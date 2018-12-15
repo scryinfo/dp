@@ -16,3 +16,11 @@ type Transaction struct {
 	state int
 	publishId string
 }
+
+func CreateTransaction() (tx *Transaction, err error)  {
+
+}
+
+func CloseTransaction(tx *Transaction) (err error) {
+
+}
