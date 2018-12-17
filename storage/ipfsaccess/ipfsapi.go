@@ -1,8 +1,10 @@
 package ipfsaccess
 
 import (
+	"errors"
 	"fmt"
 	"github.com/ipfs/go-ipfs-api"
+	"strings"
 )
 
 var (
@@ -21,6 +23,11 @@ func Initialize(nodeAddr string) bool {
 	return true
 }
 
-func SaveToIPFS()  {
+func SaveToIPFS(content []byte) (string, error) {
+	if sh == nil {
+		fmt.Println("ipfs api shell is nil")
+		return "", errors.New("ipfs api shell is nil")
+	}
 
+	return sh.Add(strings.NewReader(string(content)))
 }

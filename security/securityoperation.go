@@ -1,7 +1,7 @@
 package security
 
 
-type SecurityOperationInterface interface {
+type SecurityOperation interface {
 	Encrypt(src *[]byte) (dst *[]byte, err error)
 	Decrypt(src *[]byte) (dst *[]byte, err error)
 }
