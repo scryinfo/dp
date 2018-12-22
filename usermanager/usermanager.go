@@ -40,7 +40,7 @@ func SetCurrentUser(publicKey string) (string, error) {
 
 func GetCurrentUser() (*User, error) {
 	if curUser == nil {
-		return nil, errors.New("Current user is null ")
+		return nil, errors.New("current user is null")
 	}
 
 	return curUser, nil

@@ -5,18 +5,20 @@ import (
 	"github.com/qjpcpu/ethereum/events"
 )
 
-func ExecuteEvents(dataChannel chan events.Event, eventRepo *EventRepository) {
+func ExecuteEvents(dataChannel chan events.Event,
+	internalEventRepo *EventRepository, externalEventRepo *EventRepository) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println("Failed to execute event, error: ", err)
+			fmt.Println("failed to execute event, error: ", err)
 		}
 	}()
 
 	for {
 		select {
-		//expected: will block until has data in dataChannel
+		// block until data exist in dataChannel
 		case event := <- dataChannel:
-			executeEvent(event, eventRepo)
+			executeEvent(event, internalEventRepo)
+			executeEvent(event, externalEventRepo)
 			break
 		}
 	}
@@ -25,13 +27,13 @@ func ExecuteEvents(dataChannel chan events.Event, eventRepo *EventRepository) {
 func executeEvent(event events.Event, eventRepo *EventRepository) bool {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println("Failed to execute event " + event.Name + " because of error: ", err)
+			fmt.Println("failed to execute event " + event.Name + " because of error: ", err)
 		}
 	}()
 
 	eventCallback, exist := eventRepo.mapEventExecutor[event.Name]
 	if !exist {
-		fmt.Println("Event not subscribed: " + event.Name)
+		fmt.Println("event not subscribed: " + event.Name)
 		return false
 	}
 

@@ -26,3 +26,7 @@ func (user *User) GetSecurityOpertion() (security.SecurityOperation, error) {
 
 	return user.securityOperation, nil
 }
+
+func (user *User) GetPublicKey() (string) {
+	return user.publicKey
+}
