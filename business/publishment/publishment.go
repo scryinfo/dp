@@ -1,9 +1,9 @@
 package publishment
 
 import (
-	"../../storage/ipfsaccess"
-	"../../usermanager"
-	"../../util"
+	"../../util/storage/ipfsaccess"
+	"../../util/usermanager"
+	"../../util/uuid"
 	"../contractinterface"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
@@ -21,7 +21,7 @@ func Publish(metaData *[]byte, proofData *[]byte, descriptionData *[]byte, suppo
 	}()
 
 	//generate publishId
-	publishId := util.GenerateUUID()
+	publishId := uuid.GenerateUUID()
 
 	//submit meta data
 	cidMd, err := ipfsaccess.SaveToIPFS(*metaData)
