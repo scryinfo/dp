@@ -1,4 +1,4 @@
-package util
+package uuid
 
 import (
 	"github.com/chilts/sid"

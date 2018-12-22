@@ -1,0 +1,12 @@
+EthNode:
+  ip: 127.0.0.1
+  port: 7475
+ContractInfo:
+  - Contract:
+      addr: 11111
+      abi:  22222
+      events: 3333
+  - Contract:
+      addr: 44
+      abi: 55
+      events: 66

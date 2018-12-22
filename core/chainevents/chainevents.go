@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/qjpcpu/ethereum/events"
+	"../../util/configuration"
 )
 
 var (
@@ -14,10 +15,23 @@ var (
 	errorChannel           = make(chan error, 1)
 )
 
+type Contract struct {
+	addr string
+	abi  string
+	events string
+}
+
+
+type Contracts struct {
+	contract []Contract
+}
+
+
 func StartEventProcessing()  {
 	fmt.Println("start event processing...")
 
 	//configuration
+	configEngine := ConfigEngine{}
 
 	go ExecuteEvents(dataChannel, internalEventRepo, externalEventRepo)
 
