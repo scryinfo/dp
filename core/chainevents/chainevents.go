@@ -8,28 +8,35 @@ import (
 
 var (
 	maxChannelEventNum     = 10000
-	eventRepo              = NewEventRepository()
+	internalEventRepo              = NewEventRepository()
+	externalEventRepo              = NewEventRepository()
 	dataChannel            = make(chan events.Event, maxChannelEventNum)
 	errorChannel           = make(chan error, 1)
 )
 
 func StartEventProcessing()  {
-	fmt.Println("Start event processing...")
+	fmt.Println("start event processing...")
 
 	//configuration
 
-	//event execution routine
-	go ExecuteEvents(dataChannel, eventRepo)
+	go ExecuteEvents(dataChannel, internalEventRepo, externalEventRepo)
 
-	//event listener routine
 	go ListenEvent("", "", "", "", 60, dataChannel, errorChannel)
 
-	fmt.Println("Finished event processing.")
+	fmt.Println("finished event processing.")
 }
 
-func Subscribe(eventName string, eventCallback EventCallback) error {
+func SubscribeInternal(eventName string, eventCallback EventCallback) error {
+	return subscribe(eventName, eventCallback, internalEventRepo)
+}
+
+func SubscribeExternal(eventName string, eventCallback EventCallback) error {
+	return subscribe(eventName, eventCallback, externalEventRepo)
+}
+
+func subscribe(eventName string, eventCallback EventCallback, eventRepo *EventRepository) error {
 	if eventCallback == nil {
-		return errors.New("Couldn't subscribe event as eventCallback is null. ")
+		return errors.New("couldn't subscribe event as eventCallback is null. ")
 	}
 
 	eventRepo.mapEventExecutor[eventName] = eventCallback
