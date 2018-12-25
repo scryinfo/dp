@@ -1,7 +1,11 @@
 package core
 
-//start
+import "./chainevents"
 
-//stop
+//start
+func startEngine() {
+	chainevents.StartEventProcessing()
+}
+
 
 

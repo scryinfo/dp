@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/qjpcpu/ethereum/events"
-	"../../util/configuration"
 )
 
 var (
@@ -13,25 +12,11 @@ var (
 	externalEventRepo              = NewEventRepository()
 	dataChannel            = make(chan events.Event, maxChannelEventNum)
 	errorChannel           = make(chan error, 1)
+	settingPath            = "../../settings/setting.yaml"
 )
-
-type Contract struct {
-	addr string
-	abi  string
-	events string
-}
-
-
-type Contracts struct {
-	contract []Contract
-}
-
 
 func StartEventProcessing()  {
 	fmt.Println("start event processing...")
-
-	//configuration
-	configEngine := ConfigEngine{}
 
 	go ExecuteEvents(dataChannel, internalEventRepo, externalEventRepo)
 
@@ -50,7 +35,7 @@ func SubscribeExternal(eventName string, eventCallback EventCallback) error {
 
 func subscribe(eventName string, eventCallback EventCallback, eventRepo *EventRepository) error {
 	if eventCallback == nil {
-		return errors.New("couldn't subscribe event as eventCallback is null. ")
+		return errors.New("couldn't subscribe event as eventCallback is null")
 	}
 
 	eventRepo.mapEventExecutor[eventName] = eventCallback

@@ -9,7 +9,8 @@ import (
 )
 
 func ListenEvent(nodeAddr string, contractAddr string, abi string,
-			eventNames string,  interval time.Duration, dataChannel chan events.Event, errorChannel chan error) bool {
+			eventNames string,  interval time.Duration,
+			dataChannel chan events.Event, errorChannel chan error) bool {
 	rv := true
 	defer func() {
 		if err := recover(); err != nil {
