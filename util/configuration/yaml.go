@@ -1,4 +1,4 @@
-package my_yaml
+package yamlconfig
 
 import (
 	"errors"
