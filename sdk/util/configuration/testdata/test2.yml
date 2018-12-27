@@ -1,0 +1,8 @@
+environment:
+  Profiles: dev
+  Name: Developer App
+  Url: http://dev.abc.com
+
+  profiles: qa
+  name: QA App
+  url: http://qa.abc.com
