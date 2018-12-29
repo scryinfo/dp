@@ -1,13 +1,12 @@
 package contractinterfacewrapper
 
 import (
-	"fmt"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"../../util/uuid"
+	"../../contractinterface"
 	"../../util/storage/ipfsaccess"
 	"../../util/usermanager"
-	"../../contractinterface"
+	"../../util/uuid"
+	"fmt"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 )
 
 var (
@@ -83,7 +82,7 @@ func Publish(metaData *[]byte, proofData *[]byte, descriptionData *[]byte, suppo
 	return publishId, nil
 }
 
-func PrepareToBuy(buyerAddr string, publishId string) (txId common.Hash, err error) {
+/*func PrepareToBuy(buyerAddr string, publishId string) (txId common.Hash, err error) {
 }
 
 func BuyData(txId common.Hash) (err error) {
@@ -94,4 +93,4 @@ func SubmitMetaDataIdEncWithBuyer(txId common.Hash, encyptedMetaDataId []byte) (
 
 func ConfirmDataTruth(txId common.Hash, truth bool) (err error) {
 
-}
+}*/

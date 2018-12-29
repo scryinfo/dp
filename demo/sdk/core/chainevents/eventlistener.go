@@ -8,21 +8,17 @@ import (
 	"time"
 )
 
-func ListenEvent(nodeAddr string, contractAddr string, abi string,
+func ListenEvent(conn *ethclient.Client, contractAddr string, abi string,
 			eventNames string,  interval time.Duration,
 			dataChannel chan events.Event, errorChannel chan error) bool {
 	rv := true
+	fmt.Println("start listening events...")
 	defer func() {
 		if err := recover(); err != nil {
 			fmt.Println("Failed to listen event. error:", err)
 			rv = false
 		}
 	}()
-
-	conn, err := ethclient.Dial(nodeAddr)
-	if err != nil {
-		return false
-	}
 
 	builder := events.NewScanBuilder()
 	recp, err := builder.SetClient(conn).
@@ -34,6 +30,7 @@ func ListenEvent(nodeAddr string, contractAddr string, abi string,
 		SetInterval(interval).
 		BuildAndRun()
 	if err != nil {
+		fmt.Println("failed to listen to events.", err)
 		return false
 	}
 
@@ -47,5 +44,5 @@ func getFromBlock() uint64 {
 }
 
 func getToBlock() uint64 {
-	return 1
+	return 0
 }

@@ -3,6 +3,7 @@ package chainevents
 import (
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/qjpcpu/ethereum/events"
 )
 
@@ -15,12 +16,14 @@ var (
 	settingPath            = "../../settings/setting.yaml"
 )
 
-func StartEventProcessing()  {
+func StartEventProcessing(conn *ethclient.Client,
+	                      protocolContractAddr string,
+	                      protocolContractABI string)  {
 	fmt.Println("start event processing...")
 
 	go ExecuteEvents(dataChannel, internalEventRepo, externalEventRepo)
 
-	go ListenEvent("", "", "", "", 60, dataChannel, errorChannel)
+	go ListenEvent(conn, protocolContractAddr, protocolContractABI, "Published", 60, dataChannel, errorChannel)
 
 	fmt.Println("finished event processing.")
 }

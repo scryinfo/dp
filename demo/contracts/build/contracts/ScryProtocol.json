@@ -1,0 +1,2312 @@
+{
+  "contractName": "ScryProtocol",
+  "abi": [
+    {
+      "inputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "publishId",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "name": "users",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "name": "despDataId",
+          "type": "string"
+        }
+      ],
+      "name": "Published",
+      "type": "event"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "publishId",
+          "type": "string"
+        },
+        {
+          "name": "metaDataIdEncSeller",
+          "type": "bytes"
+        },
+        {
+          "name": "proofDataId",
+          "type": "string"
+        },
+        {
+          "name": "despDataId",
+          "type": "string"
+        },
+        {
+          "name": "supportVerify",
+          "type": "bool"
+        }
+      ],
+      "name": "publishDataInfo",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "publishId",
+          "type": "string"
+        }
+      ],
+      "name": "isPublishedDataExisted",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608060405234801561001057600080fd5b506106e6806100206000396000f30060806040526004361061004c576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff168063d180d67f14610051578063f1f93e8014610198575b600080fd5b34801561005d57600080fd5b50610196600480360381019080803590602001908201803590602001908080601f0160208091040260200160405190810160405280939291908181526020018383808284378201915050505050509192919290803590602001908201803590602001908080601f0160208091040260200160405190810160405280939291908181526020018383808284378201915050505050509192919290803590602001908201803590602001908080601f0160208091040260200160405190810160405280939291908181526020018383808284378201915050505050509192919290803590602001908201803590602001908080601f0160208091040260200160405190810160405280939291908181526020018383808284378201915050505050509192919290803515159060200190929190505050610219565b005b3480156101a457600080fd5b506101ff600480360381019080803590602001908201803590602001908080601f01602080910402602001604051908101604052809392919081815260200183838082843782019150505050505091929192905050506104ce565b604051808215151515815260200191505060405180910390f35b60a0604051908101604052808581526020018481526020018381526020013373ffffffffffffffffffffffffffffffffffffffff1681526020018215158152506000866040518082805190602001908083835b602083101515610291578051825260208201915060208101905060208303925061026c565b6001836020036101000a038019825116818451168082178552505050505050905001915050908152602001604051809103902060008201518160000190805190602001906102e0929190610595565b5060208201518160010190805190602001906102fd929190610615565b50604082015181600201908051906020019061031a929190610615565b5060608201518160030160006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555060808201518160030160146101000a81548160ff0219169083151502179055509050507f46a08b125611ec320cc1058dd976ee1adea76edb0e29c87708a4ac583d31bd77858360405180806020018060200180602001848103845286818151815260200191508051906020019080838360005b838110156103f05780820151818401526020810190506103d5565b50505050905090810190601f16801561041d5780820380516001836020036101000a031916815260200191505b50848103835260018152602001807f2a00000000000000000000000000000000000000000000000000000000000000815250602001848103825285818151815260200191508051906020019080838360005b8381101561048a57808201518184015260208101905061046f565b50505050905090810190601f1680156104b75780820380516001836020036101000a031916815260200191505b509550505050505060405180910390a15050505050565b6000806000836040518082805190602001908083835b60208310151561050957805182526020820191506020810190506020830392506104e4565b6001836020036101000a0380198251168184511680821785525050505050509050019150509081526020016040518091039020905060008160030160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16141561058a576000915061058f565b600191505b50919050565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f106105d657805160ff1916838001178555610604565b82800160010185558215610604579182015b828111156106035782518255916020019190600101906105e8565b5b5090506106119190610695565b5090565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f1061065657805160ff1916838001178555610684565b82800160010185558215610684579182015b82811115610683578251825591602001919060010190610668565b5b5090506106919190610695565b5090565b6106b791905b808211156106b357600081600090555060010161069b565b5090565b905600a165627a7a7230582034a009931e962b0f1196a56411bdccb4d64e2be9112c6ea045df8389cce24e5c0029",
+  "deployedBytecode": "0x60806040526004361061004c576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff168063d180d67f14610051578063f1f93e8014610198575b600080fd5b34801561005d57600080fd5b50610196600480360381019080803590602001908201803590602001908080601f0160208091040260200160405190810160405280939291908181526020018383808284378201915050505050509192919290803590602001908201803590602001908080601f0160208091040260200160405190810160405280939291908181526020018383808284378201915050505050509192919290803590602001908201803590602001908080601f0160208091040260200160405190810160405280939291908181526020018383808284378201915050505050509192919290803590602001908201803590602001908080601f0160208091040260200160405190810160405280939291908181526020018383808284378201915050505050509192919290803515159060200190929190505050610219565b005b3480156101a457600080fd5b506101ff600480360381019080803590602001908201803590602001908080601f01602080910402602001604051908101604052809392919081815260200183838082843782019150505050505091929192905050506104ce565b604051808215151515815260200191505060405180910390f35b60a0604051908101604052808581526020018481526020018381526020013373ffffffffffffffffffffffffffffffffffffffff1681526020018215158152506000866040518082805190602001908083835b602083101515610291578051825260208201915060208101905060208303925061026c565b6001836020036101000a038019825116818451168082178552505050505050905001915050908152602001604051809103902060008201518160000190805190602001906102e0929190610595565b5060208201518160010190805190602001906102fd929190610615565b50604082015181600201908051906020019061031a929190610615565b5060608201518160030160006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555060808201518160030160146101000a81548160ff0219169083151502179055509050507f46a08b125611ec320cc1058dd976ee1adea76edb0e29c87708a4ac583d31bd77858360405180806020018060200180602001848103845286818151815260200191508051906020019080838360005b838110156103f05780820151818401526020810190506103d5565b50505050905090810190601f16801561041d5780820380516001836020036101000a031916815260200191505b50848103835260018152602001807f2a00000000000000000000000000000000000000000000000000000000000000815250602001848103825285818151815260200191508051906020019080838360005b8381101561048a57808201518184015260208101905061046f565b50505050905090810190601f1680156104b75780820380516001836020036101000a031916815260200191505b509550505050505060405180910390a15050505050565b6000806000836040518082805190602001908083835b60208310151561050957805182526020820191506020810190506020830392506104e4565b6001836020036101000a0380198251168184511680821785525050505050509050019150509081526020016040518091039020905060008160030160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16141561058a576000915061058f565b600191505b50919050565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f106105d657805160ff1916838001178555610604565b82800160010185558215610604579182015b828111156106035782518255916020019190600101906105e8565b5b5090506106119190610695565b5090565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282601f1061065657805160ff1916838001178555610684565b82800160010185558215610684579182015b82811115610683578251825591602001919060010190610668565b5b5090506106919190610695565b5090565b6106b791905b808211156106b357600081600090555060010161069b565b5090565b905600a165627a7a7230582034a009931e962b0f1196a56411bdccb4d64e2be9112c6ea045df8389cce24e5c0029",
+  "sourceMap": "26:1005:1:-;;;376:29;8:9:-1;5:2;;;30:1;27;20:12;5:2;376:29:1;26:1005;;;;;;",
+  "deployedSourceMap": "26:1005:1:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;411:375;;8:9:-1;5:2;;;30:1;27;20:12;5:2;411:375:1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;792:236;;8:9:-1;5:2;;;30:1;27;20:12;5:2;792:236:1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;411:375;580:90;;;;;;;;;598:19;580:90;;;;619:11;580:90;;;;632:10;580:90;;;;644:10;580:90;;;;;;656:13;580:90;;;;;550:16;567:9;550:27;;;;;;;;;;;;;36:153:-1;66:2;61:3;58:11;51:19;36:153;;;182:3;176:10;171:3;164:23;98:2;93:3;89:12;82:19;;123:2;118:3;114:12;107:19;;148:2;143:3;139:12;132:19;;36:153;;;274:1;267:3;263:2;259:12;254:3;250:22;246:30;315:4;311:9;305:3;299:10;295:26;356:4;350:3;344:10;340:21;389:7;380;377:20;372:3;365:33;3:399;;;550:27:1;;;;;;;;;;;;;;;;;;;;;:120;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;742:37;752:9;768:10;742:37;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;23:1:-1;8:100;33:3;30:1;27:10;8:100;;;99:1;94:3;90:11;84:18;80:1;75:3;71:11;64:39;52:2;49:1;45:10;40:15;;8:100;;;12:14;742:37:1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;23:1:-1;8:100;33:3;30:1;27:10;8:100;;;99:1;94:3;90:11;84:18;80:1;75:3;71:11;64:39;52:2;49:1;45:10;40:15;;8:100;;;12:14;742:37:1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;411:375;;;;;:::o;792:236::-;851:4;867:22;892:16;909:9;892:27;;;;;;;;;;;;;36:153:-1;66:2;61:3;58:11;51:19;36:153;;;182:3;176:10;171:3;164:23;98:2;93:3;89:12;82:19;;123:2;118:3;114:12;107:19;;148:2;143:3;139:12;132:19;;36:153;;;274:1;267:3;263:2;259:12;254:3;250:22;246:30;315:4;311:9;305:3;299:10;295:26;356:4;350:3;344:10;340:21;389:7;380;377:20;372:3;365:33;3:399;;;892:27:1;;;;;;;;;;;;;;;;;;;;;867:52;;952:1;933:4;:15;;;;;;;;;;;;:20;;;929:63;;;976:5;969:12;;;;929:63;1017:4;1010:11;;792:236;;;;;:::o;26:1005::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;:::o;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;:::o;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o",
+  "source": "pragma solidity ^0.4.24;\n\ncontract ScryProtocol {\n\n    struct DataInfoPublished {\n        bytes metaDataIdEncSeller;\n        string proofDataId;\n        string despDataId;\n        address sellerAddr;\n        bool supportVerify;  \n    } \n\n    mapping (string => DataInfoPublished) mapPublishedData;\n\n    event Published(string publishId, string users, string despDataId);\n\n    constructor () public {\n    }\n\n    function publishDataInfo(string publishId, bytes metaDataIdEncSeller, string proofDataId, string despDataId, bool supportVerify) {\n        mapPublishedData[publishId] = DataInfoPublished(metaDataIdEncSeller, proofDataId, despDataId, msg.sender, supportVerify);\n        \n        //'*' means everyone can get despDataId\n        emit Published(publishId, \"*\", despDataId);\n    }\n\n    function isPublishedDataExisted(string publishId) returns (bool) {\n        DataInfoPublished data = mapPublishedData[publishId];\n        if (data.sellerAddr == 0) {\n            return false;\n        }\n        \n        return true;\n    }\n\n}",
+  "sourcePath": "/home/waitgordor/project/DataSupplier/contracts/ScryProtocol.sol",
+  "ast": {
+    "absolutePath": "/home/waitgordor/project/DataSupplier/contracts/ScryProtocol.sol",
+    "exportedSymbols": {
+      "ScryProtocol": [
+        143
+      ]
+    },
+    "id": 144,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 58,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:1"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 143,
+        "linearizedBaseContracts": [
+          143
+        ],
+        "name": "ScryProtocol",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "ScryProtocol.DataInfoPublished",
+            "id": 69,
+            "members": [
+              {
+                "constant": false,
+                "id": 60,
+                "name": "metaDataIdEncSeller",
+                "nodeType": "VariableDeclaration",
+                "scope": 69,
+                "src": "90:25:1",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 59,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "90:5:1",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 62,
+                "name": "proofDataId",
+                "nodeType": "VariableDeclaration",
+                "scope": 69,
+                "src": "125:18:1",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 61,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "125:6:1",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 64,
+                "name": "despDataId",
+                "nodeType": "VariableDeclaration",
+                "scope": 69,
+                "src": "153:17:1",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 63,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "153:6:1",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 66,
+                "name": "sellerAddr",
+                "nodeType": "VariableDeclaration",
+                "scope": 69,
+                "src": "180:18:1",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                },
+                "typeName": {
+                  "id": 65,
+                  "name": "address",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "180:7:1",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 68,
+                "name": "supportVerify",
+                "nodeType": "VariableDeclaration",
+                "scope": 69,
+                "src": "208:18:1",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bool",
+                  "typeString": "bool"
+                },
+                "typeName": {
+                  "id": 67,
+                  "name": "bool",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "208:4:1",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "DataInfoPublished",
+            "nodeType": "StructDefinition",
+            "scope": 143,
+            "src": "55:180:1",
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "id": 73,
+            "name": "mapPublishedData",
+            "nodeType": "VariableDeclaration",
+            "scope": 143,
+            "src": "242:54:1",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_DataInfoPublished_$69_storage_$",
+              "typeString": "mapping(string => struct ScryProtocol.DataInfoPublished)"
+            },
+            "typeName": {
+              "id": 72,
+              "keyType": {
+                "id": 70,
+                "name": "string",
+                "nodeType": "ElementaryTypeName",
+                "src": "251:6:1",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "242:37:1",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_DataInfoPublished_$69_storage_$",
+                "typeString": "mapping(string => struct ScryProtocol.DataInfoPublished)"
+              },
+              "valueType": {
+                "contractScope": null,
+                "id": 71,
+                "name": "DataInfoPublished",
+                "nodeType": "UserDefinedTypeName",
+                "referencedDeclaration": 69,
+                "src": "261:17:1",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_struct$_DataInfoPublished_$69_storage_ptr",
+                  "typeString": "struct ScryProtocol.DataInfoPublished"
+                }
+              }
+            },
+            "value": null,
+            "visibility": "internal"
+          },
+          {
+            "anonymous": false,
+            "documentation": null,
+            "id": 81,
+            "name": "Published",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 80,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 75,
+                  "indexed": false,
+                  "name": "publishId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 81,
+                  "src": "319:16:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 74,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "319:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 77,
+                  "indexed": false,
+                  "name": "users",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 81,
+                  "src": "337:12:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 76,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "337:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 79,
+                  "indexed": false,
+                  "name": "despDataId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 81,
+                  "src": "351:17:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 78,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "351:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "318:51:1"
+            },
+            "src": "303:67:1"
+          },
+          {
+            "body": {
+              "id": 84,
+              "nodeType": "Block",
+              "src": "398:7:1",
+              "statements": []
+            },
+            "documentation": null,
+            "id": 85,
+            "implemented": true,
+            "isConstructor": true,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 82,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "388:2:1"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 83,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "398:0:1"
+            },
+            "scope": 143,
+            "src": "376:29:1",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 117,
+              "nodeType": "Block",
+              "src": "540:246:1",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 109,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "argumentTypes": null,
+                      "baseExpression": {
+                        "argumentTypes": null,
+                        "id": 98,
+                        "name": "mapPublishedData",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 73,
+                        "src": "550:16:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_DataInfoPublished_$69_storage_$",
+                          "typeString": "mapping(string memory => struct ScryProtocol.DataInfoPublished storage ref)"
+                        }
+                      },
+                      "id": 100,
+                      "indexExpression": {
+                        "argumentTypes": null,
+                        "id": 99,
+                        "name": "publishId",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 87,
+                        "src": "567:9:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      },
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "nodeType": "IndexAccess",
+                      "src": "550:27:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_DataInfoPublished_$69_storage",
+                        "typeString": "struct ScryProtocol.DataInfoPublished storage ref"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "argumentTypes": null,
+                      "arguments": [
+                        {
+                          "argumentTypes": null,
+                          "id": 102,
+                          "name": "metaDataIdEncSeller",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 89,
+                          "src": "598:19:1",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes_memory_ptr",
+                            "typeString": "bytes memory"
+                          }
+                        },
+                        {
+                          "argumentTypes": null,
+                          "id": 103,
+                          "name": "proofDataId",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 91,
+                          "src": "619:11:1",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
+                          }
+                        },
+                        {
+                          "argumentTypes": null,
+                          "id": 104,
+                          "name": "despDataId",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 93,
+                          "src": "632:10:1",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
+                          }
+                        },
+                        {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 105,
+                            "name": "msg",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 158,
+                            "src": "644:3:1",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_magic_message",
+                              "typeString": "msg"
+                            }
+                          },
+                          "id": 106,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "sender",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": null,
+                          "src": "644:10:1",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        {
+                          "argumentTypes": null,
+                          "id": 107,
+                          "name": "supportVerify",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 95,
+                          "src": "656:13:1",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_bytes_memory_ptr",
+                            "typeString": "bytes memory"
+                          },
+                          {
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
+                          },
+                          {
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
+                          },
+                          {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          },
+                          {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          }
+                        ],
+                        "id": 101,
+                        "name": "DataInfoPublished",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 69,
+                        "src": "580:17:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_struct$_DataInfoPublished_$69_storage_ptr_$",
+                          "typeString": "type(struct ScryProtocol.DataInfoPublished storage pointer)"
+                        }
+                      },
+                      "id": 108,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "structConstructorCall",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "580:90:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_DataInfoPublished_$69_memory",
+                        "typeString": "struct ScryProtocol.DataInfoPublished memory"
+                      }
+                    },
+                    "src": "550:120:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_DataInfoPublished_$69_storage",
+                      "typeString": "struct ScryProtocol.DataInfoPublished storage ref"
+                    }
+                  },
+                  "id": 110,
+                  "nodeType": "ExpressionStatement",
+                  "src": "550:120:1"
+                },
+                {
+                  "eventCall": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 112,
+                        "name": "publishId",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 87,
+                        "src": "752:9:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "hexValue": "2a",
+                        "id": 113,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "763:3:1",
+                        "subdenomination": null,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_04994f67dc55b09e814ab7ffc8df3686b4afb2bb53e60eae97ef043fe03fb829",
+                          "typeString": "literal_string \"*\""
+                        },
+                        "value": "*"
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 114,
+                        "name": "despDataId",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 93,
+                        "src": "768:10:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_04994f67dc55b09e814ab7ffc8df3686b4afb2bb53e60eae97ef043fe03fb829",
+                          "typeString": "literal_string \"*\""
+                        },
+                        {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      ],
+                      "id": 111,
+                      "name": "Published",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 81,
+                      "src": "742:9:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_event_nonpayable$_t_string_memory_ptr_$_t_string_memory_ptr_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (string memory,string memory,string memory)"
+                      }
+                    },
+                    "id": 115,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "742:37:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 116,
+                  "nodeType": "EmitStatement",
+                  "src": "737:42:1"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 118,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "publishDataInfo",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 96,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 87,
+                  "name": "publishId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 118,
+                  "src": "436:16:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 86,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "436:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 89,
+                  "name": "metaDataIdEncSeller",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 118,
+                  "src": "454:25:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 88,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "454:5:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 91,
+                  "name": "proofDataId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 118,
+                  "src": "481:18:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 90,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "481:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 93,
+                  "name": "despDataId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 118,
+                  "src": "501:17:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 92,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "501:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 95,
+                  "name": "supportVerify",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 118,
+                  "src": "520:18:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 94,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "520:4:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "435:104:1"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 97,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "540:0:1"
+            },
+            "scope": 143,
+            "src": "411:375:1",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 141,
+              "nodeType": "Block",
+              "src": "857:171:1",
+              "statements": [
+                {
+                  "assignments": [
+                    126
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 126,
+                      "name": "data",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 142,
+                      "src": "867:22:1",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_DataInfoPublished_$69_storage_ptr",
+                        "typeString": "struct ScryProtocol.DataInfoPublished"
+                      },
+                      "typeName": {
+                        "contractScope": null,
+                        "id": 125,
+                        "name": "DataInfoPublished",
+                        "nodeType": "UserDefinedTypeName",
+                        "referencedDeclaration": 69,
+                        "src": "867:17:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_DataInfoPublished_$69_storage_ptr",
+                          "typeString": "struct ScryProtocol.DataInfoPublished"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 130,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "baseExpression": {
+                      "argumentTypes": null,
+                      "id": 127,
+                      "name": "mapPublishedData",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 73,
+                      "src": "892:16:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_DataInfoPublished_$69_storage_$",
+                        "typeString": "mapping(string memory => struct ScryProtocol.DataInfoPublished storage ref)"
+                      }
+                    },
+                    "id": 129,
+                    "indexExpression": {
+                      "argumentTypes": null,
+                      "id": 128,
+                      "name": "publishId",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 120,
+                      "src": "909:9:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_string_memory_ptr",
+                        "typeString": "string memory"
+                      }
+                    },
+                    "isConstant": false,
+                    "isLValue": true,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "nodeType": "IndexAccess",
+                    "src": "892:27:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_DataInfoPublished_$69_storage",
+                      "typeString": "struct ScryProtocol.DataInfoPublished storage ref"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "867:52:1"
+                },
+                {
+                  "condition": {
+                    "argumentTypes": null,
+                    "commonType": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    },
+                    "id": 134,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "argumentTypes": null,
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 131,
+                        "name": "data",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 126,
+                        "src": "933:4:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_DataInfoPublished_$69_storage_ptr",
+                          "typeString": "struct ScryProtocol.DataInfoPublished storage pointer"
+                        }
+                      },
+                      "id": 132,
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "sellerAddr",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 66,
+                      "src": "933:15:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "==",
+                    "rightExpression": {
+                      "argumentTypes": null,
+                      "hexValue": "30",
+                      "id": 133,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "number",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "952:1:1",
+                      "subdenomination": null,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_rational_0_by_1",
+                        "typeString": "int_const 0"
+                      },
+                      "value": "0"
+                    },
+                    "src": "933:20:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "falseBody": null,
+                  "id": 138,
+                  "nodeType": "IfStatement",
+                  "src": "929:63:1",
+                  "trueBody": {
+                    "id": 137,
+                    "nodeType": "Block",
+                    "src": "955:37:1",
+                    "statements": [
+                      {
+                        "expression": {
+                          "argumentTypes": null,
+                          "hexValue": "66616c7365",
+                          "id": 135,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "bool",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "976:5:1",
+                          "subdenomination": null,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          },
+                          "value": "false"
+                        },
+                        "functionReturnParameters": 124,
+                        "id": 136,
+                        "nodeType": "Return",
+                        "src": "969:12:1"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "hexValue": "74727565",
+                    "id": 139,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": true,
+                    "kind": "bool",
+                    "lValueRequested": false,
+                    "nodeType": "Literal",
+                    "src": "1017:4:1",
+                    "subdenomination": null,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    },
+                    "value": "true"
+                  },
+                  "functionReturnParameters": 124,
+                  "id": 140,
+                  "nodeType": "Return",
+                  "src": "1010:11:1"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 142,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "isPublishedDataExisted",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 121,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 120,
+                  "name": "publishId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 142,
+                  "src": "824:16:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 119,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "824:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "823:18:1"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 124,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 123,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 142,
+                  "src": "851:4:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 122,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "851:4:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "850:6:1"
+            },
+            "scope": 143,
+            "src": "792:236:1",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 144,
+        "src": "26:1005:1"
+      }
+    ],
+    "src": "0:1031:1"
+  },
+  "legacyAST": {
+    "absolutePath": "/home/waitgordor/project/DataSupplier/contracts/ScryProtocol.sol",
+    "exportedSymbols": {
+      "ScryProtocol": [
+        143
+      ]
+    },
+    "id": 144,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 58,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:1"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 143,
+        "linearizedBaseContracts": [
+          143
+        ],
+        "name": "ScryProtocol",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "ScryProtocol.DataInfoPublished",
+            "id": 69,
+            "members": [
+              {
+                "constant": false,
+                "id": 60,
+                "name": "metaDataIdEncSeller",
+                "nodeType": "VariableDeclaration",
+                "scope": 69,
+                "src": "90:25:1",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 59,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "90:5:1",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 62,
+                "name": "proofDataId",
+                "nodeType": "VariableDeclaration",
+                "scope": 69,
+                "src": "125:18:1",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 61,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "125:6:1",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 64,
+                "name": "despDataId",
+                "nodeType": "VariableDeclaration",
+                "scope": 69,
+                "src": "153:17:1",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                },
+                "typeName": {
+                  "id": 63,
+                  "name": "string",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "153:6:1",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_storage_ptr",
+                    "typeString": "string"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 66,
+                "name": "sellerAddr",
+                "nodeType": "VariableDeclaration",
+                "scope": 69,
+                "src": "180:18:1",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                },
+                "typeName": {
+                  "id": 65,
+                  "name": "address",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "180:7:1",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 68,
+                "name": "supportVerify",
+                "nodeType": "VariableDeclaration",
+                "scope": 69,
+                "src": "208:18:1",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bool",
+                  "typeString": "bool"
+                },
+                "typeName": {
+                  "id": 67,
+                  "name": "bool",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "208:4:1",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  }
+                },
+                "value": null,
+                "visibility": "internal"
+              }
+            ],
+            "name": "DataInfoPublished",
+            "nodeType": "StructDefinition",
+            "scope": 143,
+            "src": "55:180:1",
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "id": 73,
+            "name": "mapPublishedData",
+            "nodeType": "VariableDeclaration",
+            "scope": 143,
+            "src": "242:54:1",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_DataInfoPublished_$69_storage_$",
+              "typeString": "mapping(string => struct ScryProtocol.DataInfoPublished)"
+            },
+            "typeName": {
+              "id": 72,
+              "keyType": {
+                "id": 70,
+                "name": "string",
+                "nodeType": "ElementaryTypeName",
+                "src": "251:6:1",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_string_storage_ptr",
+                  "typeString": "string"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "242:37:1",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_DataInfoPublished_$69_storage_$",
+                "typeString": "mapping(string => struct ScryProtocol.DataInfoPublished)"
+              },
+              "valueType": {
+                "contractScope": null,
+                "id": 71,
+                "name": "DataInfoPublished",
+                "nodeType": "UserDefinedTypeName",
+                "referencedDeclaration": 69,
+                "src": "261:17:1",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_struct$_DataInfoPublished_$69_storage_ptr",
+                  "typeString": "struct ScryProtocol.DataInfoPublished"
+                }
+              }
+            },
+            "value": null,
+            "visibility": "internal"
+          },
+          {
+            "anonymous": false,
+            "documentation": null,
+            "id": 81,
+            "name": "Published",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 80,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 75,
+                  "indexed": false,
+                  "name": "publishId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 81,
+                  "src": "319:16:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 74,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "319:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 77,
+                  "indexed": false,
+                  "name": "users",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 81,
+                  "src": "337:12:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 76,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "337:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 79,
+                  "indexed": false,
+                  "name": "despDataId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 81,
+                  "src": "351:17:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 78,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "351:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "318:51:1"
+            },
+            "src": "303:67:1"
+          },
+          {
+            "body": {
+              "id": 84,
+              "nodeType": "Block",
+              "src": "398:7:1",
+              "statements": []
+            },
+            "documentation": null,
+            "id": 85,
+            "implemented": true,
+            "isConstructor": true,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 82,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "388:2:1"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 83,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "398:0:1"
+            },
+            "scope": 143,
+            "src": "376:29:1",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 117,
+              "nodeType": "Block",
+              "src": "540:246:1",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 109,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "argumentTypes": null,
+                      "baseExpression": {
+                        "argumentTypes": null,
+                        "id": 98,
+                        "name": "mapPublishedData",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 73,
+                        "src": "550:16:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_DataInfoPublished_$69_storage_$",
+                          "typeString": "mapping(string memory => struct ScryProtocol.DataInfoPublished storage ref)"
+                        }
+                      },
+                      "id": 100,
+                      "indexExpression": {
+                        "argumentTypes": null,
+                        "id": 99,
+                        "name": "publishId",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 87,
+                        "src": "567:9:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      },
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "nodeType": "IndexAccess",
+                      "src": "550:27:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_DataInfoPublished_$69_storage",
+                        "typeString": "struct ScryProtocol.DataInfoPublished storage ref"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "argumentTypes": null,
+                      "arguments": [
+                        {
+                          "argumentTypes": null,
+                          "id": 102,
+                          "name": "metaDataIdEncSeller",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 89,
+                          "src": "598:19:1",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes_memory_ptr",
+                            "typeString": "bytes memory"
+                          }
+                        },
+                        {
+                          "argumentTypes": null,
+                          "id": 103,
+                          "name": "proofDataId",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 91,
+                          "src": "619:11:1",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
+                          }
+                        },
+                        {
+                          "argumentTypes": null,
+                          "id": 104,
+                          "name": "despDataId",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 93,
+                          "src": "632:10:1",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
+                          }
+                        },
+                        {
+                          "argumentTypes": null,
+                          "expression": {
+                            "argumentTypes": null,
+                            "id": 105,
+                            "name": "msg",
+                            "nodeType": "Identifier",
+                            "overloadedDeclarations": [],
+                            "referencedDeclaration": 158,
+                            "src": "644:3:1",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_magic_message",
+                              "typeString": "msg"
+                            }
+                          },
+                          "id": 106,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "lValueRequested": false,
+                          "memberName": "sender",
+                          "nodeType": "MemberAccess",
+                          "referencedDeclaration": null,
+                          "src": "644:10:1",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        {
+                          "argumentTypes": null,
+                          "id": 107,
+                          "name": "supportVerify",
+                          "nodeType": "Identifier",
+                          "overloadedDeclarations": [],
+                          "referencedDeclaration": 95,
+                          "src": "656:13:1",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_bytes_memory_ptr",
+                            "typeString": "bytes memory"
+                          },
+                          {
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
+                          },
+                          {
+                            "typeIdentifier": "t_string_memory_ptr",
+                            "typeString": "string memory"
+                          },
+                          {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          },
+                          {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          }
+                        ],
+                        "id": 101,
+                        "name": "DataInfoPublished",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 69,
+                        "src": "580:17:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_struct$_DataInfoPublished_$69_storage_ptr_$",
+                          "typeString": "type(struct ScryProtocol.DataInfoPublished storage pointer)"
+                        }
+                      },
+                      "id": 108,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "structConstructorCall",
+                      "lValueRequested": false,
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "580:90:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_DataInfoPublished_$69_memory",
+                        "typeString": "struct ScryProtocol.DataInfoPublished memory"
+                      }
+                    },
+                    "src": "550:120:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_DataInfoPublished_$69_storage",
+                      "typeString": "struct ScryProtocol.DataInfoPublished storage ref"
+                    }
+                  },
+                  "id": 110,
+                  "nodeType": "ExpressionStatement",
+                  "src": "550:120:1"
+                },
+                {
+                  "eventCall": {
+                    "argumentTypes": null,
+                    "arguments": [
+                      {
+                        "argumentTypes": null,
+                        "id": 112,
+                        "name": "publishId",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 87,
+                        "src": "752:9:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      },
+                      {
+                        "argumentTypes": null,
+                        "hexValue": "2a",
+                        "id": 113,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "kind": "string",
+                        "lValueRequested": false,
+                        "nodeType": "Literal",
+                        "src": "763:3:1",
+                        "subdenomination": null,
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_stringliteral_04994f67dc55b09e814ab7ffc8df3686b4afb2bb53e60eae97ef043fe03fb829",
+                          "typeString": "literal_string \"*\""
+                        },
+                        "value": "*"
+                      },
+                      {
+                        "argumentTypes": null,
+                        "id": 114,
+                        "name": "despDataId",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 93,
+                        "src": "768:10:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      }
+                    ],
+                    "expression": {
+                      "argumentTypes": [
+                        {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        },
+                        {
+                          "typeIdentifier": "t_stringliteral_04994f67dc55b09e814ab7ffc8df3686b4afb2bb53e60eae97ef043fe03fb829",
+                          "typeString": "literal_string \"*\""
+                        },
+                        {
+                          "typeIdentifier": "t_string_memory_ptr",
+                          "typeString": "string memory"
+                        }
+                      ],
+                      "id": 111,
+                      "name": "Published",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 81,
+                      "src": "742:9:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_function_event_nonpayable$_t_string_memory_ptr_$_t_string_memory_ptr_$_t_string_memory_ptr_$returns$__$",
+                        "typeString": "function (string memory,string memory,string memory)"
+                      }
+                    },
+                    "id": 115,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "kind": "functionCall",
+                    "lValueRequested": false,
+                    "names": [],
+                    "nodeType": "FunctionCall",
+                    "src": "742:37:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_tuple$__$",
+                      "typeString": "tuple()"
+                    }
+                  },
+                  "id": 116,
+                  "nodeType": "EmitStatement",
+                  "src": "737:42:1"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 118,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "publishDataInfo",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 96,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 87,
+                  "name": "publishId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 118,
+                  "src": "436:16:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 86,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "436:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 89,
+                  "name": "metaDataIdEncSeller",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 118,
+                  "src": "454:25:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 88,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "454:5:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 91,
+                  "name": "proofDataId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 118,
+                  "src": "481:18:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 90,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "481:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 93,
+                  "name": "despDataId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 118,
+                  "src": "501:17:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 92,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "501:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 95,
+                  "name": "supportVerify",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 118,
+                  "src": "520:18:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 94,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "520:4:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "435:104:1"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 97,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "540:0:1"
+            },
+            "scope": 143,
+            "src": "411:375:1",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 141,
+              "nodeType": "Block",
+              "src": "857:171:1",
+              "statements": [
+                {
+                  "assignments": [
+                    126
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 126,
+                      "name": "data",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 142,
+                      "src": "867:22:1",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_DataInfoPublished_$69_storage_ptr",
+                        "typeString": "struct ScryProtocol.DataInfoPublished"
+                      },
+                      "typeName": {
+                        "contractScope": null,
+                        "id": 125,
+                        "name": "DataInfoPublished",
+                        "nodeType": "UserDefinedTypeName",
+                        "referencedDeclaration": 69,
+                        "src": "867:17:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_DataInfoPublished_$69_storage_ptr",
+                          "typeString": "struct ScryProtocol.DataInfoPublished"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 130,
+                  "initialValue": {
+                    "argumentTypes": null,
+                    "baseExpression": {
+                      "argumentTypes": null,
+                      "id": 127,
+                      "name": "mapPublishedData",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 73,
+                      "src": "892:16:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_mapping$_t_string_memory_$_t_struct$_DataInfoPublished_$69_storage_$",
+                        "typeString": "mapping(string memory => struct ScryProtocol.DataInfoPublished storage ref)"
+                      }
+                    },
+                    "id": 129,
+                    "indexExpression": {
+                      "argumentTypes": null,
+                      "id": 128,
+                      "name": "publishId",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 120,
+                      "src": "909:9:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_string_memory_ptr",
+                        "typeString": "string memory"
+                      }
+                    },
+                    "isConstant": false,
+                    "isLValue": true,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "nodeType": "IndexAccess",
+                    "src": "892:27:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_DataInfoPublished_$69_storage",
+                      "typeString": "struct ScryProtocol.DataInfoPublished storage ref"
+                    }
+                  },
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "867:52:1"
+                },
+                {
+                  "condition": {
+                    "argumentTypes": null,
+                    "commonType": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    },
+                    "id": 134,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "argumentTypes": null,
+                      "expression": {
+                        "argumentTypes": null,
+                        "id": 131,
+                        "name": "data",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 126,
+                        "src": "933:4:1",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_DataInfoPublished_$69_storage_ptr",
+                          "typeString": "struct ScryProtocol.DataInfoPublished storage pointer"
+                        }
+                      },
+                      "id": 132,
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "sellerAddr",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 66,
+                      "src": "933:15:1",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": "==",
+                    "rightExpression": {
+                      "argumentTypes": null,
+                      "hexValue": "30",
+                      "id": 133,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "number",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "952:1:1",
+                      "subdenomination": null,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_rational_0_by_1",
+                        "typeString": "int_const 0"
+                      },
+                      "value": "0"
+                    },
+                    "src": "933:20:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "falseBody": null,
+                  "id": 138,
+                  "nodeType": "IfStatement",
+                  "src": "929:63:1",
+                  "trueBody": {
+                    "id": 137,
+                    "nodeType": "Block",
+                    "src": "955:37:1",
+                    "statements": [
+                      {
+                        "expression": {
+                          "argumentTypes": null,
+                          "hexValue": "66616c7365",
+                          "id": 135,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": true,
+                          "kind": "bool",
+                          "lValueRequested": false,
+                          "nodeType": "Literal",
+                          "src": "976:5:1",
+                          "subdenomination": null,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          },
+                          "value": "false"
+                        },
+                        "functionReturnParameters": 124,
+                        "id": 136,
+                        "nodeType": "Return",
+                        "src": "969:12:1"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "hexValue": "74727565",
+                    "id": 139,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": true,
+                    "kind": "bool",
+                    "lValueRequested": false,
+                    "nodeType": "Literal",
+                    "src": "1017:4:1",
+                    "subdenomination": null,
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    },
+                    "value": "true"
+                  },
+                  "functionReturnParameters": 124,
+                  "id": 140,
+                  "nodeType": "Return",
+                  "src": "1010:11:1"
+                }
+              ]
+            },
+            "documentation": null,
+            "id": 142,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "isPublishedDataExisted",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 121,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 120,
+                  "name": "publishId",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 142,
+                  "src": "824:16:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 119,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "824:6:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "823:18:1"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 124,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 123,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 142,
+                  "src": "851:4:1",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 122,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "851:4:1",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "850:6:1"
+            },
+            "scope": 143,
+            "src": "792:236:1",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 144,
+        "src": "26:1005:1"
+      }
+    ],
+    "src": "0:1031:1"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.24+commit.e67f0147.Emscripten.clang"
+  },
+  "networks": {
+    "5777": {
+      "events": {},
+      "links": {},
+      "address": "0xf83872acdaca3c9a80199eeeebb0c6a323b75187",
+      "transactionHash": "0x368f6f364f07f096e02fa9cb58b97507c2ea9390e9a25e3a742ae20422827b9f"
+    }
+  },
+  "schemaVersion": "2.0.1",
+  "updatedAt": "2018-12-29T03:43:21.477Z"
+}
