@@ -1,14 +1,15 @@
 package contractclient
 
 import (
+	"../core"
 	"../contractinterface"
+	"../core/chainoperations"
 	"../util/storage/ipfsaccess"
+	"./contractinterfacewrapper"
 	"context"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"../core/chainoperations"
-	"./contractinterfacewrapper"
 )
 
 
@@ -26,9 +27,9 @@ type ContractClient struct {
 	password string
 }
 
-func NewContractClient(myAddr string, clientIdentityStream string, clientPassword string) (*ContractClient) {
+func NewContractClient(publicKey string, clientIdentityStream string, clientPassword string) (*ContractClient) {
 	return &ContractClient{
-		address: myAddr,
+		address: publicKey,
 		identityStream: clientIdentityStream,
 		password: clientPassword,
 	}
@@ -36,16 +37,22 @@ func NewContractClient(myAddr string, clientIdentityStream string, clientPasswor
 
 func (contractClient *ContractClient) Initialize(ethNodeAddr string,
 	                                             protocolContractAddr string,
-	                                             tokenContractAddr string,
+	                                             protocolContractABI string,
 	                                             ipfsNodeAddr string,
-	                                             ) (*Connector, error) {
+	                                             ) (*connector, error) {
+    defer func() {
+    	if err := recover(); err != nil {
+    		fmt.Println("failed to initialize contract client, error:", err)
+		}
+	}()
+
 	err := ipfsaccess.GetInstance().Initialize(ipfsNodeAddr)
 	if err != nil {
 		fmt.Println("failed to initialize ipfs. error: " + err.Error())
 		return nil, err
 	}
 
-	connector, err := NewConnector(ethNodeAddr, protocolContractAddr, tokenContractAddr)
+	connector, err := newConnector(ethNodeAddr, protocolContractAddr)
 	if err != nil {
 		fmt.Println("failed to initialize connector. error: " + err.Error())
 		return nil, err
@@ -54,19 +61,20 @@ func (contractClient *ContractClient) Initialize(ethNodeAddr string,
 	opts := chainoperations.BuildTransactOpts(common.HexToAddress(contractClient.address), contractClient.identityStream, contractClient.password)
 	contractinterfacewrapper.Initialize(connector.protocolClient, opts)
 
+	core.StartEngine(connector.conn, protocolContractAddr, protocolContractABI)
+
 	return connector, nil
 }
 
 
-type Connector struct {
+type connector struct {
 	ctx context.Context
 	conn *ethclient.Client
 	protocolClient *contractinterface.ScryProtocol
 }
 
-func NewConnector(ethNodeAddr string,
-	              protocolContractAddr string,
-	              tokenContractAddr string) (*Connector, error) {
+func newConnector(ethNodeAddr string,
+	              protocolContractAddr string) (*connector, error) {
 	cn, err := ethclient.Dial(ethNodeAddr)
 	if err != nil {
 		fmt.Println("failed to connect to node:" + ethNodeAddr)
@@ -79,7 +87,7 @@ func NewConnector(ethNodeAddr string,
 		return nil, err
 	}
 
-	return &Connector{
+	return &connector{
 		ctx: context.Background(),
 		conn: cn,
 		protocolClient: pc,

@@ -1,7 +1,7 @@
 // Code generated - DO NOT EDIT.
 // This file is a generated binding and any manual changes will be lost.
 
-package contractinterface
+package ScryProtocol
 
 import (
 	"math/big"
@@ -28,68 +28,68 @@ var (
 )
 
 // ScryProtocolABI is the input ABI used to generate the binding from.
-const ScryProtocolABI = "[{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"Published\",\"type\":\"event\"},{\"constant\":false,\"inputs\":[{\"name\":\"publishId\",\"type\":\"string\"},{\"name\":\"metaDataIdEncSeller\",\"type\":\"bytes\"},{\"name\":\"proofDataId\",\"type\":\"string\"},{\"name\":\"despDataId\",\"type\":\"string\"},{\"name\":\"supportVerify\",\"type\":\"bool\"}],\"name\":\"publishDataInfo\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"publishId\",\"type\":\"string\"}],\"name\":\"isPublishedDataExisted\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
+const ScryProtocolABI = "[{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"publishId\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"users\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"despDataId\",\"type\":\"string\"}],\"name\":\"Published\",\"type\":\"event\"},{\"constant\":false,\"inputs\":[{\"name\":\"publishId\",\"type\":\"string\"},{\"name\":\"metaDataIdEncSeller\",\"type\":\"bytes\"},{\"name\":\"proofDataId\",\"type\":\"string\"},{\"name\":\"despDataId\",\"type\":\"string\"},{\"name\":\"supportVerify\",\"type\":\"bool\"}],\"name\":\"publishDataInfo\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"publishId\",\"type\":\"string\"}],\"name\":\"isPublishedDataExisted\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
 
-// ScryProtocol is an auto generated Go binding around an Ethereum contracts.
+// ScryProtocol is an auto generated Go binding around an Ethereum contract.
 type ScryProtocol struct {
-	ScryProtocolCaller     // Read-only binding to the contracts
-	ScryProtocolTransactor // Write-only binding to the contracts
-	ScryProtocolFilterer   // Log filterer for contracts events
+	ScryProtocolCaller     // Read-only binding to the contract
+	ScryProtocolTransactor // Write-only binding to the contract
+	ScryProtocolFilterer   // Log filterer for contract events
 }
 
-// ScryProtocolCaller is an auto generated read-only Go binding around an Ethereum contracts.
+// ScryProtocolCaller is an auto generated read-only Go binding around an Ethereum contract.
 type ScryProtocolCaller struct {
-	contract *bind.BoundContract // Generic contracts wrapper for the low level calls
+	contract *bind.BoundContract // Generic contract wrapper for the low level calls
 }
 
-// ScryProtocolTransactor is an auto generated write-only Go binding around an Ethereum contracts.
+// ScryProtocolTransactor is an auto generated write-only Go binding around an Ethereum contract.
 type ScryProtocolTransactor struct {
-	contract *bind.BoundContract // Generic contracts wrapper for the low level calls
+	contract *bind.BoundContract // Generic contract wrapper for the low level calls
 }
 
-// ScryProtocolFilterer is an auto generated log filtering Go binding around an Ethereum contracts events.
+// ScryProtocolFilterer is an auto generated log filtering Go binding around an Ethereum contract events.
 type ScryProtocolFilterer struct {
-	contract *bind.BoundContract // Generic contracts wrapper for the low level calls
+	contract *bind.BoundContract // Generic contract wrapper for the low level calls
 }
 
-// ScryProtocolSession is an auto generated Go binding around an Ethereum contracts,
+// ScryProtocolSession is an auto generated Go binding around an Ethereum contract,
 // with pre-set call and transact options.
 type ScryProtocolSession struct {
-	Contract     *ScryProtocol     // Generic contracts binding to set the session for
+	Contract     *ScryProtocol     // Generic contract binding to set the session for
 	CallOpts     bind.CallOpts     // Call options to use throughout this session
 	TransactOpts bind.TransactOpts // Transaction auth options to use throughout this session
 }
 
-// ScryProtocolCallerSession is an auto generated read-only Go binding around an Ethereum contracts,
+// ScryProtocolCallerSession is an auto generated read-only Go binding around an Ethereum contract,
 // with pre-set call options.
 type ScryProtocolCallerSession struct {
-	Contract *ScryProtocolCaller // Generic contracts caller binding to set the session for
+	Contract *ScryProtocolCaller // Generic contract caller binding to set the session for
 	CallOpts bind.CallOpts       // Call options to use throughout this session
 }
 
-// ScryProtocolTransactorSession is an auto generated write-only Go binding around an Ethereum contracts,
+// ScryProtocolTransactorSession is an auto generated write-only Go binding around an Ethereum contract,
 // with pre-set transact options.
 type ScryProtocolTransactorSession struct {
-	Contract     *ScryProtocolTransactor // Generic contracts transactor binding to set the session for
+	Contract     *ScryProtocolTransactor // Generic contract transactor binding to set the session for
 	TransactOpts bind.TransactOpts       // Transaction auth options to use throughout this session
 }
 
-// ScryProtocolRaw is an auto generated low-level Go binding around an Ethereum contracts.
+// ScryProtocolRaw is an auto generated low-level Go binding around an Ethereum contract.
 type ScryProtocolRaw struct {
-	Contract *ScryProtocol // Generic contracts binding to access the raw methods on
+	Contract *ScryProtocol // Generic contract binding to access the raw methods on
 }
 
-// ScryProtocolCallerRaw is an auto generated low-level read-only Go binding around an Ethereum contracts.
+// ScryProtocolCallerRaw is an auto generated low-level read-only Go binding around an Ethereum contract.
 type ScryProtocolCallerRaw struct {
-	Contract *ScryProtocolCaller // Generic read-only contracts binding to access the raw methods on
+	Contract *ScryProtocolCaller // Generic read-only contract binding to access the raw methods on
 }
 
-// ScryProtocolTransactorRaw is an auto generated low-level write-only Go binding around an Ethereum contracts.
+// ScryProtocolTransactorRaw is an auto generated low-level write-only Go binding around an Ethereum contract.
 type ScryProtocolTransactorRaw struct {
-	Contract *ScryProtocolTransactor // Generic write-only contracts binding to access the raw methods on
+	Contract *ScryProtocolTransactor // Generic write-only contract binding to access the raw methods on
 }
 
-// NewScryProtocol creates a new instance of ScryProtocol, bound to a specific deployed contracts.
+// NewScryProtocol creates a new instance of ScryProtocol, bound to a specific deployed contract.
 func NewScryProtocol(address common.Address, backend bind.ContractBackend) (*ScryProtocol, error) {
 	contract, err := bindScryProtocol(address, backend, backend, backend)
 	if err != nil {
@@ -98,7 +98,7 @@ func NewScryProtocol(address common.Address, backend bind.ContractBackend) (*Scr
 	return &ScryProtocol{ScryProtocolCaller: ScryProtocolCaller{contract: contract}, ScryProtocolTransactor: ScryProtocolTransactor{contract: contract}, ScryProtocolFilterer: ScryProtocolFilterer{contract: contract}}, nil
 }
 
-// NewScryProtocolCaller creates a new read-only instance of ScryProtocol, bound to a specific deployed contracts.
+// NewScryProtocolCaller creates a new read-only instance of ScryProtocol, bound to a specific deployed contract.
 func NewScryProtocolCaller(address common.Address, caller bind.ContractCaller) (*ScryProtocolCaller, error) {
 	contract, err := bindScryProtocol(address, caller, nil, nil)
 	if err != nil {
@@ -107,7 +107,7 @@ func NewScryProtocolCaller(address common.Address, caller bind.ContractCaller) (
 	return &ScryProtocolCaller{contract: contract}, nil
 }
 
-// NewScryProtocolTransactor creates a new write-only instance of ScryProtocol, bound to a specific deployed contracts.
+// NewScryProtocolTransactor creates a new write-only instance of ScryProtocol, bound to a specific deployed contract.
 func NewScryProtocolTransactor(address common.Address, transactor bind.ContractTransactor) (*ScryProtocolTransactor, error) {
 	contract, err := bindScryProtocol(address, nil, transactor, nil)
 	if err != nil {
@@ -116,7 +116,7 @@ func NewScryProtocolTransactor(address common.Address, transactor bind.ContractT
 	return &ScryProtocolTransactor{contract: contract}, nil
 }
 
-// NewScryProtocolFilterer creates a new log filterer instance of ScryProtocol, bound to a specific deployed contracts.
+// NewScryProtocolFilterer creates a new log filterer instance of ScryProtocol, bound to a specific deployed contract.
 func NewScryProtocolFilterer(address common.Address, filterer bind.ContractFilterer) (*ScryProtocolFilterer, error) {
 	contract, err := bindScryProtocol(address, nil, nil, filterer)
 	if err != nil {
@@ -125,7 +125,7 @@ func NewScryProtocolFilterer(address common.Address, filterer bind.ContractFilte
 	return &ScryProtocolFilterer{contract: contract}, nil
 }
 
-// bindScryProtocol binds a generic wrapper to an already deployed contracts.
+// bindScryProtocol binds a generic wrapper to an already deployed contract.
 func bindScryProtocol(address common.Address, caller bind.ContractCaller, transactor bind.ContractTransactor, filterer bind.ContractFilterer) (*bind.BoundContract, error) {
 	parsed, err := abi.JSON(strings.NewReader(ScryProtocolABI))
 	if err != nil {
@@ -134,7 +134,7 @@ func bindScryProtocol(address common.Address, caller bind.ContractCaller, transa
 	return bind.NewBoundContract(address, parsed, caller, transactor, filterer), nil
 }
 
-// Call invokes the (constant) contracts method with params as input values and
+// Call invokes the (constant) contract method with params as input values and
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
@@ -142,18 +142,18 @@ func (_ScryProtocol *ScryProtocolRaw) Call(opts *bind.CallOpts, result interface
 	return _ScryProtocol.Contract.ScryProtocolCaller.contract.Call(opts, result, method, params...)
 }
 
-// Transfer initiates a plain transaction to move funds to the contracts, calling
+// Transfer initiates a plain transaction to move funds to the contract, calling
 // its default method if one is available.
 func (_ScryProtocol *ScryProtocolRaw) Transfer(opts *bind.TransactOpts) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.ScryProtocolTransactor.contract.Transfer(opts)
 }
 
-// Transact invokes the (paid) contracts method with params as input values.
+// Transact invokes the (paid) contract method with params as input values.
 func (_ScryProtocol *ScryProtocolRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.ScryProtocolTransactor.contract.Transact(opts, method, params...)
 }
 
-// Call invokes the (constant) contracts method with params as input values and
+// Call invokes the (constant) contract method with params as input values and
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
@@ -161,67 +161,67 @@ func (_ScryProtocol *ScryProtocolCallerRaw) Call(opts *bind.CallOpts, result int
 	return _ScryProtocol.Contract.contract.Call(opts, result, method, params...)
 }
 
-// Transfer initiates a plain transaction to move funds to the contracts, calling
+// Transfer initiates a plain transaction to move funds to the contract, calling
 // its default method if one is available.
 func (_ScryProtocol *ScryProtocolTransactorRaw) Transfer(opts *bind.TransactOpts) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.contract.Transfer(opts)
 }
 
-// Transact invokes the (paid) contracts method with params as input values.
+// Transact invokes the (paid) contract method with params as input values.
 func (_ScryProtocol *ScryProtocolTransactorRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.contract.Transact(opts, method, params...)
 }
 
-// IsPublishedDataExisted is a paid mutator transaction binding the contracts method 0xf1f93e80.
+// IsPublishedDataExisted is a paid mutator transaction binding the contract method 0xf1f93e80.
 //
 // Solidity: function isPublishedDataExisted(publishId string) returns(bool)
 func (_ScryProtocol *ScryProtocolTransactor) IsPublishedDataExisted(opts *bind.TransactOpts, publishId string) (*types.Transaction, error) {
 	return _ScryProtocol.contract.Transact(opts, "isPublishedDataExisted", publishId)
 }
 
-// IsPublishedDataExisted is a paid mutator transaction binding the contracts method 0xf1f93e80.
+// IsPublishedDataExisted is a paid mutator transaction binding the contract method 0xf1f93e80.
 //
 // Solidity: function isPublishedDataExisted(publishId string) returns(bool)
 func (_ScryProtocol *ScryProtocolSession) IsPublishedDataExisted(publishId string) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.IsPublishedDataExisted(&_ScryProtocol.TransactOpts, publishId)
 }
 
-// IsPublishedDataExisted is a paid mutator transaction binding the contracts method 0xf1f93e80.
+// IsPublishedDataExisted is a paid mutator transaction binding the contract method 0xf1f93e80.
 //
 // Solidity: function isPublishedDataExisted(publishId string) returns(bool)
 func (_ScryProtocol *ScryProtocolTransactorSession) IsPublishedDataExisted(publishId string) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.IsPublishedDataExisted(&_ScryProtocol.TransactOpts, publishId)
 }
 
-// PublishDataInfo is a paid mutator transaction binding the contracts method 0xd180d67f.
+// PublishDataInfo is a paid mutator transaction binding the contract method 0xd180d67f.
 //
 // Solidity: function publishDataInfo(publishId string, metaDataIdEncSeller bytes, proofDataId string, despDataId string, supportVerify bool) returns()
 func (_ScryProtocol *ScryProtocolTransactor) PublishDataInfo(opts *bind.TransactOpts, publishId string, metaDataIdEncSeller []byte, proofDataId string, despDataId string, supportVerify bool) (*types.Transaction, error) {
 	return _ScryProtocol.contract.Transact(opts, "publishDataInfo", publishId, metaDataIdEncSeller, proofDataId, despDataId, supportVerify)
 }
 
-// PublishDataInfo is a paid mutator transaction binding the contracts method 0xd180d67f.
+// PublishDataInfo is a paid mutator transaction binding the contract method 0xd180d67f.
 //
 // Solidity: function publishDataInfo(publishId string, metaDataIdEncSeller bytes, proofDataId string, despDataId string, supportVerify bool) returns()
 func (_ScryProtocol *ScryProtocolSession) PublishDataInfo(publishId string, metaDataIdEncSeller []byte, proofDataId string, despDataId string, supportVerify bool) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.PublishDataInfo(&_ScryProtocol.TransactOpts, publishId, metaDataIdEncSeller, proofDataId, despDataId, supportVerify)
 }
 
-// PublishDataInfo is a paid mutator transaction binding the contracts method 0xd180d67f.
+// PublishDataInfo is a paid mutator transaction binding the contract method 0xd180d67f.
 //
 // Solidity: function publishDataInfo(publishId string, metaDataIdEncSeller bytes, proofDataId string, despDataId string, supportVerify bool) returns()
 func (_ScryProtocol *ScryProtocolTransactorSession) PublishDataInfo(publishId string, metaDataIdEncSeller []byte, proofDataId string, despDataId string, supportVerify bool) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.PublishDataInfo(&_ScryProtocol.TransactOpts, publishId, metaDataIdEncSeller, proofDataId, despDataId, supportVerify)
 }
 
-// ScryProtocolPublishedIterator is returned from FilterPublished and is used to iterate over the raw logs and unpacked data for Published events raised by the ScryProtocol contracts.
+// ScryProtocolPublishedIterator is returned from FilterPublished and is used to iterate over the raw logs and unpacked data for Published events raised by the ScryProtocol contract.
 type ScryProtocolPublishedIterator struct {
-	Event *ScryProtocolPublished // Event containing the contracts specifics and raw log
+	Event *ScryProtocolPublished // Event containing the contract specifics and raw log
 
-	contract *bind.BoundContract // Generic contracts to use for unpacking event data
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
 
-	logs chan types.Log        // Log channel receiving the found contracts events
+	logs chan types.Log        // Log channel receiving the found contract events
 	sub  ethereum.Subscription // Subscription for errors, completion and termination
 	done bool                  // Whether the subscription completed delivering logs
 	fail error                 // Occurred error to stop iteration
@@ -281,14 +281,17 @@ func (it *ScryProtocolPublishedIterator) Close() error {
 	return nil
 }
 
-// ScryProtocolPublished represents a Published event raised by the ScryProtocol contracts.
+// ScryProtocolPublished represents a Published event raised by the ScryProtocol contract.
 type ScryProtocolPublished struct {
-	Raw types.Log // Blockchain specific contextual infos
+	PublishId  string
+	Users      string
+	DespDataId string
+	Raw        types.Log // Blockchain specific contextual infos
 }
 
-// FilterPublished is a free log retrieval operation binding the contracts event 0xa5c49e57d43a67a13cd3aba09ccf12eaa3019b35cea872059e78db9c4a70f86c.
+// FilterPublished is a free log retrieval operation binding the contract event 0x46a08b125611ec320cc1058dd976ee1adea76edb0e29c87708a4ac583d31bd77.
 //
-// Solidity: e Published()
+// Solidity: e Published(publishId string, users string, despDataId string)
 func (_ScryProtocol *ScryProtocolFilterer) FilterPublished(opts *bind.FilterOpts) (*ScryProtocolPublishedIterator, error) {
 
 	logs, sub, err := _ScryProtocol.contract.FilterLogs(opts, "Published")
@@ -298,9 +301,9 @@ func (_ScryProtocol *ScryProtocolFilterer) FilterPublished(opts *bind.FilterOpts
 	return &ScryProtocolPublishedIterator{contract: _ScryProtocol.contract, event: "Published", logs: logs, sub: sub}, nil
 }
 
-// WatchPublished is a free log subscription operation binding the contracts event 0xa5c49e57d43a67a13cd3aba09ccf12eaa3019b35cea872059e78db9c4a70f86c.
+// WatchPublished is a free log subscription operation binding the contract event 0x46a08b125611ec320cc1058dd976ee1adea76edb0e29c87708a4ac583d31bd77.
 //
-// Solidity: e Published()
+// Solidity: e Published(publishId string, users string, despDataId string)
 func (_ScryProtocol *ScryProtocolFilterer) WatchPublished(opts *bind.WatchOpts, sink chan<- *ScryProtocolPublished) (event.Subscription, error) {
 
 	logs, sub, err := _ScryProtocol.contract.WatchLogs(opts, "Published")

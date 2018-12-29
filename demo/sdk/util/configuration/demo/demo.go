@@ -9,10 +9,10 @@ import (
 )
 
 //modify the directory before you run this demo.
-const basedir = "github.com/mats9693/YAML/test"
+const basedir = "github.com/mats9693/YAML/testconsole"
 
 func main() {
-	yf, err := ioutil.ReadFile(basedir + "/test.yaml")
+	yf, err := ioutil.ReadFile(basedir + "/testconsole.yaml")
 	if err != nil {
 		log.Println("Read file Failed : ", err)
 		return
