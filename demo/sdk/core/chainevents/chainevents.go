@@ -29,19 +29,31 @@ func StartEventProcessing(conn *ethclient.Client,
 }
 
 func SubscribeInternal(eventName string, eventCallback EventCallback) error {
-	return subscribe(eventName, eventCallback, internalEventRepo)
+	return subscribe("", eventName, eventCallback, internalEventRepo)
 }
 
-func SubscribeExternal(eventName string, eventCallback EventCallback) error {
-	return subscribe(eventName, eventCallback, externalEventRepo)
+func SubscribeExternal(clientAddr string, eventName string, eventCallback EventCallback) error {
+	return subscribe(clientAddr, eventName, eventCallback, externalEventRepo)
 }
 
-func subscribe(eventName string, eventCallback EventCallback, eventRepo *EventRepository) error {
-	if eventCallback == nil {
-		return errors.New("couldn't subscribe event as eventCallback is null")
+func subscribe(clientAddr string, eventName string,
+					eventCallback EventCallback, eventRepo *EventRepository) error {
+	if eventCallback == nil || clientAddr == "" || eventName == "" {
+		return errors.New("couldn't subscribe event because of null eventCallback or empty client address or empty event name")
 	}
 
-	eventRepo.mapEventExecutor[eventName] = eventCallback
+	subscribeInfo := SubscribeInfo{
+		clientAddr: clientAddr,
+		eventCallback: eventCallback,
+	}
+
+	subscribeInfoList := eventRepo.mapEventExecutor[eventName]
+	if subscribeInfoList == nil {
+		subscribeInfoList = &SubscribeInfoList{
+			subscribeInfos: make(*SubscribeInfo, 5)
+		}
+	}
+
 
 	return nil
 }
