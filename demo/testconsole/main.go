@@ -18,9 +18,6 @@ var (
 )
 
 func main()  {
-	//subscribe events
-	chainevents.SubscribeExternal("Published", onPublished)
-
 	//seller publish
 	SellerPublishData()
 
@@ -32,9 +29,6 @@ func SellerPublishData()  {
 	publicAddress := chainoperations.DecodeKeystoreAddress([]byte(keyJson))
 
 	//initialize sdk
-	usermanager.Register(publicAddress, false, nil)
-	usermanager.SetCurrentUser(publicAddress)
-
 	client := contractclient.NewContractClient(publicAddress, keyJson, keyPassword)
 	client.Initialize("http://127.0.0.1:7545/",
 		"0x5c29f42d640ee25f080cdc648641e8e358459ddc", getAbiText(), "/ip4/127.0.0.1/tcp/5001")

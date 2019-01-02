@@ -6,6 +6,7 @@ import (
 	"../core/chainoperations"
 	"../util/storage/ipfsaccess"
 	"./contractinterfacewrapper"
+	"../core/chainevents"
 	"context"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
@@ -66,6 +67,8 @@ func (contractClient *ContractClient) Initialize(ethNodeAddr string,
 	return connector, nil
 }
 
+func (contractClient *ContractClient) SubscribeEvent(eventName string, callback chainevents.EventCallback)  {
+}
 
 type connector struct {
 	ctx context.Context
