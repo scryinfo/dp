@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-func DecodeKeystoreAddress(keyJsonStr []byte) common.Address {
+func DecodeKeystoreAddress(keyJsonStr []byte) string {
 	addr := struct {
 		Address string `json:"address"`
 	}{}
@@ -22,7 +22,7 @@ func DecodeKeystoreAddress(keyJsonStr []byte) common.Address {
 	if !strings.HasPrefix(addr.Address, "0x") {
 		addr.Address = `0x` + addr.Address
 	}
-	return common.HexToAddress(addr.Address)
+	return addr.Address
 }
 
 func BuildTransactOpts(from common.Address, keyJson string, keyPasswd string) *bind.TransactOpts {

@@ -33,7 +33,7 @@ contract ScryProtocol {
         return true;
     }
 
-    function prepareToBuy(string publishId) returns string {
+    function prepareToBuy(string publishId) {
         
     }
 

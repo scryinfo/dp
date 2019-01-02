@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/qjpcpu/ethereum/events"
+	"../ethereum/events"
 	"time"
 )
 
