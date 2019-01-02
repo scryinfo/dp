@@ -2,7 +2,7 @@ package chainevents
 
 import (
 	"fmt"
-	"github.com/qjpcpu/ethereum/events"
+	"../ethereum/events"
 	"strings"
 	"../../util/usermanager"
 )

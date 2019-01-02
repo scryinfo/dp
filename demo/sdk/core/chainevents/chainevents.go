@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/qjpcpu/ethereum/events"
+	"../ethereum/events"
 )
 
 var (
