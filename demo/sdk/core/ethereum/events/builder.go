@@ -260,7 +260,7 @@ func (es *eventScanner) scan(ctx *redo.RedoCtx) {
 		ctx.StopRedo()
 		return
 	}
-	if to_bn <= es.From {
+	if to_bn < es.From {
 		return
 	}
 	if es.From+es.StepLength < to_bn {

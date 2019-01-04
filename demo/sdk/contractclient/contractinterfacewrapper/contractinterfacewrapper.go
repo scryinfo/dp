@@ -3,7 +3,7 @@ package contractinterfacewrapper
 import (
 	"../../contractinterface"
 	"../../util/storage/ipfsaccess"
-	"../../util/usermanager"
+	"../../util/security"
 	"../../util/uuid"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -50,20 +50,8 @@ func Publish(metaData *[]byte, proofData *[]byte, descriptionData *[]byte, suppo
 		return "", err
 	}
 
-	//encrypt meta_data_id
-	curUser, err := usermanager.GetCurrentUser()
-	if err != nil {
-		fmt.Println("failed to get current user, error: ", err)
-		return "", err
-	}
-
-	secOper, err := curUser.GetSecurityOpertion()
-	if err != nil {
-		fmt.Println("failed to get security operation interface of current user, error: ", err)
-		return "", err
-	}
-
 	b := []byte(cidMd)
+	secOper := security.SecurityExecutor{}
 	encMetaId, err := secOper.Encrypt(&b)
 	if err != nil {
 		fmt.Println("failed to encrypt meta data hash, error: ", err)

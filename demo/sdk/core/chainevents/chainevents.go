@@ -42,18 +42,13 @@ func subscribe(clientAddr string, eventName string,
 		return errors.New("couldn't subscribe event because of null eventCallback or empty client address or empty event name")
 	}
 
-	subscribeInfo := SubscribeInfo{
-		clientAddr: clientAddr,
-		eventCallback: eventCallback,
+	subscribeInfoMap := eventRepo.mapEventSubscribe[eventName]
+	if subscribeInfoMap == nil {
+		subscribeInfoMap = make(map[string]EventCallback)
+		eventRepo.mapEventSubscribe[eventName] = subscribeInfoMap
 	}
 
-	subscribeInfoList := eventRepo.mapEventExecutor[eventName]
-	if subscribeInfoList == nil {
-		subscribeInfoList = &SubscribeInfoList{
-			subscribeInfos: make(*SubscribeInfo, 5)
-		}
-	}
-
+	subscribeInfoMap[clientAddr] = eventCallback
 
 	return nil
 }

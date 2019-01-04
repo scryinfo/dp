@@ -5,7 +5,6 @@ import (
 	"../sdk/contractclient/contractinterfacewrapper"
 	"../sdk/core/chainevents"
 	"../sdk/core/ethereum/events"
-	"../sdk/util/usermanager"
 	"../sdk/core/chainoperations"
 	"fmt"
 	"io/ioutil"
@@ -32,12 +31,17 @@ func SellerPublishData()  {
 	client := contractclient.NewContractClient(publicAddress, keyJson, keyPassword)
 	client.Initialize("http://127.0.0.1:7545/",
 		"0x5c29f42d640ee25f080cdc648641e8e358459ddc", getAbiText(), "/ip4/127.0.0.1/tcp/5001")
-	chainevents.SubscribeExternal("Published", onPublished)
+	chainevents.SubscribeExternal(publicAddress,"Published", onPublished)
 
 	//publish data
 	metaData := []byte{'1','2','3','3'}
 	proofData := []byte{'4','5','6','3'}
 	despData := []byte{'7','8','9','3'}
+	contractinterfacewrapper.Publish(&metaData, &proofData, &despData, false)
+
+	time.Sleep(5000000)
+	fmt.Println("wait 5 seconds...")
+
 	contractinterfacewrapper.Publish(&metaData, &proofData, &despData, false)
 }
 

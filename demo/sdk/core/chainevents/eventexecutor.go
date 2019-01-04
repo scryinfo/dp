@@ -3,6 +3,7 @@ package chainevents
 import (
 	"../ethereum/events"
 	"fmt"
+	"strings"
 )
 
 func ExecuteEvents(dataChannel chan events.Event,
@@ -31,17 +32,35 @@ func ExecuteEvents(dataChannel chan events.Event,
 func executeEvent(event events.Event, eventRepo *EventRepository) bool {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println("error: failed to execute event " + event.Name + " because of error: ", err)
+			fmt.Println("error: failed to execute event "+event.Name+" because of error: ", err)
 		}
 	}()
 
-	callbackInfo, exist := eventRepo.mapEventExecutor[event.Name]
-	if !exist {
-		fmt.Println("error: event not subscribed: " + event.Name)
+	subscribeInfoMap := eventRepo.mapEventSubscribe[event.Name]
+	if subscribeInfoMap == nil {
+		fmt.Println("Warning: no event was executed")
 		return false
 	}
 
+	users := event.Data.Get("users").(string)
+	if users == "" {
+		fmt.Println("Warning: users domain is empty in event data")
+		return false
+	} else if users == "*" {
+		for _, v := range subscribeInfoMap {
+			if v != nil {
+				EventCallback(v)(event)
+			}
+		}
+	} else {
+		for k, v := range subscribeInfoMap {
+			if strings.Contains(users, k) {
+				if v != nil {
+					EventCallback(v)(event)
+				}
+			}
+		}
+	}
 
-
-	return eventCallback(event)
+	return true
 }
