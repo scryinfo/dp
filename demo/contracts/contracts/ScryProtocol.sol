@@ -1,17 +1,19 @@
 pragma solidity ^0.4.24;
 
 contract ScryProtocol {
+    enum TransactionState {Begin, Created, Voted, Purchasing, ReadyForDownload, Payed, Arbitrating, Closed}
 
     struct DataInfoPublished {
         bytes metaDataIdEncSeller;
-        string proofDataId;
+        string[] proofDataIds;
+        uint numberOfProof;
         string despDataId;
         address seller;
         bool supportVerify;  
     } 
 
     struct Transaction {
-        enum state {Begin, Created, Voted, Purchasing, ReadyForDownload, Payed, Arbitrating, Closed};
+        TransactionState state;
         address buyer;
         address seller;
         string publishId;
@@ -19,63 +21,96 @@ contract ScryProtocol {
         uint buyerDeposit;
     }
 
-    uint public transactionSeq = 0;
-
     mapping (string => DataInfoPublished) mapPublishedData;
-
-    mapping (int => Transaction) mapTransaction;
+    mapping (uint => Transaction) mapTransaction;
 
     event Published(string publishId, string users, string despDataId);
+    event TransactionCreated(uint transactionId, string publishId, string chosenProofIds, bool supportVerify, address[] users);
+
+    uint public transactionSeq = 0;
+    uint public encryptedIdLen = 32;
 
     constructor () public {
     }
 
-    function PublishDataInfo(string publishId, bytes metaDataIdEncSeller, string proofDataId, string despDataId, bool supportVerify) public {
-        mapPublishedData[publishId] = DataInfoPublished(metaDataIdEncSeller, proofDataId, despDataId, msg.sender, supportVerify);
+    function publishDataInfo(string publishId, bytes metaDataIdEncSeller, string proofDataIdList, string despDataId, bool supportVerify) public {
+        //split string to string array
+        string[] memory proofDataIds;
+        uint proofNum;
+
+        (proofDataIds, proofNum) = splitString(proofDataIdList);
+        mapPublishedData[publishId] = DataInfoPublished(metaDataIdEncSeller, proofDataIds, proofNum, despDataId, msg.sender, supportVerify);
         
         //'*' means everyone can subscribe Published event
         emit Published(publishId, "*", despDataId);
     }
 
-    function IsPublishedDataExisted(string publishId) private returns (bool) {
-        DataInfoPublished data = mapPublishedData[publishId];
-        if (data == 0 || data.seller == 0) {
+    function isPublishedDataExisted(string publishId) private returns (bool) {
+        DataInfoPublished memory data = mapPublishedData[publishId];
+        if (data.seller == 0) {
             return false;
         }
         
         return true;
     }
 
-    function PrepareToBuy(string publishId) public {
+    function prepareToBuy(string publishId) public {
         //published data info
-        DataInfoPublished data = mapPublishedData[publishId]
-
-        //maybe publishId not valid: return gas and 
-        require(data != 0, "Can not get published data by publish id.")
+        DataInfoPublished memory data = mapPublishedData[publishId];
+        require(data.seller != 0, "Can not get published data by publish id.");
 
         //create transaction
-        mapTransaction[GetTransactionId()] = Transaction(Created, msg.sender, data.seller, publishId, 0, 0)
+        uint txId = getTransactionId();
+        bytes memory metaDataIdEncBuyer = new bytes(encryptedIdLen);
+        metaDataIdEncBuyer = "";
+        mapTransaction[txId] = Transaction(TransactionState.Created, msg.sender, data.seller, publishId, metaDataIdEncBuyer, 0);
 
-        //choose proof data randomly for buyer
+        //do not support verification
+        if (!data.supportVerify) {
+            //choose proof data randomly for buyer 
+            uint index = getRandomNumber(data.numberOfProof);
+            require(index < data.numberOfProof, "Data index need to be valid.");
 
+            string memory proofId = data.proofDataIds[index];
+            address[] memory users = new address[](1);
+            users[0] = msg.sender;
 
-        //
-        
+            //TransactionCreated event
+            emit TransactionCreated(txId, publishId, proofId, data.supportVerify, users);
+        }
     }
 
-    function GetTransactionId() private returns(uint) {
+    function getTransactionId() private returns(uint) {
         return transactionSeq++;
     }
 
-    function BuyData(string txId) {
+    function splitString(string src) private returns (string[], uint) {
+        //split string into string array 
+        string[] memory result = new string[](1);
+        result[0] = src;
+        return (result, 1);
+    }
+
+    function getRandomNumber(uint mod) private returns (uint) {
+        return uint(keccak256(now, msg.sender)) % mod;
+    }
+
+    function addressToString(address x) returns (string) {
+        bytes memory b = new bytes(20);
+        for (uint i = 0; i < 20; i++)
+            b[i] = byte(uint8(uint(x) / (2**(8*(19 - i)))));
+        return string(b);
+    }
+
+    function buyData(string txId) {
         
     }
 
-    function SubmitMetaDataIdEncWithBuyer(string txId, bytes encryptedMetaDataId) {
+    function submitMetaDataIdEncWithBuyer(string txId, bytes encryptedMetaDataId) {
         
     }
 
-    function ConfirmDataTruth(string txId, bool truth) {
+    function confirmDataTruth(string txId, bool truth) {
         
     }
 
