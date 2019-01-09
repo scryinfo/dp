@@ -9,8 +9,8 @@ import (
 )
 
 func ListenEvent(conn *ethclient.Client, contractAddr string, abi string,
-			eventNames string,  interval time.Duration,
-			dataChannel chan events.Event, errorChannel chan error) bool {
+			interval time.Duration,	dataChannel chan events.Event,
+			errorChannel chan error, eventNames ...string) bool {
 	rv := true
 	fmt.Println("start listening events...")
 	defer func() {
@@ -22,7 +22,7 @@ func ListenEvent(conn *ethclient.Client, contractAddr string, abi string,
 
 	builder := events.NewScanBuilder()
 	recp, err := builder.SetClient(conn).
-		SetContract(common.HexToAddress(contractAddr), abi, eventNames).
+		SetContract(common.HexToAddress(contractAddr), abi, eventNames...).
 		SetFrom(getFromBlock()).
 		SetTo(getToBlock()).
 		SetGracefullExit(true).
