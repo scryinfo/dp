@@ -1,5 +1,10 @@
 package definition
 
+import (
+	"context"
+	"github.com/ethereum/go-ethereum/ethclient"
+)
+
 const (
 	Document int = iota
 	Picture
@@ -31,3 +36,5 @@ type Vote struct {
 	voteResult int
 	comment    string
 }
+
+

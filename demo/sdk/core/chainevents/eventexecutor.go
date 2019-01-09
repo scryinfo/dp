@@ -3,7 +3,7 @@ package chainevents
 import (
 	"../ethereum/events"
 	"fmt"
-	"strings"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 func ExecuteEvents(dataChannel chan events.Event,
@@ -17,8 +17,9 @@ func ExecuteEvents(dataChannel chan events.Event,
 	for {
 		select {
 		case event := <- dataChannel:
-			eventUsers := event.Data.Get("users").(string)
-			if eventUsers == "" {
+			broadcast := event.Data.Get("boardcast").(bool)
+			eventUsers := event.Data.Get("users").([]common.Address)
+			if !broadcast && len(eventUsers) == 0 {
 				fmt.Println("Error: no users in event data")
 				break
 			}
@@ -42,19 +43,18 @@ func executeEvent(event events.Event, eventRepo *EventRepository) bool {
 		return false
 	}
 
-	users := event.Data.Get("users").(string)
-	if users == "" {
-		fmt.Println("Warning: users domain is empty in event data")
-		return false
-	} else if users == "*" {
+
+	broadcast := event.Data.Get("boardcast").(bool)
+	if broadcast {
 		for _, v := range subscribeInfoMap {
 			if v != nil {
 				EventCallback(v)(event)
 			}
 		}
 	} else {
+		eventUsers := event.Data.Get("users").([]common.Address)
 		for k, v := range subscribeInfoMap {
-			if strings.Contains(users, k) {
+			if containUser(eventUsers, k) {
 				if v != nil {
 					EventCallback(v)(event)
 				}
@@ -63,4 +63,14 @@ func executeEvent(event events.Event, eventRepo *EventRepository) bool {
 	}
 
 	return true
+}
+
+func containUser(userList []common.Address, user common.Address) bool {
+	for _, u := range userList {
+		if u == user {
+			return true
+		}
+	}
+
+	return false
 }
