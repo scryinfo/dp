@@ -5,7 +5,7 @@ echo "work path:"$WORK_PATH
 
 cd $WORK_PATH
 
-cp build/contracts/ScryProtocol.abi ../testconsole/
-cp ScryProtocolInterface.go ../sdk/contractinterface/
+cp build/contracts/*.abi ../testconsole/
+cp *.go ../sdk/contractinterface/
 
 echo "end."

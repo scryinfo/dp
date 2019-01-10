@@ -5,7 +5,7 @@ contract('ScryProtocol', function(accounts) {
     it("Event Publish should be watched", function() {
         return ScryProtocol.deployed().then(function(instance){
             ptl = instance
-            return ptl.publishDataInfo("publishId", "0", ["1","2"], "2", true);
+            return ptl.publishDataInfo("publishId", 1000, "0", ["1","2"], "2", true);
         }).then(function(result){
             for (var i = 0; i < result.logs.length; i++) {
                 var log = result.logs[i];
@@ -23,7 +23,7 @@ contract('ScryProtocol', function(accounts) {
     it("Event TransactionCreate should be watched", function() {
         return ScryProtocol.deployed().then(function(instance){
             ptl = instance
-            return ptl.publishDataInfo("publishId", "0", ["1","2"], "2", true);
+            return ptl.publishDataInfo("publishId", 1000, "0", ["1","2"], "2", true);
         }).then(function(result){
             return ptl.prepareToBuy("publishId");
         }).then(function(result){

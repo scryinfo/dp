@@ -15,18 +15,26 @@ import (
 )
 
 var (
-	scryProtocol *contractinterface.ScryProtocol
+	scryProtocol *contractinterface.ScryProtocol = nil
+	scryToken *contractinterface.ScryToken = nil
 )
 
-func Initialize(contractAddress common.Address, conn *ethclient.Client) error {
+func Initialize(protocolContractAddress common.Address, tokenContractAddress common.Address, conn *ethclient.Client) error {
 	var err error = nil
 
-	scryProtocol, err = contractinterface.NewScryProtocol(contractAddress, conn)
+	scryProtocol, err = contractinterface.NewScryProtocol(protocolContractAddress, conn)
 	if err != nil {
-		fmt.Println("failed to initialize contract interface wrapper.", err)
+		fmt.Println("failed to initialize protocol contract interface wrapper.", err)
+		return err
 	}
 
-	return err
+	scryToken, err = contractinterface.NewScryToken(tokenContractAddress, conn)
+	if err != nil {
+		fmt.Println("failed to initialize token contract interface wrapper.", err)
+		return err
+	}
+
+	return nil
 }
 
 func Publish(txOpts *bind.TransactOpts, metaData []byte, proofDatas [][]byte,
@@ -144,4 +152,8 @@ func ConfirmDataTruth(txOpts *bind.TransactOpts, txId *big.Int, truth bool) (err
 	}
 
 	return err
+}
+
+func transferToken()  {
+	
 }
