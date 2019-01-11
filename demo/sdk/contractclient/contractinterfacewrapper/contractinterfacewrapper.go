@@ -37,7 +37,7 @@ func Initialize(protocolContractAddress common.Address, tokenContractAddress com
 	return nil
 }
 
-func Publish(txOpts *bind.TransactOpts, metaData []byte, proofDatas [][]byte,
+func Publish(txOpts *bind.TransactOpts, price *big.Int, metaData []byte, proofDatas [][]byte,
 				proofNum int, descriptionData []byte, supportVerify bool) (string, error)  {
 	defer func(){
 		if err:=recover(); err!=nil {
@@ -88,7 +88,7 @@ func Publish(txOpts *bind.TransactOpts, metaData []byte, proofDatas [][]byte,
 	}
 
 	//upload meta_data_id_enc_seller and other cids to contracts
-	tx, err := scryProtocol.PublishDataInfo(txOpts, publishId, *encMetaId, cidPds, cidDd, supportVerify)
+	tx, err := scryProtocol.PublishDataInfo(txOpts, publishId, price, *encMetaId, cidPds, cidDd, supportVerify)
 	if err != nil {
 		fmt.Println("failed to publish data information, error: ", err)
 		return "", err
@@ -112,7 +112,7 @@ func ipfsHashToBytes32(src string) ([32]byte, error) {
 }
 
 
-func PrepareToBuy(txOpts *bind.TransactOpts, publishId string) (err error) {
+func PrepareToBuy(txOpts *bind.TransactOpts, publishId string) (error) {
 	defer func(){
 		if err:=recover(); err!=nil {
 			fmt.Println("failed to prepare to buy , error:", err)
@@ -127,7 +127,7 @@ func PrepareToBuy(txOpts *bind.TransactOpts, publishId string) (err error) {
 	return err
 }
 
-func BuyData(txOpts *bind.TransactOpts, txId *big.Int) (err error) {
+func BuyData(txOpts *bind.TransactOpts, txId *big.Int) (error) {
 	tx, err := scryProtocol.BuyData(txOpts, txId)
 	if err == nil {
 		fmt.Println("BuyData:", tx.Data(), " tx hash:", tx.Hash().String())
@@ -136,7 +136,7 @@ func BuyData(txOpts *bind.TransactOpts, txId *big.Int) (err error) {
 	return err
 }
 
-func SubmitMetaDataIdEncWithBuyer(txOpts *bind.TransactOpts, txId *big.Int, encyptedMetaDataId []byte) (err error) {
+func SubmitMetaDataIdEncWithBuyer(txOpts *bind.TransactOpts, txId *big.Int, encyptedMetaDataId []byte) (error) {
 	tx, err := scryProtocol.SubmitMetaDataIdEncWithBuyer(txOpts, txId, encyptedMetaDataId)
 	if err == nil {
 		fmt.Println("SubmitMetaDataIdEncWithBuyer:", string(tx.Data()), " tx hash:", tx.Hash().String())
@@ -145,7 +145,7 @@ func SubmitMetaDataIdEncWithBuyer(txOpts *bind.TransactOpts, txId *big.Int, ency
 	return err
 }
 
-func ConfirmDataTruth(txOpts *bind.TransactOpts, txId *big.Int, truth bool) (err error) {
+func ConfirmDataTruth(txOpts *bind.TransactOpts, txId *big.Int, truth bool) (error) {
 	tx, err := scryProtocol.ConfirmDataTruth(txOpts, txId, truth)
 	if err == nil {
 		fmt.Println("ConfirmDataTruth:", string(tx.Data()), " tx hash:", tx.Hash().String())
@@ -154,6 +154,11 @@ func ConfirmDataTruth(txOpts *bind.TransactOpts, txId *big.Int, truth bool) (err
 	return err
 }
 
-func transferToken()  {
-	
+func ApproveTransfer(txOpts *bind.TransactOpts, spender common.Address, value *big.Int) (error) {
+	tx, err := scryToken.Approve(txOpts, spender, value)
+	if err == nil {
+		fmt.Println("ApproveTransfer:", string(tx.Data()), " tx hash:", tx.Hash().String())
+	}
+
+	return err
 }

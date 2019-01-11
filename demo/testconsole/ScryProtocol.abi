@@ -1,34 +1,11 @@
 [
     {
-      "constant": true,
-      "inputs": [],
-      "name": "encryptedIdLen",
-      "outputs": [
+      "inputs": [
         {
-          "name": "",
-          "type": "uint256"
+          "name": "_token",
+          "type": "address"
         }
       ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "transactionSeq",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
       "type": "constructor"
@@ -40,6 +17,11 @@
           "indexed": false,
           "name": "publishId",
           "type": "string"
+        },
+        {
+          "indexed": false,
+          "name": "price",
+          "type": "uint256"
         },
         {
           "indexed": false,
@@ -184,6 +166,10 @@
         {
           "name": "publishId",
           "type": "string"
+        },
+        {
+          "name": "price",
+          "type": "uint256"
         },
         {
           "name": "metaDataIdEncSeller",

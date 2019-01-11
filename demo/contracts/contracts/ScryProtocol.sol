@@ -30,11 +30,11 @@ contract ScryProtocol {
     mapping (string => DataInfoPublished) mapPublishedData;
     mapping (uint => TransactionItem) mapTransaction;
 
-    event Publish(string publishId, uint256 price, string despDataId, bool boardcast, address[] users);
-    event TransactionCreate(uint256 transactionId, string publishId, bytes32 chosenProofIds, bool supportVerify, bool boardcast, address[] users);
-    event Purchase(uint256 transactionId, string publishId, bytes metaDataIdEncSeller, bool boardcast, address[] users);
-    event ReadyForDownload(uint256 transactionId, bytes metaDataIdEncBuyer, bool boardcast, address[] users);
-    event Close(uint256 transactionId, bool boardcast, address[] users);
+    event Publish(string publishId, uint256 price, string despDataId, address[] users);
+    event TransactionCreate(uint256 transactionId, string publishId, bytes32 chosenProofIds, bool supportVerify, address[] users);
+    event Purchase(uint256 transactionId, string publishId, bytes metaDataIdEncSeller, address[] users);
+    event ReadyForDownload(uint256 transactionId, bytes metaDataIdEncBuyer, address[] users);
+    event Close(uint256 transactionId, address[] users);
 
     uint256 transactionSeq = 0;
     uint256 encryptedIdLen = 32;
@@ -71,7 +71,7 @@ contract ScryProtocol {
 
         //get deposit from msg.sender
         require(token.balanceOf(msg.sender) >= data.price, "banlance should be enough");
-        require(token.transferfrom(msg.sender, address(this), data.price), "failed to transfer token from contract client");
+        require(token.transferFrom(msg.sender, address(this), data.price), "failed to transfer token from contract client");
 
         //create transaction
         uint txId = getTransactionId();
@@ -143,12 +143,12 @@ contract ScryProtocol {
         if (!data.supportVerify) {
             if(truth) {
                 //pay to seller from contract
-                require(owner.banlance >= txItem.buyerDeposit && txItem.buyerDeposit >= data.price, "banlance must be enough")
+                require(token.balanceOf(owner) >= txItem.buyerDeposit && txItem.buyerDeposit >= data.price, "banlance must be enough");
 
-                txItem.buyerDeposit -= data.price
+                txItem.buyerDeposit -= data.price;
                 if (!token.transfer(data.seller, data.price)) {
-                    txItem.buyerDeposit += data.price
-                    throw
+                    txItem.buyerDeposit += data.price;
+                    require(false, "failed to transfer tokens to seller");
                 }
             }
             

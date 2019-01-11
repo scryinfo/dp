@@ -28,7 +28,7 @@ var (
 )
 
 // ScryProtocolABI is the input ABI used to generate the binding from.
-const ScryProtocolABI = "[{\"constant\":true,\"inputs\":[],\"name\":\"encryptedIdLen\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"transactionSeq\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"publishId\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"despDataId\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"boardcast\",\"type\":\"bool\"},{\"indexed\":false,\"name\":\"users\",\"type\":\"address[]\"}],\"name\":\"Publish\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"transactionId\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"publishId\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"chosenProofIds\",\"type\":\"bytes32\"},{\"indexed\":false,\"name\":\"supportVerify\",\"type\":\"bool\"},{\"indexed\":false,\"name\":\"boardcast\",\"type\":\"bool\"},{\"indexed\":false,\"name\":\"users\",\"type\":\"address[]\"}],\"name\":\"TransactionCreate\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"transactionId\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"publishId\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"metaDataIdEncSeller\",\"type\":\"bytes\"},{\"indexed\":false,\"name\":\"boardcast\",\"type\":\"bool\"},{\"indexed\":false,\"name\":\"users\",\"type\":\"address[]\"}],\"name\":\"Purchase\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"transactionId\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"metaDataIdEncBuyer\",\"type\":\"bytes\"},{\"indexed\":false,\"name\":\"boardcast\",\"type\":\"bool\"},{\"indexed\":false,\"name\":\"users\",\"type\":\"address[]\"}],\"name\":\"ReadyForDownload\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"transactionId\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"boardcast\",\"type\":\"bool\"},{\"indexed\":false,\"name\":\"users\",\"type\":\"address[]\"}],\"name\":\"Close\",\"type\":\"event\"},{\"constant\":false,\"inputs\":[{\"name\":\"publishId\",\"type\":\"string\"},{\"name\":\"metaDataIdEncSeller\",\"type\":\"bytes\"},{\"name\":\"proofDataIds\",\"type\":\"bytes32[]\"},{\"name\":\"despDataId\",\"type\":\"string\"},{\"name\":\"supportVerify\",\"type\":\"bool\"}],\"name\":\"publishDataInfo\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"publishId\",\"type\":\"string\"}],\"name\":\"prepareToBuy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"txId\",\"type\":\"uint256\"}],\"name\":\"buyData\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"txId\",\"type\":\"uint256\"},{\"name\":\"encryptedMetaDataId\",\"type\":\"bytes\"}],\"name\":\"submitMetaDataIdEncWithBuyer\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"txId\",\"type\":\"uint256\"},{\"name\":\"truth\",\"type\":\"bool\"}],\"name\":\"confirmDataTruth\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
+const ScryProtocolABI = "[{\"inputs\":[{\"name\":\"_token\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"publishId\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"price\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"despDataId\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"boardcast\",\"type\":\"bool\"},{\"indexed\":false,\"name\":\"users\",\"type\":\"address[]\"}],\"name\":\"Publish\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"transactionId\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"publishId\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"chosenProofIds\",\"type\":\"bytes32\"},{\"indexed\":false,\"name\":\"supportVerify\",\"type\":\"bool\"},{\"indexed\":false,\"name\":\"boardcast\",\"type\":\"bool\"},{\"indexed\":false,\"name\":\"users\",\"type\":\"address[]\"}],\"name\":\"TransactionCreate\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"transactionId\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"publishId\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"metaDataIdEncSeller\",\"type\":\"bytes\"},{\"indexed\":false,\"name\":\"boardcast\",\"type\":\"bool\"},{\"indexed\":false,\"name\":\"users\",\"type\":\"address[]\"}],\"name\":\"Purchase\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"transactionId\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"metaDataIdEncBuyer\",\"type\":\"bytes\"},{\"indexed\":false,\"name\":\"boardcast\",\"type\":\"bool\"},{\"indexed\":false,\"name\":\"users\",\"type\":\"address[]\"}],\"name\":\"ReadyForDownload\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"transactionId\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"boardcast\",\"type\":\"bool\"},{\"indexed\":false,\"name\":\"users\",\"type\":\"address[]\"}],\"name\":\"Close\",\"type\":\"event\"},{\"constant\":false,\"inputs\":[{\"name\":\"publishId\",\"type\":\"string\"},{\"name\":\"price\",\"type\":\"uint256\"},{\"name\":\"metaDataIdEncSeller\",\"type\":\"bytes\"},{\"name\":\"proofDataIds\",\"type\":\"bytes32[]\"},{\"name\":\"despDataId\",\"type\":\"string\"},{\"name\":\"supportVerify\",\"type\":\"bool\"}],\"name\":\"publishDataInfo\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"publishId\",\"type\":\"string\"}],\"name\":\"prepareToBuy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"txId\",\"type\":\"uint256\"}],\"name\":\"buyData\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"txId\",\"type\":\"uint256\"},{\"name\":\"encryptedMetaDataId\",\"type\":\"bytes\"}],\"name\":\"submitMetaDataIdEncWithBuyer\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"txId\",\"type\":\"uint256\"},{\"name\":\"truth\",\"type\":\"bool\"}],\"name\":\"confirmDataTruth\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
 
 // ScryProtocol is an auto generated Go binding around an Ethereum contract.
 type ScryProtocol struct {
@@ -172,58 +172,6 @@ func (_ScryProtocol *ScryProtocolTransactorRaw) Transact(opts *bind.TransactOpts
 	return _ScryProtocol.Contract.contract.Transact(opts, method, params...)
 }
 
-// EncryptedIdLen is a free data retrieval call binding the contract method 0x28589870.
-//
-// Solidity: function encryptedIdLen() constant returns(uint256)
-func (_ScryProtocol *ScryProtocolCaller) EncryptedIdLen(opts *bind.CallOpts) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _ScryProtocol.contract.Call(opts, out, "encryptedIdLen")
-	return *ret0, err
-}
-
-// EncryptedIdLen is a free data retrieval call binding the contract method 0x28589870.
-//
-// Solidity: function encryptedIdLen() constant returns(uint256)
-func (_ScryProtocol *ScryProtocolSession) EncryptedIdLen() (*big.Int, error) {
-	return _ScryProtocol.Contract.EncryptedIdLen(&_ScryProtocol.CallOpts)
-}
-
-// EncryptedIdLen is a free data retrieval call binding the contract method 0x28589870.
-//
-// Solidity: function encryptedIdLen() constant returns(uint256)
-func (_ScryProtocol *ScryProtocolCallerSession) EncryptedIdLen() (*big.Int, error) {
-	return _ScryProtocol.Contract.EncryptedIdLen(&_ScryProtocol.CallOpts)
-}
-
-// TransactionSeq is a free data retrieval call binding the contract method 0x41a3cf63.
-//
-// Solidity: function transactionSeq() constant returns(uint256)
-func (_ScryProtocol *ScryProtocolCaller) TransactionSeq(opts *bind.CallOpts) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _ScryProtocol.contract.Call(opts, out, "transactionSeq")
-	return *ret0, err
-}
-
-// TransactionSeq is a free data retrieval call binding the contract method 0x41a3cf63.
-//
-// Solidity: function transactionSeq() constant returns(uint256)
-func (_ScryProtocol *ScryProtocolSession) TransactionSeq() (*big.Int, error) {
-	return _ScryProtocol.Contract.TransactionSeq(&_ScryProtocol.CallOpts)
-}
-
-// TransactionSeq is a free data retrieval call binding the contract method 0x41a3cf63.
-//
-// Solidity: function transactionSeq() constant returns(uint256)
-func (_ScryProtocol *ScryProtocolCallerSession) TransactionSeq() (*big.Int, error) {
-	return _ScryProtocol.Contract.TransactionSeq(&_ScryProtocol.CallOpts)
-}
-
 // BuyData is a paid mutator transaction binding the contract method 0xca209dce.
 //
 // Solidity: function buyData(txId uint256) returns()
@@ -287,25 +235,25 @@ func (_ScryProtocol *ScryProtocolTransactorSession) PrepareToBuy(publishId strin
 	return _ScryProtocol.Contract.PrepareToBuy(&_ScryProtocol.TransactOpts, publishId)
 }
 
-// PublishDataInfo is a paid mutator transaction binding the contract method 0xb5e759c8.
+// PublishDataInfo is a paid mutator transaction binding the contract method 0xa5b6e55b.
 //
-// Solidity: function publishDataInfo(publishId string, metaDataIdEncSeller bytes, proofDataIds bytes32[], despDataId string, supportVerify bool) returns()
-func (_ScryProtocol *ScryProtocolTransactor) PublishDataInfo(opts *bind.TransactOpts, publishId string, metaDataIdEncSeller []byte, proofDataIds [][32]byte, despDataId string, supportVerify bool) (*types.Transaction, error) {
-	return _ScryProtocol.contract.Transact(opts, "publishDataInfo", publishId, metaDataIdEncSeller, proofDataIds, despDataId, supportVerify)
+// Solidity: function publishDataInfo(publishId string, price uint256, metaDataIdEncSeller bytes, proofDataIds bytes32[], despDataId string, supportVerify bool) returns()
+func (_ScryProtocol *ScryProtocolTransactor) PublishDataInfo(opts *bind.TransactOpts, publishId string, price *big.Int, metaDataIdEncSeller []byte, proofDataIds [][32]byte, despDataId string, supportVerify bool) (*types.Transaction, error) {
+	return _ScryProtocol.contract.Transact(opts, "publishDataInfo", publishId, price, metaDataIdEncSeller, proofDataIds, despDataId, supportVerify)
 }
 
-// PublishDataInfo is a paid mutator transaction binding the contract method 0xb5e759c8.
+// PublishDataInfo is a paid mutator transaction binding the contract method 0xa5b6e55b.
 //
-// Solidity: function publishDataInfo(publishId string, metaDataIdEncSeller bytes, proofDataIds bytes32[], despDataId string, supportVerify bool) returns()
-func (_ScryProtocol *ScryProtocolSession) PublishDataInfo(publishId string, metaDataIdEncSeller []byte, proofDataIds [][32]byte, despDataId string, supportVerify bool) (*types.Transaction, error) {
-	return _ScryProtocol.Contract.PublishDataInfo(&_ScryProtocol.TransactOpts, publishId, metaDataIdEncSeller, proofDataIds, despDataId, supportVerify)
+// Solidity: function publishDataInfo(publishId string, price uint256, metaDataIdEncSeller bytes, proofDataIds bytes32[], despDataId string, supportVerify bool) returns()
+func (_ScryProtocol *ScryProtocolSession) PublishDataInfo(publishId string, price *big.Int, metaDataIdEncSeller []byte, proofDataIds [][32]byte, despDataId string, supportVerify bool) (*types.Transaction, error) {
+	return _ScryProtocol.Contract.PublishDataInfo(&_ScryProtocol.TransactOpts, publishId, price, metaDataIdEncSeller, proofDataIds, despDataId, supportVerify)
 }
 
-// PublishDataInfo is a paid mutator transaction binding the contract method 0xb5e759c8.
+// PublishDataInfo is a paid mutator transaction binding the contract method 0xa5b6e55b.
 //
-// Solidity: function publishDataInfo(publishId string, metaDataIdEncSeller bytes, proofDataIds bytes32[], despDataId string, supportVerify bool) returns()
-func (_ScryProtocol *ScryProtocolTransactorSession) PublishDataInfo(publishId string, metaDataIdEncSeller []byte, proofDataIds [][32]byte, despDataId string, supportVerify bool) (*types.Transaction, error) {
-	return _ScryProtocol.Contract.PublishDataInfo(&_ScryProtocol.TransactOpts, publishId, metaDataIdEncSeller, proofDataIds, despDataId, supportVerify)
+// Solidity: function publishDataInfo(publishId string, price uint256, metaDataIdEncSeller bytes, proofDataIds bytes32[], despDataId string, supportVerify bool) returns()
+func (_ScryProtocol *ScryProtocolTransactorSession) PublishDataInfo(publishId string, price *big.Int, metaDataIdEncSeller []byte, proofDataIds [][32]byte, despDataId string, supportVerify bool) (*types.Transaction, error) {
+	return _ScryProtocol.Contract.PublishDataInfo(&_ScryProtocol.TransactOpts, publishId, price, metaDataIdEncSeller, proofDataIds, despDataId, supportVerify)
 }
 
 // SubmitMetaDataIdEncWithBuyer is a paid mutator transaction binding the contract method 0x30544e69.
@@ -523,15 +471,16 @@ func (it *ScryProtocolPublishIterator) Close() error {
 // ScryProtocolPublish represents a Publish event raised by the ScryProtocol contract.
 type ScryProtocolPublish struct {
 	PublishId  string
+	Price      *big.Int
 	DespDataId string
 	Boardcast  bool
 	Users      []common.Address
 	Raw        types.Log // Blockchain specific contextual infos
 }
 
-// FilterPublish is a free log retrieval operation binding the contract event 0xaabf77ef569fa1fabd0d636cf70fa9cdca9b6acb7c1258ac8bbc70ff8c1bdb17.
+// FilterPublish is a free log retrieval operation binding the contract event 0xb4444d5dac953612a8ced49f3a9a6fa0b1fbf5d2cdad5fcd48179eada2dc518f.
 //
-// Solidity: e Publish(publishId string, despDataId string, boardcast bool, users address[])
+// Solidity: e Publish(publishId string, price uint256, despDataId string, boardcast bool, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) FilterPublish(opts *bind.FilterOpts) (*ScryProtocolPublishIterator, error) {
 
 	logs, sub, err := _ScryProtocol.contract.FilterLogs(opts, "Publish")
@@ -541,9 +490,9 @@ func (_ScryProtocol *ScryProtocolFilterer) FilterPublish(opts *bind.FilterOpts) 
 	return &ScryProtocolPublishIterator{contract: _ScryProtocol.contract, event: "Publish", logs: logs, sub: sub}, nil
 }
 
-// WatchPublish is a free log subscription operation binding the contract event 0xaabf77ef569fa1fabd0d636cf70fa9cdca9b6acb7c1258ac8bbc70ff8c1bdb17.
+// WatchPublish is a free log subscription operation binding the contract event 0xb4444d5dac953612a8ced49f3a9a6fa0b1fbf5d2cdad5fcd48179eada2dc518f.
 //
-// Solidity: e Publish(publishId string, despDataId string, boardcast bool, users address[])
+// Solidity: e Publish(publishId string, price uint256, despDataId string, boardcast bool, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) WatchPublish(opts *bind.WatchOpts, sink chan<- *ScryProtocolPublish) (event.Subscription, error) {
 
 	logs, sub, err := _ScryProtocol.contract.WatchLogs(opts, "Publish")

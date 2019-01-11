@@ -9,28 +9,21 @@ import (
 )
 
 var (
-	maxChannelEventNum     = 10000
-	internalEventRepo              = NewEventRepository()
-	externalEventRepo              = NewEventRepository()
-	dataChannel            = make(chan events.Event, maxChannelEventNum)
-	errorChannel           = make(chan error, 1)
-	settingPath            = "../../settings/setting.yaml"
+	maxChannelEventNum   = 10000
+	externalEventRepo    = NewEventRepository()
+	dataChannel  = make(chan events.Event, maxChannelEventNum)
+	errorChannel = make(chan error, 1)
+	settingPath          = "../../settings/setting.yaml"
 )
 
 func StartEventProcessing(conn *ethclient.Client,
-	                      protocolContractAddr string,
-	                      protocolContractABI string)  {
+	                      contracts []ContractInfo)  {
 	fmt.Println("start event processing...")
 
-	go ExecuteEvents(dataChannel, internalEventRepo, externalEventRepo)
-
-	go ListenEvent(conn, protocolContractAddr, protocolContractABI, 60, dataChannel, errorChannel, "Publish", "TransactionCreate", "Purchase", "ReadyForDownload", "Close")
+	go ExecuteEvents(dataChannel, externalEventRepo)
+	go ListenEvent(conn, contracts, 60, dataChannel, errorChannel)
 
 	fmt.Println("finished event processing.")
-}
-
-func SubscribeInternal(eventName string, eventCallback EventCallback) error {
-	return subscribe(common.HexToAddress("0x00"), eventName, eventCallback, internalEventRepo)
 }
 
 func SubscribeExternal(clientAddr common.Address, eventName string, eventCallback EventCallback) error {

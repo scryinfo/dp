@@ -15,9 +15,8 @@ type Connector struct {
 
 //start
 func StartEngine(ethNodeAddr string,
-	            protocolContractAddr string,
-				protocolContractABI string,
-				ipfsNodeAddr string) (*ethclient.Client, error) {
+                    contracts []chainevents.ContractInfo,
+                    ipfsNodeAddr string) (*ethclient.Client, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			fmt.Println("failed to initialize start engine, error:", err)
@@ -30,20 +29,19 @@ func StartEngine(ethNodeAddr string,
 		return nil, err
 	}
 
-	connector, err := newConnector(ethNodeAddr, protocolContractAddr)
+	connector, err := newConnector(ethNodeAddr)
 	if err != nil {
 		fmt.Println("failed to initialize connector. error: " + err.Error())
 		return nil, err
 	}
 
-	chainevents.StartEventProcessing(connector.conn, protocolContractAddr, protocolContractABI)
+	chainevents.StartEventProcessing(connector.conn, contracts)
 
 	return connector.conn, nil
 }
 
 
-func newConnector(ethNodeAddr string,
-	protocolContractAddr string) (*Connector, error) {
+func newConnector(ethNodeAddr string) (*Connector, error) {
 	cn, err := ethclient.Dial(ethNodeAddr)
 	if err != nil {
 		fmt.Println("failed to connect to node:" + ethNodeAddr)

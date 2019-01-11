@@ -1,11 +1,10 @@
 package contractclient
 
 import (
-	"../core/chainevents"
-	"../core/chainoperations"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethclient"
+    "../core/chainevents"
+    "../core/chainoperations"
+    "github.com/ethereum/go-ethereum/accounts/abi/bind"
+    "github.com/ethereum/go-ethereum/common"
 )
 
 
@@ -18,9 +17,7 @@ type ContractClient struct {
 
 func NewContractClient(publicKey string,
 					identityStream string,
-					password string,
-					contractAddress common.Address,
-					conn *ethclient.Client) (*ContractClient, error) {
+					password string) (*ContractClient, error) {
 
 	opts := chainoperations.BuildTransactOpts(common.HexToAddress(publicKey), identityStream, password)
 

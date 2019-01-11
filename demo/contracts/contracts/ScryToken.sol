@@ -9,8 +9,8 @@ contract ScryToken is StandardToken {
     uint8 public decimals = 2;
     uint256 public INITIAL_SUPPLY = 1000000000;
 
-    function ScryToken() public {
+    constructor () public {
         totalSupply_ = INITIAL_SUPPLY;
-        balances[msg.sender] = INITIAL_SUPPLY;
+        balances[msg.sender] = INITIAL_SUPPLY;        
     }
 }
