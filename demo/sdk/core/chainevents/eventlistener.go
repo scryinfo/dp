@@ -8,9 +8,15 @@ import (
 	"time"
 )
 
-func ListenEvent(conn *ethclient.Client, contractAddr string, abi string,
+type ContractInfo struct {
+    Address string
+    Abi string
+    EventNames []string
+}
+
+func ListenEvent(conn *ethclient.Client, contracts []ContractInfo,
 			interval time.Duration,	dataChannel chan events.Event,
-			errorChannel chan error, eventNames ...string) bool {
+			errorChannel chan error) bool {
 	rv := true
 	fmt.Println("start listening events...")
 	defer func() {
@@ -20,9 +26,17 @@ func ListenEvent(conn *ethclient.Client, contractAddr string, abi string,
 		}
 	}()
 
-	builder := events.NewScanBuilder()
+    if len(contracts) == 0 {
+        fmt.Println("zero contracts")
+        return false
+    }
+
+    builder := events.NewScanBuilder()
+    for _, v := range contracts {
+        builder.SetContract(common.HexToAddress(v.Address), v.Abi, v.EventNames...)
+    }
+
 	recp, err := builder.SetClient(conn).
-		SetContract(common.HexToAddress(contractAddr), abi, eventNames...).
 		SetFrom(getFromBlock()).
 		SetTo(getToBlock()).
 		SetGracefullExit(true).
