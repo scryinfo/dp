@@ -10,7 +10,10 @@ contract ScryProtocol {
         InvalidParameter,
         DataNotExist,
         NoEnoughBalance,
-        FailedTransferFromCaller
+        FailedTransferFromCaller,
+        TransactionNotExist,
+        InvalidSender,
+        FailedTransferToSeller
     }
 
     struct DataInfoPublished {
@@ -38,11 +41,11 @@ contract ScryProtocol {
     mapping (string => DataInfoPublished) mapPublishedData;
     mapping (uint => TransactionItem) mapTransaction;
 
-    event DataPublish(bool successed, string seqNo, string publishId, uint256 price, string despDataId, address[] users, uint256 errorCode);
-    event TransactionCreate(bool successed, string seqNo, uint256 transactionId, string publishId, bytes32 chosenProofIds, bool supportVerify, address[] users, uint256 errorCode);
-    event Buy(bool successed, string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, address[] users, uint256 errorCode);
-    event ReadyForDownload(bool successed, string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, address[] users, uint256 errorCode);
-    event TransactionClose(bool successed, string seqNo, uint256 transactionId, address[] users, uint256 errorCode);
+    event DataPublish(bool successed, string seqNo, string publishId, uint256 price, string despDataId, address[] users, ErrorCode errorCode);
+    event TransactionCreate(bool successed, string seqNo, uint256 transactionId, string publishId, bytes32 chosenProofIds, bool supportVerify, address[] users, ErrorCode errorCode);
+    event Buy(bool successed, string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, address[] users, ErrorCode errorCode);
+    event ReadyForDownload(bool successed, string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, address[] users, ErrorCode errorCode);
+    event TransactionClose(bool successed, string seqNo, uint256 transactionId, address[] users, ErrorCode errorCode);
 
     uint256 transactionSeq = 0;
     uint256 encryptedIdLen = 32;
@@ -65,23 +68,15 @@ contract ScryProtocol {
         address[] memory users = new address[](1);
         users[0] = address(0x00);
 
-        if (publishId == "" || 
-            seqNo == ""     ||
-            proofDataIds.length == 0 ||
-            despDataId == "") {
-            emit DataPublish(false, seqNo, publishId, price, despDataId, true, users, ErrorCode.InvalidParameter);
-            revert    
-        }
-
-        DataInfoPublished data = mapPublishedData[publishId]
+        DataInfoPublished memory data = mapPublishedData[publishId];
         if (data.used) {
-            emit DataPublish(false, seqNo, publishId, price, despDataId, true, users, ErrorCode.DuplicatePublishId);
-            revert
+            emit DataPublish(false, seqNo, publishId, price, despDataId, users, ErrorCode.DuplicatePublishId);
+            revert();
         }
 
         data = DataInfoPublished(price, metaDataIdEncSeller, proofDataIds, proofDataIds.length, despDataId, msg.sender, supportVerify, true);
         
-        emit DataPublish(true, seqNo, publishId, price, despDataId, true, users, "");
+        emit DataPublish(true, seqNo, publishId, price, despDataId, users, ErrorCode.OK);
     }
 
     function isPublishedDataExisted(string publishId) internal view returns (bool) {
@@ -89,10 +84,10 @@ contract ScryProtocol {
         return data.used;
     }
 
-    function CreateTransaction(string publishId) external {
+    function CreateTransaction(string seqNo, string publishId) external {
         address[] memory users = new address[](1);
         users[0] = msg.sender;
-        uint256 errCode = ErrorCode.OK;
+        ErrorCode errCode = ErrorCode.OK;
 
         //published data info
         DataInfoPublished memory data = mapPublishedData[publishId];
@@ -106,8 +101,8 @@ contract ScryProtocol {
         }
 
         if (errCode != ErrorCode.OK) {
-            emit TransactionCreate(false, 0, publishId, 0, data.supportVerify, false, users, errCode);
-            revert;
+            emit TransactionCreate(false, seqNo, 0, publishId, 0, data.supportVerify, users, errCode);
+            revert();
         }
 
         //create transaction
@@ -122,7 +117,7 @@ contract ScryProtocol {
             bytes32 proofId = data.proofDataIds[index];
 
             //TransactionCreat event
-            emit TransactionCreate(true, txId, publishId, proofId, data.supportVerify, false, users, errCode);
+            emit TransactionCreate(true, seqNo, txId, publishId, proofId, data.supportVerify, users, errCode);
         }
     }
 
@@ -134,77 +129,96 @@ contract ScryProtocol {
         return uint(keccak256(now, msg.sender)) % mod;
     }
 
-    function buyData(uint256 txId) external {
-        bool error = false;
-        string errMsg;
+    function buyData(string seqNo, uint256 txId) external {
         address[] memory users = new address[](1);
         users[0] = msg.sender;
+        ErrorCode errCode = ErrorCode.OK;
 
         //validate
         TransactionItem memory txItem = mapTransaction[txId];
 
-        if (setError(!txItem.used, errMsg, "Can not get transaction by transaction id") || 
-                              setError(txItem.buyer != msg.sender, errMsg, "Invalid buyer")) {
-            emit Buy(false, txId, txItem.publishId, txItem.metaDataIdEncSeller, false, users, errMsg);
-            revert;
+        if (!txItem.used) {
+            errCode = ErrorCode.TransactionNotExist;
+        } else if (txItem.buyer != msg.sender) {
+            errCode = ErrorCode.InvalidSender;
+        } 
+
+        if (errCode != ErrorCode.OK) {
+            emit Buy(false, seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, users, errCode);
+            revert();
         }
 
         txItem.state = TransactionState.Buying;
-        emit Buy(true, txId, txItem.publishId, txItem.metaDataIdEncSeller, false, users, "");
+        users[0] = txItem.seller;
+        emit Buy(true, seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, users, errCode);
     }
 
-    function submitMetaDataIdEncWithBuyer(uint256 txId, bytes encryptedMetaDataId) external {
+    function submitMetaDataIdEncWithBuyer(string seqNo, uint256 txId, bytes encryptedMetaDataId) external {
+        address[] memory users = new address[](1);
+        users[0] = msg.sender;
+        ErrorCode errCode = ErrorCode.OK;
+
         //validate
         TransactionItem memory txItem = mapTransaction[txId];
-        require(txItem.used == true, "Can not get transaction by transaction id");
-        require(txItem.seller == msg.sender, "Invalid seller");
+        if (!txItem.used) {
+            errCode = ErrorCode.TransactionNotExist;
+        } else if (txItem.seller != msg.sender) {
+            errCode = ErrorCode.InvalidSender;
+        } 
+
+        if (errCode != ErrorCode.OK) {
+            emit ReadyForDownload(false, seqNo, txId, txItem.metaDataIdEncSeller, users, errCode);   
+            revert();
+        }
 
         txItem.meteDataIdEncBuyer = encryptedMetaDataId;
         txItem.state = TransactionState.ReadyForDownload;
 
         //ReadyForDownload event
-        address[] memory users = new address[](1);
         users[0] = txItem.buyer;
-        emit ReadyForDownload(txId, txItem.metaDataIdEncSeller, false, users);   
+        emit ReadyForDownload(false, seqNo, txId, txItem.metaDataIdEncSeller, users, errCode);   
     }
 
-    function confirmDataTruth(uint256 txId, bool truth) external {
+    function confirmDataTruth(string seqNo, uint256 txId, bool truth) external {
+        address[] memory users = new address[](1);
+        users[0] = msg.sender;
+        ErrorCode errCode = ErrorCode.OK;
+
         //validate
         TransactionItem memory txItem = mapTransaction[txId];
-        require(txItem.buyer != 0, "Can not get transaction by transaction id");
-        require(txItem.buyer == msg.sender, "Invalid buyer");
+        if (!txItem.used) {
+            errCode = ErrorCode.TransactionNotExist;
+        } else if (txItem.buyer != msg.sender) {
+            errCode = ErrorCode.InvalidSender;
+        } 
+
+        if (errCode != ErrorCode.OK) {
+            emit TransactionClose(false, seqNo, txId, users, errCode);
+            revert();
+        }
 
         DataInfoPublished memory data = mapPublishedData[txItem.publishId];
-        require(txItem.used == true, "Can not get data by txItem.publishId");
-        
+        if (!data.used) {
+            emit TransactionClose(false, seqNo, txId, users, ErrorCode.DataNotExist);
+            revert();
+        }
 
         if (!data.supportVerify) {
             if(truth) {
                 //pay to seller from contract
-                require(token.balanceOf(owner) >= txItem.buyerDeposit && txItem.buyerDeposit >= data.price, "banlance must be enough");
-
                 txItem.buyerDeposit -= data.price;
                 if (!token.transfer(data.seller, data.price)) {
                     txItem.buyerDeposit += data.price;
-                    require(false, "failed to transfer tokens to seller");
+                    emit TransactionClose(false, seqNo, txId, users, ErrorCode.FailedTransferToSeller);
+                    revert();
                 }
             }
             
             txItem.state = TransactionState.Closed;
 
-            //Close event
-            address[] memory users = new address[](1);
+            //TransactionClose event
             users[0] = address(0x00);
-            emit Close(txId, true, users);            
+            emit TransactionClose(true, seqNo, txId, users, ErrorCode.OK);
         }
     }
-
-    function getErrorCode(bool condition, uint256 errCode) internal view returns uint256 {
-        if (condition) {
-            return errCode;
-        }
-
-        return ErrorCode.OK;
-    }
-
 }
