@@ -35,6 +35,7 @@ func BuildTransactOpts(from common.Address, keyJson string, keyPasswd string) *b
 			if err != nil {
 				return nil, err
 			}
+
 			signTransaction, err := types.SignTx(transaction, signer, key.PrivateKey)
 			if err != nil {
 				return nil, err
