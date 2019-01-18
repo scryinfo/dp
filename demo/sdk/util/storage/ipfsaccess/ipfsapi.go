@@ -11,7 +11,7 @@ import (
 var ipaccessor *IpfsAccessor = nil
 var once sync.Once
 
-func GetInstance() *IpfsAccessor {
+func GetIAInstance() *IpfsAccessor {
 	once.Do(func() {
 		ipaccessor = &IpfsAccessor{}
 	})

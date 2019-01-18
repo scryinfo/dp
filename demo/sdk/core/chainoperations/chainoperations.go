@@ -1,16 +1,25 @@
 package chainoperations
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"math/big"
-	"strings"
+    "context"
+    "encoding/json"
+    "fmt"
+    "github.com/ethereum/go-ethereum/accounts/abi/bind"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/core/types"
+    "math/big"
+    "strings"
+    "../../util/security"
 )
+
+var (
+    secExec security.CryptExecutor
+)
+
+type TransactParams struct {
+    from common.Address
+    password string
+}
 
 func DecodeKeystoreAddress(keyJsonStr []byte) string {
 	addr := struct {
@@ -25,27 +34,30 @@ func DecodeKeystoreAddress(keyJsonStr []byte) string {
 	return addr.Address
 }
 
-func BuildTransactOpts(from common.Address, keyJson string, keyPasswd string) *bind.TransactOpts {
+func BuildTransactOpts(txParams *TransactParams) *bind.TransactOpts {
 	opts := &bind.TransactOpts{
-		From:  from,
+		From:  txParams.from,
 		Nonce: nil,
-		Signer: func(signer types.Signer, addresses common.Address,
-			transaction *types.Transaction) (*types.Transaction, error) {
-			key, err := keystore.DecryptKey([]byte(keyJson), keyPasswd)
-			if err != nil {
-				return nil, err
-			}
-
-			signTransaction, err := types.SignTx(transaction, signer, key.PrivateKey)
-			if err != nil {
-				return nil, err
-			}
-			return signTransaction, nil
+		Signer: func(signer types.Signer, address common.Address,
+		                transaction *types.Transaction) (*types.Transaction, error) {
+            return SignTransaction(signer, address, transaction, txParams.password)
 		},
 		Value:   big.NewInt(0),
 		Context: context.Background(),
 	}
+
 	return opts
+}
+
+func SignTransaction(signer types.Signer, address common.Address,
+                        transaction *types.Transaction, password string) (*types.Transaction, error) {
+    h := signer.Hash(transaction)
+    sign, err := secExec.SignTransaction(h[:], address.String(), password)
+    if err != nil {
+        return nil, err
+    }
+
+    return transaction.WithSignature(signer, sign)
 }
 
 func BuildCallOpts(pendingState bool, from common.Address, context context.Context) (*bind.CallOpts) {
