@@ -1,7 +1,6 @@
 package accounts
 
 import (
-    "github.com/pkg/errors"
     "sync"
     "time"
 )

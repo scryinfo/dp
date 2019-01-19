@@ -23,7 +23,7 @@ func StartEngine(ethNodeAddr string,
 		}
 	}()
 
-	err := ipfsaccess.GetInstance().Initialize(ipfsNodeAddr)
+	err := ipfsaccess.GetIAInstance().Initialize(ipfsNodeAddr)
 	if err != nil {
 		fmt.Println("failed to initialize ipfs. error: " + err.Error())
 		return nil, err

@@ -17,8 +17,8 @@ var (
 )
 
 type TransactParams struct {
-    from common.Address
-    password string
+    From common.Address
+    Password string
 }
 
 func DecodeKeystoreAddress(keyJsonStr []byte) string {
@@ -36,11 +36,11 @@ func DecodeKeystoreAddress(keyJsonStr []byte) string {
 
 func BuildTransactOpts(txParams *TransactParams) *bind.TransactOpts {
 	opts := &bind.TransactOpts{
-		From:  txParams.from,
+		From:  txParams.From,
 		Nonce: nil,
 		Signer: func(signer types.Signer, address common.Address,
 		                transaction *types.Transaction) (*types.Transaction, error) {
-            return SignTransaction(signer, address, transaction, txParams.password)
+            return SignTransaction(signer, address, transaction, txParams.Password)
 		},
 		Value:   big.NewInt(0),
 		Context: context.Background(),
