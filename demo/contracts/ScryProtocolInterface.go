@@ -28,7 +28,7 @@ var (
 )
 
 // ScryProtocolABI is the input ABI used to generate the binding from.
-const ScryProtocolABI = "[{\"inputs\":[{\"name\":\"_token\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"successed\",\"type\":\"bool\"},{\"indexed\":false,\"name\":\"seqNo\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"publishId\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"price\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"despDataId\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"users\",\"type\":\"address[]\"},{\"indexed\":false,\"name\":\"errorCode\",\"type\":\"uint8\"}],\"name\":\"DataPublish\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"successed\",\"type\":\"bool\"},{\"indexed\":false,\"name\":\"seqNo\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"transactionId\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"publishId\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"chosenProofIds\",\"type\":\"bytes32\"},{\"indexed\":false,\"name\":\"supportVerify\",\"type\":\"bool\"},{\"indexed\":false,\"name\":\"users\",\"type\":\"address[]\"},{\"indexed\":false,\"name\":\"errorCode\",\"type\":\"uint8\"}],\"name\":\"TransactionCreate\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"successed\",\"type\":\"bool\"},{\"indexed\":false,\"name\":\"seqNo\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"transactionId\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"publishId\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"metaDataIdEncSeller\",\"type\":\"bytes\"},{\"indexed\":false,\"name\":\"users\",\"type\":\"address[]\"},{\"indexed\":false,\"name\":\"errorCode\",\"type\":\"uint8\"}],\"name\":\"Buy\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"successed\",\"type\":\"bool\"},{\"indexed\":false,\"name\":\"seqNo\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"transactionId\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"metaDataIdEncBuyer\",\"type\":\"bytes\"},{\"indexed\":false,\"name\":\"users\",\"type\":\"address[]\"},{\"indexed\":false,\"name\":\"errorCode\",\"type\":\"uint8\"}],\"name\":\"ReadyForDownload\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"successed\",\"type\":\"bool\"},{\"indexed\":false,\"name\":\"seqNo\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"transactionId\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"users\",\"type\":\"address[]\"},{\"indexed\":false,\"name\":\"errorCode\",\"type\":\"uint8\"}],\"name\":\"TransactionClose\",\"type\":\"event\"},{\"constant\":false,\"inputs\":[{\"name\":\"seqNo\",\"type\":\"string\"},{\"name\":\"publishId\",\"type\":\"string\"},{\"name\":\"price\",\"type\":\"uint256\"},{\"name\":\"metaDataIdEncSeller\",\"type\":\"bytes\"},{\"name\":\"proofDataIds\",\"type\":\"bytes32[]\"},{\"name\":\"despDataId\",\"type\":\"string\"},{\"name\":\"supportVerify\",\"type\":\"bool\"}],\"name\":\"publishDataInfo\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"seqNo\",\"type\":\"string\"},{\"name\":\"publishId\",\"type\":\"string\"}],\"name\":\"CreateTransaction\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"seqNo\",\"type\":\"string\"},{\"name\":\"txId\",\"type\":\"uint256\"}],\"name\":\"buyData\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"seqNo\",\"type\":\"string\"},{\"name\":\"txId\",\"type\":\"uint256\"},{\"name\":\"encryptedMetaDataId\",\"type\":\"bytes\"}],\"name\":\"submitMetaDataIdEncWithBuyer\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"seqNo\",\"type\":\"string\"},{\"name\":\"txId\",\"type\":\"uint256\"},{\"name\":\"truth\",\"type\":\"bool\"}],\"name\":\"confirmDataTruth\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
+const ScryProtocolABI = "[{\"inputs\":[{\"name\":\"_token\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"seqNo\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"publishId\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"price\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"despDataId\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"users\",\"type\":\"address[]\"}],\"name\":\"DataPublish\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"seqNo\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"transactionId\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"publishId\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"chosenProofIds\",\"type\":\"bytes32\"},{\"indexed\":false,\"name\":\"supportVerify\",\"type\":\"bool\"},{\"indexed\":false,\"name\":\"users\",\"type\":\"address[]\"}],\"name\":\"TransactionCreate\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"seqNo\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"transactionId\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"publishId\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"metaDataIdEncSeller\",\"type\":\"bytes\"},{\"indexed\":false,\"name\":\"users\",\"type\":\"address[]\"}],\"name\":\"Buy\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"seqNo\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"transactionId\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"metaDataIdEncBuyer\",\"type\":\"bytes\"},{\"indexed\":false,\"name\":\"users\",\"type\":\"address[]\"}],\"name\":\"ReadyForDownload\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"seqNo\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"transactionId\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"users\",\"type\":\"address[]\"}],\"name\":\"TransactionClose\",\"type\":\"event\"},{\"constant\":false,\"inputs\":[{\"name\":\"seqNo\",\"type\":\"string\"},{\"name\":\"publishId\",\"type\":\"string\"},{\"name\":\"price\",\"type\":\"uint256\"},{\"name\":\"metaDataIdEncSeller\",\"type\":\"bytes\"},{\"name\":\"proofDataIds\",\"type\":\"bytes32[]\"},{\"name\":\"despDataId\",\"type\":\"string\"},{\"name\":\"supportVerify\",\"type\":\"bool\"}],\"name\":\"publishDataInfo\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"seqNo\",\"type\":\"string\"},{\"name\":\"publishId\",\"type\":\"string\"}],\"name\":\"createTransaction\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"seqNo\",\"type\":\"string\"},{\"name\":\"txId\",\"type\":\"uint256\"}],\"name\":\"buyData\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"seqNo\",\"type\":\"string\"},{\"name\":\"txId\",\"type\":\"uint256\"},{\"name\":\"encryptedMetaDataId\",\"type\":\"bytes\"}],\"name\":\"submitMetaDataIdEncWithBuyer\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"seqNo\",\"type\":\"string\"},{\"name\":\"txId\",\"type\":\"uint256\"},{\"name\":\"truth\",\"type\":\"bool\"}],\"name\":\"confirmDataTruth\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
 
 // ScryProtocol is an auto generated Go binding around an Ethereum contract.
 type ScryProtocol struct {
@@ -172,27 +172,6 @@ func (_ScryProtocol *ScryProtocolTransactorRaw) Transact(opts *bind.TransactOpts
 	return _ScryProtocol.Contract.contract.Transact(opts, method, params...)
 }
 
-// CreateTransaction is a paid mutator transaction binding the contract method 0x79d23f97.
-//
-// Solidity: function CreateTransaction(seqNo string, publishId string) returns()
-func (_ScryProtocol *ScryProtocolTransactor) CreateTransaction(opts *bind.TransactOpts, seqNo string, publishId string) (*types.Transaction, error) {
-	return _ScryProtocol.contract.Transact(opts, "CreateTransaction", seqNo, publishId)
-}
-
-// CreateTransaction is a paid mutator transaction binding the contract method 0x79d23f97.
-//
-// Solidity: function CreateTransaction(seqNo string, publishId string) returns()
-func (_ScryProtocol *ScryProtocolSession) CreateTransaction(seqNo string, publishId string) (*types.Transaction, error) {
-	return _ScryProtocol.Contract.CreateTransaction(&_ScryProtocol.TransactOpts, seqNo, publishId)
-}
-
-// CreateTransaction is a paid mutator transaction binding the contract method 0x79d23f97.
-//
-// Solidity: function CreateTransaction(seqNo string, publishId string) returns()
-func (_ScryProtocol *ScryProtocolTransactorSession) CreateTransaction(seqNo string, publishId string) (*types.Transaction, error) {
-	return _ScryProtocol.Contract.CreateTransaction(&_ScryProtocol.TransactOpts, seqNo, publishId)
-}
-
 // BuyData is a paid mutator transaction binding the contract method 0x9a756a99.
 //
 // Solidity: function buyData(seqNo string, txId uint256) returns()
@@ -233,6 +212,27 @@ func (_ScryProtocol *ScryProtocolSession) ConfirmDataTruth(seqNo string, txId *b
 // Solidity: function confirmDataTruth(seqNo string, txId uint256, truth bool) returns()
 func (_ScryProtocol *ScryProtocolTransactorSession) ConfirmDataTruth(seqNo string, txId *big.Int, truth bool) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.ConfirmDataTruth(&_ScryProtocol.TransactOpts, seqNo, txId, truth)
+}
+
+// CreateTransaction is a paid mutator transaction binding the contract method 0xfecc18b4.
+//
+// Solidity: function createTransaction(seqNo string, publishId string) returns()
+func (_ScryProtocol *ScryProtocolTransactor) CreateTransaction(opts *bind.TransactOpts, seqNo string, publishId string) (*types.Transaction, error) {
+	return _ScryProtocol.contract.Transact(opts, "createTransaction", seqNo, publishId)
+}
+
+// CreateTransaction is a paid mutator transaction binding the contract method 0xfecc18b4.
+//
+// Solidity: function createTransaction(seqNo string, publishId string) returns()
+func (_ScryProtocol *ScryProtocolSession) CreateTransaction(seqNo string, publishId string) (*types.Transaction, error) {
+	return _ScryProtocol.Contract.CreateTransaction(&_ScryProtocol.TransactOpts, seqNo, publishId)
+}
+
+// CreateTransaction is a paid mutator transaction binding the contract method 0xfecc18b4.
+//
+// Solidity: function createTransaction(seqNo string, publishId string) returns()
+func (_ScryProtocol *ScryProtocolTransactorSession) CreateTransaction(seqNo string, publishId string) (*types.Transaction, error) {
+	return _ScryProtocol.Contract.CreateTransaction(&_ScryProtocol.TransactOpts, seqNo, publishId)
 }
 
 // PublishDataInfo is a paid mutator transaction binding the contract method 0x377caed1.
@@ -346,19 +346,17 @@ func (it *ScryProtocolBuyIterator) Close() error {
 
 // ScryProtocolBuy represents a Buy event raised by the ScryProtocol contract.
 type ScryProtocolBuy struct {
-	Successed           bool
 	SeqNo               string
 	TransactionId       *big.Int
 	PublishId           string
 	MetaDataIdEncSeller []byte
 	Users               []common.Address
-	ErrorCode           uint8
 	Raw                 types.Log // Blockchain specific contextual infos
 }
 
-// FilterBuy is a free log retrieval operation binding the contract event 0xfbd28edb0bf6b439a93cae175e96837d7e300a722f661b8db83d43009addc12e.
+// FilterBuy is a free log retrieval operation binding the contract event 0xeeaf28668d6d8a951d1c5b873c5e94068abdea0145811cbeaece6c309118f3e3.
 //
-// Solidity: e Buy(successed bool, seqNo string, transactionId uint256, publishId string, metaDataIdEncSeller bytes, users address[], errorCode uint8)
+// Solidity: e Buy(seqNo string, transactionId uint256, publishId string, metaDataIdEncSeller bytes, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) FilterBuy(opts *bind.FilterOpts) (*ScryProtocolBuyIterator, error) {
 
 	logs, sub, err := _ScryProtocol.contract.FilterLogs(opts, "Buy")
@@ -368,9 +366,9 @@ func (_ScryProtocol *ScryProtocolFilterer) FilterBuy(opts *bind.FilterOpts) (*Sc
 	return &ScryProtocolBuyIterator{contract: _ScryProtocol.contract, event: "Buy", logs: logs, sub: sub}, nil
 }
 
-// WatchBuy is a free log subscription operation binding the contract event 0xfbd28edb0bf6b439a93cae175e96837d7e300a722f661b8db83d43009addc12e.
+// WatchBuy is a free log subscription operation binding the contract event 0xeeaf28668d6d8a951d1c5b873c5e94068abdea0145811cbeaece6c309118f3e3.
 //
-// Solidity: e Buy(successed bool, seqNo string, transactionId uint256, publishId string, metaDataIdEncSeller bytes, users address[], errorCode uint8)
+// Solidity: e Buy(seqNo string, transactionId uint256, publishId string, metaDataIdEncSeller bytes, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) WatchBuy(opts *bind.WatchOpts, sink chan<- *ScryProtocolBuy) (event.Subscription, error) {
 
 	logs, sub, err := _ScryProtocol.contract.WatchLogs(opts, "Buy")
@@ -474,19 +472,17 @@ func (it *ScryProtocolDataPublishIterator) Close() error {
 
 // ScryProtocolDataPublish represents a DataPublish event raised by the ScryProtocol contract.
 type ScryProtocolDataPublish struct {
-	Successed  bool
 	SeqNo      string
 	PublishId  string
 	Price      *big.Int
 	DespDataId string
 	Users      []common.Address
-	ErrorCode  uint8
 	Raw        types.Log // Blockchain specific contextual infos
 }
 
-// FilterDataPublish is a free log retrieval operation binding the contract event 0xd5dc88f4bdccf3423a2eccc132639da134562c7961584196ac44fb98acc02ce4.
+// FilterDataPublish is a free log retrieval operation binding the contract event 0x9d1b954932f5249f38959200c17d585ac2b4897b77acb4c29a8fb4d8473f0e8c.
 //
-// Solidity: e DataPublish(successed bool, seqNo string, publishId string, price uint256, despDataId string, users address[], errorCode uint8)
+// Solidity: e DataPublish(seqNo string, publishId string, price uint256, despDataId string, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) FilterDataPublish(opts *bind.FilterOpts) (*ScryProtocolDataPublishIterator, error) {
 
 	logs, sub, err := _ScryProtocol.contract.FilterLogs(opts, "DataPublish")
@@ -496,9 +492,9 @@ func (_ScryProtocol *ScryProtocolFilterer) FilterDataPublish(opts *bind.FilterOp
 	return &ScryProtocolDataPublishIterator{contract: _ScryProtocol.contract, event: "DataPublish", logs: logs, sub: sub}, nil
 }
 
-// WatchDataPublish is a free log subscription operation binding the contract event 0xd5dc88f4bdccf3423a2eccc132639da134562c7961584196ac44fb98acc02ce4.
+// WatchDataPublish is a free log subscription operation binding the contract event 0x9d1b954932f5249f38959200c17d585ac2b4897b77acb4c29a8fb4d8473f0e8c.
 //
-// Solidity: e DataPublish(successed bool, seqNo string, publishId string, price uint256, despDataId string, users address[], errorCode uint8)
+// Solidity: e DataPublish(seqNo string, publishId string, price uint256, despDataId string, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) WatchDataPublish(opts *bind.WatchOpts, sink chan<- *ScryProtocolDataPublish) (event.Subscription, error) {
 
 	logs, sub, err := _ScryProtocol.contract.WatchLogs(opts, "DataPublish")
@@ -602,18 +598,16 @@ func (it *ScryProtocolReadyForDownloadIterator) Close() error {
 
 // ScryProtocolReadyForDownload represents a ReadyForDownload event raised by the ScryProtocol contract.
 type ScryProtocolReadyForDownload struct {
-	Successed          bool
 	SeqNo              string
 	TransactionId      *big.Int
 	MetaDataIdEncBuyer []byte
 	Users              []common.Address
-	ErrorCode          uint8
 	Raw                types.Log // Blockchain specific contextual infos
 }
 
-// FilterReadyForDownload is a free log retrieval operation binding the contract event 0xb0aa5aa154b0ee39a837f53038607cfcf50c327256e6340e8c5cd1a1e948307f.
+// FilterReadyForDownload is a free log retrieval operation binding the contract event 0x28eb60ba9df25f12ccee668d0a745b5e455365b717f0867aa76edcffe7430cf5.
 //
-// Solidity: e ReadyForDownload(successed bool, seqNo string, transactionId uint256, metaDataIdEncBuyer bytes, users address[], errorCode uint8)
+// Solidity: e ReadyForDownload(seqNo string, transactionId uint256, metaDataIdEncBuyer bytes, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) FilterReadyForDownload(opts *bind.FilterOpts) (*ScryProtocolReadyForDownloadIterator, error) {
 
 	logs, sub, err := _ScryProtocol.contract.FilterLogs(opts, "ReadyForDownload")
@@ -623,9 +617,9 @@ func (_ScryProtocol *ScryProtocolFilterer) FilterReadyForDownload(opts *bind.Fil
 	return &ScryProtocolReadyForDownloadIterator{contract: _ScryProtocol.contract, event: "ReadyForDownload", logs: logs, sub: sub}, nil
 }
 
-// WatchReadyForDownload is a free log subscription operation binding the contract event 0xb0aa5aa154b0ee39a837f53038607cfcf50c327256e6340e8c5cd1a1e948307f.
+// WatchReadyForDownload is a free log subscription operation binding the contract event 0x28eb60ba9df25f12ccee668d0a745b5e455365b717f0867aa76edcffe7430cf5.
 //
-// Solidity: e ReadyForDownload(successed bool, seqNo string, transactionId uint256, metaDataIdEncBuyer bytes, users address[], errorCode uint8)
+// Solidity: e ReadyForDownload(seqNo string, transactionId uint256, metaDataIdEncBuyer bytes, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) WatchReadyForDownload(opts *bind.WatchOpts, sink chan<- *ScryProtocolReadyForDownload) (event.Subscription, error) {
 
 	logs, sub, err := _ScryProtocol.contract.WatchLogs(opts, "ReadyForDownload")
@@ -729,17 +723,15 @@ func (it *ScryProtocolTransactionCloseIterator) Close() error {
 
 // ScryProtocolTransactionClose represents a TransactionClose event raised by the ScryProtocol contract.
 type ScryProtocolTransactionClose struct {
-	Successed     bool
 	SeqNo         string
 	TransactionId *big.Int
 	Users         []common.Address
-	ErrorCode     uint8
 	Raw           types.Log // Blockchain specific contextual infos
 }
 
-// FilterTransactionClose is a free log retrieval operation binding the contract event 0x104481cd585fde9e3444abb61f3e026bbd6db607e2d9e47d67b85c93a6cabfa1.
+// FilterTransactionClose is a free log retrieval operation binding the contract event 0x784a9feb5a6ecee5d955d1b5e294f2b57d9477164fba686c0bde4a40849f2b0c.
 //
-// Solidity: e TransactionClose(successed bool, seqNo string, transactionId uint256, users address[], errorCode uint8)
+// Solidity: e TransactionClose(seqNo string, transactionId uint256, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) FilterTransactionClose(opts *bind.FilterOpts) (*ScryProtocolTransactionCloseIterator, error) {
 
 	logs, sub, err := _ScryProtocol.contract.FilterLogs(opts, "TransactionClose")
@@ -749,9 +741,9 @@ func (_ScryProtocol *ScryProtocolFilterer) FilterTransactionClose(opts *bind.Fil
 	return &ScryProtocolTransactionCloseIterator{contract: _ScryProtocol.contract, event: "TransactionClose", logs: logs, sub: sub}, nil
 }
 
-// WatchTransactionClose is a free log subscription operation binding the contract event 0x104481cd585fde9e3444abb61f3e026bbd6db607e2d9e47d67b85c93a6cabfa1.
+// WatchTransactionClose is a free log subscription operation binding the contract event 0x784a9feb5a6ecee5d955d1b5e294f2b57d9477164fba686c0bde4a40849f2b0c.
 //
-// Solidity: e TransactionClose(successed bool, seqNo string, transactionId uint256, users address[], errorCode uint8)
+// Solidity: e TransactionClose(seqNo string, transactionId uint256, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) WatchTransactionClose(opts *bind.WatchOpts, sink chan<- *ScryProtocolTransactionClose) (event.Subscription, error) {
 
 	logs, sub, err := _ScryProtocol.contract.WatchLogs(opts, "TransactionClose")
@@ -855,20 +847,18 @@ func (it *ScryProtocolTransactionCreateIterator) Close() error {
 
 // ScryProtocolTransactionCreate represents a TransactionCreate event raised by the ScryProtocol contract.
 type ScryProtocolTransactionCreate struct {
-	Successed      bool
 	SeqNo          string
 	TransactionId  *big.Int
 	PublishId      string
 	ChosenProofIds [32]byte
 	SupportVerify  bool
 	Users          []common.Address
-	ErrorCode      uint8
 	Raw            types.Log // Blockchain specific contextual infos
 }
 
-// FilterTransactionCreate is a free log retrieval operation binding the contract event 0x145269b118c1cffcf5a8e7f87ca4fea1efb3b491039abe67ae1404314b0706e8.
+// FilterTransactionCreate is a free log retrieval operation binding the contract event 0x626f6f0cbcf39ba22ef1c481bf5743596d102baea8fed58505e1255496d5b0a0.
 //
-// Solidity: e TransactionCreate(successed bool, seqNo string, transactionId uint256, publishId string, chosenProofIds bytes32, supportVerify bool, users address[], errorCode uint8)
+// Solidity: e TransactionCreate(seqNo string, transactionId uint256, publishId string, chosenProofIds bytes32, supportVerify bool, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) FilterTransactionCreate(opts *bind.FilterOpts) (*ScryProtocolTransactionCreateIterator, error) {
 
 	logs, sub, err := _ScryProtocol.contract.FilterLogs(opts, "TransactionCreate")
@@ -878,9 +868,9 @@ func (_ScryProtocol *ScryProtocolFilterer) FilterTransactionCreate(opts *bind.Fi
 	return &ScryProtocolTransactionCreateIterator{contract: _ScryProtocol.contract, event: "TransactionCreate", logs: logs, sub: sub}, nil
 }
 
-// WatchTransactionCreate is a free log subscription operation binding the contract event 0x145269b118c1cffcf5a8e7f87ca4fea1efb3b491039abe67ae1404314b0706e8.
+// WatchTransactionCreate is a free log subscription operation binding the contract event 0x626f6f0cbcf39ba22ef1c481bf5743596d102baea8fed58505e1255496d5b0a0.
 //
-// Solidity: e TransactionCreate(successed bool, seqNo string, transactionId uint256, publishId string, chosenProofIds bytes32, supportVerify bool, users address[], errorCode uint8)
+// Solidity: e TransactionCreate(seqNo string, transactionId uint256, publishId string, chosenProofIds bytes32, supportVerify bool, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) WatchTransactionCreate(opts *bind.WatchOpts, sink chan<- *ScryProtocolTransactionCreate) (event.Subscription, error) {
 
 	logs, sub, err := _ScryProtocol.contract.WatchLogs(opts, "TransactionCreate")

@@ -83,14 +83,14 @@ func Publish(txParams *op.TransactParams, price *big.Int, metaData []byte, proof
 
 	b := []byte(cidMd)
 	secOper := security.CryptExecutor{}
-	encMetaId, err := secOper.Encrypt(&b)
+	encMetaId, err := secOper.Encrypt(b, txParams.From.String(), txParams.Password)
 	if err != nil {
 		fmt.Println("failed to encrypt meta data hash, error: ", err)
 		return "", err
 	}
 
 	//upload meta_data_id_enc_seller and other cids to contracts
-	tx, err := scryProtocol.PublishDataInfo(buildTxOpts(txParams), uuid.GenerateUUID(), publishId, price, *encMetaId, cidPds, cidDd, supportVerify)
+	tx, err := scryProtocol.PublishDataInfo(buildTxOpts(txParams), uuid.GenerateUUID(), publishId, price, encMetaId, cidPds, cidDd, supportVerify)
 	if err != nil {
 		fmt.Println("failed to publish data information, error: ", err)
 		return "", err
@@ -123,7 +123,7 @@ func PrepareToBuy(txParams *op.TransactParams, publishId string) (error) {
 
 	tx, err := scryProtocol.CreateTransaction(buildTxOpts(txParams), uuid.GenerateUUID(), publishId)
 	if err == nil {
-		fmt.Println("prepareToBuy transaction:" + string(tx.Data()))
+		fmt.Println("CreateTransaction:" + string(tx.Data()))
 	}
 
 	return err

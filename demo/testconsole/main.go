@@ -1,18 +1,18 @@
 package main
 
 import (
-	"../sdk/contractclient"
-	"../sdk/contractclient/contractinterfacewrapper"
-	"../sdk/core"
-	"../sdk/core/chainoperations"
-	"../sdk/core/chainevents"
-	"../sdk/core/ethereum/events"
-	"fmt"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"io/ioutil"
-	"math/big"
-	"time"
+    "../sdk/contractclient"
+    "../sdk/contractclient/contractinterfacewrapper"
+    "../sdk/core"
+    "../sdk/core/chainevents"
+    "../sdk/core/chainoperations"
+    "../sdk/core/ethereum/events"
+    "fmt"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/ethclient"
+    "io/ioutil"
+    "math/big"
+    "time"
 )
 
 var (
@@ -20,9 +20,11 @@ var (
 	txId *big.Int = big.NewInt(0)
 	metaDataIdEncWithSeller []byte
 	metaDataIdEncWithBuyer []byte
-	protocolContractAddr = "0x537f7947aa14f2e4635575e3624855fe49ebf2b0"
-	tokenContractAddr = "0xc8d93650fd8c385ead12f2e59476df853ffe5019"
+	protocolContractAddr = "0xf1206c57769a4bf8738b07528f1fa7f7239d903b"
+	tokenContractAddr = "0x7768ed4e32f9536e40ae1dd22c36f06c25ae67df"
 	conn *ethclient.Client = nil
+    keyJson = `{"version":3,"id":"80d7b778-e617-4b35-bb09-f4b224984ed6","address":"d280b60c38bc8db9d309fa5a540ffec499f0a3e8","crypto":{"ciphertext":"58ac20c29dd3029f4d374839508ba83fc84628ae9c3f7e4cc36b05e892bf150d","cipherparams":{"iv":"9ab7a5f9bcc9df7d796b5022023e2d14"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"63a364b8a64928843708b5e9665a79fa00890002b32833b3a9ff99eec78dbf81","n":262144,"r":8,"p":1},"mac":"3a38f91234b52dd95d8438172bca4b7ac1f32e6425387be4296c08d8bddb2098"}}`
+    keyPassword = "12345"
 )
 
 func main()  {
@@ -62,27 +64,35 @@ func main()  {
 }
 
 func SellerPublishData(conn *ethclient.Client)  {
-    keyJson, keyPassword, publicAddress := getClientInfo()
-
-	client, err := contractclient.NewContractClient(publicAddress, keyJson, keyPassword)
+    publicAddress := getClientInfo()
+	client, err := contractclient.NewContractClient(publicAddress)
 	if err != nil {
 		fmt.Println("failed to create contract client. error:", err)
 		return
 	}
 
-	client.SubscribeEvent("Publish", onPublish)
+	client.SubscribeEvent("DataPublish", onPublish)
 
 	//publish data
 	metaData := []byte{'1','2','3','3'}
 	proofData := [][]byte{{'4','5','6','3'}, {'2','2', '1'}}
 	despData := []byte{'7','8','9','3'}
-	contractinterfacewrapper.Publish(client.Opts, big.NewInt(1000), metaData, proofData, 2, despData, false)
+
+	txParam := chainoperations.TransactParams{ common.HexToAddress(publicAddress), keyPassword}
+	contractinterfacewrapper.Publish(&txParam, big.NewInt(1000), metaData, proofData, 2, despData, false)
+}
+
+func onPublish(event events.Event) bool {
+    fmt.Println("onpublish: ", event)
+
+    publishId = event.Data.Get("publishId").(string)
+    return true
 }
 
 func ApproveTransfer(conn *ethclient.Client)  {
-    keyJson, keyPassword, publicAddress := getClientInfo()
+    publicAddress := getClientInfo()
 
-    client, err := contractclient.NewContractClient(publicAddress, keyJson, keyPassword)
+    client, err := contractclient.NewContractClient(publicAddress)
     if err != nil {
         fmt.Println("failed to create contract client. error:", err)
         return
@@ -90,20 +100,15 @@ func ApproveTransfer(conn *ethclient.Client)  {
 
     client.SubscribeEvent("Approval", onApproval)
 
-    contractinterfacewrapper.ApproveTransfer(client.Opts, common.HexToAddress(protocolContractAddr), big.NewInt(1000))
+    txParam := chainoperations.TransactParams{ common.HexToAddress(publicAddress), keyPassword}
+    contractinterfacewrapper.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(1000))
 }
 
-func getClientInfo() (string, string, string) {
-    keyJson := `{"version":3,"id":"80d7b778-e617-4b35-bb09-f4b224984ed6","address":"d280b60c38bc8db9d309fa5a540ffec499f0a3e8","crypto":{"ciphertext":"58ac20c29dd3029f4d374839508ba83fc84628ae9c3f7e4cc36b05e892bf150d","cipherparams":{"iv":"9ab7a5f9bcc9df7d796b5022023e2d14"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"63a364b8a64928843708b5e9665a79fa00890002b32833b3a9ff99eec78dbf81","n":262144,"r":8,"p":1},"mac":"3a38f91234b52dd95d8438172bca4b7ac1f32e6425387be4296c08d8bddb2098"}}`
-    keyPassword := "12345"
-    publicAddress := chainoperations.DecodeKeystoreAddress([]byte(keyJson))
-    return keyJson, keyPassword, publicAddress
-}
 
 func PrepareToBuy(conn *ethclient.Client, publishId string)  {
-    keyJson, keyPassword, publicAddress := getClientInfo()
+    publicAddress := getClientInfo()
 
-	client, err := contractclient.NewContractClient(publicAddress, keyJson, keyPassword)
+	client, err := contractclient.NewContractClient(publicAddress)
 	if err != nil {
 		fmt.Println("failed to create contract client. error:", err)
 		return
@@ -111,18 +116,18 @@ func PrepareToBuy(conn *ethclient.Client, publishId string)  {
 
 	client.SubscribeEvent("TransactionCreate", onTransactionCreate)
 
-
-	err = contractinterfacewrapper.PrepareToBuy(client.Opts, publishId)
+    txParam := chainoperations.TransactParams{ common.HexToAddress(publicAddress), keyPassword}
+	err = contractinterfacewrapper.PrepareToBuy(&txParam, publishId)
 	if err != nil {
 		fmt.Println("failed to prepareToBuy, error:", err)
 	}
 }
 
 func Buy(conn *ethclient.Client, txId *big.Int) {
-    keyJson, keyPassword, publicAddress := getClientInfo()
+    publicAddress := getClientInfo()
 
 	//initialize sdk
-	client, err := contractclient.NewContractClient(publicAddress, keyJson, keyPassword)
+	client, err := contractclient.NewContractClient(publicAddress)
 	if err != nil {
 		fmt.Println("failed to create contract client. error:", err)
 		return
@@ -130,17 +135,18 @@ func Buy(conn *ethclient.Client, txId *big.Int) {
 
 	client.SubscribeEvent("Purchase", onPurchase)
 
-	err = contractinterfacewrapper.BuyData(client.Opts, txId)
+    txParam := chainoperations.TransactParams{ common.HexToAddress(publicAddress), keyPassword}
+	err = contractinterfacewrapper.BuyData(&txParam, txId)
 	if err != nil {
 		fmt.Println("failed to buyData, error:", err)
 	}
 }
 
 func SubmitMetaDataIdEncWithBuyer(conn *ethclient.Client, txId *big.Int)  {
-    keyJson, keyPassword, publicAddress := getClientInfo()
+    publicAddress := getClientInfo()
 
 	//initialize sdk
-	client, err := contractclient.NewContractClient(publicAddress, keyJson, keyPassword)
+	client, err := contractclient.NewContractClient(publicAddress)
 	if err != nil {
 		fmt.Println("failed to create contract client. error:", err)
 		return
@@ -148,17 +154,18 @@ func SubmitMetaDataIdEncWithBuyer(conn *ethclient.Client, txId *big.Int)  {
 
 	client.SubscribeEvent("ReadyForDownload", onReadyForDownload)
 
-	err = contractinterfacewrapper.SubmitMetaDataIdEncWithBuyer(client.Opts, txId, metaDataIdEncWithBuyer)
+    txParam := chainoperations.TransactParams{ common.HexToAddress(publicAddress), keyPassword}
+	err = contractinterfacewrapper.SubmitMetaDataIdEncWithBuyer(&txParam, txId, metaDataIdEncWithBuyer)
 	if err != nil {
 		fmt.Println("failed to SubmitMetaDataIdEncWithBuyer, error:", err)
 	}
 }
 
 func ConfirmDataTruth(conn *ethclient.Client, txId *big.Int)  {
-    keyJson, keyPassword, publicAddress := getClientInfo()
+    publicAddress := getClientInfo()
 
 	//initialize sdk
-	client, err := contractclient.NewContractClient(publicAddress, keyJson, keyPassword)
+	client, err := contractclient.NewContractClient(publicAddress)
 	if err != nil {
 		fmt.Println("failed to create contract client. error:", err)
 		return
@@ -166,24 +173,13 @@ func ConfirmDataTruth(conn *ethclient.Client, txId *big.Int)  {
 
 	client.SubscribeEvent("Close", onClose)
 
-	err = contractinterfacewrapper.ConfirmDataTruth(client.Opts, txId, true)
+    txParam := chainoperations.TransactParams{ common.HexToAddress(publicAddress), keyPassword}
+	err = contractinterfacewrapper.ConfirmDataTruth(&txParam, txId, true)
 	if err != nil {
 		fmt.Println("failed to ConfirmDataTruth, error:", err)
 	}
 }
 
-func onPublish(event events.Event) bool {
-	fmt.Println("onpublish: ", event)
-
-	publishId = event.Data.Get("publishId").(string)
-	return true
-}
-
-func onTransactionCreate(event events.Event) bool {
-	fmt.Println("onTransactionCreated:", event)
-	txId = event.Data.Get("transactionId").(*big.Int)
-	return true
-}
 
 func onPurchase(event events.Event) bool {
 	fmt.Println("onPurchase:", event)
@@ -205,15 +201,6 @@ func onClose(event events.Event) bool {
 	return true
 }
 
-func getAbiText(fileName string) string {
-	abi, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		fmt.Println("failed to read abi text", err)
-		return ""
-	}
-
-	return string(abi)
-}
 
 func onApproval(event events.Event) bool {
     fmt.Println("onApproveTransfer:", event)
@@ -223,7 +210,7 @@ func onApproval(event events.Event) bool {
 }
 
 func getContracts() ([]chainevents.ContractInfo) {
-    protocolEvents := []string{"Publish", "TransactionCreate", "Purchase", "ReadyForDownload", "Close"}
+    protocolEvents := []string{"DataPublish", "TransactionCreate", "Buy", "ReadyForDownload", "TransactionClose"}
     tokenEvents := []string{"Approval"}
 
     contracts := []chainevents.ContractInfo {
@@ -232,4 +219,26 @@ func getContracts() ([]chainevents.ContractInfo) {
     }
 
     return contracts
+}
+
+func getAbiText(fileName string) string {
+    abi, err := ioutil.ReadFile(fileName)
+    if err != nil {
+        fmt.Println("failed to read abi text", err)
+        return ""
+    }
+
+    return string(abi)
+}
+
+
+func getClientInfo() (string) {
+    publicAddress := chainoperations.DecodeKeystoreAddress([]byte(keyJson))
+    return publicAddress
+}
+
+func onTransactionCreate(event events.Event) bool {
+    fmt.Println("onTransactionCreated:", event)
+    txId = event.Data.Get("transactionId").(*big.Int)
+    return true
 }

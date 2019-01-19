@@ -15,11 +15,6 @@
       "inputs": [
         {
           "indexed": false,
-          "name": "successed",
-          "type": "bool"
-        },
-        {
-          "indexed": false,
           "name": "seqNo",
           "type": "string"
         },
@@ -42,11 +37,6 @@
           "indexed": false,
           "name": "users",
           "type": "address[]"
-        },
-        {
-          "indexed": false,
-          "name": "errorCode",
-          "type": "uint8"
         }
       ],
       "name": "DataPublish",
@@ -55,11 +45,6 @@
     {
       "anonymous": false,
       "inputs": [
-        {
-          "indexed": false,
-          "name": "successed",
-          "type": "bool"
-        },
         {
           "indexed": false,
           "name": "seqNo",
@@ -89,11 +74,6 @@
           "indexed": false,
           "name": "users",
           "type": "address[]"
-        },
-        {
-          "indexed": false,
-          "name": "errorCode",
-          "type": "uint8"
         }
       ],
       "name": "TransactionCreate",
@@ -102,11 +82,6 @@
     {
       "anonymous": false,
       "inputs": [
-        {
-          "indexed": false,
-          "name": "successed",
-          "type": "bool"
-        },
         {
           "indexed": false,
           "name": "seqNo",
@@ -131,11 +106,6 @@
           "indexed": false,
           "name": "users",
           "type": "address[]"
-        },
-        {
-          "indexed": false,
-          "name": "errorCode",
-          "type": "uint8"
         }
       ],
       "name": "Buy",
@@ -144,11 +114,6 @@
     {
       "anonymous": false,
       "inputs": [
-        {
-          "indexed": false,
-          "name": "successed",
-          "type": "bool"
-        },
         {
           "indexed": false,
           "name": "seqNo",
@@ -168,11 +133,6 @@
           "indexed": false,
           "name": "users",
           "type": "address[]"
-        },
-        {
-          "indexed": false,
-          "name": "errorCode",
-          "type": "uint8"
         }
       ],
       "name": "ReadyForDownload",
@@ -181,11 +141,6 @@
     {
       "anonymous": false,
       "inputs": [
-        {
-          "indexed": false,
-          "name": "successed",
-          "type": "bool"
-        },
         {
           "indexed": false,
           "name": "seqNo",
@@ -200,11 +155,6 @@
           "indexed": false,
           "name": "users",
           "type": "address[]"
-        },
-        {
-          "indexed": false,
-          "name": "errorCode",
-          "type": "uint8"
         }
       ],
       "name": "TransactionClose",
@@ -260,7 +210,7 @@
           "type": "string"
         }
       ],
-      "name": "CreateTransaction",
+      "name": "createTransaction",
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",

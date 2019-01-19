@@ -20,7 +20,7 @@ func (ce CryptExecutor) SignTransaction(message []byte, pubkey string, password 
     return sig, err
 }
 
-func (ce CryptExecutor) Encrypt(plainText []byte, pubkey string, password string) ([]byte, error) {
+func (ce CryptExecutor) Encrypt(plainText []byte, pubKey string, password string) ([]byte, error) {
     //hardcode here, will call jeremy's library later
     return plainText, nil
 }
