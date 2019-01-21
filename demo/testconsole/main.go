@@ -20,8 +20,8 @@ var (
 	txId *big.Int = big.NewInt(0)
 	metaDataIdEncWithSeller []byte
 	metaDataIdEncWithBuyer []byte
-	protocolContractAddr = "0xf1206c57769a4bf8738b07528f1fa7f7239d903b"
-	tokenContractAddr = "0x7768ed4e32f9536e40ae1dd22c36f06c25ae67df"
+	protocolContractAddr = "0xde0b64fffc3f5c17a51939104beed765b140fe75"
+	tokenContractAddr = "0xf7a782a79d693eb179a59a15db3a36eab6e1f388"
 	conn *ethclient.Client = nil
     keyJson = `{"version":3,"id":"80d7b778-e617-4b35-bb09-f4b224984ed6","address":"d280b60c38bc8db9d309fa5a540ffec499f0a3e8","crypto":{"ciphertext":"58ac20c29dd3029f4d374839508ba83fc84628ae9c3f7e4cc36b05e892bf150d","cipherparams":{"iv":"9ab7a5f9bcc9df7d796b5022023e2d14"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"63a364b8a64928843708b5e9665a79fa00890002b32833b3a9ff99eec78dbf81","n":262144,"r":8,"p":1},"mac":"3a38f91234b52dd95d8438172bca4b7ac1f32e6425387be4296c08d8bddb2098"}}`
     keyPassword = "12345"
@@ -44,19 +44,19 @@ func main()  {
 
 	SellerPublishData(conn)
 
-	time.Sleep(5000000000)
+	time.Sleep(50000000000)
 
 	ApproveTransfer(conn)
 
-	time.Sleep(5000000000)
+	time.Sleep(50000000000)
 
 	Buy(conn, txId)
 
-	time.Sleep(5000000000)
+	time.Sleep(50000000000)
 
 	SubmitMetaDataIdEncWithBuyer(conn, txId)
 
-	time.Sleep(5000000000)
+	time.Sleep(50000000000)
 
 	ConfirmDataTruth(conn, txId)
 
@@ -133,7 +133,7 @@ func Buy(conn *ethclient.Client, txId *big.Int) {
 		return
 	}
 
-	client.SubscribeEvent("Purchase", onPurchase)
+	client.SubscribeEvent("Buy", onPurchase)
 
     txParam := chainoperations.TransactParams{ common.HexToAddress(publicAddress), keyPassword}
 	err = contractinterfacewrapper.BuyData(&txParam, txId)

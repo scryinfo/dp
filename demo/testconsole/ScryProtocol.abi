@@ -99,6 +99,11 @@
         },
         {
           "indexed": false,
+          "name": "state",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
           "name": "metaDataIdEncSeller",
           "type": "bytes"
         },
