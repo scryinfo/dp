@@ -44,7 +44,7 @@ contract ScryProtocol {
 
     event DataPublish(string seqNo, string publishId, uint256 price, string despDataId, address[] users);
     event TransactionCreate(string seqNo, uint256 transactionId, string publishId, bytes32 chosenProofIds, bool supportVerify, address[] users);
-    event Buy(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, address[] users);
+    event Buy(string seqNo, uint256 transactionId, string publishId, TransactionState state, bytes metaDataIdEncSeller, address[] users);
     event ReadyForDownload(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, address[] users);
     event TransactionClose(string seqNo, uint256 transactionId, address[] users);
 
@@ -78,7 +78,7 @@ contract ScryProtocol {
     }
 
     function isPublishedDataExisted(string publishId) internal view returns (bool) {
-        DataInfoPublished memory data = mapPublishedData[publishId];
+        DataInfoPublished storage data = mapPublishedData[publishId];
         return data.used;
     }
 
@@ -120,7 +120,7 @@ contract ScryProtocol {
         address[] memory users;
 
         //validate
-        TransactionItem memory txItem = mapTransaction[txId];
+        TransactionItem storage txItem = mapTransaction[txId];
         require(txItem.used, "Transaction does not exist");
         require(txItem.buyer == msg.sender, "Invalid buyer");
 
@@ -135,12 +135,12 @@ contract ScryProtocol {
 
         txItem.state = TransactionState.Buying;
 
-        emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, users);
+        emit Buy(seqNo, txId, txItem.publishId, mapTransaction[txId].state, txItem.metaDataIdEncSeller, users);
     }
 
     function submitMetaDataIdEncWithBuyer(string seqNo, uint256 txId, bytes encryptedMetaDataId) external {
         //validate
-        TransactionItem memory txItem = mapTransaction[txId];
+        TransactionItem storage txItem = mapTransaction[txId];
         require(txItem.used, "Transaction does not exist");
         require(txItem.seller == msg.sender, "Invalid seller");
         require(txItem.state == TransactionState.Buying, "Invalid transaction state");
@@ -158,7 +158,7 @@ contract ScryProtocol {
         address[] memory users = new address[](1);
 
         //validate
-        TransactionItem memory txItem = mapTransaction[txId];
+        TransactionItem storage txItem = mapTransaction[txId];
         require(txItem.used, "Transaction does not exist");
         require(txItem.buyer == msg.sender, "Invalid buyer");
 
