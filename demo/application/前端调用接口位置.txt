@@ -1,0 +1,6 @@
+index.js:
+// 验证用户信息：func send(account,password) (bool) {}
+// 将新建的账户信息保存到keystore，跳转界面：func send(account information) (bool) {}
+main.js:
+// 发布新数据 func publish(all details) (bool) {}
+// 购买数据 func buy(all ids) (bool) {}
