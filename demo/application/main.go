@@ -1,62 +1,79 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/asticode/go-astilectron"
+	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/asticode/go-astilog"
+	"github.com/pkg/errors"
+	"time"
 )
 
 // Constants
-const ()
+const (
+	ABOUT = "test about."
+)
 
 // Vars
-var ()
+var (
+	AppName string
+	w       *astilectron.Window
+)
 
 func main() {
-	// Initialize astilectron
-	a, err := astilectron.New(astilectron.Options{
-		AppName:            "<your app name>",
-		AppIconDefaultPath: "<your .png icon>",  // If path is relative, it must be relative to the data directory
-		AppIconDarwinPath:  "<your .icns icon>", // Same here
-		BaseDirectoryPath:  "<where you want the provisioner to install the dependencies>",
-	})
-	defer a.Close()
-	if err != nil {
-		astilog.Fatal(err)
-	}
-
-	// Start astilectron
-	err = a.Start()
-	if err != nil {
-		astilog.Fatal(err)
-	}
-
-	// Blocking pattern
-	a.Wait()
-
-
-	// Create a new window
-	w, err := a.NewWindow("http://127.0.0.1:4000", &astilectron.WindowOptions{
-		Center: astilectron.PtrBool(true),
-		Height: astilectron.PtrInt(600),
-		Width:  astilectron.PtrInt(600),
-	})
-	if err != nil {
-		astilog.Fatal(err)
-	}
-	err = w.Create()
-	if err != nil {
-		astilog.Fatal(err)
-	}
-
-	// Open dev tools
-	err = w.OpenDevTools()
-	if err != nil {
-		astilog.Fatal(err)
-	}
-
-	// Close dev tools
-	err = w.CloseDevTools()
-	if err != nil {
-		astilog.Fatal(err)
+	// Run bootstrap
+	if err := bootstrap.Run(bootstrap.Options{
+		Asset:    Asset,
+		AssetDir: AssetDir,
+		AstilectronOptions: astilectron.Options{
+			AppName:            AppName,
+			AppIconDefaultPath: "resources/icon.ico",
+		},
+		Debug: true,
+		MenuOptions: []*astilectron.MenuItemOptions{{
+			Label: astilectron.PtrStr("Tools bar"),
+			SubMenu: []*astilectron.MenuItemOptions{
+				{
+					Label: astilectron.PtrStr("About"),
+					OnClick: func(e astilectron.Event) (deleteListener bool) {
+						if err := bootstrap.SendMessage(w, "about", ABOUT, func(m *bootstrap.MessageIn) {
+							// Unmarshal payload
+							var s string
+							if err := json.Unmarshal(m.Payload, &s); err != nil {
+								astilog.Error(errors.Wrap(err, "unmarshal payload failed"))
+								return
+							}
+							astilog.Infof("About modal has been displayed and payload is %s!", s)
+						}); err != nil {
+							astilog.Error(errors.Wrap(err, "sending about event failed"))
+						}
+						return
+					},
+				},
+				{Role: astilectron.MenuItemRoleClose},
+			},
+		}},
+		OnWait: func(_ *astilectron.Astilectron, ws []*astilectron.Window, _ *astilectron.Menu, _ *astilectron.Tray, _ *astilectron.Menu) error {
+			w = ws[0]
+			go func() {
+				time.Sleep(5 * time.Second)
+				if err := bootstrap.SendMessage(w, "check.out.menu", "Don't forget to check out the menu!"); err != nil {
+					astilog.Error(errors.Wrap(err, "sending check.out.menu event failed"))
+				}
+			}()
+			return nil
+		},
+		RestoreAssets: RestoreAssets,
+		Windows: []*bootstrap.Window{{
+			Homepage:       "index.html",
+			MessageHandler: handleMessages,
+			Options: &astilectron.WindowOptions{
+				Center:          astilectron.PtrBool(true),
+				Height:          astilectron.PtrInt(768),
+				Width:           astilectron.PtrInt(1366),
+			},
+		}},
+	}); err != nil {
+		astilog.Fatal(errors.Wrap(err, "running bootstrap failed"))
 	}
 }

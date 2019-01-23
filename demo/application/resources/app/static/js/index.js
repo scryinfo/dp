@@ -1,20 +1,37 @@
 let index = {
     listen:function () {
-        document.getElementById("login").onclick = function () {
-            document.getElementById("show_new").style.display = "none";
-            document.getElementById("show").style.display = "block";
-            document.getElementById("describe").innerHTML = `Login`;
-            document.getElementById("button").innerHTML =
-                `<button class="right-button" id="submit_login">Submit</button>`;
-            document.getElementById("submit_login").onclick = function () {
-                // 验证用户信息：func send(account,password) (bool) {}
-                if (true) {
-                    index.login();
-                }else {
-                    alert("account or password is wrong.");
-                }
+        document.addEventListener('astilectron-ready', function() {
+            document.getElementById("html-js-test").innerHTML = `<button class="left-button" id="login">Login</button>`
+            document.getElementById("login").onclick = function () {
+                document.getElementById("show_new").style.display = "none";
+                document.getElementById("show").style.display = "block";
+                document.getElementById("describe").innerHTML = `Login`;
+                document.getElementById("button").innerHTML =
+                    `<button class="right-button" id="submit_login">Submit</button>`;
+                document.getElementById("submit_login").onclick = function () {
+                    // 验证用户信息：func send(account,password) (bool) {}
+                    if (true) {
+                        index.login();
+                    }else {
+                        alert("account or password is wrong.");
+                    }
+                };
             };
+        });
+
+        index.onctest();
+
+        document.getElementById("back").onclick = function () {
+            document.getElementById("show").style.display = "none";
         };
+        document.getElementById("back_new").onclick = function () {
+            document.getElementById("show_new").style.display = "none";
+        };
+    },
+    login:function () {
+        window.location.href = "main.html";
+    },
+    onctest:function () {
         document.getElementById("new_account").onclick = function () {
             document.getElementById("show_new").style.display = "none";
             document.getElementById("show").style.display = "block";
@@ -30,14 +47,5 @@ let index = {
                 };
             };
         };
-        document.getElementById("back").onclick = function () {
-            document.getElementById("show").style.display = "none";
-        };
-        document.getElementById("back_new").onclick = function () {
-            document.getElementById("show_new").style.display = "none";
-        };
-    },
-    login:function () {
-        window.location.href = "main.html";
-    },
+    }
 };

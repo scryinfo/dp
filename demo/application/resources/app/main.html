@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="static/css/main.css">
+    <link rel="stylesheet" href="static/lib/astiloader/astiloader.css">
+    <link rel="stylesheet" href="static/lib/astimodaler/astimodaler.css">
+    <link rel="stylesheet" href="static/lib/astinotifier/astinotifier.css">
+    <link rel="stylesheet" href="static/lib/font-awesome-4.7.0/css/font-awesome.min.css">
 </head>
 <body>
     <div class="top">
@@ -10,7 +14,7 @@
         <div class="top-account" id="account">
             <!--这里显示当前账号，一种实现的思路是验证密码、跳转到这个界面时，带上参数：
             func js(account) () {doc.gebi("user").inh = `account`}-->
-            Account
+            <button onclick="dt.smtgo()">Account</button>
         </div>
         <div>
             <button class="top-logout" id="logout">Logout</button>
@@ -92,6 +96,10 @@
 
     <script src="static/js/main.js"></script>
     <script src="static/js/transmission.js"></script>
+    <script src="static/lib/astiloader/astiloader.js"></script>
+    <script src="static/lib/astimodaler/astimodaler.js"></script>
+    <script src="static/lib/astinotifier/astinotifier.js"></script>
+    <script src="static/lib/chart/chart.min.js"></script>
     <script type="text/javascript">
         main.listen();
         dt.init();

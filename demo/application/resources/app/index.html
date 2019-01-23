@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="static/css/index.css">
+    <link rel="stylesheet" href="static/lib/astiloader/astiloader.css">
+    <link rel="stylesheet" href="static/lib/astimodaler/astimodaler.css">
+    <link rel="stylesheet" href="static/lib/astinotifier/astinotifier.css">
+    <link rel="stylesheet" href="static/lib/font-awesome-4.7.0/css/font-awesome.min.css">
 </head>
 <body>
     <div class="top">
@@ -17,8 +21,8 @@
                 <option value="1">11</option>
             </datalist>
         </div>
-        <div><button class="left-button" id="login">Login</button></div>
-        <div><button class="left-button" id="new_account">Create New Account</button></div>
+        <div id="html-js-test"></div>
+        <div><button class="left-button" id="new_account" onclick="index.onctest()">Create New Account</button></div>
     </div>
     <div class="right" id="show">
         <div class="right-show"><label id="describe"></label>:
@@ -35,6 +39,10 @@
 
     <script src="static/js/index.js"></script>
     <script src="static/js/transmission.js"></script>
+    <script src="static/lib/astiloader/astiloader.js"></script>
+    <script src="static/lib/astimodaler/astimodaler.js"></script>
+    <script src="static/lib/astinotifier/astinotifier.js"></script>
+    <script src="static/lib/chart/chart.min.js"></script>
     <script type="text/javascript">
         index.listen();
         dt.init();
