@@ -43,7 +43,7 @@ func main() {
 								astilog.Error(errors.Wrap(err, "unmarshal payload failed"))
 								return
 							}
-							astilog.Infof("About modal has been displayed and payload is %s!", s)
+							astilog.Debugf("About modal has been displayed and payload is %s!", s)
 						}); err != nil {
 							astilog.Error(errors.Wrap(err, "sending about event failed"))
 						}

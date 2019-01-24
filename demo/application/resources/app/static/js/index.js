@@ -1,11 +1,16 @@
 let index = {
-    listen:function () {
+    init:function () {
+        // Init
+
+        // wait for ready
         document.addEventListener('astilectron-ready', function() {
-            document.getElementById("html-js-test").innerHTML = `<button class="left-button" id="login">Login</button>`
-            document.getElementById("login").onclick = function () {
-                document.getElementById("show_new").style.display = "none";
-                document.getElementById("show").style.display = "block";
-                document.getElementById("describe").innerHTML = `Login`;
+            // -
+        });
+    },
+    onclick:function (id) {
+        switch (id) {
+            case "login":
+                index.prepare("Login");
                 document.getElementById("button").innerHTML =
                     `<button class="right-button" id="submit_login">Submit</button>`;
                 document.getElementById("submit_login").onclick = function () {
@@ -15,37 +20,25 @@ let index = {
                     }else {
                         alert("account or password is wrong.");
                     }
-                };
-            };
-        });
-
-        index.onctest();
-
-        document.getElementById("back").onclick = function () {
-            document.getElementById("show").style.display = "none";
-        };
-        document.getElementById("back_new").onclick = function () {
-            document.getElementById("show_new").style.display = "none";
-        };
+                };break;
+            case "new_account":
+                index.prepare("New");
+                document.getElementById("button").innerHTML =
+                    `<button class="right-button" id="submit_new">Submit</button>`;
+                document.getElementById("submit_new").onclick = function () {
+                    document.getElementById("show").style.display = "none";
+                    document.getElementById("show_new").style.display = "block";
+                };break;
+            case "submit_keystore":
+                // 将新建的账户信息保存到keystore：func send(account information) (bool) {}
+                window.location.href = "main.html";;break;
+            case "back":document.getElementById("show").style.display = "none";break;
+            case "back_new":document.getElementById("show_new").style.display = "none";break;
+        }
     },
-    login:function () {
-        window.location.href = "main.html";
+    prepare:function (describe) {
+        document.getElementById("show_new").style.display = "none";
+        document.getElementById("show").style.display = "block";
+        document.getElementById("describe").innerHTML = describe;
     },
-    onctest:function () {
-        document.getElementById("new_account").onclick = function () {
-            document.getElementById("show_new").style.display = "none";
-            document.getElementById("show").style.display = "block";
-            document.getElementById("describe").innerHTML = `New`;
-            document.getElementById("button").innerHTML =
-                `<button class="right-button" id="submit_new">Submit</button>`;
-            document.getElementById("submit_new").onclick = function () {
-                document.getElementById("show").style.display = "none";
-                document.getElementById("show_new").style.display = "block";
-                document.getElementById("submit_keystore").onclick = function () {
-                    // 将新建的账户信息保存到keystore：func send(account information) (bool) {}
-                    index.login();
-                };
-            };
-        };
-    }
 };

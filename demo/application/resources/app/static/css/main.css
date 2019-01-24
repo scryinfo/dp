@@ -93,6 +93,7 @@ html, body {
 .right-publish-input {
     width: 60%;
     display: inline-block;
+    resize: none;
 }
 
 .right-publish-button {

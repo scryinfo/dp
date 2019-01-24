@@ -21,20 +21,20 @@
                 <option value="1">11</option>
             </datalist>
         </div>
-        <div id="html-js-test"></div>
-        <div><button class="left-button" id="new_account" onclick="index.onctest()">Create New Account</button></div>
+        <div><button class="left-button" id="login" onclick="index.onclick('login')">Login</button></div>
+        <div><button class="left-button" id="new_account" onclick="index.onclick('new_account')">Create New Account</button></div>
     </div>
     <div class="right" id="show">
         <div class="right-show"><label id="describe"></label>:
             <label><input class="right-pwd" id="password" type="password" placeholder="password"/></label></div>
-        <div><button class="right-button" id="back">Back</button><label id="button"></label></div>
+        <div><button class="right-button" id="back" onclick="index.onclick('back')">Back</button><label id="button"></label></div>
     </div>
     <div class="right" id="show_new">
         <div>Your account is created : &nbsp;0x123456789012345678901234567890<br/>
         account information is saved at local : &nbsp;demo/resources/app/accounts.txt<br/>
         please keep it properly.<br/><hr/>Do you want to save and login with this account?</div>
-        <div class="right-pwd"><button class="right-button" id="back_new">No</button>
-        <button class="right-button" id="submit_keystore">Yes</button></div>
+        <div class="right-pwd"><button class="right-button" id="back_new" onclick="index.onclick('back_new')">No</button>
+        <button class="right-button" id="submit_keystore" onclick="index.onclick('submit_keystore')">Yes</button></div>
     </div>
 
     <script src="static/js/index.js"></script>
@@ -44,7 +44,7 @@
     <script src="static/lib/astinotifier/astinotifier.js"></script>
     <script src="static/lib/chart/chart.min.js"></script>
     <script type="text/javascript">
-        index.listen();
+        index.init();
         dt.init();
     </script>
 </body>
