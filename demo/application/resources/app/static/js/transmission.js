@@ -8,19 +8,12 @@ let dt = {
         document.addEventListener('astilectron-ready', function() {
             // -
             dt.listen();
+            document.getElementById("account").innerHTML = `<button onclick="dt.smtgo()">Account</button>`;
         });
     },
     smtgo:function () {
-        asticode.loader.show();
-        astilectron.sendMessage({"name": "Account", payload: "administrator"}, function(message) {
-            // Init
-            asticode.loader.hide();
-
-            if (message.name === "error") {
-                // Process error
-            }
-            // document.getElementById("account").innerHTML = message.payload;
-            dt.about(message.payload);
+        astilectron.sendMessage({"name" : "hello",payload : "message from js"},function (message) {
+            console.log("received " + message.payload);
         });
     },
     listen:function () {
@@ -29,9 +22,6 @@ let dt = {
                 case "about":
                     dt.about(message.payload);
                     return {payload: "payload"};
-                    break;
-                case "check.out.menu":
-                    asticode.notifier.info(message.payload);
                     break;
             }
         });
