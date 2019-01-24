@@ -1,30 +1,48 @@
 let main = {
-    listen:function () {
-        document.getElementById("logout").onclick = function () {
-            window.location.href = "index.html";
-        };
-        document.getElementById("pub_submit").onclick = function () {
-            // 发布新数据 func publish(all details) (bool) {}
-            if (true) {
-                alert("Publish new data succeed.");
-            }else {
-                alert("Publish new data failed.");
-            }
-        };
-        document.getElementById("dl_buy").onclick = function () {
-            // 购买数据 func buy(all ids) (bool) {}
-            if (true) {
-                alert("Buy data succeed.");
-            }else {
-                alert("Buy data failed.");
-            }
-        };
-        document.getElementById("dl_search").onclick = function () {
-            alert("Please input your search criteria.")
+    init:function () {
+        // Init
+
+        // wait for ready
+        document.addEventListener('astilectron-ready', function() {
+            // -
+        });
+    },
+    onclick:function (id) {
+        switch (id) {
+            case "d":main.show('d');break;
+            case "t":main.show('t');break;
+            case "p":main.show('p');break;
+            case "logout":window.location.href = "index.html";break;
+            case "dl_buy":
+                // 购买数据 func buy(all ids) (bool) {}
+                if (true) {
+                    alert("Buy data succeed.");
+                }else {
+                    alert("Buy data failed.");
+                }
+                break;
+            case "dl_search":alert("Please input your search criteria.");break;
+            case "insDL":main.insDL();break;
+            case "insMT":main.insMT();break;
+            case "show":
+                let file;
+                for(let i = 0 ;i<document.getElementById("pub_proofs").files.length;i++){
+                    file=document.getElementById("pub_proofs").files[i];
+                    document.getElementById("pub_proofs_show").innerHTML += file.name + " ";
+                }
+                break;
+            case "pub_submit":
+                // 发布新数据 func publish(all details) (bool) {}
+                if (true) {
+                    alert("Publish new data succeed.");
+                }else {
+                    alert("Publish new data failed.");
+                }
+                break;
         }
     },
     show:function (c) {
-        main.closeAll();
+        main.hideAll();
         switch (c) {
             case 'd':document.getElementById("show_datalist").style.display = "block";break;
             case 't':document.getElementById("show_transaction").style.display = "block";break;
@@ -32,20 +50,10 @@ let main = {
             default: alert("Illegal command " + c)
         }
     },
-    closeAll:function () {
+    hideAll:function () {
         document.getElementById("show_datalist").style.display = "none";
         document.getElementById("show_transaction").style.display = "none";
         document.getElementById("show_publish").style.display = "none";
-    },
-    reshow:function () {
-        let file;
-        //取得FileList取得的file集合
-        for(let i = 0 ;i<document.getElementById("pub_proofs").files.length;i++){
-            //file对象为用户选择的某一个文件
-            file=document.getElementById("pub_proofs").files[i];
-            //此时取出这个文件进行处理，这里只是显示文件名
-            document.getElementById("pub_proofs_show").innerHTML += file.name + " ";
-        }
     },
     insDL:function () {
         let row = document.getElementById("dl_table").insertRow(1);

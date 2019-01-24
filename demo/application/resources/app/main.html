@@ -17,20 +17,20 @@
             <button onclick="dt.smtgo()">Account</button>
         </div>
         <div>
-            <button class="top-logout" id="logout">Logout</button>
+            <button class="top-logout" id="logout" onclick="main.onclick('logout')">Logout</button>
         </div>
     </div>
     <div class="left" id="functions">
         <ul>
-            <li class="left-list" onclick="main.show('d')">Data list</li>
-            <li class="left-list" onclick="main.show('t')">My transaction</li>
-            <li class="left-list" onclick="main.show('p')">Publish new data</li>
+            <li class="left-list" onclick="main.onclick('d')">Data list</li>
+            <li class="left-list" onclick="main.onclick('t')">My transaction</li>
+            <li class="left-list" onclick="main.onclick('p')">Publish new data</li>
         </ul>
     </div>
     <div class="right" id="show_datalist">
         <div class="right-title">
-            <button id="dl_buy">Buy</button>
-            <button id="dl_search">Search</button>
+            <button id="dl_buy" onclick="main.onclick('dl_buy')">Buy</button>
+            <button id="dl_search" onclick="main.onclick('dl_search')">Search</button>
         </div>
         <div>
             <table class="right-table" id="dl_table">
@@ -73,7 +73,7 @@
                 </tr>
             </table>
         </div>
-        <div class="right-bottom">Pre 1 2 3 <input type="button" onclick="main.insMT()" value="Insert"/> Next</div>
+        <div class="right-bottom">Pre 1 2 3 <input type="button" onclick="main.onclick('insMT')" value="Insert"/> Next</div>
     </div>
     <div class="right" id="show_publish"><div class="right-title"></div>
         <div class="right-publish"><label class="right-publish-describe">Title</label>
@@ -81,17 +81,18 @@
         <div class="right-publish"><label class="right-publish-describe">Price</label>
             <label><input class="right-publish-input" id="pub_price" placeholder="Unit is DDD"/></label></div>
         <div class="right-publish"><label class="right-publish-describe">Keys</label>
-            <label><textarea class="right-publish-input" id="pub_keys" rows="3"></textarea></label></div>
+            <label><textarea class="right-publish-input" id="pub_keys" rows="2"
+                             placeholder="Separate each tag with a space or comma"></textarea></label></div>
         <div class="right-publish"><label class="right-publish-describe">Description</label>
             <label><textarea class="right-publish-input" id="pub_description" rows="3"></textarea></label></div>
         <div class="right-publish"><label class="right-publish-describe">Data</label>
-            <label><input class="right-publish-input" id="pub_data" type="file"/></label></div>
+            <label><input  id="pub_data" type="file"/></label></div>
         <div class="right-publish"><label class="right-publish-describe">Proofs</label>
-            <label><input class="right-publish-input" id="pub_proofs" type="file" onchange="main.reshow()" multiple/></label></div>
+            <label><input  id="pub_proofs" type="file" onchange="main.onclick('show')" multiple/></label></div>
         <div class="right-publish"><label class="right-publish-describe"></label>
             <label><textarea class="right-publish-input" id="pub_proofs_show" rows="5" readonly></textarea></label></div>
         <div class="right-publish"><label class="right-publish-describe"></label>
-            <button class="right-publish-button" id="pub_submit">Submit</button></div>
+            <button class="right-publish-button" id="pub_submit" onclick="main.onclick('pub_submit')">Submit</button></div>
     </div>
 
     <script src="static/js/main.js"></script>
@@ -101,7 +102,7 @@
     <script src="static/lib/astinotifier/astinotifier.js"></script>
     <script src="static/lib/chart/chart.min.js"></script>
     <script type="text/javascript">
-        main.listen();
+        main.init();
         dt.init();
     </script>
 </body>
