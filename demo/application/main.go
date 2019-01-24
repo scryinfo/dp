@@ -11,7 +11,7 @@ import (
 
 // Constants
 const (
-	ABOUT = "test about."
+	ABOUT = "test go -> js."
 )
 
 // Vars
@@ -50,27 +50,33 @@ func main() {
 						return
 					},
 				},
+				{
+					Label: astilectron.PtrStr("Get accounts"),
+					OnClick: func(e astilectron.Event) (deleteListener bool) {
+
+						if err := bootstrap.SendMessage(w, "get", accounts, func(m *bootstrap.MessageIn) {
+
+						}); err != nil {
+							astilog.Error(errors.Wrap(err, "sending get account event failed"))
+						}
+						return
+					},
+				},
 				{Role: astilectron.MenuItemRoleClose},
 			},
 		}},
-		OnWait: func(_ *astilectron.Astilectron, ws []*astilectron.Window, _ *astilectron.Menu, _ *astilectron.Tray, _ *astilectron.Menu) error {
-			w = ws[0]
-			go func() {
-				time.Sleep(5 * time.Second)
-				if err := bootstrap.SendMessage(w, "check.out.menu", "Don't forget to check out the menu!"); err != nil {
-					astilog.Error(errors.Wrap(err, "sending check.out.menu event failed"))
-				}
-			}()
-			return nil
-		},
 		RestoreAssets: RestoreAssets,
 		Windows: []*bootstrap.Window{{
 			Homepage:       "index.html",
 			MessageHandler: handleMessages,
 			Options: &astilectron.WindowOptions{
-				Center:          astilectron.PtrBool(true),
-				Height:          astilectron.PtrInt(768),
-				Width:           astilectron.PtrInt(1366),
+				Center: astilectron.PtrBool(true),
+				Height: astilectron.PtrInt(768),
+				Width:  astilectron.PtrInt(1366),
+				WebPreferences: &astilectron.WebPreferences{
+					NodeIntegration: astilectron.PtrBool(true),
+					WebSecurity:     astilectron.PtrBool(false),
+				},
 			},
 		}},
 	}); err != nil {

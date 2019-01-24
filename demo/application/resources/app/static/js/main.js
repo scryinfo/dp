@@ -42,18 +42,15 @@ let main = {
         }
     },
     show:function (c) {
-        main.hideAll();
+        document.getElementById("show_datalist").style.display = "none";
+        document.getElementById("show_transaction").style.display = "none";
+        document.getElementById("show_publish").style.display = "none";
         switch (c) {
             case 'd':document.getElementById("show_datalist").style.display = "block";break;
             case 't':document.getElementById("show_transaction").style.display = "block";break;
             case 'p':document.getElementById("show_publish").style.display = "block";break;
             default: alert("Illegal command " + c)
         }
-    },
-    hideAll:function () {
-        document.getElementById("show_datalist").style.display = "none";
-        document.getElementById("show_transaction").style.display = "none";
-        document.getElementById("show_publish").style.display = "none";
     },
     insDL:function () {
         let row = document.getElementById("dl_table").insertRow(1);

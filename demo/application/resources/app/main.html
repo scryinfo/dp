@@ -14,7 +14,6 @@
         <div class="top-account" id="account">
             <!--这里显示当前账号，一种实现的思路是验证密码、跳转到这个界面时，带上参数：
             func js(account) () {doc.gebi("user").inh = `account`}-->
-            <button onclick="dt.smtgo()">Account</button>
         </div>
         <div>
             <button class="top-logout" id="logout" onclick="main.onclick('logout')">Logout</button>
@@ -82,7 +81,7 @@
             <label><input class="right-publish-input" id="pub_price" placeholder="Unit is DDD"/></label></div>
         <div class="right-publish"><label class="right-publish-describe">Keys</label>
             <label><textarea class="right-publish-input" id="pub_keys" rows="2"
-                             placeholder="Separate each tag with a space or comma"></textarea></label></div>
+                             placeholder="Separate each tag with a comma or semicolon"></textarea></label></div>
         <div class="right-publish"><label class="right-publish-describe">Description</label>
             <label><textarea class="right-publish-input" id="pub_description" rows="3"></textarea></label></div>
         <div class="right-publish"><label class="right-publish-describe">Data</label>

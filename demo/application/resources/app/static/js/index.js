@@ -16,7 +16,7 @@ let index = {
                 document.getElementById("submit_login").onclick = function () {
                     // 验证用户信息：func send(account,password) (bool) {}
                     if (true) {
-                        index.login();
+                        window.location.href = "main.html";
                     }else {
                         alert("account or password is wrong.");
                     }
@@ -31,7 +31,7 @@ let index = {
                 };break;
             case "submit_keystore":
                 // 将新建的账户信息保存到keystore：func send(account information) (bool) {}
-                window.location.href = "main.html";;break;
+                window.location.href = "main.html";break;
             case "back":document.getElementById("show").style.display = "none";break;
             case "back_new":document.getElementById("show_new").style.display = "none";break;
         }
