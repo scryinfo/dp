@@ -31,7 +31,7 @@ asticode.notifier = {
         document.getElementById("astinotifier").prepend(wrapper);
         setTimeout(function() {
             close.click();
-        }, 3000);
+        }, 5000);
     },
     success: function(message) {
         this.notify("success", message);
