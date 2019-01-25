@@ -6,21 +6,26 @@ import (
 	"github.com/asticode/go-astilectron-bootstrap"
 )
 
-func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload interface{}, err error) {
+func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, error) {
+	var (
+		payload interface{}
+		err     error
+	)
+
 	switch m.Name {
 	case "hello":
 		var s string
-		err = json.Unmarshal(m.Payload,&s)
+		err = json.Unmarshal(m.Payload, &s)
 		if err != nil {
 			payload = err.Error()
-			return
+			return payload, err
 		}
-
 		if s == "message from js" {
 			payload = "message from go"
-			return
+			return payload, nil
 		}
 	}
+
 	payload = err.Error()
-	return
+	return payload, err
 }
