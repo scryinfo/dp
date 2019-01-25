@@ -1,0 +1,104 @@
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    font-family: sans-serif;
+    font-size: 16px;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.top {
+    background-color: #333333;
+    color: white;
+    height: 50px;
+    width: 100%;
+    text-align: center;
+}
+
+.top-name {
+    float: left;
+    width: 80%;
+    line-height: 50px;
+}
+
+.top-account {
+    float: left;
+    width: 15%;
+    line-height: 50px;
+}
+
+.top-logout {
+    float: right;
+    width: 5%;
+    height: 50px;
+}
+
+.left {
+    background-color: lightgray;
+    float: left;
+    overflow: auto;
+    height: calc(100% - 50px);
+    width: 15%;
+    padding-top: 80px;
+}
+
+.left-list {
+    margin: 15px 5px;
+    width: 80%;
+    padding: 0;
+    text-decoration: none;
+}
+
+.right {
+    float: right;
+    overflow: auto;
+    height: calc(100% - 50px);
+    width: 85%;
+    padding: 0 10%;
+    display: none;
+}
+
+.right-title {
+    margin-top: 50px;
+    height: 30px;
+}
+
+.right-table {
+    width: 100%;
+    height: calc(100% - 80px - 60px);
+}
+
+.right-bottom {
+    margin-top: 30px;
+    height: 30px;
+    float: right;
+}
+
+.right-publish {
+    padding: 0 15%;
+    margin: 5px 0;
+}
+
+.right-publish-describe {
+    width: 30%;
+    display: inline-block;
+    vertical-align: top;
+    text-align: left;
+}
+
+.right-publish-input {
+    width: 60%;
+    display: inline-block;
+    resize: none;
+}
+
+.right-publish-button {
+    width: 25%;
+    display: inline-block;
+    margin: 30px 10% auto auto;
+    float: right;
+}

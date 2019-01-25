@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="static/css/index.css">
+    <link rel="stylesheet" href="static/lib/astiloader/astiloader.css">
+    <link rel="stylesheet" href="static/lib/astimodaler/astimodaler.css">
+    <link rel="stylesheet" href="static/lib/astinotifier/astinotifier.css">
+    <link rel="stylesheet" href="static/lib/font-awesome-4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <div class="top">
+        <div class="top-name">My Astilectron demo</div>
+        <div class="top-about">About</div>
+    </div>
+    <div class="left" id="functions">
+        <div class="left-explain">select account:</div>
+        <div>
+            <label><input class="left-account" id="accounts" list="sa"/></label>
+            <datalist id="sa">
+                <option value="1">11</option>
+            </datalist>
+        </div>
+        <div><button class="left-button" id="login" onclick="index.onclick('login')">Login</button></div>
+        <div><button class="left-button" id="new_account" onclick="index.onclick('new_account')">Create New Account</button></div>
+    </div>
+    <div class="right" id="show">
+        <div class="right-show"><label id="describe"></label>:
+            <label><input class="right-pwd" id="password" type="password" placeholder="password"/></label></div>
+        <div><button class="right-button" id="back" onclick="index.onclick('back')">Back</button><label id="button"></label></div>
+    </div>
+    <div class="right" id="show_new">
+        <div>Your account is created : &nbsp;0x123456789012345678901234567890<br/>
+        account information will saves at local : &nbsp;demo/resources/app/static/lib/testdata/accounts.txt<br/>
+        please keep it properly.<br/><hr/>Do you want to save and login with this account?</div>
+        <div class="right-pwd"><button class="right-button" id="back_new" onclick="index.onclick('back_new')">No</button>
+        <button class="right-button" id="submit_keystore" onclick="index.onclick('submit_keystore')">Yes</button></div>
+    </div>
+
+    <script src="static/js/index.js"></script>
+    <script src="static/js/transmission.js"></script>
+    <script src="static/lib/astiloader/astiloader.js"></script>
+    <script src="static/lib/astimodaler/astimodaler.js"></script>
+    <script src="static/lib/astinotifier/astinotifier.js"></script>
+    <script src="static/lib/chart/chart.min.js"></script>
+    <script type="text/javascript">
+        index.init();
+    </script>
+</body>
+</html>
