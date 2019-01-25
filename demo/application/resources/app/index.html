@@ -17,9 +17,7 @@
         <div class="left-explain">select account:</div>
         <div>
             <label><input class="left-account" id="accounts" list="sa"/></label>
-            <datalist id="sa">
-                <option value="1">11</option>
-            </datalist>
+            <datalist id="sa"></datalist>
         </div>
         <div><button class="left-button" id="login" onclick="index.onclick('login')">Login</button></div>
         <div><button class="left-button" id="new_account" onclick="index.onclick('new_account')">Create New Account</button></div>
@@ -45,6 +43,7 @@
     <script src="static/lib/chart/chart.min.js"></script>
     <script type="text/javascript">
         index.init();
+        dt.init();
     </script>
 </body>
 </html>

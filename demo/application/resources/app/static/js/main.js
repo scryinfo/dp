@@ -55,11 +55,11 @@ let main = {
     insDL:function () {
         let row = document.getElementById("dl_table").insertRow(1);
         row.insertCell(0).innerHTML = "<label style='width: 5%'><input type='checkbox' /></label>";
-        row.insertCell(1).innerHTML = "test2";
-        row.insertCell(2).innerHTML = "test3";
-        row.insertCell(3).innerHTML = "test4";
-        row.insertCell(4).innerHTML = "test5";
-        row.insertCell(5).innerHTML = "test6";
+        row.insertCell(1).innerHTML = "test1";
+        row.insertCell(2).innerHTML = "test2";
+        row.insertCell(3).innerHTML = "test3";
+        row.insertCell(4).innerHTML = "test4";
+        row.insertCell(5).innerHTML = "test5";
     },
     insMT:function () {
         let row = document.getElementById("trans_table").insertRow(1);
