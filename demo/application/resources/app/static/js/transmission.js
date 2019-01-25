@@ -19,6 +19,7 @@ let dt = {
         astilectron.onMessage(function(message) {
             switch (message.name) {
                 case "about":
+                case "about2":
                     dt.about(message.payload);
                     return {payload: "payload"};
                     break;
