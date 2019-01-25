@@ -43,21 +43,9 @@ func main() {
 								astilog.Error(errors.Wrap(err, "unmarshal payload failed"))
 								return
 							}
-							astilog.Debugf("About modal has been displayed and payload is %s!", s)
+							astilog.Infof("About modal has been displayed and payload is %s!", s)
 						}); err != nil {
 							astilog.Error(errors.Wrap(err, "sending about event failed"))
-						}
-						return
-					},
-				},
-				{
-					Label: astilectron.PtrStr("Get accounts"),
-					OnClick: func(e astilectron.Event) (deleteListener bool) {
-
-						if err := bootstrap.SendMessage(w, "get", accounts, func(m *bootstrap.MessageIn) {
-
-						}); err != nil {
-							astilog.Error(errors.Wrap(err, "sending get account event failed"))
 						}
 						return
 					},
@@ -65,17 +53,27 @@ func main() {
 				{Role: astilectron.MenuItemRoleClose},
 			},
 		}},
+		OnWait: func(_ *astilectron.Astilectron, ws []*astilectron.Window, _ *astilectron.Menu, _ *astilectron.Tray, _ *astilectron.Menu) error {
+			w = ws[0]
+			go func() {
+				time.Sleep(3 * time.Second)
+				if err := bootstrap.SendMessage(w, "welcome", "Welcome to my go-astilectron demo!"); err != nil {
+					astilog.Error(errors.Wrap(err, "sending welcome event failed"))
+				}
+			}()
+			return nil
+		},
 		RestoreAssets: RestoreAssets,
 		Windows: []*bootstrap.Window{{
 			Homepage:       "index.html",
 			MessageHandler: handleMessages,
 			Options: &astilectron.WindowOptions{
 				Center: astilectron.PtrBool(true),
-				Height: astilectron.PtrInt(768),
-				Width:  astilectron.PtrInt(1366),
+				Height: astilectron.PtrInt(700),
+				Width:  astilectron.PtrInt(1000),
 				WebPreferences: &astilectron.WebPreferences{
 					NodeIntegration: astilectron.PtrBool(true),
-					WebSecurity:     astilectron.PtrBool(false),
+					WebSecurity:     astilectron.PtrBool(true),
 				},
 			},
 		}},

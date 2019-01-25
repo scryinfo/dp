@@ -8,11 +8,10 @@ let dt = {
         document.addEventListener('astilectron-ready', function() {
             // -
             dt.listen();
-            document.getElementById("account").innerHTML = `<button onclick="dt.smtgo()">Account</button>`;
         });
     },
     smtgo:function () {
-        astilectron.sendMessage({"name" : "hello",payload : "message from js"},function (message) {
+        astilectron.sendMessage({Name : "hello",Payload : "message from js"},function (message) {
             console.log("received " + message.payload);
         });
     },
@@ -22,6 +21,9 @@ let dt = {
                 case "about":
                     dt.about(message.payload);
                     return {payload: "payload"};
+                    break;
+                case "welcome":
+                    asticode.notifier.info(message.payload);
                     break;
             }
         });
