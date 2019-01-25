@@ -5,6 +5,16 @@ let index = {
         // wait for ready
         document.addEventListener('astilectron-ready', function() {
             // -
+            index.getAccounts();
+        });
+    },
+    getAccounts:function () {
+        astilectron.sendMessage({Name : "get.accounts",Payload: ""},function (message) {
+            let str = `<option></option>`;
+            for(let i=0;i<message.payload.length;i++){
+                str += `<option>`+message.payload[i]+`</option>`;
+            }
+            document.getElementById("accounts").innerHTML = str;
         });
     },
     onclick:function (id) {
@@ -14,12 +24,15 @@ let index = {
                 document.getElementById("button").innerHTML =
                     `<button class="right-button" id="submit_login">Submit</button>`;
                 document.getElementById("submit_login").onclick = function () {
-                    // 验证用户信息：func send(account,password) (bool) {}
-                    if (true) {
-                        window.location.href = "main.html";
-                    }else {
-                        alert("account or password is wrong.");
-                    }
+                    astilectron.sendMessage({Name:"login.verify",Payload:
+                            {account:document.getElementById("accounts").value ,
+                             password:document.getElementById("password").value}},function (message) {
+                        if (message.payload) {
+                            window.location.href = "main.html";
+                        }else {
+                            alert("account or password is wrong.");
+                        }
+                    });
                 };break;
             case "new_account":
                 index.prepare("New");
@@ -30,7 +43,15 @@ let index = {
                     document.getElementById("show_new").style.display = "block";
                 };break;
             case "submit_keystore":
-                // 将新建的账户信息保存到keystore：func send(account information) (bool) {}
+                astilectron.sendMessage({Name:"save.keystroe",Payload:
+                        {account:document.getElementById("new_account").innerHTML ,
+                         password:document.getElementById("password").value}},function (message) {
+                    if (message.payload) {
+                        window.location.href = "main.html";
+                    }else {
+                        alert("account or password is wrong.");
+                    }
+                });
                 window.location.href = "main.html";break;
             case "back":document.getElementById("show").style.display = "none";break;
             case "back_new":document.getElementById("show_new").style.display = "none";break;

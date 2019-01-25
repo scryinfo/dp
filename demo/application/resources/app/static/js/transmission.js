@@ -10,15 +10,13 @@ let dt = {
             dt.listen();
         });
     },
-    smtgo:function () {
-        astilectron.sendMessage({Name : "hello",Payload : "message from js"},function (message) {
-            console.log("received " + message.payload);
-        });
-    },
     listen:function () {
         astilectron.onMessage(function(message) {
             switch (message.name) {
                 case "about":
+                    dt.about(message.payload);
+                    return {payload: "payload"};
+                    break;
                 case "about2":
                     dt.about(message.payload);
                     return {payload: "payload"};

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
 )
@@ -13,17 +12,15 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 	)
 
 	switch m.Name {
-	case "hello":
-		var s string
-		err = json.Unmarshal(m.Payload, &s)
-		if err != nil {
-			payload = err.Error()
-			return payload, err
-		}
-		if s == "message from js" {
-			payload = "message from go"
-			return payload, nil
-		}
+	case "get.accounts":
+		payload = []string{"0x123456789012345678901234567890","0x152478321257865520236547951123"}
+		return payload,nil
+	case "login.verify":
+		payload = true
+		return payload,nil
+	case "save.keystroe":
+		payload = true
+		return payload,nil
 	}
 
 	payload = err.Error()
