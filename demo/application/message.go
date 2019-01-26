@@ -1,26 +1,63 @@
 package main
 
 import (
-	"encoding/json"
 	"github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
 )
 
-func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (payload interface{}, err error) {
-	switch m.Name {
-	case "hello":
-		var s string
-		err = json.Unmarshal(m.Payload,&s)
-		if err != nil {
-			payload = err.Error()
-			return
-		}
+const (
+	Created  = byte(iota)
+	Voted
+	Payed
+	ReadyForDownload
+	Closed
+)
 
-		if s == "message from js" {
-			payload = "message from go"
-			return
+func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, error) {
+	var (
+		payload interface{}
+		err     error
+	)
+
+	switch m.Name {
+	case "get.accounts":
+		payload = []string{"0x123456789012345678901234567890", "0x152478321257865520236547951123"}
+		return payload, nil
+	case "login.verify":
+		payload = true
+		return payload, nil
+	case "save.keystroe":
+		payload = true
+		return payload, nil
+	case "get.datalist":
+		payload = []Datalist{
+			{"Qm461","title1", 100, "tag1,tag2,tag3", "test description", "0x123456789012345678901234567890"},
 		}
+		return payload, nil
+	case "get.transaction":
+		payload = []Transaction{
+			{"title1",1,"0x123456789012345678901234567890","0x152478321257865520236547951123",Created},
+		}
+		return payload,nil
 	}
+
 	payload = err.Error()
-	return
+	return payload, err
+}
+
+type Datalist struct {
+	ID string
+	Title       string
+	Price       int
+	Keys        string
+	Description string
+	Owner       string
+}
+
+type Transaction struct {
+	Title         string
+	TransactionID int
+	Seller        string
+	Buyer         string
+	State         byte
 }
