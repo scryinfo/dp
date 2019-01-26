@@ -20,6 +20,23 @@
         },
         {
           "indexed": false,
+          "name": "users",
+          "type": "address[]"
+        }
+      ],
+      "name": "RegisterVerifier",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "seqNo",
+          "type": "string"
+        },
+        {
+          "indexed": false,
           "name": "publishId",
           "type": "string"
         },
@@ -62,8 +79,8 @@
         },
         {
           "indexed": false,
-          "name": "chosenProofIds",
-          "type": "bytes32"
+          "name": "proofIds",
+          "type": "bytes32[]"
         },
         {
           "indexed": false,
@@ -94,13 +111,67 @@
         },
         {
           "indexed": false,
-          "name": "publishId",
+          "name": "proofIds",
+          "type": "bytes32[]"
+        },
+        {
+          "indexed": false,
+          "name": "users",
+          "type": "address[]"
+        }
+      ],
+      "name": "VerifiersChosen",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "seqNo",
           "type": "string"
         },
         {
           "indexed": false,
-          "name": "state",
-          "type": "uint8"
+          "name": "transactionId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "judge",
+          "type": "bool"
+        },
+        {
+          "indexed": false,
+          "name": "comments",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "name": "users",
+          "type": "address[]"
+        }
+      ],
+      "name": "Vote",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "seqNo",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "name": "transactionId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "publishId",
+          "type": "string"
         },
         {
           "indexed": false,
@@ -171,6 +242,20 @@
         {
           "name": "seqNo",
           "type": "string"
+        }
+      ],
+      "name": "registerAsVerifier",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "seqNo",
+          "type": "string"
         },
         {
           "name": "publishId",
@@ -216,6 +301,32 @@
         }
       ],
       "name": "createTransaction",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "seqNo",
+          "type": "string"
+        },
+        {
+          "name": "txId",
+          "type": "uint256"
+        },
+        {
+          "name": "judge",
+          "type": "bool"
+        },
+        {
+          "name": "comments",
+          "type": "string"
+        }
+      ],
+      "name": "vote",
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
@@ -278,6 +389,56 @@
         }
       ],
       "name": "confirmDataTruth",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "deposit",
+          "type": "uint256"
+        }
+      ],
+      "name": "setVerifierDepositToken",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "num",
+          "type": "uint8"
+        }
+      ],
+      "name": "setVerifierNum",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "txId",
+          "type": "uint256"
+        },
+        {
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "name": "credit",
+          "type": "uint8"
+        }
+      ],
+      "name": "creditsToVerifier",
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",

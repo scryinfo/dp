@@ -9,33 +9,33 @@ import (
 )
 
 type ContractClient struct {
-	account *accounts.Account
+	Account *accounts.Account
 }
 
 func NewContractClient(publicKey string) (*ContractClient, error) {
     return &ContractClient{
-		account: &accounts.Account{publicKey},
+		Account: &accounts.Account{publicKey},
 	}, nil
 }
 
-func CreateContractClient(publicKey string, password string) (*ContractClient, error) {
+func CreateContractClient(password string) (*ContractClient, error) {
     account, err := accounts.GetAMInstance().CreateAccount(password)
     if err != nil {
-        fmt.Println("failed to create account, error:", err)
+        fmt.Println("failed to create Account, error:", err)
         return nil, err
     }
 
     return &ContractClient{
-        account: account,
+        Account: account,
     }, nil
 }
 
 func (client ContractClient) SubscribeEvent(eventName string, callback chainevents.EventCallback)  {
-	chainevents.SubscribeExternal(common.HexToAddress(client.account.Address), eventName, callback)
+	chainevents.SubscribeExternal(common.HexToAddress(client.Account.Address), eventName, callback)
 }
 
-func (client ContractClient) Authticate(password string) (bool, error) {
-    return accounts.GetAMInstance().AuthAccount(client.account.Address, password)
+func (client ContractClient) Authenticate(password string) (bool, error) {
+    return accounts.GetAMInstance().AuthAccount(client.Account.Address, password)
 }
 
 func (client *ContractClient) SwitchAccount(pubkey string) error {
@@ -43,7 +43,7 @@ func (client *ContractClient) SwitchAccount(pubkey string) error {
         return errors.New("The public key is not valid")
     }
 
-    client.account.Address = pubkey
+    client.Account.Address = pubkey
     return nil
 }
 
