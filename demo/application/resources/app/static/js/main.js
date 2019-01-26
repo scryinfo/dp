@@ -5,6 +5,27 @@ let main = {
         // wait for ready
         document.addEventListener('astilectron-ready', function() {
             // -
+            main.getUser();
+            main.getDatalist();
+            main.getTransaction();
+        });
+    },
+    getUser:function () {
+        let acc = location.search.split("=")[1];
+        document.getElementById("account").innerHTML = acc;
+    },
+    getDatalist:function () {
+        astilectron.sendMessage({Name:"get.datalist",Payload:""},function (message) {
+            for (let i=0;i<message.payload.length;i++) {
+                main.insDL(message.payload[i]);
+            }
+        });
+    },
+    getTransaction:function () {
+        astilectron.sendMessage({Name:"get.transaction",Payload:""},function (message) {
+            for (let i=0;i<message.payload.length;i++) {
+                main.insMT(message.payload[i]);
+            }
         });
     },
     onclick:function (id) {
@@ -52,21 +73,30 @@ let main = {
             default: alert("Illegal command " + c)
         }
     },
-    insDL:function () {
+    insDL:function (dl) {
         let row = document.getElementById("dl_table").insertRow(1);
-        row.insertCell(0).innerHTML = "<label style='width: 5%'><input type='checkbox' /></label>";
-        row.insertCell(1).innerHTML = "test1";
-        row.insertCell(2).innerHTML = "test2";
-        row.insertCell(3).innerHTML = "test3";
-        row.insertCell(4).innerHTML = "test4";
-        row.insertCell(5).innerHTML = "test5";
+        row.insertCell(0).innerHTML =
+            "<label style='width: 5%'><input type='checkbox' name='dl_checkboxes' id='1'/></label>";
+        document.getElementById("1").value = dl.ID;
+        row.insertCell(1).innerHTML = dl.Title;
+        row.insertCell(2).innerHTML = dl.Price;
+        row.insertCell(3).innerHTML = dl.Keys;
+        row.insertCell(4).innerHTML = dl.Description;
+        row.insertCell(5).innerHTML = dl.Owner;
     },
-    insMT:function () {
+    insMT:function (mt) {
+        switch (mt.State) {
+            case '0':mt.State = "Created";break;
+            case '1':mt.State = "Voted";break;
+            case '2':mt.State = "Payed";break;
+            case '3':mt.State = "ReadyForDownload";break;
+            case '4':mt.State = "Closed";break;
+        }
         let row = document.getElementById("trans_table").insertRow(1);
-        row.insertCell(0).innerHTML = "test1";
-        row.insertCell(1).innerHTML = "test2";
-        row.insertCell(2).innerHTML = "test3";
-        row.insertCell(3).innerHTML = "test4";
-        row.insertCell(4).innerHTML = "test5";
+        row.insertCell(0).innerHTML = mt.Title;
+        row.insertCell(1).innerHTML = mt.TransactionID;
+        row.insertCell(2).innerHTML = mt.Seller;
+        row.insertCell(3).innerHTML = mt.Buyer;
+        row.insertCell(4).innerHTML = mt.State;
     },
 };

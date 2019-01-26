@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <table id="dl_table">
+        <tr>
+            <th style="width: 5%;">&nbsp;</th>
+            <th>Title</th>
+            <th>Price</th>
+            <th>Keys</th>
+            <th>Description</th>
+            <th>Owner</th>
+        </tr>
+    </table>
+    <p><input type="button" onclick="js()" value="insert"/></p>
+    <p><input type="button" onclick="show()" value="show"/></p>
+
+    <script>
+        function js() {
+            let dl = {ID:"Qm461",Title:"title1",Price: 100,Keys: "tag1,tag2,tag3",
+                    Description:"test description",Owner: "0x123456789012345678901234567890"};
+            let row = document.getElementById("dl_table").insertRow(1);
+            row.insertCell(0).innerHTML =
+                "<label style='width: 5%'><input type='checkbox' name='dl_checkboxes' id='1'/></label>";
+            document.getElementById("1").value = dl.ID;
+            row.insertCell(1).innerHTML = dl.Title;
+            row.insertCell(2).innerHTML = dl.Price;
+            row.insertCell(3).innerHTML = dl.Keys;
+            row.insertCell(4).innerHTML = dl.Description;
+            row.insertCell(5).innerHTML = dl.Owner;
+        }
+        function show() {
+            let cbs = document.getElementsByName("dl_checkboxes");
+            let str = [];
+            for(let i=0;i<cbs.length;i++) {
+                if (cbs[i].checked) {
+                    str.push(cbs[i].value);
+                }
+            }
+            alert(str);
+        }
+    </script>
+</body>
+</html>
