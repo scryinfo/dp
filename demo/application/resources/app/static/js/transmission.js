@@ -1,4 +1,4 @@
-let dt = {
+let transmission = {
     init:function () {
         // Init
         asticode.loader.init();
@@ -7,21 +7,22 @@ let dt = {
 
         document.addEventListener('astilectron-ready', function() {
             // -
-            dt.listen();
-            document.getElementById("account").innerHTML = `<button onclick="dt.smtgo()">Account</button>`;
-        });
-    },
-    smtgo:function () {
-        astilectron.sendMessage({"name" : "hello",payload : "message from js"},function (message) {
-            console.log("received " + message.payload);
+            transmission.listen();
         });
     },
     listen:function () {
         astilectron.onMessage(function(message) {
             switch (message.name) {
                 case "about":
-                    dt.about(message.payload);
+                    transmission.about(message.payload);
                     return {payload: "payload"};
+                    break;
+                case "about2":
+                    transmission.about(message.payload);
+                    return {payload: "payload"};
+                    break;
+                case "welcome":
+                    asticode.notifier.info(message.payload);
                     break;
             }
         });
