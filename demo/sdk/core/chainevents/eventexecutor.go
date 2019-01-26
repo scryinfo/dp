@@ -1,9 +1,9 @@
 package chainevents
 
 import (
-	"../ethereum/events"
-	"fmt"
-	"github.com/ethereum/go-ethereum/common"
+    "../ethereum/events"
+    "fmt"
+    "github.com/ethereum/go-ethereum/common"
 )
 
 func ExecuteEvents(dataChannel chan events.Event, externalEventRepo *EventRepository) {
@@ -44,7 +44,13 @@ func executeEvent(event events.Event, eventRepo *EventRepository) bool {
         }
 
     } else {
-        executeAllEvent(subscribeInfoMap, event)
+        obj, ok := event.Data.Get("owner").(string)
+        if ok {
+            owner := common.HexToAddress(obj)
+            executeMatchedEvent(subscribeInfoMap, []common.Address{owner}, event)
+        } else {
+            fmt.Println("Warning: unknown event type, event:", event.Name)
+        }
     }
 
     return true

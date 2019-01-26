@@ -1,18 +1,18 @@
 package contractinterfacewrapper
 
 import (
-	"../../contractinterface"
-	"../../util/storage/ipfsaccess"
-	"../../util/security"
-	"../../util/uuid"
-	op "../../core/chainoperations"
-	"errors"
-	"fmt"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/btcsuite/btcutil/base58"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"math/big"
+    "../../contractinterface"
+    op "../../core/chainoperations"
+    "../../util/security"
+    "../../util/storage/ipfsaccess"
+    "../../util/uuid"
+    "errors"
+    "fmt"
+    "github.com/btcsuite/btcutil/base58"
+    "github.com/ethereum/go-ethereum/accounts/abi/bind"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/ethclient"
+    "math/big"
 )
 
 var (
@@ -163,6 +163,33 @@ func ApproveTransfer(txParams *op.TransactParams, spender common.Address, value 
 	}
 
 	return err
+}
+
+func Vote(txParams *op.TransactParams, txId *big.Int, judge bool, comments string) (error) {
+    tx, err := scryProtocol.Vote(buildTxOpts(txParams), uuid.GenerateUUID(), txId, judge, comments)
+    if err == nil {
+        fmt.Println("Vote:", string(tx.Data()), " tx hash:", tx.Hash().String())
+    }
+
+    return err
+}
+
+func RegisterAsVerifier(txParams *op.TransactParams) (error) {
+    tx, err := scryProtocol.RegisterAsVerifier(buildTxOpts(txParams), uuid.GenerateUUID())
+    if err == nil {
+        fmt.Println("RegisterAsVerifier:", string(tx.Data()), " tx hash:", tx.Hash().String())
+    }
+
+    return err
+}
+
+func CreditsToVerifier(txParams *op.TransactParams, txId *big.Int, to common.Address, credit uint8) (error) {
+    tx, err := scryProtocol.CreditsToVerifier(buildTxOpts(txParams), txId, to, credit)
+    if err == nil {
+        fmt.Println("RegisterAsVerifier:", string(tx.Data()), " tx hash:", tx.Hash().String())
+    }
+
+    return err
 }
 
 func buildTxOpts(txParams *op.TransactParams) (*bind.TransactOpts) {
