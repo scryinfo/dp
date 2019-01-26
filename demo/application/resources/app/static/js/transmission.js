@@ -1,4 +1,4 @@
-let dt = {
+let transmission = {
     init:function () {
         // Init
         asticode.loader.init();
@@ -7,18 +7,18 @@ let dt = {
 
         document.addEventListener('astilectron-ready', function() {
             // -
-            dt.listen();
+            transmission.listen();
         });
     },
     listen:function () {
         astilectron.onMessage(function(message) {
             switch (message.name) {
                 case "about":
-                    dt.about(message.payload);
+                    transmission.about(message.payload);
                     return {payload: "payload"};
                     break;
                 case "about2":
-                    dt.about(message.payload);
+                    transmission.about(message.payload);
                     return {payload: "payload"};
                     break;
                 case "welcome":

@@ -42,17 +42,9 @@
                     <th>Description</th>
                     <th>Owner</th>
                 </tr>
-                <tr>
-                    <td style="width: 5%;"><label><input type="checkbox"/></label></td>
-                    <td>test data</td>
-                    <td>test data</td>
-                    <td>test data</td>
-                    <td>test data</td>
-                    <td>test data</td>
-                </tr>
             </table>
         </div>
-        <div class="right-bottom">Pre 1 2 3 <input type="button" onclick="main.insDL()" value="Insert"/> Next</div>
+        <div class="right-bottom">Pre 1 2 3 <label><input type="text" placeholder="page"/></label> Next</div>
     </div>
     <div class="right" id="show_transaction"><div class="right-title"></div>
         <div>
@@ -64,16 +56,9 @@
                     <th>Buyer</th>
                     <th>State</th>
                 </tr>
-                <tr>
-                    <td>test data</td>
-                    <td>test data</td>
-                    <td>test data</td>
-                    <td>test data</td>
-                    <td>test data</td>
-                </tr>
             </table>
         </div>
-        <div class="right-bottom">Pre 1 2 3 <input type="button" onclick="main.onclick('insMT')" value="Insert"/> Next</div>
+        <div class="right-bottom">Pre 1 2 3 <label><input type="text" placeholder="page"/></label> Next</div>
     </div>
     <div class="right" id="show_publish"><div class="right-title"></div>
         <div class="right-publish"><label class="right-publish-describe">Title</label>
@@ -103,7 +88,7 @@
     <script src="static/lib/chart/chart.min.js"></script>
     <script type="text/javascript">
         main.init();
-        dt.init();
+        transmission.init();
     </script>
 </body>
 </html>

@@ -24,11 +24,12 @@ let index = {
                 document.getElementById("button").innerHTML =
                     `<button class="right-button" id="submit_login">Submit</button>`;
                 document.getElementById("submit_login").onclick = function () {
+                    let acc = document.getElementById("accounts").value;
                     astilectron.sendMessage({Name:"login.verify",Payload:
-                            {account:document.getElementById("accounts").value ,
+                            {account:acc,
                              password:document.getElementById("password").value}},function (message) {
                         if (message.payload) {
-                            window.location.href = "main.html";
+                            window.location.href = "main.html?acc="+acc;
                         }else {
                             alert("account or password is wrong.");
                         }
@@ -43,16 +44,16 @@ let index = {
                     document.getElementById("show_new").style.display = "block";
                 };break;
             case "submit_keystore":
+                let acc = document.getElementById("new_account").innerHTML;
                 astilectron.sendMessage({Name:"save.keystroe",Payload:
-                        {account:document.getElementById("new_account").innerHTML ,
+                        {account: acc,
                          password:document.getElementById("password").value}},function (message) {
                     if (message.payload) {
-                        window.location.href = "main.html";
+                        window.location.href = "main.html?"+acc;
                     }else {
                         alert("account or password is wrong.");
                     }
-                });
-                window.location.href = "main.html";break;
+                });break;
             case "back":document.getElementById("show").style.display = "none";break;
             case "back_new":document.getElementById("show_new").style.display = "none";break;
         }
