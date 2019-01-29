@@ -75,6 +75,7 @@ func main() {
 							return
 						},
 					},
+					{Role:astilectron.MenuItemRoleReload},
 				},
 			},
 		},
