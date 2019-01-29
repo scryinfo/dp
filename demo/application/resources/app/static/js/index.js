@@ -44,12 +44,13 @@ let index = {
                     document.getElementById("show_new").style.display = "block";
                 };break;
             case "submit_keystore":
+                // 这里的账户也是go随机生成的，这里使用模拟数据
                 let acc = document.getElementById("new_account").innerHTML;
-                astilectron.sendMessage({Name:"save.keystroe",Payload:
+                astilectron.sendMessage({Name:"save.keystore",Payload:
                         {account: acc,
                          password:document.getElementById("password").value}},function (message) {
                     if (message.payload) {
-                        window.location.href = "main.html?"+acc;
+                        window.location.href = "main.html?acc="+acc;
                     }else {
                         alert("account or password is wrong.");
                     }

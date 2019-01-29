@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html >
+<head>
+    <title>Test demo</title>
+</head>
+<body>
+    <span id="1">123</span>
+    <p><input type="button" onclick="f1()" value="function1 button"/></p>
+    <p><input type="button" onclick="f2()" value="function2 button"/></p>
+    <script type="text/javascript">
+        function f1() {
+            alert(document.getElementById("1").value);
+        }
+        function f2() {
+            alert(document.getElementById("1").innerHTML);
+        }
+    </script>
+</body>
+</html>

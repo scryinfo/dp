@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	Created  = byte(iota)
+	Created = byte(iota)
 	Voted
 	Payed
 	ReadyForDownload
@@ -26,19 +26,25 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 	case "login.verify":
 		payload = true
 		return payload, nil
-	case "save.keystroe":
+	case "save.keystore":
 		payload = true
 		return payload, nil
 	case "get.datalist":
 		payload = []Datalist{
-			{"Qm461","title1", 100, "tag1,tag2,tag3", "test description", "0x123456789012345678901234567890"},
+			{"Qm461", "title1", 100, "tag1,tag2,tag3", "test description", "0x123456789012345678901234567890"},
 		}
 		return payload, nil
 	case "get.transaction":
 		payload = []Transaction{
-			{"title1",1,"0x123456789012345678901234567890","0x152478321257865520236547951123",Created},
+			{"title1", 1, "0x123456789012345678901234567890", "0x152478321257865520236547951123", Created},
 		}
-		return payload,nil
+		return payload, nil
+	case "buy":
+		payload = true
+		return payload, nil
+	case "publish":
+		payload = true
+		return payload, nil
 	}
 
 	payload = err.Error()
@@ -46,7 +52,7 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 }
 
 type Datalist struct {
-	ID string
+	ID          string
 	Title       string
 	Price       int
 	Keys        string
