@@ -2,49 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title><style type="text/css">
-        body{
-        }
-        table .table-striped{
-        }
-        table th{
-            text-align: left;
-            height: 30px;
-            background: #deeeee;
-            padding: 5px;
-            margin: 0;
-            border: 0;
-        }
-        table td{
-            text-align: left;
-            height:30px;
-            margin: 0;
-            padding: 5px;
-            border: 0;
-        }
-        table tr:hover{
-            background: #eeeeee;
-        }
-        .span6{
-            /*width:500px;*/
-            float:inherit;
-            margin:10px;
-        }
-        #pagiDiv span{
-            background:#1e90ff;
-            border-radius: .2em;
-            padding:5px;
-        }
-    </style>
+    <title></title>
     <script type="text/javascript">
-        //全局变量
+        // 全局变量
         let numCount;       //数据总数量
         let columnsCounts;  //数据列数量
         let pageCount;      //每页显示的数量
         let pageNum;        //总页数
         let currPageNum ;   //当前页数
 
-        //页面标签变量
+        // 页面标签变量
         let blockTable;
         let preSpan;
         let firstSpan;
@@ -54,7 +21,7 @@
         let currPageSpan;
 
         window.onload=function(){
-            //页面标签变量
+            // 为页面标签变量赋值
             blockTable = document.getElementById("blocks");
             preSpan = document.getElementById("spanPre");
             firstSpan = document.getElementById("spanFirst");
@@ -63,22 +30,22 @@
             pageNumSpan = document.getElementById("spanTotalPage");
             currPageSpan = document.getElementById("spanPageNum");
 
-            numCount = document.getElementById("blocks").rows.length - 1;       //取table的行数作为数据总数量（减去标题行1）
-            alert(numCount);
+            // 为全局变量赋值
+            numCount = document.getElementById("blocks").rows.length - 1;
             columnsCounts = blockTable.rows[0].cells.length;
             pageCount = 5;
             pageNum = parseInt(numCount/pageCount);
-            if(0 != numCount%pageCount){
+            if(numCount%pageCount !== 0){
                 pageNum += 1;
             }
 
-            firstPage();
+            showPage(1);
         };
     </script>
 </head>
-<body align="center">
+<body >
     <div class="container" align="center" >
-        <table id="blocks" class="table table-striped" style="margin-top:25px">
+        <table id="blocks" style="margin-top:25px">
             <tr>
                 <th>Height</th>
                 <th>Time</th>
@@ -97,30 +64,72 @@
                 <td class="hidden-phone">000000000000000004c6a895e2ea6e12ff5e8046454ab663d14b569734228b8d</td>
                 <td class="hidden-phone">999.15</td>
             </tr>
-    
             <tr>
                 <td>424544</td>
                 <td>2016-08-10 10:17:29</td>
-                <td class="hidden-phone"><a href="/block-index/1134493/0000000000000000053027e87de8298f06e42d30933c9fea3af9c116a5852659">0000000000000000053027e87de8298f06e42d30933c9fea3af9c116a5852659</a></td>
+                <td class="hidden-phone">0000000000000000053027e87de8298f06e42d30933c9fea3af9c116a5852659</td>
                 <td class="hidden-phone">999.09</td>
             </tr>
-    
             <tr>
-                <td><a href="/block-height/424530">424530</a> <font color="green">(Main Chain)</font></td>
+                <td>424530</td>
                 <td>2016-08-10 07:41:23</td>
-    
-                <td class="hidden-phone"><a href="/block-index/1134479/000000000000000001e1450b8089bac13c69942660f54360abeb0b8a382a5cb5">000000000000000001e1450b8089bac13c69942660f54360abeb0b8a382a5cb5</a></td>
+                <td class="hidden-phone">000000000000000001e1450b8089bac13c69942660f54360abeb0b8a382a5cb5</td>
                 <td class="hidden-phone">626.62</td>
             </tr>
-    
             <tr>
-                <td><a href="/block-height/424528">424528</a> <font color="green">(Main Chain)</font></td>
+                <td>424528</td>
                 <td>2016-08-10 07:25:05</td>
-    
-                <td class="hidden-phone"><a href="/block-index/1134477/000000000000000000241a05e40031a7b71c17babbb00255a633c224b8959775">000000000000000000241a05e40031a7b71c17babbb00255a633c224b8959775</a></td>
+                <td class="hidden-phone">000000000000000000241a05e40031a7b71c17babbb00255a633c224b8959775</td>
                 <td class="hidden-phone">239.95</td>
             </tr>
-    
+            <tr>
+                <td>424528</td>
+                <td>2016-08-10 07:25:05</td>
+                <td class="hidden-phone">000000000000000000241a05e40031a7b71c17babbb00255a633c224b8959775</td>
+                <td class="hidden-phone">239.95</td>
+            </tr>
+            <tr>
+                <td>424528</td>
+                <td>2016-08-10 07:25:05</td>
+                <td class="hidden-phone">000000000000000000241a05e40031a7b71c17babbb00255a633c224b8959775</td>
+                <td class="hidden-phone">239.95</td>
+            </tr>
+            <tr>
+                <td>424528</td>
+                <td>2016-08-10 07:25:05</td>
+                <td class="hidden-phone">000000000000000000241a05e40031a7b71c17babbb00255a633c224b8959775</td>
+                <td class="hidden-phone">239.95</td>
+            </tr>
+            <tr>
+                <td>424528</td>
+                <td>2016-08-10 07:25:05</td>
+                <td class="hidden-phone">000000000000000000241a05e40031a7b71c17babbb00255a633c224b8959775</td>
+                <td class="hidden-phone">239.95</td>
+            </tr>
+            <tr>
+                <td>424528</td>
+                <td>2016-08-10 07:25:05</td>
+                <td class="hidden-phone">000000000000000000241a05e40031a7b71c17babbb00255a633c224b8959775</td>
+                <td class="hidden-phone">239.95</td>
+            </tr>
+            <tr>
+                <td>424528</td>
+                <td>2016-08-10 07:25:05</td>
+                <td class="hidden-phone">000000000000000000241a05e40031a7b71c17babbb00255a633c224b8959775</td>
+                <td class="hidden-phone">239.95</td>
+            </tr>
+            <tr>
+                <td>424528</td>
+                <td>2016-08-10 07:25:05</td>
+                <td class="hidden-phone">000000000000000000241a05e40031a7b71c17babbb00255a633c224b8959775</td>
+                <td class="hidden-phone">239.95</td>
+            </tr>
+            <tr>
+                <td>424528</td>
+                <td>2016-08-10 07:25:05</td>
+                <td class="hidden-phone">000000000000000000241a05e40031a7b71c17babbb00255a633c224b8959775</td>
+                <td class="hidden-phone">239.95</td>
+            </tr>
         </table>
     
         <div id="pagiDiv" align="right" style="width:1200px">
@@ -132,136 +141,42 @@
         </div>
     </div>
     <script type="text/javascript">
-        function firstPage(){
-            hide();
-            currPageNum = 1;
-            showCurrPage(currPageNum);
-            showTotalPage();
-            for(i = 1; i < pageCount + 1; i++){
-                blockTable.rows[i].style.display = "";
-            }
-
-            firstText();
-            preText();
-            nextLink();
-            lastLink();
-        }
-
-        function prePage(){
-            hide();
-            currPageNum--;
-            showCurrPage(currPageNum);
-            showTotalPage();
-            let firstR = firstRow(currPageNum);
-            let lastR = lastRow(firstR);
-            for(i = firstR; i < lastR; i++){
-                blockTable.rows[i].style.display = "";
-            }
-
-            if(1 == currPageNum){
-                firstText();
-                preText();
-                nextLink();
-                lastLink();
-            }else if(pageNum == currPageNum){
-                preLink();
-                firstLink();
-                nextText();
-                lastText();
-            }else{
-                firstLink();
-                preLink();
-                nextLink();
-                lastLink();
-            }
-
-        }
-
-        function nextPage(){
-            hide();
-            currPageNum++;
-            showCurrPage(currPageNum);
-            showTotalPage();
-            let firstR = firstRow(currPageNum);
-            let lastR = lastRow(firstR);
-            for(i = firstR; i < lastR; i ++){
-                blockTable.rows[i].style.display = "";
-            }
-
-            if(1 == currPageNum){
-                firstText();
-                preText();
-                nextLink();
-                lastLink();
-            }else if(pageNum == currPageNum){
-                preLink();
-                firstLink();
-                nextText();
-                lastText();
-            }else{
-                firstLink();
-                preLink();
-                nextLink();
-                lastLink();
-            }
-        }
-
-        function lastPage(){
-            hide();
-            currPageNum = pageNum;
-            showCurrPage(currPageNum);
-            showTotalPage();
-            let firstR = firstRow(currPageNum);
-            for(i = firstR; i < numCount + 1; i++){
-                blockTable.rows[i].style.display = "";
-            }
-
-            firstLink();
-            preLink();
-            nextText();
-            lastText();
-        }
-
-        // 计算将要显示的页面的首行和尾行
-        function firstRow(currPageNum){
-            return pageCount*(currPageNum - 1) + 1;
-        }
-
-        function lastRow(firstRow){
-            let lastRow = firstRow + pageCount;
-            if(lastRow > numCount + 1){
-                lastRow = numCount + 1;
-            }
-            return lastRow;
-        }
-
-        function showCurrPage(cpn){
-            currPageSpan.innerHTML = cpn;
-        }
-
-        function showTotalPage(){
-            pageNumSpan.innerHTML = pageNum;
-        }
-
-        //隐藏所有行
-        function hide(){
+        function showPage(page) {
             for(let i = 1; i < numCount + 1; i ++){
                 blockTable.rows[i].style.display = "none";
             }
+            currPageNum = page;
+            currPageSpan.innerHTML = currPageNum;
+            pageNumSpan.innerHTML = pageNum;
+            let firstR = pageCount*(currPageNum - 1) + 1;
+            let lastR = (firstR + pageCount)<=(numCount + 1) ? (firstR + pageCount) : (numCount + 1);
+            for(let i = firstR; i < lastR; i++){
+                blockTable.rows[i].style.display = "";
+            }
+
+            if(1 === currPageNum){
+                aheadText();
+                hinderLink();
+            }else if(pageNum === currPageNum){
+                aheadLink();
+                hinderText();
+            }else{
+                aheadLink();
+                hinderLink();
+            }
         }
 
-        //控制首页等功能的显示与不显示
-        function firstLink(){firstSpan.innerHTML = "<a href='javascript:firstPage();'>First</a>";}
-        function firstText(){firstSpan.innerHTML = "First";}
+        function aheadText() {firstSpan.innerHTML = "First";preSpan.innerHTML = "Pre";}
+        function aheadLink() {
+            firstSpan.innerHTML = "<a href='javascript:showPage(1);'>First</a>";
+            preSpan.innerHTML = "<a href='javascript:showPage(currPageNum-1);'>Pre</a>";
+        }
 
-        function preLink(){preSpan.innerHTML = "<a href='javascript:prePage();'>Pre</a>";}
-        function preText(){preSpan.innerHTML = "Pre";}
-
-        function nextLink(){nextSpan.innerHTML = "<a href='javascript:nextPage();'>Next</a>";}
-        function nextText(){nextSpan.innerHTML = "Next";}
-
-        function lastLink(){lastSpan.innerHTML = "<a href='javascript:lastPage();'>Last</a>";}
-        function lastText(){lastSpan.innerHTML = "Last";}
+        function hinderText() {nextSpan.innerHTML = "Next";lastSpan.innerHTML = "Last";}
+        function hinderLink() {
+            nextSpan.innerHTML = "<a href='javascript:showPage(currPageNum+1);'>Next</a>";
+            lastSpan.innerHTML = "<a href='javascript:showPage(pageNum);'>Last</a>";
+        }
     </script>
 </body>
 </html>

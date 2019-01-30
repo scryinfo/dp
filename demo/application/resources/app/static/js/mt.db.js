@@ -14,8 +14,20 @@ mt_db.init = function(){
     };
 
     request.onsuccess = function(event) {
-        //此处采用异步通知. 在使用curd的时候请通过事件触发
+        // 此处采用异步通知. 在使用curd的时候请通过事件触发
         mt_db.db = event.target.result;
+        let t = mt_db.db.transaction(mt_db.db_store_name,"readonly");
+        let s = t.objectStore(mt_db.db_store_name);
+        let c = s.openCursor();
+        c.onsuccess = function(event) {
+            let cursor = event.target.result;
+            if (cursor) {
+                let p = {};
+                p.title = cursor.value.title;p.seller = cursor.value.seller;p.buyer = cursor.value.buyer;p.state = cursor.value.state;
+                main.insMT(p,cursor.key);
+                cursor.continue();
+            }
+        };
     };
 };
 
@@ -35,11 +47,11 @@ mt_db.delete = function(primaryKey) {
 };
 
 mt_db.select = function(key) {
-    //第二个参数可以省略
+    // 第二个参数可以省略
     let transaction = mt_db.db.transaction(mt_db.db_store_name,"readwrite");
     let store = transaction.objectStore(mt_db.db_store_name);
     let request;
-    if(key)
+    if (key)
         request = store.get(key);
     else
         request = store.getAll();
