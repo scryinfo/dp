@@ -21,13 +21,13 @@ html, body {
 
 .top-name {
     float: left;
-    width: 80%;
+    width: 70%;
     line-height: 50px;
 }
 
 .top-about {
-    margin-left: 80%;
-    width: 20%;
+    float: right;
+    width: 30%;
     line-height: 50px;
 }
 
