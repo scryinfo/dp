@@ -1,73 +1,144 @@
 var scryProtocol = artifacts.require("./ScryProtocol.sol")
 var scryToken = artifacts.require("./ScryToken.sol")
 
-var ptl
-var ste
-contract('ScryProtocol', function(accounts) {
-    it("Event Publish should be watched", function() {
-        return scryProtocol.deployed().then(function(instance){
-            ptl = instance
-            return ptl.publishDataInfo("seqno", "publishId", 1000, "0", ["1","2"], "2", true);
-        }).then(function(result){
-            console.log(result)
+var ptl, ste;
+var deployer, seller, buyer, verifier1, verifier2, verifier3, chosenVerfiers;
+var publishId, txId;
+contract('ScryProtocol', function (accounts) {
 
-            for (var i = 0; i < result.logs.length; i++) {
-                var log = result.logs[i];
-        
-                if (log.event == "DataPublish") {
-                    console.log("Event DataPublish watched");
-                    break;
-                }
-            }
-        }).catch(function(err){
-            assert.fail()
-            console.log("catched error:", err)
-        })
-    })/*
-    it("Event TransactionCreate should be watched", function() {
-        return scryToken.deployed().then(function(instance){
-            ste = instance;
-        }).then(function(){
-            return scryProtocol.deployed(ste.address).then(function(instance){
-                ptl = instance;
-            })
+    before(function() {
+        InitUsers();
+    })
+
+    before(function() {
+        InitContracts();
+    })
+
+    it("Normal procedure with verifier", function () {
+        return ptl.publishDataInfo("seqno", "publishId", 1000, "0", ["1", "2"], "2", true, {from: seller}).then(function (result) {
+            eventName = "DataPublish";
+            assert(checkEvent(eventName, result), "failed to watch event " + eventName);
         }).then(function() {
-            return ptl.publishDataInfo("seqno1", "publishId", 1000, "0", ["1","2"], "2", true);
-        }).then(function(){
-            return ste.approve(ptl.address, 1000);
-        }).then(function() {
-            console.log("Start creating transaction...");
-            return ptl.createTransaction("seqno2", "publishId");
+            //verifier approve that contract transfer deposit
+            return ste.approve(ptl.address, 10000, {from: verifier1});
         }).then(function(result) {
-            console.log("result", result);
-            for (var i = 0; i < result.logs.length; i++) {
-                var log = result.logs[i];
-        
-                if (log.event == "TransactionCreate") {
-                    console.log("Event TransactionCreate watched");
-                    break;
-                }
-            }
-        }).catch(function(err){
-            assert.fail()
+            assert(result, "failed to approve contract to transfer deposit"); 
+        }).then(function() {
+            //register verifier
+            return ptl.registerAsVerifier("seqno1", {from: verifier1});
+        }).then(function(result) {
+            //onRegisterVerifier
+            eventName = "RegisterVerifier";
+            assert(checkEvent(eventName, result), "failed to watch event " + eventName);
+        }).then(function() {
+            //verifier approve that contract transfer deposit
+            return ste.approve(ptl.address, 10000, {from: verifier2});
+        }).then(function(result) {
+            assert(result, "failed to approve contract to transfer deposit"); 
+        }).then(function() {
+            //register verifier
+            return ptl.registerAsVerifier("seqno1", {from: verifier2});
+        }).then(function(result) {
+            //onRegisterVerifier
+            eventName = "RegisterVerifier";
+            assert(checkEvent(eventName, result), "failed to watch event " + eventName);
+        }).then(function() {
+            //verifier approve that contract transfer deposit
+            return ste.approve(ptl.address, 10000, {from: verifier3});
+        }).then(function(result) {
+            assert(result, "failed to approve contract to transfer deposit"); 
+        }).then(function() {
+            //register verifier
+            return ptl.registerAsVerifier("seqno1", {from: verifier3});
+        }).then(function(result) {
+            //onRegisterVerifier
+            eventName = "RegisterVerifier";
+            assert(checkEvent(eventName, result), "failed to watch event " + eventName);
+            ste.approve(ptl.address, 1000, {from: buyer});
+        }).then(function() {
+            return ptl.createTransaction("seqno3",  "publishId", {from: buyer});
+        }).then(function(result) {
+            eventName = "TransactionCreate";
+            assert(checkEvent(eventName, result), "failed to watch event " + eventName);
+
+            eventName = "VerifiersChosen";
+            assert(checkEvent(eventName, result), "failed to watch event " + eventName);
+
+            txId = getEventField("VerifiersChosen", result, "transactionId");
+            verifiers = getEventField("VerifiersChosen", result, "users");
+            chosenVerfiers = verifiers;
+
+            return verifiers;
+        }).then(function(result) {
+            assert(result.length == 2, "Invalid chosen verifiers")
+            return ptl.vote("seqNo4", txId, true, "comments from verifier1", {from: result[0]});
+        }).then(function(result) {
+            eventName = "Vote";
+            assert(checkEvent(eventName, result), "failed to watch event " + eventName);
+        }).then(function() {
+            return ptl.buyData("seqNo5", txId, {from: buyer});
+        }).then(function(result) {
+            eventName = "Buy";
+            assert(checkEvent(eventName, result), "failed to watch event " + eventName);
+        }).then(function() {
+            return ptl.submitMetaDataIdEncWithBuyer("seqNo6", txId, "0", {from: seller});
+        }).then(function(result) {
+            eventName = "ReadyForDownload";
+            assert(checkEvent(eventName, result), "failed to watch event " + eventName);
+        }).then(function() {
+            return ptl.confirmDataTruth("seqNO7", txId, true, {from: buyer});
+        }).then(function(result) {
+            eventName = "TransactionClose";
+            assert(checkEvent(eventName, result), "failed to watch event " + eventName);
+        }).then(function() {
+            ptl.creditsToVerifier(txId, chosenVerfiers[1], 5);
+        }).catch(function (err) {
             console.log("catched error:", err)
+            assert.fail()            
         })
-    
-    })*/
+    })
+
+    function InitContracts() {
+        var nc = new Promise(function() {
+            scryToken.deployed().then(function (instance) {
+                ste = instance;
+            }).then(function() {
+                scryProtocol.deployed().then(function (instance) {
+                    ptl = instance;
+                })
+            })
+        })
+
+        return nc;
+    }
+
+    function InitUsers() {
+        deployer = accounts[0];
+        seller = accounts[1];
+        buyer = accounts[2];
+        verifier1 = accounts[3];
+        verifier2 = accounts[4];
+        verifier3 = accounts[5];        
+    }
 })
 
-/*
-.then(function(){
-    return ste.approve(ptl.address, 1000);
-}).then(function(result){
-    console.log(result)
+function checkEvent(eventName, receipt) {
+    for (var i = 0; i < receipt.logs.length; i++) {
+        var log = receipt.logs[i];
 
-    for (var i = 0; i < result.logs.length; i++) {
-        var log = result.logs[i];
-
-        if (log.event == "Approval") {
-            console.log("Event Approval watched");
-            break;
+        if (log.event == eventName) {
+            console.log("Event " + eventName + " watched");
+            return true;
         }
     }
-})*/
+}
+
+function getEventField(eventName, receipt, fieldName) {
+    for (var i = 0; i < receipt.logs.length; i++) {
+        var log = receipt.logs[i];
+
+        if (log.event == eventName) {
+            return log.args[fieldName];
+        }
+    }
+}
