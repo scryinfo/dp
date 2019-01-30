@@ -10,12 +10,27 @@ dl_db.init = function(){
     };
     request.onupgradeneeded = function(event) {
         this.db = event.target.result;
-        this.db.createObjectStore(dl_db.db_store_name);
+        let store = this.db.createObjectStore(dl_db.db_store_name);
+        store.createIndex("ti","title",{unique:false});
     };
 
     request.onsuccess = function(event) {
-        //此处采用异步通知. 在使用curd的时候请通过事件触发
+        // 此处采用异步通知. 在使用curd的时候请通过事件触发
         dl_db.db = event.target.result;
+        let t = dl_db.db.transaction(dl_db.db_store_name,"readonly");
+        let s = t.objectStore(dl_db.db_store_name);
+        let c = s.openCursor();
+        c.onsuccess = function(event) {
+            let cursor = event.target.result;
+            if (cursor) {
+                let p = {};
+                p.title = cursor.value.title;p.price = cursor.value.price;p.keys = cursor.value.keys;
+                p.description = cursor.value.description;p.owner = cursor.value.owner;
+                main.insDL(p,cursor.key);
+                cursor.continue();
+            }
+        };
+
     };
 };
 
@@ -35,17 +50,17 @@ dl_db.delete = function(key) {
 };
 
 dl_db.select = function(key) {
-    //第二个参数可以省略
+    // 第二个参数可以省略
     let transaction = dl_db.db.transaction(dl_db.db_store_name,"readwrite");
     let store = transaction.objectStore(dl_db.db_store_name);
     let request;
-    if(key)
+    if (key) {
         request = store.get(key);
-    else
+    }else {
         request = store.getAll();
+    }
 
     request.onsuccess = function () {
-        console.log(request.result);
         return request.result;
     };
 };

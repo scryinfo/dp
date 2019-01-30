@@ -6,8 +6,6 @@ let main = {
         document.addEventListener('astilectron-ready', function() {
             // init account and lists
             document.getElementById("account").innerHTML = location.search.split("=")[1];
-            main.getDatalist();
-            main.getTransaction();
         });
     },
     getDatalist:function () {
@@ -29,12 +27,12 @@ let main = {
                 let t = message.payload[i];
                 let p = {};
                 p.title = t.Title;p.seller = t.Seller;p.buyer = t.Buyer;
-                switch (t.State) {
-                    case '0':p.state = "Created";break;
-                    case '1':p.state = "Voted";break;
-                    case '2':p.state = "Payed";break;
-                    case '3':p.state = "ReadyForDownload";break;
-                    case '4':p.state = "Closed";break;
+                switch (parseInt(t.State)) {
+                    case 0:p.state = "Created";break;
+                    case 1:p.state = "Voted";break;
+                    case 2:p.state = "Payed";break;
+                    case 3:p.state = "ReadyForDownload";break;
+                    case 4:p.state = "Closed";break;
                 }
                 mt_db.write(p,t.TransactionID);
                 main.insMT(p,t.TransactionID);
