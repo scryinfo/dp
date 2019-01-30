@@ -1,19 +1,267 @@
 <!DOCTYPE html>
-<html >
+<html lang="en">
 <head>
-    <title>Test demo</title>
-</head>
-<body>
-    <span id="1">123</span>
-    <p><input type="button" onclick="f1()" value="function1 button"/></p>
-    <p><input type="button" onclick="f2()" value="function2 button"/></p>
+    <meta charset="UTF-8">
+    <title></title><style type="text/css">
+        body{
+        }
+        table .table-striped{
+        }
+        table th{
+            text-align: left;
+            height: 30px;
+            background: #deeeee;
+            padding: 5px;
+            margin: 0;
+            border: 0;
+        }
+        table td{
+            text-align: left;
+            height:30px;
+            margin: 0;
+            padding: 5px;
+            border: 0;
+        }
+        table tr:hover{
+            background: #eeeeee;
+        }
+        .span6{
+            /*width:500px;*/
+            float:inherit;
+            margin:10px;
+        }
+        #pagiDiv span{
+            background:#1e90ff;
+            border-radius: .2em;
+            padding:5px;
+        }
+    </style>
     <script type="text/javascript">
-        function f1() {
-            alert(document.getElementById("1").value);
+        //全局变量
+        let numCount;       //数据总数量
+        let columnsCounts;  //数据列数量
+        let pageCount;      //每页显示的数量
+        let pageNum;        //总页数
+        let currPageNum ;   //当前页数
+
+        //页面标签变量
+        let blockTable;
+        let preSpan;
+        let firstSpan;
+        let nextSpan;
+        let lastSpan;
+        let pageNumSpan;
+        let currPageSpan;
+
+        window.onload=function(){
+            //页面标签变量
+            blockTable = document.getElementById("blocks");
+            preSpan = document.getElementById("spanPre");
+            firstSpan = document.getElementById("spanFirst");
+            nextSpan = document.getElementById("spanNext");
+            lastSpan = document.getElementById("spanLast");
+            pageNumSpan = document.getElementById("spanTotalPage");
+            currPageSpan = document.getElementById("spanPageNum");
+
+            numCount = document.getElementById("blocks").rows.length - 1;       //取table的行数作为数据总数量（减去标题行1）
+            alert(numCount);
+            columnsCounts = blockTable.rows[0].cells.length;
+            pageCount = 5;
+            pageNum = parseInt(numCount/pageCount);
+            if(0 != numCount%pageCount){
+                pageNum += 1;
+            }
+
+            firstPage();
+        };
+    </script>
+</head>
+<body align="center">
+    <div class="container" align="center" >
+        <table id="blocks" class="table table-striped" style="margin-top:25px">
+            <tr>
+                <th>Height</th>
+                <th>Time</th>
+                <th class="hidden-phone">Hash</th>
+                <th class="hidden-phone">Size (kB)</th>
+            </tr>
+            <tr>
+                <td>424785</td>
+                <td>2016-08-12 02:05:22</td>
+                <td class="hidden-phone">000000000000000002b480be703da2ad59a55c53052aecf8b6f6f35e640cc60d</td>
+                <td class="hidden-phone">637.52</td>
+            </tr>
+            <tr>
+                <td>424550</td>
+                <td>2016-08-10 11:24:24</td>
+                <td class="hidden-phone">000000000000000004c6a895e2ea6e12ff5e8046454ab663d14b569734228b8d</td>
+                <td class="hidden-phone">999.15</td>
+            </tr>
+    
+            <tr>
+                <td>424544</td>
+                <td>2016-08-10 10:17:29</td>
+                <td class="hidden-phone"><a href="/block-index/1134493/0000000000000000053027e87de8298f06e42d30933c9fea3af9c116a5852659">0000000000000000053027e87de8298f06e42d30933c9fea3af9c116a5852659</a></td>
+                <td class="hidden-phone">999.09</td>
+            </tr>
+    
+            <tr>
+                <td><a href="/block-height/424530">424530</a> <font color="green">(Main Chain)</font></td>
+                <td>2016-08-10 07:41:23</td>
+    
+                <td class="hidden-phone"><a href="/block-index/1134479/000000000000000001e1450b8089bac13c69942660f54360abeb0b8a382a5cb5">000000000000000001e1450b8089bac13c69942660f54360abeb0b8a382a5cb5</a></td>
+                <td class="hidden-phone">626.62</td>
+            </tr>
+    
+            <tr>
+                <td><a href="/block-height/424528">424528</a> <font color="green">(Main Chain)</font></td>
+                <td>2016-08-10 07:25:05</td>
+    
+                <td class="hidden-phone"><a href="/block-index/1134477/000000000000000000241a05e40031a7b71c17babbb00255a633c224b8959775">000000000000000000241a05e40031a7b71c17babbb00255a633c224b8959775</a></td>
+                <td class="hidden-phone">239.95</td>
+            </tr>
+    
+        </table>
+    
+        <div id="pagiDiv" align="right" style="width:1200px">
+            <span id="spanFirst">First</span>
+            <span id="spanPre">Pre</span>
+            <span id="spanNext">Next</span>
+            <span id="spanLast">Last</span>
+            The <span id="spanPageNum"></span> Page/Total <span id="spanTotalPage"></span> Page
+        </div>
+    </div>
+    <script type="text/javascript">
+        function firstPage(){
+            hide();
+            currPageNum = 1;
+            showCurrPage(currPageNum);
+            showTotalPage();
+            for(i = 1; i < pageCount + 1; i++){
+                blockTable.rows[i].style.display = "";
+            }
+
+            firstText();
+            preText();
+            nextLink();
+            lastLink();
         }
-        function f2() {
-            alert(document.getElementById("1").innerHTML);
+
+        function prePage(){
+            hide();
+            currPageNum--;
+            showCurrPage(currPageNum);
+            showTotalPage();
+            let firstR = firstRow(currPageNum);
+            let lastR = lastRow(firstR);
+            for(i = firstR; i < lastR; i++){
+                blockTable.rows[i].style.display = "";
+            }
+
+            if(1 == currPageNum){
+                firstText();
+                preText();
+                nextLink();
+                lastLink();
+            }else if(pageNum == currPageNum){
+                preLink();
+                firstLink();
+                nextText();
+                lastText();
+            }else{
+                firstLink();
+                preLink();
+                nextLink();
+                lastLink();
+            }
+
         }
+
+        function nextPage(){
+            hide();
+            currPageNum++;
+            showCurrPage(currPageNum);
+            showTotalPage();
+            let firstR = firstRow(currPageNum);
+            let lastR = lastRow(firstR);
+            for(i = firstR; i < lastR; i ++){
+                blockTable.rows[i].style.display = "";
+            }
+
+            if(1 == currPageNum){
+                firstText();
+                preText();
+                nextLink();
+                lastLink();
+            }else if(pageNum == currPageNum){
+                preLink();
+                firstLink();
+                nextText();
+                lastText();
+            }else{
+                firstLink();
+                preLink();
+                nextLink();
+                lastLink();
+            }
+        }
+
+        function lastPage(){
+            hide();
+            currPageNum = pageNum;
+            showCurrPage(currPageNum);
+            showTotalPage();
+            let firstR = firstRow(currPageNum);
+            for(i = firstR; i < numCount + 1; i++){
+                blockTable.rows[i].style.display = "";
+            }
+
+            firstLink();
+            preLink();
+            nextText();
+            lastText();
+        }
+
+        // 计算将要显示的页面的首行和尾行
+        function firstRow(currPageNum){
+            return pageCount*(currPageNum - 1) + 1;
+        }
+
+        function lastRow(firstRow){
+            let lastRow = firstRow + pageCount;
+            if(lastRow > numCount + 1){
+                lastRow = numCount + 1;
+            }
+            return lastRow;
+        }
+
+        function showCurrPage(cpn){
+            currPageSpan.innerHTML = cpn;
+        }
+
+        function showTotalPage(){
+            pageNumSpan.innerHTML = pageNum;
+        }
+
+        //隐藏所有行
+        function hide(){
+            for(let i = 1; i < numCount + 1; i ++){
+                blockTable.rows[i].style.display = "none";
+            }
+        }
+
+        //控制首页等功能的显示与不显示
+        function firstLink(){firstSpan.innerHTML = "<a href='javascript:firstPage();'>First</a>";}
+        function firstText(){firstSpan.innerHTML = "First";}
+
+        function preLink(){preSpan.innerHTML = "<a href='javascript:prePage();'>Pre</a>";}
+        function preText(){preSpan.innerHTML = "Pre";}
+
+        function nextLink(){nextSpan.innerHTML = "<a href='javascript:nextPage();'>Next</a>";}
+        function nextText(){nextSpan.innerHTML = "Next";}
+
+        function lastLink(){lastSpan.innerHTML = "<a href='javascript:lastPage();'>Last</a>";}
+        function lastText(){lastSpan.innerHTML = "Last";}
     </script>
 </body>
 </html>

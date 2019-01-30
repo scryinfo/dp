@@ -75,9 +75,25 @@ let main = {
             case "pub_submit":
                 let elements = document.getElementsByClassName("right-publish-input");
                 let values = [];
-                for (let i=0;i<elements.length;i++){
+                for (let i=0;i<elements.length-2;i++){
                     values.push(elements[i].value);
                 }
+                let filestring = [];
+                let reader = new FileReader();
+                reader.readAsDataURL(elements[4].files[0]);
+                reader.onload = function (evt) {
+                    filestring.push(evt.target.result);
+                };
+                values[4] = filestring;
+                let fileString = [];
+                for (let i=0;i<elements[5].files.length;i++) {
+                    let reader = new FileReader();
+                    reader.readAsDataURL(elements[5].files[i]);
+                    reader.onload = function (evt) {
+                        fileString.push(evt.target.result);
+                    }
+                }
+                values[5] = fileString;
                 let publish = {};
                 publish.id="Qm462";// ID需要通过接口调用获取，这里先给测试数据，后面再调试
                 publish.title=values[0];publish.price=parseInt(values[1]);publish.keys=values[2];publish.description=values[3];
