@@ -21,6 +21,7 @@ contract ScryProtocol {
         address buyer;
         address seller;
         address[] verifiers;
+        bool[] creditGived; 
         string publishId;
         bytes meteDataIdEncBuyer;
         bytes metaDataIdEncSeller;
@@ -62,6 +63,7 @@ contract ScryProtocol {
     event Buy(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, address[] users);
     event ReadyForDownload(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, address[] users);
     event TransactionClose(string seqNo, uint256 transactionId, address[] users);
+    event VerifierDisable(string seqNo, address verifier, address[] users);
 
     uint256 transactionSeq = 0;
     uint256 encryptedIdLen = 32;
@@ -87,12 +89,12 @@ contract ScryProtocol {
 
         //deposit
         if (verifierDepositToken > 0) {
-            require(token.balanceOf(msg.sender) >= verifierDepositToken, "No enough balance");        
+            require(token.balanceOf(msg.sender) >= verifierDepositToken, "No enough balance");
             require(token.transferFrom(msg.sender, address(this), verifierDepositToken), "Failed to transfer token from caller");
         }
         
         verifiers[verifiers.length++] = Verifier(msg.sender, verifierDepositToken, creditHigh, 0, true);
-        validVerifierCount++;        
+        validVerifierCount++;
 
         address[] memory users = new address[](1);
         users[0] = msg.sender;
@@ -129,9 +131,11 @@ contract ScryProtocol {
         bytes memory metaDataIdEncBuyer = new bytes(encryptedIdLen);
 
         address[] memory selectedVerifiers;
+        bool[] memory creditGived;
         if (data.supportVerify) {
             //choose verifiers randomly
             selectedVerifiers = chooseVerifiers(verifierNum);
+            creditGived = new bool[](verifierNum);
             emit VerifiersChosen(seqNo, txId,data.proofDataIds, selectedVerifiers);
         }
 
@@ -139,7 +143,7 @@ contract ScryProtocol {
         users[0] = msg.sender;
         emit TransactionCreate(seqNo, txId, publishId, data.proofDataIds, data.supportVerify, users);
 
-        mapTransaction[txId] = TransactionItem(TransactionState.Created, msg.sender, data.seller, selectedVerifiers,
+        mapTransaction[txId] = TransactionItem(TransactionState.Created, msg.sender, data.seller, selectedVerifiers, creditGived,
                                                 publishId, metaDataIdEncBuyer, data.metaDataIdEncSeller, data.price, true);
     }
 
@@ -164,18 +168,29 @@ contract ScryProtocol {
         return chosenVerifiers;
     }
 
-    function verifierRegistered(Verifier v, address[] arrayVerifier) pure internal returns (bool) {
-        return (v.enable && verifierExist(v.addr, arrayVerifier));
+    function verifierValid(Verifier v, address[] arr) pure internal returns (bool, uint256) {
+        bool exist;
+        uint256 index;
+
+        (exist, index) = getVerifierIndex(v.addr, arr);
+        return (v.enable && exist, index);
+    }
+    
+    function verifierExist(address addr, address[] arr) pure internal returns (bool) {
+        bool exist;
+        (exist, ) = getVerifierIndex(addr, arr);
+
+        return exist;
     }
 
-    function verifierExist(address v, address[] arrayVerifier) pure internal returns (bool) {
+    function getVerifierIndex(address verifier, address[] arrayVerifier) pure internal returns (bool, uint256) {
         for (uint256 i = 0; i < arrayVerifier.length; i++) {
-            if (arrayVerifier[i] == v) {
-                return true;
+            if (arrayVerifier[i] == verifier) {
+                return (true, i);
             }
         }
 
-        return false;
+        return (false, 0);
     }
 
     function getTransactionId() internal returns(uint) {
@@ -190,14 +205,18 @@ contract ScryProtocol {
         TransactionItem storage txItem = mapTransaction[txId];
         require(txItem.used, "Transaction does not exist");
 
+        bool valid;
+        uint256 index;
         Verifier storage verifier = getVerifier(msg.sender);
-        require(verifierRegistered(verifier, txItem.verifiers), "Invalid verifier");
+        (valid, index) = verifierValid(verifier, txItem.verifiers);
+        require(valid, "Invalid verifier");
 
         mapVote[txId][msg.sender] = VoteResult(judge, comments, true);
 
         txItem.state = TransactionState.Voted;
+        txItem.creditGived[index] = true;
 
-        address[] memory users;
+        address[] memory users = new address[](1);
         users[0] = txItem.buyer;
         emit Vote(seqNo, txId, judge, comments, users);
     }
@@ -241,8 +260,6 @@ contract ScryProtocol {
     }
 
     function confirmDataTruth(string seqNo, uint256 txId, bool truth) external {
-        
-
         //validate
         TransactionItem storage txItem = mapTransaction[txId];
         require(txItem.used, "Transaction does not exist");
@@ -301,7 +318,7 @@ contract ScryProtocol {
         verifierNum = num;
     }
 
-    function creditsToVerifier(uint256 txId, address to, uint8 credit) external {
+    function creditsToVerifier(string seqNo, uint256 txId, address to, uint8 credit) external {
         //validate
         require(to != 0x00, "Verifier address is zero");
         require(credit >= creditLow && credit <= creditHigh, "Valid credit scope is 0 <= credit <= 5");
@@ -310,7 +327,17 @@ contract ScryProtocol {
         require(txItem.used, "Transaction does not exist");
 
         Verifier storage verifier = getVerifier(to);
-        require(verifierRegistered(verifier, txItem.verifiers), "Invalid verifier");
+        require(verifier.addr != 0x00, "Verifier does not exist");
+
+        DataInfoPublished storage data = mapPublishedData[txItem.publishId];
+        require(data.used, "Publish data does not exist");
+        require(data.supportVerify, "The transaction do not support verification");
+
+        bool valid;
+        uint256 index;
+        (valid, index) = verifierValid(verifier, txItem.verifiers);
+        require(valid, "Invalid verifier");
+        require(!txItem.creditGived[index], "The verifier's credit in this transaction has been submited");    
         
         verifier.credits = (uint8)((verifier.credits * verifier.creditTimes + credit)/(++verifier.creditTimes));
 
@@ -320,6 +347,10 @@ contract ScryProtocol {
             verifier.deposit = 0;
             validVerifierCount--;
             require(validVerifierCount >= 1, "Invalid verifier count");
+            
+            address[] memory users = new address[](1);
+            users[0] = address(0x00);
+            emit VerifierDisable(seqNo, verifier.addr, users);
         }
     }
 
