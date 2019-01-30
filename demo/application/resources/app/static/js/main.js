@@ -4,27 +4,40 @@ let main = {
 
         // wait for ready
         document.addEventListener('astilectron-ready', function() {
-            // -
-            main.getUser();
+            // init account and lists
+            document.getElementById("account").innerHTML = location.search.split("=")[1];
             main.getDatalist();
             main.getTransaction();
         });
     },
-    getUser:function () {
-        let acc = location.search.split("=")[1];
-        document.getElementById("account").innerHTML = acc;
-    },
     getDatalist:function () {
+        // 把当前最新的一条数据的ID传过去，go只读取和发送js没有的部分
         astilectron.sendMessage({Name:"get.datalist",Payload:""},function (message) {
             for (let i=0;i<message.payload.length;i++) {
-                main.insDL(message.payload[i]);
+                let t = message.payload[i];
+                let p = {};
+                p.title = t.Title;p.price = t.Price;p.keys = t.Keys;p.description = t.Description;p.owner = t.Owner;
+                dl_db.write(p,t.ID);
+                main.insDL(p,t.ID);
             }
         });
     },
     getTransaction:function () {
-        astilectron.sendMessage({Name:"get.transaction",Payload:""},function (message) {
+        astilectron.sendMessage({Name:"get.transaction",Payload:location.search.split("=")[1]},
+            function (message) {
             for (let i=0;i<message.payload.length;i++) {
-                main.insMT(message.payload[i]);
+                let t = message.payload[i];
+                let p = {};
+                p.title = t.Title;p.seller = t.Seller;p.buyer = t.Buyer;
+                switch (t.State) {
+                    case '0':p.state = "Created";break;
+                    case '1':p.state = "Voted";break;
+                    case '2':p.state = "Payed";break;
+                    case '3':p.state = "ReadyForDownload";break;
+                    case '4':p.state = "Closed";break;
+                }
+                mt_db.write(p,t.TransactionID);
+                main.insMT(p,t.TransactionID);
             }
         });
     },
@@ -35,31 +48,49 @@ let main = {
             case "p":main.show('p');break;
             case "logout":window.location.href = "index.html";break;
             case "dl_buy":
-                // 购买数据 func buy(all ids) (bool) {}
-                if (true) {
-                    alert("Buy data succeed.");
-                }else {
-                    alert("Buy data failed.");
+                let cbs = document.getElementsByName("dl_checkboxes");
+                let parse = [];
+                for(let i = 0; i < cbs.length; i++){
+                    if(cbs[i].checked)
+                        parse.push(cbs[i].value);
                 }
-                break;
+                astilectron.sendMessage({Name:"buy",Payload:{buyer:location.search.split("=")[1],ids:parse}},
+                    function (message) {
+                    if (message.payload) {
+                        main.getTransaction();
+                        console.log("Buy data succeed.");
+                    }else {
+                        alert("Buy data failed.");
+                    }
+                });break;
             case "dl_search":alert("Please input your search criteria.");break;
             case "insDL":main.insDL();break;
             case "insMT":main.insMT();break;
             case "show":
-                let file;
-                for(let i = 0 ;i<document.getElementById("pub_proofs").files.length;i++){
-                    file=document.getElementById("pub_proofs").files[i];
-                    document.getElementById("pub_proofs_show").innerHTML += file.name + " ";
-                }
-                break;
+                let file = document.getElementById("pub_proofs").files;
+                document.getElementById("pub_proofs_show").innerHTML = "";
+                for(let i = 0 ;i<file.length;i++){
+                    document.getElementById("pub_proofs_show").innerHTML += file[i].name+"\r\n";
+                }break;
             case "pub_submit":
-                // 发布新数据 func publish(all details) (bool) {}
-                if (true) {
-                    alert("Publish new data succeed.");
-                }else {
-                    alert("Publish new data failed.");
+                let elements = document.getElementsByClassName("right-publish-input");
+                let values = [];
+                for (let i=0;i<elements.length;i++){
+                    values.push(elements[i].value);
                 }
-                break;
+                let publish = {};
+                publish.id="Qm462";// ID需要通过接口调用获取，这里先给测试数据，后面再调试
+                publish.title=values[0];publish.price=parseInt(values[1]);publish.keys=values[2];publish.description=values[3];
+                publish.data=values[4];publish.proofs=values[5];publish.owner=location.search.split("=")[1];
+                astilectron.sendMessage({Name:"publish",Payload:publish}, function (message) {
+                    if (message.payload) {
+                        dl_db.write({title:publish.title,price:publish.price,keys:publish.keys,
+                            description:publish.description,owner:publish.owner},publish.id);
+                        console.log("Publish data succeed.");
+                    }else {
+                        alert("Publish data failed.");
+                    }
+                });break;
         }
     },
     show:function (c) {
@@ -73,30 +104,23 @@ let main = {
             default: alert("Illegal command " + c)
         }
     },
-    insDL:function (dl) {
+    insDL:function (dl,id) {
         let row = document.getElementById("dl_table").insertRow(1);
         row.insertCell(0).innerHTML =
             "<label style='width: 5%'><input type='checkbox' name='dl_checkboxes' id='1'/></label>";
-        document.getElementById("1").value = dl.ID;
-        row.insertCell(1).innerHTML = dl.Title;
-        row.insertCell(2).innerHTML = dl.Price;
-        row.insertCell(3).innerHTML = dl.Keys;
-        row.insertCell(4).innerHTML = dl.Description;
-        row.insertCell(5).innerHTML = dl.Owner;
+        document.getElementById("1").value = id;
+        row.insertCell(1).innerHTML = dl.title;
+        row.insertCell(2).innerHTML = dl.price;
+        row.insertCell(3).innerHTML = dl.keys;
+        row.insertCell(4).innerHTML = dl.description;
+        row.insertCell(5).innerHTML = dl.owner;
     },
-    insMT:function (mt) {
-        switch (mt.State) {
-            case '0':mt.State = "Created";break;
-            case '1':mt.State = "Voted";break;
-            case '2':mt.State = "Payed";break;
-            case '3':mt.State = "ReadyForDownload";break;
-            case '4':mt.State = "Closed";break;
-        }
+    insMT:function (mt,id) {
         let row = document.getElementById("trans_table").insertRow(1);
-        row.insertCell(0).innerHTML = mt.Title;
-        row.insertCell(1).innerHTML = mt.TransactionID;
-        row.insertCell(2).innerHTML = mt.Seller;
-        row.insertCell(3).innerHTML = mt.Buyer;
-        row.insertCell(4).innerHTML = mt.State;
+        row.insertCell(0).innerHTML = mt.title;
+        row.insertCell(1).innerHTML = id;
+        row.insertCell(2).innerHTML = mt.seller;
+        row.insertCell(3).innerHTML = mt.buyer;
+        row.insertCell(4).innerHTML = mt.state;
     },
 };

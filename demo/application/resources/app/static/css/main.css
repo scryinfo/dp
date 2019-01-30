@@ -21,17 +21,19 @@ html, body {
 
 .top-name {
     float: left;
-    width: 80%;
+    width: 70%;
     line-height: 50px;
 }
 
 .top-account {
+    font-size: 12px;
     float: left;
-    width: 15%;
+    width: 25%;
     line-height: 50px;
 }
 
 .top-logout {
+    text-align: center;
     float: right;
     width: 5%;
     height: 50px;
@@ -96,9 +98,15 @@ html, body {
     resize: none;
 }
 
-.right-publish-button {
-    width: 25%;
+.right-publish-textarea {
+    width: 60%;
     display: inline-block;
-    margin: 30px 10% auto auto;
+    resize: none;
+}
+
+.right-publish-button {
+    width: 35%;
+    display: inline-block;
+    margin: 0 10%;
     float: right;
 }
