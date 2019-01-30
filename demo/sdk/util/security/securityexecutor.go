@@ -34,6 +34,10 @@ func (ce CryptExecutor) SignTransaction(message []byte, pubkey string, password 
         keyJson = `{"version":3,"id":"857cb57c-cdcb-4a19-a3c2-fe5a2ea3b3c2","address":"8c091c18bf57db0896d077b1b778301cab48bc37","crypto":{"ciphertext":"90141512a4b938921f67f943426939b20a21bef08cb9767f09a0ee3bbf33f8f7","cipherparams":{"iv":"568781bb771bb2aedef69a21eedb3e4d"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"c8740dd4d4ba72b5a513bb8986342a47ac93c9c89ea2bb9420d924d78243b343","n":262144,"r":8,"p":1},"mac":"1760cc87aa8eddb269e582cea5213db55c5f615f3527b2941d1d6b6b2ada200d"}}`
     }
 
+    if pubkey == "0x30c04b0ded7c042c09ad884bdcb8ddb38e536f0e" {
+        keyJson = `{"version":3,"id":"2ffd7c1d-e948-4f44-ade4-10b8a6619e0a","address":"30c04b0ded7c042c09ad884bdcb8ddb38e536f0e","crypto":{"ciphertext":"8cd9db8c430dd55fbeb56bfd93c91033972229b783c678f6864bcaf4d1291723","cipherparams":{"iv":"471f25a18e9cb8eddf1965d31f2989b8"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"ba77cda872eb0ef19882c099ec47f33dbfc8a27335cb99d1ede4c2ea1963a5a0","n":262144,"r":8,"p":1},"mac":"b2d34b7e879effbe30185e9f6222607733741e94f04444caa608496f4dcbfcad"}}`
+    }
+
     key, err := keystore.DecryptKey([]byte(keyJson), "12345")
     if err != nil {
         return nil, err
