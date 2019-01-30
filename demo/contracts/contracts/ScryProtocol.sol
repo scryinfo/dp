@@ -214,7 +214,7 @@ contract ScryProtocol {
         mapVote[txId][msg.sender] = VoteResult(judge, comments, true);
 
         txItem.state = TransactionState.Voted;
-        txItem.creditGived[index] = true;
+        txItem.creditGived[index] = false;
 
         address[] memory users = new address[](1);
         users[0] = txItem.buyer;
@@ -340,7 +340,8 @@ contract ScryProtocol {
         require(!txItem.creditGived[index], "The verifier's credit in this transaction has been submited");    
         
         verifier.credits = (uint8)((verifier.credits * verifier.creditTimes + credit)/(++verifier.creditTimes));
-
+        txItem.creditGived[index] = true;
+        
         //disable verifier and forfeiture deposit while credit <= creditThreshold
         if (verifier.credits <= creditThreshold) {
             verifier.enable = false;

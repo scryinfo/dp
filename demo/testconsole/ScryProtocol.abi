@@ -237,6 +237,28 @@
       "type": "event"
     },
     {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "seqNo",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "name": "verifier",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "users",
+          "type": "address[]"
+        }
+      ],
+      "name": "VerifierDisable",
+      "type": "event"
+    },
+    {
       "constant": false,
       "inputs": [
         {
@@ -425,6 +447,10 @@
     {
       "constant": false,
       "inputs": [
+        {
+          "name": "seqNo",
+          "type": "string"
+        },
         {
           "name": "txId",
           "type": "uint256"

@@ -1,7 +1,7 @@
 package contractinterfacewrapper
 
 import (
-    "../../contractinterface"
+    "../../interface/contractinterface"
     op "../../core/chainoperations"
     "../../util/security"
     "../../util/storage/ipfsaccess"
@@ -184,7 +184,7 @@ func RegisterAsVerifier(txParams *op.TransactParams) (error) {
 }
 
 func CreditsToVerifier(txParams *op.TransactParams, txId *big.Int, to common.Address, credit uint8) (error) {
-    tx, err := scryProtocol.CreditsToVerifier(buildTxOpts(txParams), txId, to, credit)
+    tx, err := scryProtocol.CreditsToVerifier(buildTxOpts(txParams), uuid.GenerateUUID(), txId, to, credit)
     if err == nil {
         fmt.Println("RegisterAsVerifier:", string(tx.Data()), " tx hash:", tx.Hash().String())
     }
