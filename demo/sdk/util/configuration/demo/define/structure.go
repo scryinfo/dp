@@ -1,4 +1,4 @@
-package configuration
+package define
 
 
 type Conf struct {

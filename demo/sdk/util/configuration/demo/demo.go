@@ -4,19 +4,21 @@ import (
 	"fmt"
 	"log"
 	"../../configuration"
+	"./define"
 )
 
 //modify the directory before you run this demo.
 func main() {
-	rv, err := configuration.GetYAMLStructure("./test/test.yaml", &configuration.Conf{})
+	rv, err := configuration.GetYAMLStructure("./test/test.yaml", &define.Conf{})
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	conf, ok := rv.(*configuration.Conf)
-    if ok {
-        fmt.Println("conf:", conf)
+	conf, ok := rv.(*define.Conf)
+    if !ok {
+        fmt.Println("failed to get yaml structure")
+        return
     }
 
 	fmt.Println("conf: ", conf)
