@@ -13,36 +13,34 @@
         <div class="top-name">My Astilectron demo</div>
         <div class="top-about">About</div>
     </div>
-    <div class="left" id="functions">
+    <div class="left">
         <div class="left-explain">select account:</div>
-        <div>
-            <label><select class="left-account" id="accounts"></select></label>
-        </div>
+        <div><label><select class="left-account" id="accounts"></select></label></div>
         <div><button class="left-button" onclick="index.onclick('login')">Login</button></div>
         <div><button class="left-button" onclick="index.onclick('new_account')">Create New Account</button></div>
     </div>
     <div class="right" id="show">
         <div class="right-show"><label id="describe"></label>:
             <label><input class="right-pwd" id="password" type="password" placeholder="password"/></label></div>
-        <div><button class="right-button" id="back" onclick="index.onclick('back')">Back</button><label id="button"></label></div>
+        <div><button class="right-button" onclick="index.onclick('back')">Back</button><label id="button"></label></div>
     </div>
     <div class="right" id="show_new">
-        <div>Your account is created : &nbsp;<span id="new_account">0x123456789012345678901234567890</span><br/>
+        <div>Your account is created : &nbsp;<span id="show_new_account"></span><br/>
         account information will saves at local : &nbsp;keystore<br/>
         please keep it properly.<br/><hr/>Do you want to save and login with this account?</div>
-        <div class="right-pwd"><button class="right-button" id="back_new" onclick="index.onclick('back_new')">No</button>
-        <button class="right-button" id="submit_keystore" onclick="index.onclick('submit_keystore')">Yes</button></div>
+        <div class="right-pwd"><button class="right-button" onclick="index.onclick('back_new')">No</button>
+        <button class="right-button" onclick="index.onclick('submit_keystore')">Yes</button></div>
     </div>
 
     <script src="static/js/index.js"></script>
-    <script src="static/js/transmission.js"></script>
+    <script src="static/js/listenFromGo.js"></script>
     <script src="static/lib/astiloader/astiloader.js"></script>
     <script src="static/lib/astimodaler/astimodaler.js"></script>
     <script src="static/lib/astinotifier/astinotifier.js"></script>
     <script src="static/lib/min.js/chart.min.js"></script>
     <script type="text/javascript">
         index.init();
-        transmission.init();
+        lfg.init();
     </script>
 </body>
 </html>

@@ -1,6 +1,4 @@
-* {
-    box-sizing: border-box;
-}
+* {box-sizing: border-box;}
 
 html, body {
     font-family: sans-serif;
@@ -53,7 +51,7 @@ html, body {
 .left-button {
     border-radius: 4px;
     width: 100%;
-    margin: 5px auto 5px auto;
+    margin: 5px auto;
 }
 
 .right {

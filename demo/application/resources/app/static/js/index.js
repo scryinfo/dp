@@ -21,8 +21,6 @@ let index = {
         switch (id) {
             case "login":
                 index.prepare("Login");
-                document.getElementById("button").innerHTML =
-                    `<button class="right-button" id="submit_login">Submit</button>`;
                 document.getElementById("submit_login").onclick = function () {
                     let acc = document.getElementById("accounts").value;
                     astilectron.sendMessage({Name:"login.verify",Payload:
@@ -37,11 +35,12 @@ let index = {
                 };break;
             case "new_account":
                 index.prepare("New");
-                document.getElementById("button").innerHTML =
-                    `<button class="right-button" id="submit_new">Submit</button>`;
                 document.getElementById("submit_new").onclick = function () {
-                    document.getElementById("show").style.display = "none";
-                    document.getElementById("show_new").style.display = "block";
+                    astilectron.sendMessage({Name:"create.new.account",Payload:""},function(message) {
+                        document.getElementById("show_new_account").innerHTML = message.payload;
+                        document.getElementById("show").style.display = "none";
+                        document.getElementById("show_new").style.display = "block";
+                    });
                 };break;
             case "submit_keystore":
                 // 这里的账户也是go随机生成的，这里使用模拟数据
@@ -60,8 +59,14 @@ let index = {
         }
     },
     prepare:function (describe) {
+        let bh = "";
+        switch (describe) {
+            case "Login":bh = `<button class="right-button" id="submit_login">Submit</button>`;break;
+            case "New":bh = `<button class="right-button" id="submit_new">Submit</button>`;break;
+        }
         document.getElementById("show_new").style.display = "none";
         document.getElementById("show").style.display = "block";
         document.getElementById("describe").innerHTML = describe;
+        document.getElementById("button").innerHTML = bh;
     },
 };
