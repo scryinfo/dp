@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/mats9693/YAML"
+	"github.com/iscap/demo/sdk/util/configuration"
 	"log"
 )
 
 //modify the directory before you run this demo.
-const basedir = "github.com/mats9693/YAML/test"
+const basedir = "github.com/iscap/demo/sdk/util/configuration/test"
 
 func main() {
 	conf, err := my.GetYAMLStructure(basedir + "/test.yaml")
