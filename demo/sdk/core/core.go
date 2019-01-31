@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"../util/accounts"
 )
 
 type Connector struct {
@@ -15,6 +16,7 @@ type Connector struct {
 
 //start
 func StartEngine(ethNodeAddr string,
+                    asServiceAddr string,
                     contracts []chainevents.ContractInfo,
                     ipfsNodeAddr string) (*ethclient.Client, error) {
 	defer func() {
@@ -34,6 +36,12 @@ func StartEngine(ethNodeAddr string,
 		fmt.Println("failed to initialize connector. error: " + err.Error())
 		return nil, err
 	}
+
+	err = accounts.GetAMInstance().Initialize(asServiceAddr)
+    if err != nil {
+        fmt.Println("failed to initialize account service, error:", err)
+        return nil, err
+    }
 
 	chainevents.StartEventProcessing(connector.conn, contracts)
 

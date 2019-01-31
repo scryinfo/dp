@@ -9,11 +9,7 @@ import (
     "github.com/ethereum/go-ethereum/core/types"
     "math/big"
     "strings"
-    "../../util/security"
-)
-
-var (
-    secExec security.CryptExecutor
+    "../../util/accounts"
 )
 
 type TransactParams struct {
@@ -54,7 +50,7 @@ func BuildTransactOpts(txParams *TransactParams) *bind.TransactOpts {
 func SignTransaction(signer types.Signer, address common.Address,
                         transaction *types.Transaction, password string) (*types.Transaction, error) {
     h := signer.Hash(transaction)
-    sign, err := secExec.SignTransaction(h[:], address.String(), password)
+    sign, err := accounts.GetAMInstance().SignTransaction(h[:], address.String(), password)
     if err != nil {
         return nil, err
     }
