@@ -1,19 +1,20 @@
-package my
+package configuration
 
 import (
-	"errors"
-	"github.com/go-yaml/yaml"
-	"io/ioutil"
-	"os"
+    "github.com/go-yaml/yaml"
+    "io/ioutil"
+    "os"
+    "reflect"
 )
 
-func GetYAMLStructure(fileAddr string) (*Conf, error) {
+func GetYAMLStructure(fileAddr string, v interface{}) (interface{}, error) {
 	yf, err := ioutil.ReadFile(fileAddr)
 	if err != nil {
 		return nil, err
 	}
 
-	conf := new(Conf)
+	t := reflect.TypeOf(v).Elem()
+	conf := reflect.New(t).Interface()
 	err = yaml.Unmarshal(yf, conf)
 	if err != nil {
 		return nil, err
@@ -27,7 +28,7 @@ func GetYAMLStructure(fileAddr string) (*Conf, error) {
     This function will delete items in .yaml file which not in structure.go,
     so make sure items in structure.go is not less than in .yaml file.
 */
-func SaveChanges(fileAddr string, conf *Conf) error {
+func SaveChanges(fileAddr string, conf interface{}) error {
 	err := writeFile(fileAddr, conf, os.O_TRUNC) //O_TRUNC param will rewrite the file
 	if err != nil {
 		return err
@@ -54,7 +55,7 @@ func writeFile(fileAddr string, ymlConf interface{}, opt int) error {
 
 	return nil
 }
-
+/*
 func Add(fileAddr string, inlineAdd *InlineAdd) error {
 	addNow, err := getInlineAdd(fileAddr)
 	if err != nil {
@@ -85,4 +86,4 @@ func getInlineAdd(fileAddr string) (*InlineAdd, error) {
 	}
 
 	return inlineAdd, nil
-}
+}*/

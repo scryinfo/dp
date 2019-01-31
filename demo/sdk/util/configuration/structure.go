@@ -1,4 +1,5 @@
-package my
+package configuration
+
 
 type Conf struct {
 	Person    `yaml:"Person"`

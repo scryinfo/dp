@@ -4,6 +4,7 @@ import (
     "../sdk/contractclient"
     "../sdk/contractclient/contractinterfacewrapper"
     "../sdk/core"
+    "../sdk/util/accounts"
     "../sdk/core/chainevents"
     "../sdk/core/chainoperations"
     "../sdk/core/ethereum/events"
@@ -40,14 +41,14 @@ var (
 
 func main()  {
     var err error = nil
-	conn, err = core.StartEngine("http://127.0.0.1:7545/", getContracts(), "/ip4/127.0.0.1/tcp/5001")
+	conn, err = core.StartEngine("http://127.0.0.1:7545/", "192.168.1.6:48080", getContracts(), "/ip4/127.0.0.1/tcp/5001")
 	if err != nil {
 		fmt.Println("failed to start engine. error:", err)
 		return
 	}
 
 	err = contractinterfacewrapper.Initialize(common.HexToAddress(protocolContractAddr),
-		common.HexToAddress(tokenContractAddr), conn)
+		                                        common.HexToAddress(tokenContractAddr), conn)
 	if err != nil {
 		fmt.Println("failed to initialize contract interface, error:", err)
 		return
@@ -55,11 +56,35 @@ func main()  {
 
     initClients()
 
-    testTxWithoutVerify()
+	testAccounts()
 
-	testTxWithVerify()
+    //testTxWithoutVerify()
+
+	//testTxWithVerify()
 
 	time.Sleep(100000000000000)
+}
+
+func testAccounts()  {
+    fmt.Println("Start testing accounts...")
+
+    ac, err := accounts.GetAMInstance().CreateAccount("12345")
+    if err != nil {
+        fmt.Println("failed to create account, error:", err)
+    }
+
+    rv, err := accounts.GetAMInstance().AuthAccount(ac.Address, "12345")
+    if err != nil {
+        fmt.Println("failed to authenticate account, error:", err)
+    }
+
+    if rv {
+        fmt.Println("Account authentication passed")
+    } else {
+        fmt.Println("Account authentication not passed")
+    }
+
+    fmt.Println("Test end")
 }
 
 func testTxWithoutVerify()  {

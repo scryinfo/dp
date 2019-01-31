@@ -2,7 +2,7 @@ package contractclient
 
 import (
     "../core/chainevents"
-    "../core/accounts"
+    "../util/accounts"
     "fmt"
     "github.com/ethereum/go-ethereum/common"
     "github.com/pkg/errors"
