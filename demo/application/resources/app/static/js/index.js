@@ -43,15 +43,14 @@ let index = {
                     });
                 };break;
             case "submit_keystore":
-                // 这里的账户也是go随机生成的，这里使用模拟数据
-                let acc = document.getElementById("new_account").innerHTML;
+                let acc = document.getElementById("show_new_account").innerHTML;
                 astilectron.sendMessage({Name:"save.keystore",Payload:
                         {account: acc,
                          password:document.getElementById("password").value}},function (message) {
                     if (message.payload) {
                         window.location.href = "main.html?acc="+acc;
                     }else {
-                        alert("account or password is wrong.");
+                        alert("save account information failed.");
                     }
                 });break;
             case "back":document.getElementById("show").style.display = "none";break;

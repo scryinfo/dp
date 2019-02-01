@@ -16,9 +16,9 @@
     </div>
     <div class="left">
         <ul>
-            <li class="left-list" onclick="main.onclick('d');">Data list</li>
-            <li class="left-list" onclick="main.onclick('t');">My transaction</li>
-            <li class="left-list" onclick="main.onclick('p');">Publish new data</li>
+            <li class="left-list" onclick="main.onclick('show_d');">Data list</li>
+            <li class="left-list" onclick="main.onclick('show_t');">My transaction</li>
+            <li class="left-list" onclick="main.onclick('show_p');">Publish new data</li>
         </ul>
     </div>
     <div class="right" id="show_datalist">
@@ -39,12 +39,15 @@
             </table>
         </div>
         <div class="right-bottom">
-            <label id="dl_First">First</label><label id="dl_Pre">Pre</label>
+            <label id="dl_First">First</label>&nbsp;<label id="dl_Pre">Pre</label>
             &nbsp;The&nbsp;<label id="dl_PageNum"></label>/<label id="dl_TotalPage"></label>&nbsp;Page&nbsp;
-            <label id="dl_Next">Next</label><label id="dl_Last">Last</label>
+            <label id="dl_Next">Next</label>&nbsp;<label id="dl_Last">Last</label>
         </div>
     </div>
-    <div class="right" id="show_transaction"><div class="right-title"></div>
+    <div class="right" id="show_transaction">
+        <div class="right-title">
+            <button onclick="main.onclick('mt_search')">Search</button>
+        </div>
         <div>
             <table class="right-table" id="trans_table">
                 <tr>
@@ -88,6 +91,7 @@
     <script src="static/lib/astimodaler/astimodaler.js"></script>
     <script src="static/lib/astinotifier/astinotifier.js"></script>
     <script src="static/lib/min.js/chart.min.js"></script>
+    <script src="static/lib/min.js/jquery-3.3.1.min.js"></script>
     <script type="text/javascript">
         main.init();
         lfg.init();
