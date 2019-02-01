@@ -1,7 +1,8 @@
 let main = {
     init:function () {
-        // Init
-        database.init();
+        // init
+        dl_db.init(-1);
+        mt_db.init(-1);
 
         // wait for ready
         document.addEventListener('astilectron-ready', function() {
@@ -41,12 +42,13 @@ let main = {
     },
     onclick:function (id) {
         switch (id) {
-            case "d":main.show('d');break;
-            case "t":main.show('t');break;
-            case "p":main.show('p');break;
+            case "show_d":main.show('datalist');break;
+            case "show_t":main.show('transaction');break;
+            case "show_p":main.show('publish');break;
             case "logout":window.location.href = "index.html";break;
             case "dl_buy":main.buy();break;
-            case "dl_search":alert("Please input your search criteria.");break;
+            case "dl_search":dl_db.init(1);break;
+            case "mt_search":mt_db.init(1);break;
             case "show_proofs_name":
                 document.getElementById("pub_proofs_show").innerHTML = "";
                 let file = document.getElementById("pub_proofs").files;
@@ -60,10 +62,11 @@ let main = {
         document.getElementById("show_datalist").style.display = "none";
         document.getElementById("show_transaction").style.display = "none";
         document.getElementById("show_publish").style.display = "none";
+        document.getElementById("show_"+c).style.display = "block";
         switch (c) {
-            case 'd':document.getElementById("show_datalist").style.display = "block";dl_table.init();break;
-            case 't':document.getElementById("show_transaction").style.display = "block";mt_table.init();break;
-            case 'p':document.getElementById("show_publish").style.display = "block";break;
+            case 'datalist':dl_db.init(-1);break;
+            case 'transaction':mt_db.init(-1);break;
+            case 'publish':break;
             default: alert("Illegal command " + c);break;
         }
     },
@@ -142,8 +145,9 @@ let main = {
 };
 
 let dl_db = {
-    init:function(){
-        console.log("node:init");
+    init:function(selectKey){
+        document.getElementById("dl_table").innerHTML = `<tr><th style="width: 5%;">&nbsp;</th>
+            <th>Title</th><th>Price</th><th>Keys</th><th>Description</th><th>Owner</th></tr>`;
         this.db_name = "Database";
         this.db_version = "1";
         this.db_store_name = "datalist";
@@ -154,15 +158,19 @@ let dl_db = {
         };
         request.onupgradeneeded = function(event) {
             this.db = event.target.result;
-            this.db.createObjectStore(dl_db.db_store_name);
+            let store_dl = this.db.createObjectStore(dl_db.db_store_name);
+            store_dl.createIndex("i-price","price",{unique:false});
             this.db.createObjectStore("transaction");
         };
         request.onsuccess = function(event) {
-            // 此处采用异步通知. 在使用curd的时候请通过事件触发
             dl_db.db = event.target.result;
-            let t = dl_db.db.transaction(dl_db.db_store_name,"readonly");
-            let s = t.objectStore(dl_db.db_store_name);
-            let c = s.openCursor();
+            let s = dl_db.db.transaction(dl_db.db_store_name,"readonly").objectStore(dl_db.db_store_name);
+            let c;
+            if (parseInt(selectKey) === -1) {
+                c = s.openCursor();
+            }else {
+                c = s.index("i-price").openCursor(window.IDBKeyRange.only(selectKey));
+            }
             c.onsuccess = function(event) {
                 let cursor = event.target.result;
                 if (cursor) {
@@ -171,13 +179,17 @@ let dl_db = {
                     p.description = cursor.value.description;p.owner = cursor.value.owner;
                     main.insDL(p,cursor.key);
                     cursor.continue();
+                }else {
+                    dl_table.init();
                 }
             };
         };
     },
 };
 let mt_db = {
-    init:function () {
+    init:function (selectKey) {
+        document.getElementById("trans_table").innerHTML = `<tr><th>Title</th><th>TransactionID</th>
+            <th>Seller</th><th>Buyer</th><th>State</th></tr>`;
         this.db_name = "Database";
         this.db_version = "1";
         this.db_store_name = "transaction";
@@ -187,11 +199,14 @@ let mt_db = {
             alert("open failed with error code: " + event.target.errorCode);
         };
         request.onsuccess = function(event) {
-            // 此处采用异步通知. 在使用curd的时候请通过事件触发
             mt_db.db = event.target.result;
-            let t = mt_db.db.transaction(mt_db.db_store_name,"readonly");
-            let s = t.objectStore(mt_db.db_store_name);
-            let c = s.openCursor();
+            let s = mt_db.db.transaction(mt_db.db_store_name,"readonly").objectStore(mt_db.db_store_name);
+            let c ;
+            if (selectKey === -1) {
+                c = s.openCursor();
+            }else {
+                c = s.openCursor()
+            }
             c.onsuccess = function(event) {
                 let cursor = event.target.result;
                 if (cursor) {
@@ -199,42 +214,20 @@ let mt_db = {
                     p.title = cursor.value.title;p.seller = cursor.value.seller;p.buyer = cursor.value.buyer;p.state = cursor.value.state;
                     main.insMT(p,cursor.key);
                     cursor.continue();
+                }else {
+                    mt_table.init();
                 }
             };
         };
     },
 };
 let database = {
-    init:function() {
-        dl_db.init();
-        mt_db.init();
-    },
     write:function(params, key,DB) {
-        let transaction = DB.db.transaction(DB.db_store_name, "readwrite");
-        let store = transaction.objectStore(DB.db_store_name);
+        let store = DB.db.transaction(DB.db_store_name, "readwrite").objectStore(DB.db_store_name);
         let request = store.put(params,key);
         request.onerror = function(event){
             console.log(event);
         };
-    },
-    deleteItem:function(key,DB) {
-        DB.db.transaction(DB.db_store_name, "readwrite").objectStore(DB.db_store_name).delete(key);
-    },
-    select:function(key,DB) {
-        let transaction = DB.db.transaction(DB.db_store_name,"readwrite");
-        let store = transaction.objectStore(DB.db_store_name);
-        let request;
-        if (key) {
-            request = store.get(key);
-        }else {
-            request = store.getAll();
-        }
-        request.onsuccess = function () {
-            return request.result;
-        };
-    },
-    clear:function(DB) {
-        DB.db.transaction(DB.db_store_name,"readwrite").objectStore(DB.db_store_name).clear();
     },
 };
 
@@ -278,6 +271,10 @@ dl_table.showPage=function(page) {
     }else{
         aheadLink();
         hinderLink();
+    }
+    if(0 === dl_table.pageNum || 1 === dl_table.pageNum) {
+        aheadText();
+        hinderText();
     }
     function aheadText() {dl_table.firstSpan.innerHTML = "First";dl_table.preSpan.innerHTML = "Pre";}
     function aheadLink() {
@@ -330,6 +327,10 @@ mt_table.showPage=function(page) {
     }else{
         aheadLink();
         hinderLink();
+    }
+    if(0 === mt_table.pageNum || 1 === mt_table.pageNum) {
+        aheadText();
+        hinderText();
     }
     function aheadText() {mt_table.firstSpan.innerHTML = "First";mt_table.preSpan.innerHTML = "Pre";}
     function aheadLink() {
