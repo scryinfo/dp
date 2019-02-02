@@ -1,13 +1,11 @@
 let main = {
     init:function () {
-        // init
         dl_db.init(-1);
         mt_db.init(-1);
 
-        // wait for ready
         document.addEventListener('astilectron-ready', function() {
-            // init account and lists
             document.getElementById("account").innerHTML = location.search.split("=")[1];
+            // go will send recent data to js forwardly,modify here listen instead of send message.
             main.getDatalist();
             main.getTransaction();
         });
@@ -72,12 +70,12 @@ let main = {
     },
     buy:function () {
         let cbs = document.getElementsByName("dl_checkboxes");
-        let purchase = [];
+        let ids = [];
         for(let i = 0; i < cbs.length; i++){
             if(cbs[i].checked)
-                purchase.push(cbs[i].value);
+                ids.push(cbs[i].value);
         }
-        astilectron.sendMessage({Name:"buy",Payload:{buyer:location.search.split("=")[1],ids:purchase}},
+        astilectron.sendMessage({Name:"buy",Payload:{buyer:location.search.split("=")[1],ids:ids}},
             function (message) {
                 if (message.payload) {
                     main.getTransaction();
@@ -108,16 +106,15 @@ let main = {
             }
         }
         let publish = {};
-        publish.id="Qm462";// ID需要通过接口调用获取，这里先给测试数据，后面再调试
         publish.title=values[0];publish.price=parseInt(values[1]);publish.keys=values[2];publish.description=values[3];
         publish.data=values[4];publish.proofs=values[5];publish.owner=location.search.split("=")[1];
         let p = {};
         p.title=publish.title;p.price=publish.price;p.keys=publish.keys;p.description=publish.description;p.owner=publish.owner;
         astilectron.sendMessage({Name:"publish",Payload:publish}, function (message) {
             if (message.payload) {
+                publish.id="Qm462"; // interface call will return an unique id also,remember to modify it.
                 database.write(p,publish.id,dl_db);
                 main.insDL(p,publish.id);
-                console.log("Publish data succeed.");
             }else {
                 alert("Publish data failed.");
             }
@@ -205,7 +202,7 @@ let mt_db = {
             if (selectKey === -1) {
                 c = s.openCursor();
             }else {
-                c = s.openCursor()
+                c = s.openCursor(window.IDBKeyRange.only(selectKey));
             }
             c.onsuccess = function(event) {
                 let cursor = event.target.result;
