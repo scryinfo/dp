@@ -2,7 +2,7 @@ package chainevents
 
 import (
     "../ethereum/events"
-    "fmt"
+    rlog "github.com/sirupsen/logrus"
     "github.com/ethereum/go-ethereum/common"
 )
 
@@ -15,7 +15,7 @@ const (
 func ExecuteEvents(dataChannel chan events.Event, externalEventRepo *EventRepository) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println("Error: failed to execute event, error: ", err)
+			rlog.Error("Error: failed to execute event, error: ", err)
 		}
 	}()
 
@@ -30,13 +30,13 @@ func ExecuteEvents(dataChannel chan events.Event, externalEventRepo *EventReposi
 func executeEvent(event events.Event, eventRepo *EventRepository) bool {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println("error: failed to execute event "+event.Name+" because of error: ", err)
+			rlog.Error("error: failed to execute event "+event.Name+" because of error: ", err)
 		}
 	}()
 
 	subscribeInfoMap := eventRepo.mapEventSubscribe[event.Name]
 	if subscribeInfoMap == nil {
-		fmt.Println("Warning: no event was executed, event:", event.Name)
+		rlog.Error("warning: no event was executed, event:", event.Name)
 		return false
 	}
 
@@ -55,7 +55,7 @@ func executeEvent(event events.Event, eventRepo *EventRepository) bool {
             owner := common.HexToAddress(obj)
             executeMatchedEvent(subscribeInfoMap, []common.Address{owner}, event)
         } else {
-            fmt.Println("Warning: unknown event type, event:", event.Name)
+            rlog.Error("Warning: unknown event type, event:", event.Name)
         }
     }
 

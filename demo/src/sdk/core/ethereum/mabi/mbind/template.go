@@ -28,8 +28,8 @@ type tmplData struct {
 type tmplContract struct {
 	Type        string                 // Type name of the main contract binding
 	InputABI    string                 // JSON ABI used as the input to generate the binding from
-	InputBin    string                 // Optional EVM bytecode used to denetare deploy code from
-	Constructor abi.Method             // Contract constructor for deploy parametrization
+	InputBin    string                 // Optional EVM bytecode used to denetare script code from
+	Constructor abi.Method             // Contract constructor for script parametrization
 	Calls       map[string]*tmplMethod // Contract calls that only read state data
 	Transacts   map[string]*tmplMethod // Contract calls that write state data
 	Events      map[string]*tmplEvent  // Contract events accessors
@@ -439,8 +439,8 @@ import org.ethereum.geth.internal.*;
 			// BYTECODE is the compiled bytecode used for deploying new contracts.
 			public final static byte[] BYTECODE = "{{.InputBin}}".getBytes();
 
-			// deploy deploys a new Ethereum contract, binding an instance of {{.Type}} to it.
-			public static {{.Type}} deploy(TransactOpts auth, EthereumClient client{{range .Constructor.Inputs}}, {{bindtype .Type}} {{.Name}}{{end}}) throws Exception {
+			// script deploys a new Ethereum contract, binding an instance of {{.Type}} to it.
+			public static {{.Type}} script(TransactOpts auth, EthereumClient client{{range .Constructor.Inputs}}, {{bindtype .Type}} {{.Name}}{{end}}) throws Exception {
 				Interfaces args = Geth.newInterfaces({{(len .Constructor.Inputs)}});
 				{{range $index, $element := .Constructor.Inputs}}
 				  args.set({{$index}}, Geth.newInterface()); args.get({{$index}}).set{{namedtype (bindtype .Type) .Type}}({{.Name}});

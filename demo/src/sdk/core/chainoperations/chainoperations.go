@@ -9,6 +9,7 @@ import (
     "github.com/ethereum/go-ethereum/common"
     "github.com/ethereum/go-ethereum/core/types"
     "github.com/ethereum/go-ethereum/crypto"
+    rlog "github.com/sirupsen/logrus"
     "math/big"
     "strings"
     "../../util/accounts"
@@ -62,7 +63,7 @@ func SignTransaction(signer types.Signer, address common.Address,
         key, err:= keystore.DecryptKey([]byte(keyJson), "12345")
 
         if err != nil {
-            fmt.Println("failed to sign transaction, error:", err)
+            rlog.Error("failed to sign transaction, error:", err)
             return nil, err
         }
 

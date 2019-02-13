@@ -1,9 +1,9 @@
 package main
 
 import (
+    "../sdk"
     "../sdk/contractclient"
     "../sdk/contractclient/contractinterfacewrapper"
-    "../sdk/core"
     "../sdk/core/chainevents"
     "../sdk/core/chainoperations"
     "../sdk/core/ethereum/events"
@@ -37,17 +37,9 @@ var (
 )
 
 func main()  {
-    var err error = nil
-	conn, err = core.StartEngine("http://127.0.0.1:7545/", "192.168.1.6:48080", getContracts(), "/ip4/127.0.0.1/tcp/5001")
+    err := sdk.Init("http://127.0.0.1:7545/", "192.168.1.6:48080", getContracts(), 0, "/ip4/127.0.0.1/tcp/5001", common.HexToAddress(protocolContractAddr), common.HexToAddress(tokenContractAddr))
 	if err != nil {
-		fmt.Println("failed to start engine. error:", err)
-		return
-	}
-
-	err = contractinterfacewrapper.Initialize(common.HexToAddress(protocolContractAddr),
-		                                        common.HexToAddress(tokenContractAddr), conn)
-	if err != nil {
-		fmt.Println("failed to initialize contract interface, error:", err)
+		fmt.Println("failed to initialize sdk, error:", err)
 		return
 	}
 
@@ -372,8 +364,6 @@ func onApprovalBuyerTransfer(event events.Event) bool {
 
 func onApprovalVerifierTransfer(event events.Event) bool {
     fmt.Println("onApprovalVerifierTransfer:", event)
-
-
 
     return true
 }
