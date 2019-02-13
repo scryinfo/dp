@@ -3,9 +3,9 @@ package contractinterfacewrapper
 import (
     "../../interface/contractinterface"
     op "../../core/chainoperations"
-    "../../util/security"
     "../../util/storage/ipfsaccess"
     "../../util/uuid"
+    "../../util/accounts"
     "errors"
     "fmt"
     "github.com/btcsuite/btcutil/base58"
@@ -82,8 +82,7 @@ func Publish(txParams *op.TransactParams, price *big.Int, metaData []byte, proof
 	}
 
 	b := []byte(cidMd)
-	secOper := security.CryptExecutor{}
-	encMetaId, err := secOper.Encrypt(b, txParams.From.String(), txParams.Password)
+	encMetaId, err := accounts.GetAMInstance().Encrypt(b, txParams.From.String(), txParams.Password)
 	if err != nil {
 		fmt.Println("failed to encrypt meta data hash, error: ", err)
 		return "", err
@@ -96,7 +95,7 @@ func Publish(txParams *op.TransactParams, price *big.Int, metaData []byte, proof
 		return "", err
 	}
 
-	fmt.Println("publish transaction:" + string(tx.Data()))
+	fmt.Println("publish transaction:" + string(tx.Data()) + " hash:" + tx.Hash().String())
 
 	return publishId, nil
 }
@@ -195,3 +194,14 @@ func CreditsToVerifier(txParams *op.TransactParams, txId *big.Int, to common.Add
 func buildTxOpts(txParams *op.TransactParams) (*bind.TransactOpts) {
     return op.BuildTransactOpts(txParams)
 }
+
+func TransferTokens(txParams *op.TransactParams, to common.Address, value *big.Int) (error)  {
+    tx, err := scryToken.Transfer(buildTxOpts(txParams), to, value)
+    if err == nil {
+        fmt.Println("tx:", tx)
+        return err
+    }
+
+    return err
+}
+
