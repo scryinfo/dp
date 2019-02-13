@@ -1,12 +1,11 @@
 package settings
 
-
 import (
-    cf "../util/configuration"
-    ev "../core/ethereum/events"
-    "errors"
-    "fmt"
     "../core/ethereum/events"
+    ev "../core/ethereum/events"
+    cf "../util/configuration"
+    rlog "github.com/sirupsen/logrus"
+    "errors"
 )
 
 const (
@@ -16,7 +15,7 @@ const (
 func SaveLastEvent(event ev.Event) (error) {
     rv, err := LoadSettings()
     if err != nil {
-        fmt.Println("failed to load settings, error:", err)
+        rlog.Error("failed to load settings, error:", err)
         return err
     }
 
@@ -24,7 +23,7 @@ func SaveLastEvent(event ev.Event) (error) {
 
     err = cf.SaveChanges(SETTING_LOCATION, rv)
     if err != nil {
-        fmt.Println("failed to save settings, error:", err)
+        rlog.Error("failed to save settings, error:", err)
         return err
     }
 
@@ -34,7 +33,7 @@ func SaveLastEvent(event ev.Event) (error) {
 func LoadLastEvent() (events.Event, error) {
     rv, err := LoadSettings()
     if err != nil {
-        fmt.Println("failed to load settings, error:", err)
+        rlog.Error("failed to load settings, error:", err)
         return events.Event{}, err
     }
 
@@ -42,17 +41,27 @@ func LoadLastEvent() (events.Event, error) {
 
 }
 
+func LoadLogPath() (*Log, error) {
+    rv, err := LoadSettings()
+    if err != nil {
+        rlog.Error("failed to load settings, error:", err)
+        return nil, err
+    }
+
+    return &rv.Log, nil
+}
+
 func LoadSettings() (*ScryInfo, error) {
     rv, err := cf.GetYAMLStructure(SETTING_LOCATION, &ScryInfo{})
     if err != nil {
-        fmt.Println("failed to get yaml structure, error:", err)
+        rlog.Error("failed to get yaml structure, error:", err)
         return nil, err
     }
 
     scryInfo, ok := rv.(*ScryInfo)
     if !ok {
         emsg := "failed to convert stream to yaml structure"
-        fmt.Println(emsg)
+        rlog.Error(emsg)
         return nil, errors.New(emsg)
     }
 

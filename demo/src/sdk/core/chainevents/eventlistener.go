@@ -1,7 +1,7 @@
 package chainevents
 
 import (
-	"fmt"
+    rlog "github.com/sirupsen/logrus"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"../ethereum/events"
@@ -15,19 +15,20 @@ type ContractInfo struct {
 }
 
 func ListenEvent(conn *ethclient.Client, contracts []ContractInfo,
-			interval time.Duration,	dataChannel chan events.Event,
-			errorChannel chan error) bool {
+            fromBlock uint64, interval time.Duration,
+            dataChannel chan events.Event, errorChannel chan error) bool {
 	rv := true
-	fmt.Println("start listening events...")
+	rlog.Info("start listening events...")
+
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println("Failed to listen event. error:", err)
+			rlog.Error("Failed to listen event. error:", err)
 			rv = false
 		}
 	}()
 
     if len(contracts) == 0 {
-        fmt.Println("zero contracts")
+        rlog.Error("invalid contracts parameter")
         return false
     }
 
@@ -37,14 +38,14 @@ func ListenEvent(conn *ethclient.Client, contracts []ContractInfo,
     }
 
 	recp, err := builder.SetClient(conn).
-		SetFrom(getFromBlock()).
-		SetTo(getToBlock()).
+		SetFrom(fromBlock).
+		SetTo(0).
 		SetGracefullExit(true).
 		SetDataChan(dataChannel, errorChannel).
 		SetInterval(interval).
 		BuildAndRun()
 	if err != nil {
-		fmt.Println("failed to listen to events.", err)
+		rlog.Error("failed to listen to events.", err)
 		return false
 	}
 
@@ -53,10 +54,3 @@ func ListenEvent(conn *ethclient.Client, contracts []ContractInfo,
 	return rv
 }
 
-func getFromBlock() uint64 {
-	return 0
-}
-
-func getToBlock() uint64 {
-	return 0
-}

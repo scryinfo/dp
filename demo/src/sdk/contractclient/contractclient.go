@@ -3,7 +3,7 @@ package contractclient
 import (
     "../core/chainevents"
     "../util/accounts"
-    "fmt"
+    rlog "github.com/sirupsen/logrus"
     "github.com/ethereum/go-ethereum/common"
     "github.com/pkg/errors"
 )
@@ -21,7 +21,7 @@ func NewContractClient(publicKey string) (*ContractClient, error) {
 func CreateContractClient(password string) (*ContractClient, error) {
     account, err := accounts.GetAMInstance().CreateAccount(password)
     if err != nil {
-        fmt.Println("failed to create Account, error:", err)
+        rlog.Error("failed to create Account, error:", err)
         return nil, err
     }
 
