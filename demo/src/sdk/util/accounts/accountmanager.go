@@ -22,13 +22,13 @@ func GetAMInstance() *AccountManager {
 
 type Account struct {
     Address string
+    Online bool
 }
 
 type AccountManager struct {
     client scryinfo.KeyServiceClient
     accounts []*Account
 }
-
 
 func (am *AccountManager) Initialize(asNodeAddr string) error {
     cn, err := grpc.Dial(asNodeAddr, grpc.WithInsecure())
@@ -62,7 +62,7 @@ func (am *AccountManager) CreateAccount(password string) (*Account, error) {
         return nil, err
     }
 
-    newAccount := &Account{addr.Address}
+    newAccount := &Account{addr.Address, false}
     am.accounts = append(am.accounts, newAccount)
 
     return newAccount, nil
@@ -91,7 +91,7 @@ func (am AccountManager) AuthAccount(address string, password string) (bool, err
     return rv, nil
 }
 
-func (am AccountManager) GetAccountList() ([]*Account) {
+func (am AccountManager) GetAccounts() ([]*Account) {
     return am.accounts
 }
 
@@ -158,15 +158,20 @@ func (am AccountManager) ReEncrypt(cipherText []byte, address1 string,
 func (am AccountManager) SignTransaction(message []byte, address string, password string) ([]byte, error) {
     defer func() {
         if err := recover(); err != nil {
-            fmt.Println("failed to reencrypt, error:", err)
+            fmt.Println("failed to encrypt, error:", err)
         }
     }()
 
     if am.client == nil {
-        return nil, errors.New("failed to encrypt, error: null account service")
+        return nil, errors.New("failed to encrypt, error: null client")
     }
 
-    in := scryinfo.CipherParameter{Message: message}
+    in := scryinfo.CipherParameter{
+        Message: message,
+        Address:address,
+        Password:password,
+    }
+
     out, err := am.client.Signature(context.Background(), &in)
     if err != nil {
         fmt.Println("failed to signature, error:", err)

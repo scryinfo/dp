@@ -6,6 +6,12 @@ import (
     "github.com/ethereum/go-ethereum/common"
 )
 
+const (
+    BROADCAST_TO_USERS = "0x00"
+    TARGET_USERS = "users"
+    TARGET_OWNER = "owner"
+)
+
 func ExecuteEvents(dataChannel chan events.Event, externalEventRepo *EventRepository) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -34,17 +40,17 @@ func executeEvent(event events.Event, eventRepo *EventRepository) bool {
 		return false
 	}
 
-	objUsers := event.Data.Get("users")
+	objUsers := event.Data.Get(TARGET_USERS)
 	if objUsers != nil {
 	    users := objUsers.([]common.Address)
-        if len(users) == 1 && users[0] == common.HexToAddress("0x00") {
+        if len(users) == 1 && users[0] == common.HexToAddress(BROADCAST_TO_USERS) {
             executeAllEvent(subscribeInfoMap, event)
         } else {
             executeMatchedEvent(subscribeInfoMap, users, event)
         }
 
     } else {
-        obj, ok := event.Data.Get("owner").(string)
+        obj, ok := event.Data.Get(TARGET_OWNER).(string)
         if ok {
             owner := common.HexToAddress(obj)
             executeMatchedEvent(subscribeInfoMap, []common.Address{owner}, event)
@@ -62,7 +68,6 @@ func executeMatchedEvent(subscribeInfoMap map[common.Address]EventCallback,
         if containUser(users, k) {
             if v != nil {
                 EventCallback(v)(event)
-
             }
         }
     }
