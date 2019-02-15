@@ -57,6 +57,7 @@ contract ScryProtocol {
     }
 
     Verifier[] verifiers;
+    address[] shortlist;
     mapping (string => DataInfoPublished) mapPublishedData;
     mapping (uint256 => TransactionItem) mapTransaction;
     mapping (uint256 => mapping(address => VoteResult)) mapVote;
@@ -239,43 +240,43 @@ contract ScryProtocol {
         emit Vote(seqNo, txId, judge, comments, users);
     }
 
-    function chooseArbitrators(uint8 num, address[] vs) internal view returns (address[] memory) {
-        address[] memory shortlist = new address[](num * 3);
+    function chooseArbitrators(uint8 num, address[] vs) internal returns (address[] memory) {
+        shortlist = new address[](num * 3);uint256 count = 0;
         address[] memory chosenArbitrators = new address[](num);
-        uint256 count;
+        // chosenArbitrators = ['0x0000...'] 40 chars.
 
         for (uint256 i = 0;i < verifiers.length && count < num * 3;i++) {
             Verifier storage a = verifiers[i];
-            if (arbitratorValid(a.addr,vs)) {
+            if (arbitratorValid(a,vs)) {
                 shortlist[count] = a.addr;
                 count++;
             }
         }
+        shortlist.length = count;
         require(count >= num, "Not enough arbitrators");
 
         for (i = 0;i < num;i++) {
             uint index = getRandomNumber(shortlist.length) % shortlist.length;
-            address ad = shortlist[index];address t = ad;
-            while (!arbitratorExist(ad,chosenArbitrators)) {
-                ad = shortlist[(++index) % chosenArbitrators.length];
-                require(ad != t, "Disordered arbitrators");
+            address ad = shortlist[index];
+            while (arbitratorExist(ad,chosenArbitrators)) {
+                ad = shortlist[(++index) % shortlist.length];
             }
             chosenArbitrators[i] = ad;
         }
 
         return chosenArbitrators;
+//        return shortlist;
     }
 
-    function arbitratorValid(address addr, address[] vs) internal pure returns (bool) {
+    function arbitratorValid(Verifier a, address[] vs) internal view returns (bool) {
         bool notVerifier = true;
         for (uint8 i = 0;i < vs.length;i++) {
-            if (addr == vs[i]) {
+            if (a.addr == vs[i]) {
                 notVerifier = false;
                 break;
             }
         }
-//        return notVerifier && a.enable && (a.credits >= arbitrateCredit);
-        return notVerifier;
+        return notVerifier && a.enable && (a.credits >= arbitrateCredit);
     }
 
     function arbitratorExist(address ad, address[] addrs) internal pure returns (bool) {
@@ -358,8 +359,7 @@ contract ScryProtocol {
         require(txItem.used, "Transaction does not exist");
 
         mapArbitrate[txId][msg.sender] = ArbitrateResult(judge);
-        uint256 c = mapCount[txId].length;
-        mapCount[txId][c] = judge;
+        mapCount[txId].push(judge);
 
         txItem.state = TransactionState.Arbitrating;
 
@@ -380,6 +380,8 @@ contract ScryProtocol {
             address[] memory users = new address[](1);
             users[0] = txItem.buyer;
             emit Arbitrate(seqNo, txId, users);
+
+            closeTransaction(txItem, seqNo, txId);
         }
     }
 
