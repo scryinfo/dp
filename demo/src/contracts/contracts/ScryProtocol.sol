@@ -14,14 +14,14 @@ contract ScryProtocol {
         address seller;
         bool supportVerify;
         bool used;
-    } 
+    }
 
     struct TransactionItem {
         TransactionState state;
         address buyer;
         address seller;
         address[] verifiers;
-        bool[] creditGived; 
+        bool[] creditGived;
         string publishId;
         bytes meteDataIdEncBuyer;
         bytes metaDataIdEncSeller;
@@ -36,13 +36,15 @@ contract ScryProtocol {
         uint256 creditTimes;
         bool enable;
     }
-    
+
     uint8 validVerifierCount = 0;
     uint8 verifierNum = 2;
     uint256 verifierDepositToken = 10000;
     uint8 creditLow = 0;
     uint8 creditHigh = 5;
     uint8 creditThreshold = 2;
+    uint8 arbitratorNum = 1;
+    uint8 arbitrateCredit = 0;
 
     struct VoteResult {
         bool judge;
@@ -50,16 +52,24 @@ contract ScryProtocol {
         bool used;
     }
 
+    struct ArbitrateResult {
+        bool judge;
+    }
+
     Verifier[] verifiers;
     mapping (string => DataInfoPublished) mapPublishedData;
     mapping (uint256 => TransactionItem) mapTransaction;
     mapping (uint256 => mapping(address => VoteResult)) mapVote;
+    mapping (uint256 => mapping(address => ArbitrateResult)) mapArbitrate;
+    mapping (uint256 => bool[]) mapCount;
 
     event RegisterVerifier(string seqNo, address[] users);
     event DataPublish(string seqNo, string publishId, uint256 price, string despDataId, address[] users);
     event TransactionCreate(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool supportVerify, address[] users);
     event VerifiersChosen(string seqNo, uint256 transactionId, bytes32[] proofIds, address[] users);
     event Vote(string seqNo, uint256 transactionId, bool judge, string comments, address[] users);
+    event ArbitratorsChosen(string seqNo,uint256 transactionId,address[] users);
+    event Arbitrate(string seqNo,uint256 txId,address[] users);
     event Buy(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, address[] users);
     event ReadyForDownload(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, address[] users);
     event TransactionClose(string seqNo, uint256 transactionId, address[] users);
@@ -92,7 +102,7 @@ contract ScryProtocol {
             require(token.balanceOf(msg.sender) >= verifierDepositToken, "No enough balance");
             require(token.transferFrom(msg.sender, address(this), verifierDepositToken), "Failed to transfer token from caller");
         }
-        
+
         verifiers[verifiers.length++] = Verifier(msg.sender, verifierDepositToken, creditHigh, 0, true);
         validVerifierCount++;
 
@@ -102,7 +112,7 @@ contract ScryProtocol {
     }
 
     function publishDataInfo(string seqNo, string publishId, uint256 price, bytes metaDataIdEncSeller,
-                                     bytes32[] proofDataIds, string despDataId, bool supportVerify) external {
+        bytes32[] proofDataIds, string despDataId, bool supportVerify) external {
         address[] memory users = new address[](1);
         users[0] = address(0x00);
 
@@ -110,7 +120,7 @@ contract ScryProtocol {
         require(!data.used, "Duplicate publish id");
 
         mapPublishedData[publishId] = DataInfoPublished(price, metaDataIdEncSeller, proofDataIds, proofDataIds.length, despDataId, msg.sender, supportVerify, true);
-        
+
         emit DataPublish(seqNo, publishId, price, despDataId, users);
     }
 
@@ -124,6 +134,10 @@ contract ScryProtocol {
         DataInfoPublished memory data = mapPublishedData[publishId];
         require(data.used, "Publish data does not exist");
         require((token.balanceOf(msg.sender)) >= data.price, "No enough balance");
+        uint256 fee = data.price;
+        if (data.supportVerify) {
+            fee += 0;   // should add the tokens which for awarding verifiers and arbitrators.
+        }
         require(token.transferFrom(msg.sender, address(this), data.price), "Failed to transfer token from caller");
 
         //create transaction
@@ -137,6 +151,10 @@ contract ScryProtocol {
             selectedVerifiers = chooseVerifiers(verifierNum);
             creditGived = new bool[](verifierNum);
             emit VerifiersChosen(seqNo, txId,data.proofDataIds, selectedVerifiers);
+
+//            address[] memory selectedArbitrators;
+//            selectedArbitrators = chooseArbitrators(arbitratorNum, selectedVerifiers);
+//            emit ArbitratorsChosen(seqNo, txId, selectedArbitrators);
         }
 
         address[] memory users = new address[](1);
@@ -144,7 +162,7 @@ contract ScryProtocol {
         emit TransactionCreate(seqNo, txId, publishId, data.proofDataIds, data.supportVerify, users);
 
         mapTransaction[txId] = TransactionItem(TransactionState.Created, msg.sender, data.seller, selectedVerifiers, creditGived,
-                                                publishId, metaDataIdEncBuyer, data.metaDataIdEncSeller, data.price, true);
+            publishId, metaDataIdEncBuyer, data.metaDataIdEncSeller, data.price, true);
     }
 
     function chooseVerifiers(uint8 num) internal view returns (address[] memory) {
@@ -175,7 +193,7 @@ contract ScryProtocol {
         (exist, index) = getVerifierIndex(v.addr, arr);
         return (v.enable && exist, index);
     }
-    
+
     function verifierExist(address addr, address[] arr) pure internal returns (bool) {
         bool exist;
         (exist, ) = getVerifierIndex(addr, arr);
@@ -219,6 +237,52 @@ contract ScryProtocol {
         address[] memory users = new address[](1);
         users[0] = txItem.buyer;
         emit Vote(seqNo, txId, judge, comments, users);
+    }
+
+    function chooseArbitrators(uint8 num, address[] vs) internal view returns (address[] memory) {
+        address[] memory shortlist = new address[](num * 3);
+        address[] memory chosenArbitrators = new address[](num);
+        uint256 count;
+
+        for (uint256 i = 0;i < verifiers.length && count < num * 3;i++) {
+            Verifier storage a = verifiers[i];
+            if (arbitratorValid(a.addr,vs)) {
+                shortlist[count] = a.addr;
+                count++;
+            }
+        }
+        require(count >= num, "Not enough arbitrators");
+
+        for (i = 0;i < num;) {
+            uint index = getRandomNumber(shortlist.length) % shortlist.length;
+            address ad = shortlist[index];
+            if (!arbitratorExist(ad,shortlist)) {
+                chosenArbitrators[i] = a.addr;
+                i++;
+            }
+        }
+
+        return chosenArbitrators;
+    }
+
+    function arbitratorValid(address addr, address[] vs) internal pure returns (bool) {
+        bool notVerifier = true;
+        for (uint8 i = 0;i < vs.length;i++) {
+            if (addr == vs[i]) {
+                return false;
+            }
+        }
+//        return notVerifier && a.enable && (a.credits >= arbitrateCredit);
+        return notVerifier;
+    }
+
+    function arbitratorExist(address addr, address[] shortlist) internal pure returns (bool) {
+        for (uint256 i = 0;i < shortlist.length;i++) {
+            if (addr == shortlist[i]) {
+                return true;
+            }
+        }
+        return false;
     }
 
     function buyData(string seqNo, uint256 txId) external {
@@ -273,15 +337,45 @@ contract ScryProtocol {
             if(truth) {
                 payToSeller(txItem, data);
             }
-            
+
             closeTransaction(txItem, seqNo, txId);
         } else {
             if (truth) {
                 payToSeller(txItem, data);
                 closeTransaction(txItem, seqNo, txId);
             } else {
-                
+                // arbitrate.
             }
+        }
+    }
+
+    function arbitrate(string seqNo,uint txId,bool judge) external {
+        TransactionItem storage txItem = mapTransaction[txId];
+        require(txItem.used, "Transaction does not exist");
+
+        mapArbitrate[txId][msg.sender] = ArbitrateResult(judge);
+        uint256 c = mapCount[txId].length;
+        mapCount[txId][c] = judge;
+
+        txItem.state = TransactionState.Arbitrating;
+
+        if (mapCount[txId].length == arbitratorNum) {
+            uint8 truth;
+            for (uint256 i = 0;i < arbitratorNum;i++) {
+                if (mapCount[txId][i]) {
+                    truth++;
+                }
+            }
+            delete mapCount[txId];
+            if (truth >= (arbitratorNum+1)/2) {
+                DataInfoPublished storage data = mapPublishedData[txItem.publishId];
+                payToSeller(txItem, data);
+            }else {
+                // reward arbitrators.
+            }
+            address[] memory users = new address[](1);
+            users[0] = txItem.buyer;
+            emit Arbitrate(seqNo, txId, users);
         }
     }
 
@@ -308,13 +402,13 @@ contract ScryProtocol {
 
     function setVerifierDepositToken(uint256 deposit) external {
         require(owner == msg.sender, "The value only can be set by owner");
-        
+
         verifierDepositToken = deposit;
     }
 
     function setVerifierNum(uint8 num) external {
         require(owner == msg.sender, "The value only can be set by owner");
-        
+
         verifierNum = num;
     }
 
@@ -337,18 +431,18 @@ contract ScryProtocol {
         uint256 index;
         (valid, index) = verifierValid(verifier, txItem.verifiers);
         require(valid, "Invalid verifier");
-        require(!txItem.creditGived[index], "The verifier's credit in this transaction has been submited");    
-        
+        require(!txItem.creditGived[index], "The verifier's credit in this transaction has been submited");
+
         verifier.credits = (uint8)((verifier.credits * verifier.creditTimes + credit)/(++verifier.creditTimes));
         txItem.creditGived[index] = true;
-        
+
         //disable verifier and forfeiture deposit while credit <= creditThreshold
         if (verifier.credits <= creditThreshold) {
             verifier.enable = false;
             verifier.deposit = 0;
             validVerifierCount--;
             require(validVerifierCount >= 1, "Invalid verifier count");
-            
+
             address[] memory users = new address[](1);
             users[0] = address(0x00);
             emit VerifierDisable(seqNo, verifier.addr, users);
