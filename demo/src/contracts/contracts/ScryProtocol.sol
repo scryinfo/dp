@@ -253,13 +253,14 @@ contract ScryProtocol {
         }
         require(count >= num, "Not enough arbitrators");
 
-        for (i = 0;i < num;) {
+        for (i = 0;i < num;i++) {
             uint index = getRandomNumber(shortlist.length) % shortlist.length;
-            address ad = shortlist[index];
-            if (!arbitratorExist(ad,chosenArbitrators)) {
-                chosenArbitrators[i] = ad;
-                i++;
+            address ad = shortlist[index];address t = ad;
+            while (!arbitratorExist(ad,chosenArbitrators)) {
+                ad = shortlist[(++index) % chosenArbitrators.length];
+                require(ad != t, "Disordered arbitrators");
             }
+            chosenArbitrators[i] = ad;
         }
 
         return chosenArbitrators;
