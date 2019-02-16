@@ -374,16 +374,11 @@ contract ScryProtocol {
             if (truth >= (arbitratorNum+1)/2) {
                 DataInfoPublished storage data = mapPublishedData[txItem.publishId];
                 payToSeller(txItem, data);
-            }else {
-
             }
             address[] memory users = new address[](1);
             users[0] = txItem.buyer;
-
-            // Arbitrate event will be emited only all arbitrators arbitrated.
+            // Arbitrate event will be emitted only all arbitrators arbitrated.
             emit Arbitrate(seqNo, txId, users);
-
-            closeTransaction(txItem, seqNo, txId);
         }
     }
 
