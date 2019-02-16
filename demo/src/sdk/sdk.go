@@ -1,7 +1,7 @@
 package sdk
 
 import (
-    "./contractclient/contractinterfacewrapper"
+    "./scryclient/contractinterfacewrapper"
     "./core"
     "./core/chainevents"
     "./settings"
