@@ -2,7 +2,7 @@ var scryProtocol = artifacts.require("./ScryProtocol.sol")
 var scryToken = artifacts.require("./ScryToken.sol")
 
 var ptl, ste;
-var deployer, seller, buyer, verifier1, verifier2, verifier3, chosenVerfiers;
+var deployer, seller, buyer, verifier1, verifier2, verifier3, chosenVerfiers, chosenArbitrators;
 var publishId, txId;
 contract('ScryProtocol', function (accounts) {
 
@@ -64,9 +64,13 @@ contract('ScryProtocol', function (accounts) {
             eventName = "VerifiersChosen";
             assert(checkEvent(eventName, result), "failed to watch event " + eventName);
 
+            eventName = "ArbitratorsChosen";
+            assert(checkEvent(eventName, result), "failed to watch event " + eventName);
+
             txId = getEventField("VerifiersChosen", result, "transactionId");
             verifiers = getEventField("VerifiersChosen", result, "users");
             chosenVerfiers = verifiers;
+            chosenArbitrators = getEventField("ArbitratorsChosen", result, "users");
 
             return verifiers;
         }).then(function(result) {
@@ -85,11 +89,17 @@ contract('ScryProtocol', function (accounts) {
         }).then(function(result) {
             eventName = "ReadyForDownload";
             assert(checkEvent(eventName, result), "failed to watch event " + eventName);
-        }).then(function() {
-            return ptl.confirmDataTruth("seqNO7", txId, true, {from: buyer});
+        })/*.then(function() {
+            // return ↓
+            ptl.confirmDataTruth("seqNO7", txId, true, {from: buyer});
         }).then(function(result) {
             eventName = "TransactionClose";
             assert(checkEvent(eventName, result), "failed to watch event " + eventName);
+        })*/.then(function() {
+            return ptl.arbitrate("seqNO8", txId, true)
+        }).then(function(result) {
+            eventName = "Arbitrate";
+            assert(checkEvent(eventName, result), "failed to watch event " + eventName)
         }).then(function() {
             ptl.creditsToVerifier(txId, chosenVerfiers[1], 5);
         }).catch(function (err) {

@@ -43,7 +43,7 @@ contract ScryProtocol {
     uint8 creditLow = 0;
     uint8 creditHigh = 5;
     uint8 creditThreshold = 2;
-    uint8 arbitratorNum = 1;
+    uint8 arbitratorNum = 1;        // test data.
     uint8 arbitrateCredit = 0;
 
     struct VoteResult {
@@ -57,6 +57,7 @@ contract ScryProtocol {
     }
 
     Verifier[] verifiers;
+    address[] shortlist;
     mapping (string => DataInfoPublished) mapPublishedData;
     mapping (uint256 => TransactionItem) mapTransaction;
     mapping (uint256 => mapping(address => VoteResult)) mapVote;
@@ -138,7 +139,7 @@ contract ScryProtocol {
         if (data.supportVerify) {
             fee += 0;   // should add the tokens which for awarding verifiers and arbitrators.
         }
-        require(token.transferFrom(msg.sender, address(this), data.price), "Failed to transfer token from caller");
+        require(token.transferFrom(msg.sender, address(this), fee), "Failed to transfer token from caller");
 
         //create transaction
         uint txId = getTransactionId();
@@ -152,9 +153,9 @@ contract ScryProtocol {
             creditGived = new bool[](verifierNum);
             emit VerifiersChosen(seqNo, txId,data.proofDataIds, selectedVerifiers);
 
-//            address[] memory selectedArbitrators;
-//            selectedArbitrators = chooseArbitrators(arbitratorNum, selectedVerifiers);
-//            emit ArbitratorsChosen(seqNo, txId, selectedArbitrators);
+            address[] memory selectedArbitrators;
+            selectedArbitrators = chooseArbitrators(arbitratorNum, selectedVerifiers);
+            emit ArbitratorsChosen(seqNo, txId, selectedArbitrators);
         }
 
         address[] memory users = new address[](1);
@@ -239,50 +240,54 @@ contract ScryProtocol {
         emit Vote(seqNo, txId, judge, comments, users);
     }
 
-    function chooseArbitrators(uint8 num, address[] vs) internal view returns (address[] memory) {
-        address[] memory shortlist = new address[](num * 3);
+    function chooseArbitrators(uint8 num, address[] vs) internal returns (address[] memory) {
+        shortlist = new address[](num * 3);uint256 count = 0;
         address[] memory chosenArbitrators = new address[](num);
-        uint256 count;
+        // chosenArbitrators = ['0x0000...'] 40 chars.
 
         for (uint256 i = 0;i < verifiers.length && count < num * 3;i++) {
             Verifier storage a = verifiers[i];
-            if (arbitratorValid(a.addr,vs)) {
+            if (arbitratorValid(a,vs)) {
                 shortlist[count] = a.addr;
                 count++;
             }
         }
+        shortlist.length = count;
         require(count >= num, "Not enough arbitrators");
 
-        for (i = 0;i < num;) {
+        for (i = 0;i < num;i++) {
             uint index = getRandomNumber(shortlist.length) % shortlist.length;
             address ad = shortlist[index];
-            if (!arbitratorExist(ad,shortlist)) {
-                chosenArbitrators[i] = a.addr;
-                i++;
+            while (arbitratorExist(ad,chosenArbitrators)) {
+                ad = shortlist[(++index) % shortlist.length];
             }
+            chosenArbitrators[i] = ad;
         }
 
         return chosenArbitrators;
+//        return shortlist;
     }
 
-    function arbitratorValid(address addr, address[] vs) internal pure returns (bool) {
+    function arbitratorValid(Verifier a, address[] vs) internal view returns (bool) {
         bool notVerifier = true;
         for (uint8 i = 0;i < vs.length;i++) {
-            if (addr == vs[i]) {
-                return false;
+            if (a.addr == vs[i]) {
+                notVerifier = false;
+                break;
             }
         }
-//        return notVerifier && a.enable && (a.credits >= arbitrateCredit);
-        return notVerifier;
+        return notVerifier && a.enable && (a.credits >= arbitrateCredit);
     }
 
-    function arbitratorExist(address addr, address[] shortlist) internal pure returns (bool) {
-        for (uint256 i = 0;i < shortlist.length;i++) {
-            if (addr == shortlist[i]) {
-                return true;
+    function arbitratorExist(address ad, address[] addrs) internal pure returns (bool) {
+        bool exist = false;
+        for (uint8 i = 0;i < addrs.length;i++) {
+            if (ad == addrs[i]) {
+                exist = true;
+                break;
             }
         }
-        return false;
+        return exist;
     }
 
     function buyData(string seqNo, uint256 txId) external {
@@ -354,8 +359,7 @@ contract ScryProtocol {
         require(txItem.used, "Transaction does not exist");
 
         mapArbitrate[txId][msg.sender] = ArbitrateResult(judge);
-        uint256 c = mapCount[txId].length;
-        mapCount[txId][c] = judge;
+        mapCount[txId].push(judge);
 
         txItem.state = TransactionState.Arbitrating;
 
@@ -376,6 +380,8 @@ contract ScryProtocol {
             address[] memory users = new address[](1);
             users[0] = txItem.buyer;
             emit Arbitrate(seqNo, txId, users);
+
+            closeTransaction(txItem, seqNo, txId);
         }
     }
 
