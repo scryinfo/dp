@@ -44,7 +44,7 @@ contract ScryProtocol {
     uint8 creditHigh = 5;
     uint8 creditThreshold = 2;
     uint8 arbitratorNum = 1;        // test data.
-    uint8 arbitrateCredit = 0;
+    uint8 arbitrateCredit = 0;      // test data.
 
     struct VoteResult {
         bool judge;
@@ -52,16 +52,11 @@ contract ScryProtocol {
         bool used;
     }
 
-    struct ArbitrateResult {
-        bool judge;
-    }
-
     Verifier[] verifiers;
-    address[] shortlist;
+    address[] selectedArbitrators;
     mapping (string => DataInfoPublished) mapPublishedData;
     mapping (uint256 => TransactionItem) mapTransaction;
     mapping (uint256 => mapping(address => VoteResult)) mapVote;
-    mapping (uint256 => mapping(address => ArbitrateResult)) mapArbitrate;
     mapping (uint256 => bool[]) mapCount;
 
     event RegisterVerifier(string seqNo, address[] users);
@@ -69,10 +64,10 @@ contract ScryProtocol {
     event TransactionCreate(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool supportVerify, address[] users);
     event VerifiersChosen(string seqNo, uint256 transactionId, bytes32[] proofIds, address[] users);
     event Vote(string seqNo, uint256 transactionId, bool judge, string comments, address[] users);
-    event ArbitratorsChosen(string seqNo,uint256 transactionId,address[] users);
-    event Arbitrate(string seqNo,uint256 txId,address[] users);
     event Buy(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, address[] users);
     event ReadyForDownload(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, address[] users);
+    event ArbitratingBegin(string seqNo,uint256 transactionId, address[] users);
+    event Payed(string seqNo,uint256 txId,TransactionState state);
     event TransactionClose(string seqNo, uint256 transactionId, address[] users);
     event VerifierDisable(string seqNo, address verifier, address[] users);
 
@@ -153,9 +148,7 @@ contract ScryProtocol {
             creditGived = new bool[](verifierNum);
             emit VerifiersChosen(seqNo, txId,data.proofDataIds, selectedVerifiers);
 
-            address[] memory selectedArbitrators;
             selectedArbitrators = chooseArbitrators(arbitratorNum, selectedVerifiers);
-            emit ArbitratorsChosen(seqNo, txId, selectedArbitrators);
         }
 
         address[] memory users = new address[](1);
@@ -240,20 +233,25 @@ contract ScryProtocol {
         emit Vote(seqNo, txId, judge, comments, users);
     }
 
-    function chooseArbitrators(uint8 num, address[] vs) internal returns (address[] memory) {
-        shortlist = new address[](verifiers.length);
-        uint256 count;
+    function chooseArbitrators(uint8 num, address[] vs) internal view returns (address[] memory) {
+        uint256[] memory shortlistIndex = new uint256[](verifiers.length - verifierNum);
         address[] memory chosenArbitrators = new address[](num);
+        uint256 count;
 
         for (uint256 i = 0;i < verifiers.length;i++) {
-            Verifier storage a = verifiers[i];
+            Verifier memory a = verifiers[i];
             if (arbitratorValid(a,vs)) {
-                shortlist[count] = a.addr;
+                shortlistIndex[count] = i;
                 count++;
             }
         }
-        shortlist.length = count;
-        require(count >= num, "Not enough arbitrators");
+        require(count >= num, "No enough arbitrators");
+
+        address[] memory shortlist = new address[](count);
+        while (count > 0) {
+            count--;
+            shortlist[count] = verifiers[shortlistIndex[count]].addr;
+        }
 
         for (i = 0;i < num;i++) {
             uint index = getRandomNumber(shortlist.length) % shortlist.length;
@@ -348,7 +346,8 @@ contract ScryProtocol {
                 payToSeller(txItem, data);
                 closeTransaction(txItem, seqNo, txId);
             } else {
-                // arbitrate.
+                txItem.state = TransactionState.Arbitrating;
+                emit ArbitratingBegin(seqNo,txId,selectedArbitrators);
             }
         }
     }
@@ -357,13 +356,9 @@ contract ScryProtocol {
         TransactionItem storage txItem = mapTransaction[txId];
         require(txItem.used, "Transaction does not exist");
 
-        // when reward arbitrators decided if variable mA is necessary.
-        mapArbitrate[txId][msg.sender] = ArbitrateResult(judge);
         mapCount[txId].push(judge);
-
-        txItem.state = TransactionState.Arbitrating;
-
         if (mapCount[txId].length == arbitratorNum) {
+            // reward arbitrators,transfer tokens to selectedArbitrators.
             uint8 truth;
             for (uint256 i = 0;i < arbitratorNum;i++) {
                 if (mapCount[txId][i]) {
@@ -371,14 +366,15 @@ contract ScryProtocol {
                 }
             }
             delete mapCount[txId];
-            if (truth >= (arbitratorNum+1)/2) {
+            if (!(truth >= (arbitratorNum+1)/2)) {
+                // return tokens to buyer.
+            }else {
                 DataInfoPublished storage data = mapPublishedData[txItem.publishId];
                 payToSeller(txItem, data);
             }
-            address[] memory users = new address[](1);
-            users[0] = txItem.buyer;
-            // Arbitrate event will be emitted only all arbitrators arbitrated.
-            emit Arbitrate(seqNo, txId, users);
+
+            txItem.state = TransactionState.Payed;
+            emit Payed(seqNo, txId, txItem.state);
         }
     }
 
