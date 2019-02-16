@@ -241,11 +241,11 @@ contract ScryProtocol {
     }
 
     function chooseArbitrators(uint8 num, address[] vs) internal returns (address[] memory) {
-        shortlist = new address[](num * 3);uint256 count = 0;
+        shortlist = new address[](verifiers.length);
+        uint256 count;
         address[] memory chosenArbitrators = new address[](num);
-        // chosenArbitrators = ['0x0000...'] 40 chars.
 
-        for (uint256 i = 0;i < verifiers.length && count < num * 3;i++) {
+        for (uint256 i = 0;i < verifiers.length;i++) {
             Verifier storage a = verifiers[i];
             if (arbitratorValid(a,vs)) {
                 shortlist[count] = a.addr;
@@ -265,7 +265,6 @@ contract ScryProtocol {
         }
 
         return chosenArbitrators;
-//        return shortlist;
     }
 
     function arbitratorValid(Verifier a, address[] vs) internal view returns (bool) {
@@ -358,6 +357,7 @@ contract ScryProtocol {
         TransactionItem storage txItem = mapTransaction[txId];
         require(txItem.used, "Transaction does not exist");
 
+        // when reward arbitrators decided if variable mA is necessary.
         mapArbitrate[txId][msg.sender] = ArbitrateResult(judge);
         mapCount[txId].push(judge);
 
@@ -374,14 +374,11 @@ contract ScryProtocol {
             if (truth >= (arbitratorNum+1)/2) {
                 DataInfoPublished storage data = mapPublishedData[txItem.publishId];
                 payToSeller(txItem, data);
-            }else {
-                // reward arbitrators.
             }
             address[] memory users = new address[](1);
             users[0] = txItem.buyer;
+            // Arbitrate event will be emitted only all arbitrators arbitrated.
             emit Arbitrate(seqNo, txId, users);
-
-            closeTransaction(txItem, seqNo, txId);
         }
     }
 
