@@ -349,12 +349,15 @@ contract ScryProtocol {
                 txItem.state = TransactionState.Arbitrating;
                 emit ArbitratingBegin(seqNo,txId,selectedArbitrators);
             }
+
         }
     }
 
     function arbitrate(string seqNo,uint txId,bool judge) external {
         TransactionItem storage txItem = mapTransaction[txId];
         require(txItem.used, "Transaction does not exist");
+
+        require(arbitratorExist(msg.sender, selectedArbitrators), "Invalid arbitrator");
 
         mapCount[txId].push(judge);
         if (mapCount[txId].length == arbitratorNum) {
