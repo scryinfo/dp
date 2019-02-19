@@ -1,12 +1,12 @@
 package core
 
 import (
-	"../util/storage/ipfsaccess"
-	"./chainevents"
-	"context"
-	"fmt"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"../util/accounts"
+    "../util/accounts"
+    "../util/storage/ipfsaccess"
+    "./chainevents"
+    "context"
+    "github.com/ethereum/go-ethereum/ethclient"
+    rlog "github.com/sirupsen/logrus"
 )
 
 type Connector struct {
@@ -18,32 +18,35 @@ type Connector struct {
 func StartEngine(ethNodeAddr string,
                     asServiceAddr string,
                     contracts []chainevents.ContractInfo,
+                    fromBlock uint64,
                     ipfsNodeAddr string) (*ethclient.Client, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println("failed to initialize start engine, error:", err)
+			rlog.Error("failed to initialize start engine, error:", err)
 		}
+
 	}()
+
 
 	err := ipfsaccess.GetIAInstance().Initialize(ipfsNodeAddr)
 	if err != nil {
-		fmt.Println("failed to initialize ipfs. error: " + err.Error())
+		rlog.Error("failed to initialize ipfs. error: ", err)
 		return nil, err
 	}
 
 	connector, err := newConnector(ethNodeAddr)
 	if err != nil {
-		fmt.Println("failed to initialize connector. error: " + err.Error())
+		rlog.Error("failed to initialize connector. error: ", err)
 		return nil, err
 	}
 
 	err = accounts.GetAMInstance().Initialize(asServiceAddr)
     if err != nil {
-        fmt.Println("failed to initialize account service, error:", err)
+        rlog.Error("failed to initialize account service, error:", err)
         return nil, err
     }
 
-	chainevents.StartEventProcessing(connector.conn, contracts)
+	chainevents.StartEventProcessing(connector.conn, contracts, fromBlock)
 
 	return connector.conn, nil
 }
@@ -52,7 +55,7 @@ func StartEngine(ethNodeAddr string,
 func newConnector(ethNodeAddr string) (*Connector, error) {
 	cn, err := ethclient.Dial(ethNodeAddr)
 	if err != nil {
-		fmt.Println("failed to connect to node:" + ethNodeAddr)
+		rlog.Error("failed to connect to node:" + ethNodeAddr)
 		return nil, err
 	}
 

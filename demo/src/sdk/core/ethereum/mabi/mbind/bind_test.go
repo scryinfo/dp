@@ -114,7 +114,7 @@ var bindTests = []struct {
 			 err = b.AnonInputs(nil, "", "")
 			 err = b.MixedInputs(nil, "", "")
 
-			 fmt.Println(err)
+			 rlog.Error(err)
 		 }`,
 	},
 	// Test that named and anonymous outputs are handled correctly
@@ -145,7 +145,7 @@ var bindTests = []struct {
 			 str1, str2, err  = b.AnonOutputs(nil)
 			 str1, str2, err  = b.MixedOutputs(nil)
 
-			 fmt.Println(str1, str2, res.Str1, res.Str2, err)
+			 rlog.Error(str1, str2, res.Str1, res.Str2, err)
 		 }`,
 	},
 	// Tests that named, anonymous and indexed events are handled correctly
@@ -179,9 +179,9 @@ var bindTests = []struct {
 			 err = mit.Error() // Make sure the iterator has an Error method
 			 err = mit.Close() // Make sure the iterator has a Close method
 
-			 fmt.Println(mit.Event.Raw.BlockHash) // Make sure the raw log is contained within the results
-			 fmt.Println(mit.Event.Num)           // Make sure the unpacked non-indexed fields are present
-			 fmt.Println(mit.Event.Addr)          // Make sure the reconstructed indexed fields are present
+			 rlog.Error(mit.Event.Raw.BlockHash) // Make sure the raw log is contained within the results
+			 rlog.Error(mit.Event.Num)           // Make sure the unpacked non-indexed fields are present
+			 rlog.Error(mit.Event.Addr)          // Make sure the reconstructed indexed fields are present
 
 			 dit, err := e.FilterDynamic(nil, []string{}, [][]byte{})
 
@@ -195,18 +195,18 @@ var bindTests = []struct {
 			 defer sub.Unsubscribe()
 
 			 event := <-sink
-			 fmt.Println(event.Raw.BlockHash) // Make sure the raw log is contained within the results
-			 fmt.Println(event.Num)           // Make sure the unpacked non-indexed fields are present
-			 fmt.Println(event.Addr)          // Make sure the reconstructed indexed fields are present
+			 rlog.Error(event.Raw.BlockHash) // Make sure the raw log is contained within the results
+			 rlog.Error(event.Num)           // Make sure the unpacked non-indexed fields are present
+			 rlog.Error(event.Addr)          // Make sure the reconstructed indexed fields are present
 
-			 fmt.Println(res, str, dat, hash, err)
+			 rlog.Error(res, str, dat, hash, err)
 		 }
 		 // Run a tiny reflection test to ensure disallowed methods don't appear
 		 if _, ok := reflect.TypeOf(&EventChecker{}).MethodByName("FilterAnonymous"); ok {
 		 	t.Errorf("binding has disallowed method (FilterAnonymous)")
 		 }`,
 	},
-	// Test that contract interactions (deploy, transact and call) generate working code
+	// Test that contract interactions (script, transact and call) generate working code
 	{
 		`Interactor`,
 		`
@@ -234,7 +234,7 @@ var bindTests = []struct {
 			// Deploy an interaction tester contract and call a transaction on it
 			_, _, interactor, err := DeployInteractor(auth, sim, "Deploy string")
 			if err != nil {
-				t.Fatalf("Failed to deploy interactor contract: %v", err)
+				t.Fatalf("Failed to script interactor contract: %v", err)
 			}
 			if _, err := interactor.Transact(auth, "Transact string"); err != nil {
 				t.Fatalf("Failed to transact with interactor contract: %v", err)
@@ -243,7 +243,7 @@ var bindTests = []struct {
 			sim.Commit()
 
 			if str, err := interactor.DeployString(nil); err != nil {
-				t.Fatalf("Failed to retrieve deploy string: %v", err)
+				t.Fatalf("Failed to retrieve script string: %v", err)
 			} else if str != "Deploy string" {
 				t.Fatalf("Deploy string mismatch: have '%s', want 'Deploy string'", str)
 			}
@@ -275,7 +275,7 @@ var bindTests = []struct {
 			// Deploy a tuple tester contract and execute a structured call on it
 			_, _, getter, err := DeployGetter(auth, sim)
 			if err != nil {
-				t.Fatalf("Failed to deploy getter contract: %v", err)
+				t.Fatalf("Failed to script getter contract: %v", err)
 			}
 			sim.Commit()
 
@@ -307,7 +307,7 @@ var bindTests = []struct {
 			// Deploy a tuple tester contract and execute a structured call on it
 			_, _, tupler, err := DeployTupler(auth, sim)
 			if err != nil {
-				t.Fatalf("Failed to deploy tupler contract: %v", err)
+				t.Fatalf("Failed to script tupler contract: %v", err)
 			}
 			sim.Commit()
 
@@ -349,7 +349,7 @@ var bindTests = []struct {
 			// Deploy a slice tester contract and execute a n array call on it
 			_, _, slicer, err := DeploySlicer(auth, sim)
 			if err != nil {
-					t.Fatalf("Failed to deploy slicer contract: %v", err)
+					t.Fatalf("Failed to script slicer contract: %v", err)
 			}
 			sim.Commit()
 
@@ -383,7 +383,7 @@ var bindTests = []struct {
 			// Deploy a default method invoker contract and execute its default method
 			_, _, defaulter, err := DeployDefaulter(auth, sim)
 			if err != nil {
-				t.Fatalf("Failed to deploy defaulter contract: %v", err)
+				t.Fatalf("Failed to script defaulter contract: %v", err)
 			}
 			if _, err := (&DefaulterRaw{defaulter}).Transfer(auth); err != nil {
 				t.Fatalf("Failed to invoke default method: %v", err)
@@ -452,7 +452,7 @@ var bindTests = []struct {
 			// Deploy a funky gas pattern contract
 			_, _, limiter, err := DeployFunkyGasPattern(auth, sim)
 			if err != nil {
-				t.Fatalf("Failed to deploy funky contract: %v", err)
+				t.Fatalf("Failed to script funky contract: %v", err)
 			}
 			sim.Commit()
 
@@ -487,7 +487,7 @@ var bindTests = []struct {
 			// Deploy a sender tester contract and execute a structured call on it
 			_, _, callfrom, err := DeployCallFrom(auth, sim)
 			if err != nil {
-				t.Fatalf("Failed to deploy sender contract: %v", err)
+				t.Fatalf("Failed to script sender contract: %v", err)
 			}
 			sim.Commit()
 
@@ -543,7 +543,7 @@ var bindTests = []struct {
 			// Deploy a underscorer tester contract and execute a structured call on it
 			_, _, underscorer, err := DeployUnderscorer(auth, sim)
 			if err != nil {
-				t.Fatalf("Failed to deploy underscorer contract: %v", err)
+				t.Fatalf("Failed to script underscorer contract: %v", err)
 			}
 			sim.Commit()
 
@@ -563,7 +563,7 @@ var bindTests = []struct {
 			a, b, _ = underscorer.PurelyUnderscoredOutput(nil)
 			a, b, _ = underscorer.AllPurelyUnderscoredOutput(nil)
 
-			fmt.Println(a, b, err)
+			rlog.Error(a, b, err)
 		`,
 	},
 	// Tests that logs can be successfully filtered and decoded.
@@ -612,7 +612,7 @@ var bindTests = []struct {
 			// Deploy an eventer contract
 			_, _, eventer, err := DeployEventer(auth, sim)
 			if err != nil {
-				t.Fatalf("Failed to deploy eventer contract: %v", err)
+				t.Fatalf("Failed to script eventer contract: %v", err)
 			}
 			sim.Commit()
 
@@ -748,7 +748,7 @@ func TestBindings(t *testing.T) {
 		t.Skip("go sdk not found for testing")
 	}
 	// Skip the test if the go-ethereum sources are symlinked (https://github.com/golang/go/issues/14845)
-	linkTestCode := fmt.Sprintf("package linktest\nfunc CheckSymlinks(){\nfmt.Println(backends.NewSimulatedBackend(nil))\n}")
+	linkTestCode := fmt.Sprintf("package linktest\nfunc CheckSymlinks(){\nrlog.Error(backends.NewSimulatedBackend(nil))\n}")
 	linkTestDeps, err := imports.Process(os.TempDir(), []byte(linkTestCode), nil)
 	if err != nil {
 		t.Fatalf("failed check for goimports symlink bug: %v", err)

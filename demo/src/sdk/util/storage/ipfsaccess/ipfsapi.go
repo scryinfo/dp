@@ -2,7 +2,7 @@ package ipfsaccess
 
 import (
 	"errors"
-	"fmt"
+    rlog "github.com/sirupsen/logrus"
 	"github.com/ipfs/go-ipfs-api"
 	"strings"
 	"sync"
@@ -37,7 +37,7 @@ func (ia *IpfsAccessor) Initialize(nodeAddr string) error {
 
 func (ia *IpfsAccessor) SaveToIPFS(content []byte) (string, error) {
 	if ia.sh == nil {
-		fmt.Println("ipfs api shell is nil")
+		rlog.Error("ipfs api shell is nil")
 		return "", errors.New("ipfs api shell is nil")
 	}
 

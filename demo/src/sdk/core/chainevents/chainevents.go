@@ -2,7 +2,7 @@ package chainevents
 
 import (
 	"errors"
-	"fmt"
+    rlog "github.com/sirupsen/logrus"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"../ethereum/events"
@@ -17,13 +17,14 @@ var (
 )
 
 func StartEventProcessing(conn *ethclient.Client,
-	                      contracts []ContractInfo)  {
-	fmt.Println("start event processing...")
+	                      contracts []ContractInfo,
+	                      fromBlock uint64)  {
+	rlog.Info("start event processing...")
 
 	go ExecuteEvents(dataChannel, externalEventRepo)
-	go ListenEvent(conn, contracts, 60, dataChannel, errorChannel)
+	go ListenEvent(conn, contracts, fromBlock,60, dataChannel, errorChannel)
 
-	fmt.Println("finished event processing.")
+	rlog.Info("finished event processing.")
 }
 
 func SubscribeExternal(clientAddr common.Address, eventName string, eventCallback EventCallback) error {

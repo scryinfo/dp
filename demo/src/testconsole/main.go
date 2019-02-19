@@ -1,9 +1,9 @@
 package main
 
 import (
-    "../sdk/contractclient"
-    "../sdk/contractclient/contractinterfacewrapper"
-    "../sdk/core"
+    "../sdk"
+    "../sdk/scryclient"
+    "../sdk/scryclient/contractinterfacewrapper"
     "../sdk/core/chainevents"
     "../sdk/core/chainoperations"
     "../sdk/core/ethereum/events"
@@ -21,33 +21,25 @@ var (
 	txId *big.Int = big.NewInt(0)
 	metaDataIdEncWithSeller []byte
 	metaDataIdEncWithBuyer []byte
-	protocolContractAddr = "0x4ae12e473d8eaf98d0410555508cc8ba8c3cf7b6"
-	tokenContractAddr = "0x77d631c8c87bd3dd0d5631add4d76364662b2159"
+	protocolContractAddr              = "0x4ae12e473d8eaf98d0410555508cc8ba8c3cf7b6"
+	tokenContractAddr                 = "0x77d631c8c87bd3dd0d5631add4d76364662b2159"
 	conn *ethclient.Client = nil
-    deployerKeyJson = `{"version":3,"id":"80d7b778-e617-4b35-bb09-f4b224984ed6","address":"d280b60c38bc8db9d309fa5a540ffec499f0a3e8","crypto":{"ciphertext":"58ac20c29dd3029f4d374839508ba83fc84628ae9c3f7e4cc36b05e892bf150d","cipherparams":{"iv":"9ab7a5f9bcc9df7d796b5022023e2d14"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"63a364b8a64928843708b5e9665a79fa00890002b32833b3a9ff99eec78dbf81","n":262144,"r":8,"p":1},"mac":"3a38f91234b52dd95d8438172bca4b7ac1f32e6425387be4296c08d8bddb2098"}}`
-    keyPassword = "12345"
-    deployer *contractclient.ContractClient = nil
-    seller *contractclient.ContractClient = nil
-    buyer *contractclient.ContractClient = nil
-    verifier1 *contractclient.ContractClient = nil
-    verifier2 *contractclient.ContractClient = nil
-    verifier3 *contractclient.ContractClient = nil
-    arbitrator *contractclient.ContractClient = nil
-    sleepTime time.Duration = 20000000000
+    deployerKeyJson                   = `{"version":3,"id":"80d7b778-e617-4b35-bb09-f4b224984ed6","address":"d280b60c38bc8db9d309fa5a540ffec499f0a3e8","crypto":{"ciphertext":"58ac20c29dd3029f4d374839508ba83fc84628ae9c3f7e4cc36b05e892bf150d","cipherparams":{"iv":"9ab7a5f9bcc9df7d796b5022023e2d14"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"63a364b8a64928843708b5e9665a79fa00890002b32833b3a9ff99eec78dbf81","n":262144,"r":8,"p":1},"mac":"3a38f91234b52dd95d8438172bca4b7ac1f32e6425387be4296c08d8bddb2098"}}`
+    keyPassword                       = "12345"
+    deployer *scryclient.ScryClient   = nil
+    seller *scryclient.ScryClient     = nil
+    buyer *scryclient.ScryClient      = nil
+    verifier1 *scryclient.ScryClient  = nil
+    verifier2 *scryclient.ScryClient  = nil
+    verifier3 *scryclient.ScryClient  = nil
+    arbitrator *scryclient.ScryClient = nil
+    sleepTime time.Duration           = 20000000000
 )
 
 func main()  {
-    var err error = nil
-	conn, err = core.StartEngine("http://127.0.0.1:7545/", "192.168.1.6:48080", getContracts(), "/ip4/127.0.0.1/tcp/5001")
+    err := sdk.Init("http://127.0.0.1:7545/", "192.168.1.6:48080", getContracts(), 0, "/ip4/127.0.0.1/tcp/5001", common.HexToAddress(protocolContractAddr), common.HexToAddress(tokenContractAddr))
 	if err != nil {
-		fmt.Println("failed to start engine. error:", err)
-		return
-	}
-
-	err = contractinterfacewrapper.Initialize(common.HexToAddress(protocolContractAddr),
-		                                        common.HexToAddress(tokenContractAddr), conn)
-	if err != nil {
-		fmt.Println("failed to initialize contract interface, error:", err)
+		fmt.Println("failed to initialize sdk, error:", err)
 		return
 	}
 
@@ -208,8 +200,8 @@ func initClients()  {
     time.Sleep(sleepTime)
 }
 
-func CreateClientWithToken(value *big.Int) (*contractclient.ContractClient, error) {
-    client, err := contractclient.CreateContractClient(keyPassword)
+func CreateClientWithToken(value *big.Int) (*scryclient.ScryClient, error) {
+    client, err := scryclient.CreateScryClient(keyPassword)
     if err != nil {
         fmt.Println("failed to create user, error:", err)
         return nil, err
@@ -225,8 +217,8 @@ func CreateClientWithToken(value *big.Int) (*contractclient.ContractClient, erro
     return client, nil
 }
 
-func getClient(keyJson string) (*contractclient.ContractClient) {
-    client, err := contractclient.NewContractClient(getPublicAddress(keyJson))
+func getClient(keyJson string) (*scryclient.ScryClient) {
+    client, err := scryclient.NewScryClient(getPublicAddress(keyJson))
     if err != nil {
         fmt.Println("failed to create contract client. error:", err)
         return nil
@@ -247,7 +239,7 @@ func SellerPublishData(conn *ethclient.Client, supportVerify bool)  {
 	contractinterfacewrapper.Publish(&txParam, big.NewInt(1000), metaData, proofData, 2, despData, supportVerify)
 }
 
-func VerifierApproveTransfer(conn *ethclient.Client, verifier *contractclient.ContractClient)  {
+func VerifierApproveTransfer(conn *ethclient.Client, verifier *scryclient.ScryClient)  {
     verifier.SubscribeEvent("Approval", onApprovalVerifierTransfer)
 
     txParam := chainoperations.TransactParams{ common.HexToAddress(verifier.Account.Address), keyPassword}
@@ -257,7 +249,7 @@ func VerifierApproveTransfer(conn *ethclient.Client, verifier *contractclient.Co
     }
 }
 
-func RegisterAsVerifier(conn *ethclient.Client, verifier *contractclient.ContractClient) {
+func RegisterAsVerifier(conn *ethclient.Client, verifier *scryclient.ScryClient) {
     verifier.SubscribeEvent("RegisterVerifier", OnRegisterVerifier)
 
     txParam := chainoperations.TransactParams{ common.HexToAddress(verifier.Account.Address), keyPassword}
@@ -267,7 +259,7 @@ func RegisterAsVerifier(conn *ethclient.Client, verifier *contractclient.Contrac
     }
 }
 
-func Vote(conn *ethclient.Client, verifier *contractclient.ContractClient) {
+func Vote(conn *ethclient.Client, verifier *scryclient.ScryClient) {
     buyer.SubscribeEvent("Vote", onVote)
 
     txParam := chainoperations.TransactParams{ common.HexToAddress(verifier.Account.Address), keyPassword}
@@ -372,8 +364,6 @@ func onApprovalBuyerTransfer(event events.Event) bool {
 
 func onApprovalVerifierTransfer(event events.Event) bool {
     fmt.Println("onApprovalVerifierTransfer:", event)
-
-
 
     return true
 }
