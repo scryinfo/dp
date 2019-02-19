@@ -1,17 +1,17 @@
 package contractinterfacewrapper
 
 import (
-    "../../interface/contractinterface"
     op "../../core/chainoperations"
+    "../../interface/contractinterface"
+    "../../util/accounts"
     "../../util/storage/ipfsaccess"
     "../../util/uuid"
-    "../../util/accounts"
     "errors"
-    "fmt"
     "github.com/btcsuite/btcutil/base58"
     "github.com/ethereum/go-ethereum/accounts/abi/bind"
     "github.com/ethereum/go-ethereum/common"
     "github.com/ethereum/go-ethereum/ethclient"
+    rlog "github.com/sirupsen/logrus"
     "math/big"
 )
 
@@ -21,18 +21,19 @@ var (
 )
 
 
-func Initialize(protocolContractAddress common.Address, tokenContractAddress common.Address, conn *ethclient.Client) error {
+func Initialize(protocolContractAddress common.Address,
+    tokenContractAddress common.Address, conn *ethclient.Client) error {
 	var err error = nil
 
 	scryProtocol, err = contractinterface.NewScryProtocol(protocolContractAddress, conn)
 	if err != nil {
-		fmt.Println("failed to initialize protocol contract interface wrapper.", err)
+		rlog.Error("failed to initialize protocol contract interface wrapper.", err)
 		return err
 	}
 
 	scryToken, err = contractinterface.NewScryToken(tokenContractAddress, conn)
 	if err != nil {
-		fmt.Println("failed to initialize token contract interface wrapper.", err)
+		rlog.Error("failed to initialize token contract interface wrapper.", err)
 		return err
 	}
 
@@ -42,8 +43,8 @@ func Initialize(protocolContractAddress common.Address, tokenContractAddress com
 func Publish(txParams *op.TransactParams, price *big.Int, metaData []byte, proofDatas [][]byte,
 				proofNum int, descriptionData []byte, supportVerify bool) (string, error)  {
 	defer func(){
-		if err:=recover(); err!=nil {
-			fmt.Println("failed to publish data, error:", err)
+		if err := recover(); err != nil {
+			rlog.Error("failed to publish data, error:", err)
 		}
 	}()
 
@@ -53,7 +54,7 @@ func Publish(txParams *op.TransactParams, price *big.Int, metaData []byte, proof
 	//submit meta data
 	cidMd, err := ipfsaccess.GetIAInstance().SaveToIPFS(metaData)
 	if err != nil {
-		fmt.Println("failed to save meta data to ipfs, error: ", err)
+		rlog.Error("failed to save meta data to ipfs, error: ", err)
 		return "", err
 	}
 
@@ -63,13 +64,13 @@ func Publish(txParams *op.TransactParams, price *big.Int, metaData []byte, proof
 		cidPd, err := ipfsaccess.GetIAInstance().SaveToIPFS(proofDatas[i])
 
 		if err != nil {
-			fmt.Println("failed to save proof data to ipfs, error: ", err)
+			rlog.Error("failed to save proof data to ipfs, error: ", err)
 			return "", err
 		}
 
 		cidPds[i], err = ipfsHashToBytes32(cidPd)
 		if err != nil {
-			fmt.Println("failed to convert ipfs hash to bytes32")
+			rlog.Error("failed to convert ipfs hash to bytes32")
 			return "", err
 		}
 	}
@@ -77,25 +78,25 @@ func Publish(txParams *op.TransactParams, price *big.Int, metaData []byte, proof
 	//submit description data
 	cidDd, err := ipfsaccess.GetIAInstance().SaveToIPFS(descriptionData)
 	if err != nil {
-		fmt.Println("failed to save description data to ipfs, error: ", err)
+		rlog.Error("failed to save description data to ipfs, error: ", err)
 		return "", err
 	}
 
 	b := []byte(cidMd)
 	encMetaId, err := accounts.GetAMInstance().Encrypt(b, txParams.From.String(), txParams.Password)
 	if err != nil {
-		fmt.Println("failed to encrypt meta data hash, error: ", err)
+		rlog.Error("failed to encrypt meta data hash, error: ", err)
 		return "", err
 	}
 
 	//upload meta_data_id_enc_seller and other cids to contracts
 	tx, err := scryProtocol.PublishDataInfo(buildTxOpts(txParams), uuid.GenerateUUID(), publishId, price, encMetaId, cidPds, cidDd, supportVerify)
 	if err != nil {
-		fmt.Println("failed to publish data information, error: ", err)
+		rlog.Error("failed to publish data information, error: ", err)
 		return "", err
 	}
 
-	fmt.Println("publish transaction:" + string(tx.Data()) + " hash:" + tx.Hash().String())
+	rlog.Debug("publish transaction:" + string(tx.Data()) + " hash:" + tx.Hash().String())
 
 	return publishId, nil
 }
@@ -116,13 +117,13 @@ func ipfsHashToBytes32(src string) ([32]byte, error) {
 func PrepareToBuy(txParams *op.TransactParams, publishId string) (error) {
 	defer func(){
 		if err:=recover(); err!=nil {
-			fmt.Println("failed to prepare to buy , error:", err)
+			rlog.Error("failed to prepare to buy , error:", err)
 		}
 	}()
 
 	tx, err := scryProtocol.CreateTransaction(buildTxOpts(txParams), uuid.GenerateUUID(), publishId)
 	if err == nil {
-		fmt.Println("CreateTransaction:" + string(tx.Data()))
+		rlog.Error("CreateTransaction:" + string(tx.Data()))
 	}
 
 	return err
@@ -131,7 +132,7 @@ func PrepareToBuy(txParams *op.TransactParams, publishId string) (error) {
 func BuyData(txParams *op.TransactParams, txId *big.Int) (error) {
 	tx, err := scryProtocol.BuyData(buildTxOpts(txParams), uuid.GenerateUUID(), txId)
 	if err == nil {
-		fmt.Println("BuyData:", tx.Data(), " tx hash:", tx.Hash().String())
+		rlog.Error("BuyData:", tx.Data(), " tx hash:", tx.Hash().String())
 	}
 
 	return err
@@ -140,7 +141,7 @@ func BuyData(txParams *op.TransactParams, txId *big.Int) (error) {
 func SubmitMetaDataIdEncWithBuyer(txParams *op.TransactParams, txId *big.Int, encyptedMetaDataId []byte) (error) {
 	tx, err := scryProtocol.SubmitMetaDataIdEncWithBuyer(buildTxOpts(txParams), uuid.GenerateUUID(), txId, encyptedMetaDataId)
 	if err == nil {
-		fmt.Println("SubmitMetaDataIdEncWithBuyer:", string(tx.Data()), " tx hash:", tx.Hash().String())
+		rlog.Error("SubmitMetaDataIdEncWithBuyer:", string(tx.Data()), " tx hash:", tx.Hash().String())
 	}
 
 	return err
@@ -149,7 +150,7 @@ func SubmitMetaDataIdEncWithBuyer(txParams *op.TransactParams, txId *big.Int, en
 func ConfirmDataTruth(txParams *op.TransactParams, txId *big.Int, truth bool) (error) {
 	tx, err := scryProtocol.ConfirmDataTruth(buildTxOpts(txParams), uuid.GenerateUUID(), txId, truth)
 	if err == nil {
-		fmt.Println("ConfirmDataTruth:", string(tx.Data()), " tx hash:", tx.Hash().String())
+		rlog.Error("ConfirmDataTruth:", string(tx.Data()), " tx hash:", tx.Hash().String())
 	}
 
 	return err
@@ -158,7 +159,7 @@ func ConfirmDataTruth(txParams *op.TransactParams, txId *big.Int, truth bool) (e
 func ApproveTransfer(txParams *op.TransactParams, spender common.Address, value *big.Int) (error) {
 	tx, err := scryToken.Approve(buildTxOpts(txParams), spender, value)
 	if err == nil {
-		fmt.Println("ApproveTransfer:", string(tx.Data()), " tx hash:", tx.Hash().String())
+		rlog.Error("ApproveTransfer:", string(tx.Data()), " tx hash:", tx.Hash().String())
 	}
 
 	return err
@@ -167,7 +168,7 @@ func ApproveTransfer(txParams *op.TransactParams, spender common.Address, value 
 func Vote(txParams *op.TransactParams, txId *big.Int, judge bool, comments string) (error) {
     tx, err := scryProtocol.Vote(buildTxOpts(txParams), uuid.GenerateUUID(), txId, judge, comments)
     if err == nil {
-        fmt.Println("Vote:", string(tx.Data()), " tx hash:", tx.Hash().String())
+        rlog.Error("Vote:", string(tx.Data()), " tx hash:", tx.Hash().String())
     }
 
     return err
@@ -176,7 +177,7 @@ func Vote(txParams *op.TransactParams, txId *big.Int, judge bool, comments strin
 func RegisterAsVerifier(txParams *op.TransactParams) (error) {
     tx, err := scryProtocol.RegisterAsVerifier(buildTxOpts(txParams), uuid.GenerateUUID())
     if err == nil {
-        fmt.Println("RegisterAsVerifier:", string(tx.Data()), " tx hash:", tx.Hash().String())
+        rlog.Error("RegisterAsVerifier:", string(tx.Data()), " tx hash:", tx.Hash().String())
     }
 
     return err
@@ -185,7 +186,7 @@ func RegisterAsVerifier(txParams *op.TransactParams) (error) {
 func CreditsToVerifier(txParams *op.TransactParams, txId *big.Int, to common.Address, credit uint8) (error) {
     tx, err := scryProtocol.CreditsToVerifier(buildTxOpts(txParams), uuid.GenerateUUID(), txId, to, credit)
     if err == nil {
-        fmt.Println("RegisterAsVerifier:", string(tx.Data()), " tx hash:", tx.Hash().String())
+        rlog.Error("RegisterAsVerifier:", string(tx.Data()), " tx hash:", tx.Hash().String())
     }
 
     return err
@@ -198,7 +199,7 @@ func buildTxOpts(txParams *op.TransactParams) (*bind.TransactOpts) {
 func TransferTokens(txParams *op.TransactParams, to common.Address, value *big.Int) (error)  {
     tx, err := scryToken.Transfer(buildTxOpts(txParams), to, value)
     if err == nil {
-        fmt.Println("tx:", tx)
+        rlog.Error("tx:", tx)
         return err
     }
 

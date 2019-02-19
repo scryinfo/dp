@@ -55,35 +55,3 @@ func writeFile(fileAddr string, ymlConf interface{}, opt int) error {
 
 	return nil
 }
-/*
-func Add(fileAddr string, inlineAdd *InlineAdd) error {
-	addNow, err := getInlineAdd(fileAddr)
-	if err != nil {
-		return err
-	}
-	if *addNow != *new(InlineAdd) {
-		return errors.New("please ensure items in \"inlineAdd\" all not in .yaml file first")
-	}
-
-	err = writeFile(fileAddr, inlineAdd, os.O_APPEND)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func getInlineAdd(fileAddr string) (*InlineAdd, error) {
-	yf, err := ioutil.ReadFile(fileAddr)
-	if err != nil {
-		return nil, err
-	}
-
-	inlineAdd := new(InlineAdd)
-	err = yaml.Unmarshal(yf, inlineAdd)
-	if err != nil {
-		return nil, err
-	}
-
-	return inlineAdd, nil
-}*/
