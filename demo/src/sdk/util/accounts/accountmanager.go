@@ -3,8 +3,8 @@ package accounts
 import (
     "../../interface/accountinterface"
     "context"
-    rlog "github.com/sirupsen/logrus"
     "github.com/pkg/errors"
+    rlog "github.com/sirupsen/logrus"
     "google.golang.org/grpc"
     "sync"
 )
@@ -55,10 +55,10 @@ func (am *AccountManager) CreateAccount(password string) (*Account, error) {
         return nil, errors.New("failed to create account, error: null account service")
     }
 
-    addr, err := am.client.GenerateAddress(context.Background(), &scryinfo.AddressParameter{Password:password})
-    if err != nil {
-        rlog.Error("failed to create account, error:", err)
-        return nil, err
+    addr, _ := am.client.GenerateAddress(context.Background(), &scryinfo.AddressParameter{Password:password})
+    if addr.Status != scryinfo.Status_OK {
+        rlog.Error("failed to create account, error:", addr.Msg)
+        return nil, errors.New("failed to create account, error:" + addr.Msg)
     }
 
     newAccount := &Account{addr.Address}
@@ -78,13 +78,8 @@ func (am AccountManager) AuthAccount(address string, password string) (bool, err
         return false, errors.New("failed to authenticate account, error: null account service")
     }
 
-    addr, err := am.client.VerifyAddress(context.Background(),
+    addr, _ := am.client.VerifyAddress(context.Background(),
         &scryinfo.AddressParameter{Password:password, Address: address})
-    if err != nil {
-        rlog.Error("failed to authenticate account, error:", err)
-        return false, err
-    }
-
     rv := addr.Status == scryinfo.Status_OK
 
     return rv, nil
@@ -115,11 +110,11 @@ func (am AccountManager) Encrypt(plainText []byte, address string, password stri
         return nil, errors.New("failed to encrypt, error: null account service")
     }
 
-    in := scryinfo.CipherParameter{Message: plainText}
-    out, err := am.client.ContentEncrypt(context.Background(), &in)
-    if err != nil {
-        rlog.Error("failed to encrypt, error:", err)
-        return nil, err
+    in := scryinfo.CipherParameter{Message: plainText, Address:address}
+    out, _ := am.client.ContentEncrypt(context.Background(), &in)
+    if out.Status != scryinfo.Status_OK {
+        rlog.Error("failed to encrypt, error:", out.Msg)
+        return nil, errors.New("failed to encrypt, error:" + out.Msg)
     }
 
     return out.Data, nil
@@ -137,18 +132,18 @@ func (am AccountManager) ReEncrypt(cipherText []byte, address1 string,
         return nil, errors.New("failed to encrypt, error: null account service")
     }
 
-    in := scryinfo.CipherParameter{Message: cipherText}
-    out, err := am.client.ContentDecrypt(context.Background(), &in)
-    if err != nil {
-        rlog.Error("failed to decrypt, error:", err)
-        return nil, err
+    in := scryinfo.CipherParameter{Message: cipherText, Address:address1, Password:password}
+    out, _ := am.client.ContentDecrypt(context.Background(), &in)
+    if out.Status != scryinfo.Status_OK {
+        rlog.Error("failed to decrypt, error:", out.Msg)
+        return nil, errors.New("failed to encrypt, error:" + out.Msg)
     }
 
-    in = scryinfo.CipherParameter{Message: out.Data}
-    out, err = am.client.ContentEncrypt(context.Background(), &in)
-    if err != nil {
-        rlog.Error("failed to encrypt, error:", err)
-        return nil, err
+    in = scryinfo.CipherParameter{Message: out.Data, Address:address2}
+    out, _ = am.client.ContentEncrypt(context.Background(), &in)
+    if out.Status != scryinfo.Status_OK {
+        rlog.Error("failed to encrypt, error:", out.Msg)
+        return nil, errors.New("failed to encrypt, error:" + out.Msg)
     }
 
     return out.Data, nil
@@ -171,11 +166,32 @@ func (am AccountManager) SignTransaction(message []byte, address string, passwor
         Password:password,
     }
 
-    out, err := am.client.Signature(context.Background(), &in)
-    if err != nil {
-        rlog.Error("failed to signature, error:", err)
-        return nil, err
+    out, _ := am.client.Signature(context.Background(), &in)
+    if out.Status != scryinfo.Status_OK {
+        rlog.Error("failed to signature, error:", out.Msg)
+        return nil, errors.New("failed to signature, error:" + out.Msg)
     }
 
     return out.Data, nil
+}
+
+func (am AccountManager) ImportAccount(keyJson []byte, oldPassword string, newPassword string) (string, error) {
+    defer func() {
+        if err := recover(); err != nil {
+            rlog.Error("failed to import account, error:", err)
+        }
+    }()
+
+    if am.client == nil {
+        return "", errors.New("failed to import account, null account service")
+    }
+
+    in := scryinfo.ImportParameter{ContentPassword:oldPassword, ImportPsd:newPassword, Content:keyJson}
+    out, _ := am.client.ImportKeystore(context.Background(), &in)
+    if out.Status != scryinfo.Status_OK {
+        rlog.Error("failed to import account, error:", out.Msg)
+        return "", errors.New("failed to import account, error:" + out.Msg)
+    }
+
+    return out.Address, nil
 }

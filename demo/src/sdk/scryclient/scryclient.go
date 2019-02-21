@@ -2,9 +2,13 @@ package scryclient
 
 import (
     "../core/chainevents"
+    "../core/chainoperations"
     "../util/accounts"
+    "./contractinterfacewrapper"
     "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/ethclient"
     rlog "github.com/sirupsen/logrus"
+    "math/big"
 )
 
 type ScryClient struct {
@@ -37,10 +41,29 @@ func (client ScryClient) Authenticate(password string) (bool, error) {
     return accounts.GetAMInstance().AuthAccount(client.Account.Address, password)
 }
 
-func (client ScryClient) transferEthFrom(from common.Address, value uint64) (error) {
+func (client ScryClient) TransferEthFrom(from common.Address, password string, value *big.Int, ec *ethclient.Client) (error) {
+    tx, err := chainoperations.TransferEth(from, password, common.HexToAddress(client.Account.Address), value, ec)
+    if err == nil {
+        rlog.Debug("transferEthFrom: ", tx.Hash(), tx.Data())
+    }
 
+    return err
 }
 
-func (client ScryClient) transferTokenFrom()  {
+func (client ScryClient) TransferTokenFrom(from common.Address, password string, value *big.Int) (error) {
+    txParam := &chainoperations.TransactParams{From: from, Password: password, Value:value}
+    return contractinterfacewrapper.TransferTokens(txParam,
+                                                    common.HexToAddress(client.Account.Address),
+                                                    value)
+}
 
+func (client ScryClient) GetEth(owner common.Address, ec *ethclient.Client) (*big.Int, error) {
+    return chainoperations.GetEthBalance(owner, ec)
+}
+
+func (client ScryClient) GetScryToken(owner common.Address) (*big.Int, error)  {
+    from := common.HexToAddress(client.Account.Address)
+    txParam := &chainoperations.TransactParams{From: from, Pending: true}
+
+    return contractinterfacewrapper.GetTokenBalance(txParam, owner)
 }
