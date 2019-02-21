@@ -45,11 +45,11 @@ func main()  {
 
     initClients()
 
-	//testAccounts()
+	testAccounts()
 
-    testTxWithoutVerify()
+    //testTxWithoutVerify()
 
-	//testTxWithVerify()
+	testTxWithVerify()
 
 	time.Sleep(100000000000000)
 }
@@ -124,7 +124,7 @@ func testTxWithVerify()  {
 
     time.Sleep(sleepTime)
 
-    RegisterAsVerifier(conn, arbitrator)
+    RegisterAsVerifier(conn, verifier3)
 
     time.Sleep(sleepTime)
 
@@ -148,50 +148,50 @@ func testTxWithVerify()  {
 
     time.Sleep(sleepTime)
 
-    CreditsToVerifier(conn, common.HexToAddress(verifier1.Account.Address))
-
-    CreditsToVerifier(conn, common.HexToAddress(verifier2.Account.Address))
-
     fmt.Println("Testing end")
 
 }
 
 func initClients()  {
-    deployer = getClient(deployerKeyJson)
-
     var err error
-    seller, err = CreateClientWithToken(big.NewInt(1000000))
+    deployer, err = ImportAccount(deployerKeyJson, keyPassword, keyPassword)
     if err != nil {
         fmt.Println("failed to init clients, error:", err)
         panic(err)
     }
 
-    buyer, err = CreateClientWithToken(big.NewInt(1000000))
+    seller, err = CreateClientWithToken(big.NewInt(10000000))
+    if err != nil {
+        fmt.Println("failed to init clients, error:", err)
+        panic(err)
+    }
+
+    buyer, err = CreateClientWithToken(big.NewInt(10000000))
     if err != nil {
         fmt.Println("failed to init clients, error:", err)
         panic(err)
     }
 
 
-    verifier1, err = CreateClientWithToken(big.NewInt(1000000))
+    verifier1, err = CreateClientWithToken(big.NewInt(10000000))
     if err != nil {
         fmt.Println("failed to init clients, error:", err)
         panic(err)
     }
 
-    verifier2, err = CreateClientWithToken(big.NewInt(1000000))
+    verifier2, err = CreateClientWithToken(big.NewInt(10000000))
     if err != nil {
         fmt.Println("failed to init clients, error:", err)
         panic(err)
     }
 
-    verifier3, err = CreateClientWithToken(big.NewInt(1000000))
+    verifier3, err = CreateClientWithToken(big.NewInt(10000000))
     if err != nil {
         fmt.Println("failed to init clients, error:", err)
         panic(err)
     }
 
-    arbitrator, err = CreateClientWithToken(big.NewInt(1000000))
+    arbitrator, err = CreateClientWithToken(big.NewInt(10000000))
     if err != nil {
         fmt.Println("failed to init clients, error:", err)
         panic(err)
@@ -207,7 +207,7 @@ func CreateClientWithToken(value *big.Int) (*scryclient.ScryClient, error) {
         return nil, err
     }
 
-    txParam := chainoperations.TransactParams{ common.HexToAddress(deployer.Account.Address), keyPassword}
+    txParam := chainoperations.TransactParams{ common.HexToAddress(deployer.Account.Address), keyPassword, big.NewInt(0), false}
     err = contractinterfacewrapper.TransferTokens(&txParam, common.HexToAddress(client.Account.Address), value)
     if err != nil {
         fmt.Println("failed to transfer token, error:", err)
@@ -227,6 +227,22 @@ func getClient(keyJson string) (*scryclient.ScryClient) {
     return client
 }
 
+func ImportAccount(keyJson string, oldPassword string, newPassword string) (*scryclient.ScryClient, error) {
+    address, err := accounts.GetAMInstance().ImportAccount([]byte(keyJson), oldPassword, newPassword)
+    if err != nil {
+        fmt.Println("failed to import account. error:", err)
+        return nil, err
+    }
+
+    client, err := scryclient.NewScryClient(address)
+    if err != nil {
+        fmt.Println("failed to create contract client. error:", err)
+        return nil, err
+    }
+
+    return client, nil
+}
+
 func SellerPublishData(conn *ethclient.Client, supportVerify bool)  {
 	seller.SubscribeEvent("DataPublish", onPublish)
 
@@ -235,14 +251,14 @@ func SellerPublishData(conn *ethclient.Client, supportVerify bool)  {
 	proofData := [][]byte{{'4','5','6','3'}, {'2','2', '1'}}
 	despData := []byte{'7','8','9','3'}
 
-	txParam := chainoperations.TransactParams{ common.HexToAddress(seller.Account.Address), keyPassword}
+	txParam := chainoperations.TransactParams{ common.HexToAddress(seller.Account.Address), keyPassword, big.NewInt(0), false}
 	contractinterfacewrapper.Publish(&txParam, big.NewInt(1000), metaData, proofData, 2, despData, supportVerify)
 }
 
 func VerifierApproveTransfer(conn *ethclient.Client, verifier *scryclient.ScryClient)  {
     verifier.SubscribeEvent("Approval", onApprovalVerifierTransfer)
 
-    txParam := chainoperations.TransactParams{ common.HexToAddress(verifier.Account.Address), keyPassword}
+    txParam := chainoperations.TransactParams{ common.HexToAddress(verifier.Account.Address), keyPassword, big.NewInt(0), false}
     err := contractinterfacewrapper.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(10000))
     if err != nil {
         fmt.Println("VerifierApproveTransfer", err)
@@ -252,7 +268,7 @@ func VerifierApproveTransfer(conn *ethclient.Client, verifier *scryclient.ScryCl
 func RegisterAsVerifier(conn *ethclient.Client, verifier *scryclient.ScryClient) {
     verifier.SubscribeEvent("RegisterVerifier", OnRegisterVerifier)
 
-    txParam := chainoperations.TransactParams{ common.HexToAddress(verifier.Account.Address), keyPassword}
+    txParam := chainoperations.TransactParams{ common.HexToAddress(verifier.Account.Address), keyPassword, big.NewInt(0), false}
     err := contractinterfacewrapper.RegisterAsVerifier(&txParam)
     if err != nil {
         fmt.Println("RegisterAsVerifier", err)
@@ -262,7 +278,7 @@ func RegisterAsVerifier(conn *ethclient.Client, verifier *scryclient.ScryClient)
 func Vote(conn *ethclient.Client, verifier *scryclient.ScryClient) {
     buyer.SubscribeEvent("Vote", onVote)
 
-    txParam := chainoperations.TransactParams{ common.HexToAddress(verifier.Account.Address), keyPassword}
+    txParam := chainoperations.TransactParams{ common.HexToAddress(verifier.Account.Address), keyPassword, big.NewInt(0), false}
     err := contractinterfacewrapper.Vote(&txParam, txId, true, "This could be real from " + verifier.Account.Address)
     if err != nil {
         fmt.Println("Vote:", err)
@@ -272,7 +288,7 @@ func Vote(conn *ethclient.Client, verifier *scryclient.ScryClient) {
 func CreditsToVerifier(conn *ethclient.Client, to common.Address) {
     buyer.SubscribeEvent("VerifierDisable", onVerifierDisable)
 
-    txParam := chainoperations.TransactParams{ common.HexToAddress(buyer.Account.Address), keyPassword}
+    txParam := chainoperations.TransactParams{ common.HexToAddress(buyer.Account.Address), keyPassword, big.NewInt(0), false}
     err := contractinterfacewrapper.CreditsToVerifier(&txParam, txId, to, 5)
     if err != nil {
         fmt.Println("CreditsToVerifier:", err)
@@ -282,7 +298,7 @@ func CreditsToVerifier(conn *ethclient.Client, to common.Address) {
 func BuyerApproveTransfer(conn *ethclient.Client)  {
     buyer.SubscribeEvent("Approval", onApprovalBuyerTransfer)
 
-    txParam := chainoperations.TransactParams{ common.HexToAddress(buyer.Account.Address), keyPassword}
+    txParam := chainoperations.TransactParams{ common.HexToAddress(buyer.Account.Address), keyPassword, big.NewInt(0), false}
     err := contractinterfacewrapper.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(1000))
     if err != nil {
         fmt.Println("BuyerApproveTransfer:", err)
@@ -296,7 +312,7 @@ func PrepareToBuy(conn *ethclient.Client, publishId string)  {
     verifier2.SubscribeEvent("VerifiersChosen", onVerifier2Chosen)
     arbitrator.SubscribeEvent("VerifiersChosen", onVerifier3Chosen)
 
-    txParam := chainoperations.TransactParams{ common.HexToAddress(buyer.Account.Address), keyPassword}
+    txParam := chainoperations.TransactParams{ common.HexToAddress(buyer.Account.Address), keyPassword, big.NewInt(0), false}
 	err := contractinterfacewrapper.PrepareToBuy(&txParam, publishId)
 	if err != nil {
 		fmt.Println("failed to prepareToBuy, error:", err)
@@ -306,7 +322,7 @@ func PrepareToBuy(conn *ethclient.Client, publishId string)  {
 func Buy(conn *ethclient.Client, txId *big.Int) {
 	seller.SubscribeEvent("Buy", onPurchase)
 
-    txParam := chainoperations.TransactParams{ common.HexToAddress(buyer.Account.Address), keyPassword}
+    txParam := chainoperations.TransactParams{ common.HexToAddress(buyer.Account.Address), keyPassword, big.NewInt(0), false}
 	err := contractinterfacewrapper.BuyData(&txParam, txId)
 	if err != nil {
 		fmt.Println("failed to buyData, error:", err)
@@ -316,7 +332,7 @@ func Buy(conn *ethclient.Client, txId *big.Int) {
 func SubmitMetaDataIdEncWithBuyer(conn *ethclient.Client, txId *big.Int)  {
     buyer.SubscribeEvent("ReadyForDownload", onReadyForDownload)
 
-    txParam := chainoperations.TransactParams{ common.HexToAddress(seller.Account.Address), keyPassword}
+    txParam := chainoperations.TransactParams{ common.HexToAddress(seller.Account.Address), keyPassword, big.NewInt(0), false}
 	err := contractinterfacewrapper.SubmitMetaDataIdEncWithBuyer(&txParam, txId, metaDataIdEncWithBuyer)
 	if err != nil {
 		fmt.Println("failed to SubmitMetaDataIdEncWithBuyer, error:", err)
@@ -326,7 +342,7 @@ func SubmitMetaDataIdEncWithBuyer(conn *ethclient.Client, txId *big.Int)  {
 func ConfirmDataTruth(conn *ethclient.Client, txId *big.Int)  {
     buyer.SubscribeEvent("TransactionClose", onClose)
 
-    txParam := chainoperations.TransactParams{ common.HexToAddress(buyer.Account.Address), keyPassword}
+    txParam := chainoperations.TransactParams{ common.HexToAddress(buyer.Account.Address), keyPassword, big.NewInt(0), false}
 	err := contractinterfacewrapper.ConfirmDataTruth(&txParam, txId, true)
 	if err != nil {
 		fmt.Println("failed to ConfirmDataTruth, error:", err)

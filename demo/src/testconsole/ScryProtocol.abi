@@ -233,6 +233,50 @@
           "type": "address[]"
         }
       ],
+      "name": "ArbitratingBegin",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "seqNo",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "name": "txId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "state",
+          "type": "uint8"
+        }
+      ],
+      "name": "Payed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "seqNo",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "name": "transactionId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "users",
+          "type": "address[]"
+        }
+      ],
       "name": "TransactionClose",
       "type": "event"
     },
@@ -411,6 +455,28 @@
         }
       ],
       "name": "confirmDataTruth",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "seqNo",
+          "type": "string"
+        },
+        {
+          "name": "txId",
+          "type": "uint256"
+        },
+        {
+          "name": "judge",
+          "type": "bool"
+        }
+      ],
+      "name": "arbitrate",
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
