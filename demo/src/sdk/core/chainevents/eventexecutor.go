@@ -2,8 +2,8 @@ package chainevents
 
 import (
     "../ethereum/events"
-    rlog "github.com/sirupsen/logrus"
     "github.com/ethereum/go-ethereum/common"
+    rlog "github.com/sirupsen/logrus"
 )
 
 const (
@@ -22,6 +22,7 @@ func ExecuteEvents(dataChannel chan events.Event, externalEventRepo *EventReposi
 	for {
 		select {
         case event := <- dataChannel:
+            rlog.Debug("event coming:", event.String())
 			executeEvent(event, externalEventRepo)
 		}
 	}

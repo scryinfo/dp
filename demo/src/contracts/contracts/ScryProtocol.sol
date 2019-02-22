@@ -43,7 +43,7 @@ contract ScryProtocol {
     uint8 creditLow = 0;
     uint8 creditHigh = 5;
     uint8 creditThreshold = 2;
-    uint8 arbitratorNum = 1;
+    uint8 arbitratorNum = 1;        
     uint8 arbitrateCredit = 0;      
 
     struct VoteResult {

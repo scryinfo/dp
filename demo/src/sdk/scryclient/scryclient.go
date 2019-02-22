@@ -4,7 +4,7 @@ import (
     "../core/chainevents"
     "../core/chainoperations"
     "../util/accounts"
-    "./contractinterfacewrapper"
+    "./chaininterfacewrapper"
     "github.com/ethereum/go-ethereum/common"
     "github.com/ethereum/go-ethereum/ethclient"
     rlog "github.com/sirupsen/logrus"
@@ -52,7 +52,7 @@ func (client ScryClient) TransferEthFrom(from common.Address, password string, v
 
 func (client ScryClient) TransferTokenFrom(from common.Address, password string, value *big.Int) (error) {
     txParam := &chainoperations.TransactParams{From: from, Password: password, Value:value}
-    return contractinterfacewrapper.TransferTokens(txParam,
+    return chaininterfacewrapper.TransferTokens(txParam,
                                                     common.HexToAddress(client.Account.Address),
                                                     value)
 }
@@ -65,5 +65,5 @@ func (client ScryClient) GetScryToken(owner common.Address) (*big.Int, error)  {
     from := common.HexToAddress(client.Account.Address)
     txParam := &chainoperations.TransactParams{From: from, Pending: true}
 
-    return contractinterfacewrapper.GetTokenBalance(txParam, owner)
+    return chaininterfacewrapper.GetTokenBalance(txParam, owner)
 }

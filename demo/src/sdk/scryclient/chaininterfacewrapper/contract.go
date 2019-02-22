@@ -1,4 +1,4 @@
-package contractinterfacewrapper
+package chaininterfacewrapper
 
 import (
     op "../../core/chainoperations"
@@ -9,33 +9,37 @@ import (
     "errors"
     "github.com/btcsuite/btcutil/base58"
     "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/core/types"
     "github.com/ethereum/go-ethereum/ethclient"
     rlog "github.com/sirupsen/logrus"
     "math/big"
 )
 
 var (
+    conn *ethclient.Client = nil
 	scryProtocol *contractinterface.ScryProtocol = nil
 	scryToken *contractinterface.ScryToken = nil
 )
 
 
 func Initialize(protocolContractAddress common.Address,
-    tokenContractAddress common.Address, conn *ethclient.Client) error {
+    tokenContractAddress common.Address,
+    clientConn *ethclient.Client) error {
 	var err error = nil
 
-	scryProtocol, err = contractinterface.NewScryProtocol(protocolContractAddress, conn)
+	scryProtocol, err = contractinterface.NewScryProtocol(protocolContractAddress, clientConn)
 	if err != nil {
 		rlog.Error("failed to initialize protocol contract interface wrapper.", err)
 		return err
 	}
 
-	scryToken, err = contractinterface.NewScryToken(tokenContractAddress, conn)
+	scryToken, err = contractinterface.NewScryToken(tokenContractAddress, clientConn)
 	if err != nil {
 		rlog.Error("failed to initialize token contract interface wrapper.", err)
 		return err
 	}
 
+	conn = clientConn
 	return nil
 }
 
@@ -203,4 +207,15 @@ func TransferTokens(txParams *op.TransactParams, to common.Address, value *big.I
 
 func GetTokenBalance(txParams *op.TransactParams, owner common.Address) (*big.Int, error)  {
     return scryToken.BalanceOf(op.BuildCallOpts(txParams), owner)
+}
+
+func TransferEth(from common.Address,
+    password string,
+    to common.Address,
+    value *big.Int) (*types.Transaction, error) {
+    return op.TransferEth(from, password, to, value, conn)
+}
+
+func GetEthBalance(owner common.Address) (*big.Int, error) {
+    return op.GetEthBalance(owner, conn)
 }

@@ -47,7 +47,7 @@ func BuildTransactOpts(txParams *TransactParams) *bind.TransactOpts {
 		                transaction *types.Transaction) (*types.Transaction, error) {
             return SignTransaction(signer, address, transaction, txParams.Password)
 		},
-		Value:   big.NewInt(0),
+		Value:   txParams.Value,
         GasPrice: big.NewInt(0),
 		GasLimit: 0,
 		Context: context.Background(),
