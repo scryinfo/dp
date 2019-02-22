@@ -3,14 +3,13 @@ package main
 import (
     "../sdk"
     "../sdk/scryclient"
-    "../sdk/scryclient/contractinterfacewrapper"
+    cif "../sdk/scryclient/chaininterfacewrapper"
     "../sdk/core/chainevents"
     "../sdk/core/chainoperations"
     "../sdk/core/ethereum/events"
     "../sdk/util/accounts"
     "fmt"
     "github.com/ethereum/go-ethereum/common"
-    "github.com/ethereum/go-ethereum/ethclient"
     "io/ioutil"
     "math/big"
     "time"
@@ -23,7 +22,6 @@ var (
 	metaDataIdEncWithBuyer []byte
 	protocolContractAddr              = "0x4ae12e473d8eaf98d0410555508cc8ba8c3cf7b6"
 	tokenContractAddr                 = "0x77d631c8c87bd3dd0d5631add4d76364662b2159"
-	conn *ethclient.Client = nil
     deployerKeyJson                   = `{"version":3,"id":"80d7b778-e617-4b35-bb09-f4b224984ed6","address":"d280b60c38bc8db9d309fa5a540ffec499f0a3e8","crypto":{"ciphertext":"58ac20c29dd3029f4d374839508ba83fc84628ae9c3f7e4cc36b05e892bf150d","cipherparams":{"iv":"9ab7a5f9bcc9df7d796b5022023e2d14"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"63a364b8a64928843708b5e9665a79fa00890002b32833b3a9ff99eec78dbf81","n":262144,"r":8,"p":1},"mac":"3a38f91234b52dd95d8438172bca4b7ac1f32e6425387be4296c08d8bddb2098"}}`
     keyPassword                       = "12345"
     deployer *scryclient.ScryClient   = nil
@@ -37,6 +35,7 @@ var (
 )
 
 func main()  {
+    //note: asServiceAddr is the host of key management service which is outside
     err := sdk.Init("http://127.0.0.1:7545/", "192.168.1.6:48080", getContracts(), 0, "/ip4/127.0.0.1/tcp/5001", common.HexToAddress(protocolContractAddr), common.HexToAddress(tokenContractAddr))
 	if err != nil {
 		fmt.Println("failed to initialize sdk, error:", err)
@@ -46,6 +45,8 @@ func main()  {
     initClients()
 
 	testAccounts()
+
+    testTransferEth()
 
     //testTxWithoutVerify()
 
@@ -79,77 +80,115 @@ func testAccounts()  {
 func testTxWithoutVerify()  {
     fmt.Println("Start testing tx without verification...")
 
-    SellerPublishData(conn, false)
+    SellerPublishData(false)
 
     time.Sleep(sleepTime)
 
-    BuyerApproveTransfer(conn)
+    BuyerApproveTransfer()
 
     time.Sleep(sleepTime)
 
-    Buy(conn, txId)
+    Buy(txId)
 
     time.Sleep(sleepTime)
 
-    SubmitMetaDataIdEncWithBuyer(conn, txId)
+    SubmitMetaDataIdEncWithBuyer(txId)
 
     time.Sleep(sleepTime)
 
-    ConfirmDataTruth(conn, txId)
+    ConfirmDataTruth(txId)
 
     fmt.Println("Testing end")
 }
 
 func testTxWithVerify()  {
-    fmt.Println("Start testing tx with verification...")
+    fmt.Println("Start testing tx with verification...Note: please restart the test chain before running this case")
 
-    VerifierApproveTransfer(conn, verifier1)
-
-    time.Sleep(sleepTime)
-
-    VerifierApproveTransfer(conn, verifier2)
+    VerifierApproveTransfer(verifier1)
 
     time.Sleep(sleepTime)
 
-    VerifierApproveTransfer(conn, verifier3)
+    VerifierApproveTransfer(verifier2)
+
+    time.Sleep(sleepTime)
+
+    VerifierApproveTransfer(verifier3)
 
     time.Sleep(sleepTime)
 
 
-    RegisterAsVerifier(conn, verifier1)
+    RegisterAsVerifier(verifier1)
 
     time.Sleep(sleepTime)
 
-    RegisterAsVerifier(conn, verifier2)
+    RegisterAsVerifier(verifier2)
 
     time.Sleep(sleepTime)
 
-    RegisterAsVerifier(conn, verifier3)
+    RegisterAsVerifier(verifier3)
 
     time.Sleep(sleepTime)
 
-    SellerPublishData(conn, true)
+    SellerPublishData(true)
 
     time.Sleep(sleepTime)
 
-    BuyerApproveTransfer(conn)
+    BuyerApproveTransfer()
 
     time.Sleep(sleepTime)
 
-    Buy(conn, txId)
+    Buy(txId)
 
     time.Sleep(sleepTime)
 
-    SubmitMetaDataIdEncWithBuyer(conn, txId)
+    SubmitMetaDataIdEncWithBuyer(txId)
 
     time.Sleep(sleepTime)
 
-    ConfirmDataTruth(conn, txId)
+    ConfirmDataTruth(txId)
 
     time.Sleep(sleepTime)
 
     fmt.Println("Testing end")
 
+}
+
+func testTransferEth()  {
+    balanceBefore, err := cif.GetEthBalance(common.HexToAddress(deployer.Account.Address))
+    if err != nil {
+        fmt.Println("failed to transfer eth. error:", err)
+        panic(err)
+    }
+
+    fmt.Println("buyer's balance before transfer:", balanceBefore)
+
+    //transfer
+    _, err = cif.TransferEth(common.HexToAddress(deployer.Account.Address),
+                                keyPassword,
+                                common.HexToAddress(buyer.Account.Address),
+                                big.NewInt(10))
+    if err != nil {
+        fmt.Println("failed to transfer eth. error:", err)
+        panic(err)
+    }
+
+    balanceAfter, err := cif.GetEthBalance(common.HexToAddress(deployer.Account.Address))
+    if err != nil {
+        fmt.Println("failed to transfer eth. error:", err)
+        panic(err)
+    }
+
+    fmt.Println("buyer's balance after transfer:", balanceAfter)
+
+    sum := big.NewInt(0)
+    (*big.Int).Add(sum, balanceAfter, big.NewInt(10))
+
+    if sum.String() != balanceBefore.String() {
+        fmt.Println("failed to transfer eth.")
+        panic("failed to transfer eth.")
+    }
+
+    fmt.Println("Testing end")
 }
 
 func initClients()  {
@@ -191,12 +230,6 @@ func initClients()  {
         panic(err)
     }
 
-    arbitrator, err = CreateClientWithToken(big.NewInt(10000000))
-    if err != nil {
-        fmt.Println("failed to init clients, error:", err)
-        panic(err)
-    }
-
     time.Sleep(sleepTime)
 }
 
@@ -208,7 +241,7 @@ func CreateClientWithToken(value *big.Int) (*scryclient.ScryClient, error) {
     }
 
     txParam := chainoperations.TransactParams{ common.HexToAddress(deployer.Account.Address), keyPassword, big.NewInt(0), false}
-    err = contractinterfacewrapper.TransferTokens(&txParam, common.HexToAddress(client.Account.Address), value)
+    err = cif.TransferTokens(&txParam, common.HexToAddress(client.Account.Address), value)
     if err != nil {
         fmt.Println("failed to transfer token, error:", err)
         return nil, err
@@ -243,7 +276,7 @@ func ImportAccount(keyJson string, oldPassword string, newPassword string) (*scr
     return client, nil
 }
 
-func SellerPublishData(conn *ethclient.Client, supportVerify bool)  {
+func SellerPublishData(supportVerify bool)  {
 	seller.SubscribeEvent("DataPublish", onPublish)
 
 	//publish data
@@ -252,98 +285,98 @@ func SellerPublishData(conn *ethclient.Client, supportVerify bool)  {
 	despData := []byte{'7','8','9','3'}
 
 	txParam := chainoperations.TransactParams{ common.HexToAddress(seller.Account.Address), keyPassword, big.NewInt(0), false}
-	contractinterfacewrapper.Publish(&txParam, big.NewInt(1000), metaData, proofData, 2, despData, supportVerify)
+	cif.Publish(&txParam, big.NewInt(1000), metaData, proofData, 2, despData, supportVerify)
 }
 
-func VerifierApproveTransfer(conn *ethclient.Client, verifier *scryclient.ScryClient)  {
+func VerifierApproveTransfer(verifier *scryclient.ScryClient)  {
     verifier.SubscribeEvent("Approval", onApprovalVerifierTransfer)
 
     txParam := chainoperations.TransactParams{ common.HexToAddress(verifier.Account.Address), keyPassword, big.NewInt(0), false}
-    err := contractinterfacewrapper.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(10000))
+    err := cif.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(10000))
     if err != nil {
         fmt.Println("VerifierApproveTransfer", err)
     }
 }
 
-func RegisterAsVerifier(conn *ethclient.Client, verifier *scryclient.ScryClient) {
+func RegisterAsVerifier(verifier *scryclient.ScryClient) {
     verifier.SubscribeEvent("RegisterVerifier", OnRegisterVerifier)
 
     txParam := chainoperations.TransactParams{ common.HexToAddress(verifier.Account.Address), keyPassword, big.NewInt(0), false}
-    err := contractinterfacewrapper.RegisterAsVerifier(&txParam)
+    err := cif.RegisterAsVerifier(&txParam)
     if err != nil {
         fmt.Println("RegisterAsVerifier", err)
     }
 }
 
-func Vote(conn *ethclient.Client, verifier *scryclient.ScryClient) {
+func Vote(verifier *scryclient.ScryClient) {
     buyer.SubscribeEvent("Vote", onVote)
 
     txParam := chainoperations.TransactParams{ common.HexToAddress(verifier.Account.Address), keyPassword, big.NewInt(0), false}
-    err := contractinterfacewrapper.Vote(&txParam, txId, true, "This could be real from " + verifier.Account.Address)
+    err := cif.Vote(&txParam, txId, true, "This could be real from " + verifier.Account.Address)
     if err != nil {
         fmt.Println("Vote:", err)
     }
 }
 
-func CreditsToVerifier(conn *ethclient.Client, to common.Address) {
+func CreditsToVerifier(to common.Address) {
     buyer.SubscribeEvent("VerifierDisable", onVerifierDisable)
 
     txParam := chainoperations.TransactParams{ common.HexToAddress(buyer.Account.Address), keyPassword, big.NewInt(0), false}
-    err := contractinterfacewrapper.CreditsToVerifier(&txParam, txId, to, 5)
+    err := cif.CreditsToVerifier(&txParam, txId, to, 5)
     if err != nil {
         fmt.Println("CreditsToVerifier:", err)
     }
 }
 
-func BuyerApproveTransfer(conn *ethclient.Client)  {
+func BuyerApproveTransfer()  {
     buyer.SubscribeEvent("Approval", onApprovalBuyerTransfer)
 
     txParam := chainoperations.TransactParams{ common.HexToAddress(buyer.Account.Address), keyPassword, big.NewInt(0), false}
-    err := contractinterfacewrapper.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(1000))
+    err := cif.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(1000))
     if err != nil {
         fmt.Println("BuyerApproveTransfer:", err)
     }
 }
 
 
-func PrepareToBuy(conn *ethclient.Client, publishId string)  {
+func PrepareToBuy(publishId string)  {
 	buyer.SubscribeEvent("TransactionCreate", onTransactionCreate)
     verifier1.SubscribeEvent("VerifiersChosen", onVerifier1Chosen)
     verifier2.SubscribeEvent("VerifiersChosen", onVerifier2Chosen)
-    arbitrator.SubscribeEvent("VerifiersChosen", onVerifier3Chosen)
+    verifier3.SubscribeEvent("VerifiersChosen", onVerifier3Chosen)
 
     txParam := chainoperations.TransactParams{ common.HexToAddress(buyer.Account.Address), keyPassword, big.NewInt(0), false}
-	err := contractinterfacewrapper.PrepareToBuy(&txParam, publishId)
+	err := cif.PrepareToBuy(&txParam, publishId)
 	if err != nil {
 		fmt.Println("failed to prepareToBuy, error:", err)
 	}
 }
 
-func Buy(conn *ethclient.Client, txId *big.Int) {
+func Buy(txId *big.Int) {
 	seller.SubscribeEvent("Buy", onPurchase)
 
     txParam := chainoperations.TransactParams{ common.HexToAddress(buyer.Account.Address), keyPassword, big.NewInt(0), false}
-	err := contractinterfacewrapper.BuyData(&txParam, txId)
+	err := cif.BuyData(&txParam, txId)
 	if err != nil {
 		fmt.Println("failed to buyData, error:", err)
 	}
 }
 
-func SubmitMetaDataIdEncWithBuyer(conn *ethclient.Client, txId *big.Int)  {
+func SubmitMetaDataIdEncWithBuyer(txId *big.Int)  {
     buyer.SubscribeEvent("ReadyForDownload", onReadyForDownload)
 
     txParam := chainoperations.TransactParams{ common.HexToAddress(seller.Account.Address), keyPassword, big.NewInt(0), false}
-	err := contractinterfacewrapper.SubmitMetaDataIdEncWithBuyer(&txParam, txId, metaDataIdEncWithBuyer)
+	err := cif.SubmitMetaDataIdEncWithBuyer(&txParam, txId, metaDataIdEncWithBuyer)
 	if err != nil {
 		fmt.Println("failed to SubmitMetaDataIdEncWithBuyer, error:", err)
 	}
 }
 
-func ConfirmDataTruth(conn *ethclient.Client, txId *big.Int)  {
+func ConfirmDataTruth(txId *big.Int)  {
     buyer.SubscribeEvent("TransactionClose", onClose)
 
     txParam := chainoperations.TransactParams{ common.HexToAddress(buyer.Account.Address), keyPassword, big.NewInt(0), false}
-	err := contractinterfacewrapper.ConfirmDataTruth(&txParam, txId, true)
+	err := cif.ConfirmDataTruth(&txParam, txId, true)
 	if err != nil {
 		fmt.Println("failed to ConfirmDataTruth, error:", err)
 	}
@@ -374,7 +407,7 @@ func onClose(event events.Event) bool {
 func onApprovalBuyerTransfer(event events.Event) bool {
     fmt.Println("onApprovalBuyerTransfer:", event)
 
-    PrepareToBuy(conn, publishId)
+    PrepareToBuy(publishId)
     return true
 }
 
@@ -423,7 +456,7 @@ func onVerifier1Chosen(event events.Event) bool {
     fmt.Println("onVerifier1Chosen:", event)
 
     txId = event.Data.Get("transactionId").(*big.Int)
-    Vote(conn, verifier1)
+    Vote(verifier1)
     return true
 }
 
@@ -431,7 +464,7 @@ func onVerifier2Chosen(event events.Event) bool {
     fmt.Println("onVerifier2Chosen:", event)
 
     txId = event.Data.Get("transactionId").(*big.Int)
-    Vote(conn, verifier2)
+    Vote(verifier2)
     return true
 }
 
@@ -439,7 +472,7 @@ func onVerifier3Chosen(event events.Event) bool {
     fmt.Println("onVerifier3Chosen:", event)
 
     txId = event.Data.Get("transactionId").(*big.Int)
-    Vote(conn, arbitrator)
+    Vote(arbitrator)
     return true
 }
 
