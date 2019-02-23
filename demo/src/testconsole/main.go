@@ -211,7 +211,6 @@ func initClients()  {
         panic(err)
     }
 
-
     verifier1, err = CreateClientWithToken(big.NewInt(10000000))
     if err != nil {
         fmt.Println("failed to init clients, error:", err)
