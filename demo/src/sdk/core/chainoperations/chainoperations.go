@@ -73,9 +73,10 @@ func SignTransaction(signer types.Signer, address common.Address,
 
 func BuildCallOpts(txParams *TransactParams) (*bind.CallOpts) {
 	opts := &bind.CallOpts{
-		txParams.Pending,
-		txParams.From,
-		context.Background(),
+		Pending: txParams.Pending,
+		From: txParams.From,
+		BlockNumber: nil,
+		Context: context.Background(),
 	}
 
 	return opts
