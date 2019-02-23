@@ -1,7 +1,7 @@
 package sdk
 
 import (
-    "./scryclient/contractinterfacewrapper"
+    "./scryclient/chaininterfacewrapper"
     "./core"
     "./core/chainevents"
     "./settings"
@@ -39,7 +39,7 @@ func Init(ethNodeAddr string,
         return errors.New(START_ENGINE_FAILED)
     }
 
-    err = contractinterfacewrapper.Initialize(protocolContractAddress, tokenContractAddress, conn)
+    err = chaininterfacewrapper.Initialize(protocolContractAddress, tokenContractAddress, conn)
     if err != nil {
         rlog.Error(INIT_CONTRACT_INTERFACE_WRAPPER_FAILED, err)
         return errors.New(INIT_CONTRACT_INTERFACE_WRAPPER_FAILED)

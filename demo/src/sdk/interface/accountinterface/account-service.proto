@@ -7,10 +7,6 @@ enum Status {
     ERROR = 1;
 }
 
-enum Type {
-    DEFAULT = 0;
-}
-
 service KeyService {
     //生成地址
     rpc GenerateAddress (AddressParameter) returns (AddressInfo) {
@@ -27,6 +23,16 @@ service KeyService {
     //消息签名
     rpc Signature (CipherParameter) returns (CipherText) {
     }
+    //导入keystore文件内容
+    rpc import_keystore (ImportParameter) returns (AddressInfo) {
+
+    }
+}
+
+message ImportParameter {
+    string content_password = 1;
+    string import_psd= 2;
+    bytes content = 3;
 }
 
 message AddressParameter {
@@ -41,10 +47,9 @@ message AddressInfo {
 }
 
 message CipherParameter {
-    Type type = 1;
-    string password = 2;
-    string address = 3;
-    bytes message = 4;
+    string password = 1;
+    string address = 2;
+    bytes message = 3;
 }
 
 message CipherText {
