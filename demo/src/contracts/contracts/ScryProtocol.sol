@@ -26,6 +26,7 @@ contract ScryProtocol {
         bytes meteDataIdEncBuyer;
         bytes metaDataIdEncSeller;
         uint256 buyerDeposit;
+        uint256 verifierBonus;
         bool used;
     }
 
@@ -40,6 +41,7 @@ contract ScryProtocol {
     uint8 validVerifierCount = 0;
     uint8 verifierNum = 2;
     uint256 verifierDepositToken = 10000;
+    uint256 verifierBonus = 300;
     uint8 creditLow = 0;
     uint8 creditHigh = 5;
     uint8 creditThreshold = 2;
@@ -132,7 +134,7 @@ contract ScryProtocol {
         require((token.balanceOf(msg.sender)) >= data.price, "No enough balance");
         uint256 fee = data.price;
         if (data.supportVerify) {
-            fee += 0;   // should add the tokens which for awarding verifiers and arbitrators.
+            fee += verifierBonus * verifierNum;   // should add the tokens which for awarding verifiers and arbitrators.
         }
         require(token.transferFrom(msg.sender, address(this), fee), "Failed to transfer token from caller");
 
@@ -156,7 +158,7 @@ contract ScryProtocol {
         emit TransactionCreate(seqNo, txId, publishId, data.proofDataIds, data.supportVerify, users);
 
         mapTransaction[txId] = TransactionItem(TransactionState.Created, msg.sender, data.seller, selectedVerifiers, creditGived,
-            publishId, metaDataIdEncBuyer, data.metaDataIdEncSeller, data.price, true);
+            publishId, metaDataIdEncBuyer, data.metaDataIdEncSeller, fee, verifierBonus, true);
     }
 
     function chooseVerifiers(uint8 num) internal view returns (address[] memory) {
@@ -227,6 +229,8 @@ contract ScryProtocol {
 
         txItem.state = TransactionState.Voted;
         txItem.creditGived[index] = false;
+
+        payToVerifier(txItem, verifier.addr);
 
         address[] memory users = new address[](1);
         users[0] = txItem.buyer;
@@ -389,6 +393,19 @@ contract ScryProtocol {
         emit TransactionClose(seqNo, txId, users);
     }
 
+    function payToVerifier(TransactionItem storage txItem, address verifier) internal {
+        if (txItem.buyerDeposit >= txItem.verifierBonus) {
+            txItem.buyerDeposit -= txItem.verifierBonus;
+
+            if (!token.transfer(verifier, txItem.verifierBonus)) {
+                txItem.buyerDeposit += txItem.verifierBonus;
+                require(false, "Failed to pay to verifier");
+            }
+        } else {
+            require(false, "Low deposit value for paying to verifier");
+        }        
+    }
+
     function payToSeller(TransactionItem storage txItem, DataInfoPublished storage data) internal {
         if (txItem.buyerDeposit >= data.price) {
             txItem.buyerDeposit -= data.price;
@@ -398,7 +415,7 @@ contract ScryProtocol {
                 require(false, "Failed to pay to seller");
             }
         } else {
-            require(false, "Low deposit value");
+            require(false, "Low deposit value for paying to seller");
         }
     }
 
@@ -413,6 +430,12 @@ contract ScryProtocol {
 
         verifierNum = num;
     }
+
+    function setVerifierBonus(uint256 bonus) external {
+        require(owner == msg.sender, "The value only can be set by owner");
+
+        verifierBonus = bonus;
+    }    
 
     function creditsToVerifier(string seqNo, uint256 txId, address to, uint8 credit) external {
         //validate
