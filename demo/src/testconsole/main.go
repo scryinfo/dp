@@ -199,31 +199,31 @@ func initClients()  {
         panic(err)
     }
 
-    seller, err = CreateClientWithToken(big.NewInt(10000000))
+    seller, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(1000000000000000000))
     if err != nil {
         fmt.Println("failed to init clients, error:", err)
         panic(err)
     }
 
-    buyer, err = CreateClientWithToken(big.NewInt(10000000))
+    buyer, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(1000000000000000000))
     if err != nil {
         fmt.Println("failed to init clients, error:", err)
         panic(err)
     }
 
-    verifier1, err = CreateClientWithToken(big.NewInt(10000000))
+    verifier1, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(1000000000000000000))
     if err != nil {
         fmt.Println("failed to init clients, error:", err)
         panic(err)
     }
 
-    verifier2, err = CreateClientWithToken(big.NewInt(10000000))
+    verifier2, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(1000000000000000000))
     if err != nil {
         fmt.Println("failed to init clients, error:", err)
         panic(err)
     }
 
-    verifier3, err = CreateClientWithToken(big.NewInt(10000000))
+    verifier3, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(1000000000000000000))
     if err != nil {
         fmt.Println("failed to init clients, error:", err)
         panic(err)
@@ -232,15 +232,24 @@ func initClients()  {
     time.Sleep(sleepTime)
 }
 
-func CreateClientWithToken(value *big.Int) (*scryclient.ScryClient, error) {
+func CreateClientWithToken(token *big.Int, eth *big.Int) (*scryclient.ScryClient, error) {
     client, err := scryclient.CreateScryClient(keyPassword)
     if err != nil {
         fmt.Println("failed to create user, error:", err)
         return nil, err
     }
 
+    _, err = cif.TransferEth(common.HexToAddress(deployer.Account.Address),
+                          keyPassword,
+                          common.HexToAddress(client.Account.Address),
+                          big.NewInt(0))
+    if err != nil {
+        fmt.Println("failed to transfer token, error:", err)
+        return nil, err
+    }
+
     txParam := chainoperations.TransactParams{ common.HexToAddress(deployer.Account.Address), keyPassword, big.NewInt(0), false}
-    err = cif.TransferTokens(&txParam, common.HexToAddress(client.Account.Address), value)
+    err = cif.TransferTokens(&txParam, common.HexToAddress(client.Account.Address), token)
     if err != nil {
         fmt.Println("failed to transfer token, error:", err)
         return nil, err
@@ -471,7 +480,7 @@ func onVerifier3Chosen(event events.Event) bool {
     fmt.Println("onVerifier3Chosen:", event)
 
     txId = event.Data.Get("transactionId").(*big.Int)
-    Vote(arbitrator)
+    Vote(verifier3)
     return true
 }
 

@@ -54,7 +54,7 @@ contract('ScryProtocol', function (accounts) {
             //onRegisterVerifier
             eventName = "RegisterVerifier"
             assert(checkEvent(eventName, result), "failed to watch event " + eventName)
-            ste.approve(ptl.address, 1000, {from: buyer})
+            ste.approve(ptl.address, 1600, {from: buyer})
         }).then(function() {
             return ptl.createTransaction("seqno3",  "publishId", {from: buyer})
         }).then(function(result) {
