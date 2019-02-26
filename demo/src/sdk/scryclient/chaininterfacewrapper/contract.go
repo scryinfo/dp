@@ -1,30 +1,29 @@
 package chaininterfacewrapper
 
 import (
-    op "sdk/core/chainoperations"
-    "sdk/interface/contractinterface"
-    "sdk/util/accounts"
-    "sdk/util/storage/ipfsaccess"
-    "sdk/util/uuid"
-    "errors"
-    "github.com/btcsuite/btcutil/base58"
-    "github.com/ethereum/go-ethereum/common"
-    "github.com/ethereum/go-ethereum/core/types"
-    "github.com/ethereum/go-ethereum/ethclient"
-    rlog "github.com/sirupsen/logrus"
-    "math/big"
+	"errors"
+	"github.com/btcsuite/btcutil/base58"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethclient"
+	op "github.com/iscap/demo/src/sdk/core/chainoperations"
+	"github.com/iscap/demo/src/sdk/interface/contractinterface"
+	"github.com/iscap/demo/src/sdk/util/accounts"
+	"github.com/iscap/demo/src/sdk/util/storage/ipfsaccess"
+	"github.com/iscap/demo/src/sdk/util/uuid"
+	rlog "github.com/sirupsen/logrus"
+	"math/big"
 )
 
 var (
-    conn *ethclient.Client = nil
+	conn         *ethclient.Client               = nil
 	scryProtocol *contractinterface.ScryProtocol = nil
-	scryToken *contractinterface.ScryToken = nil
+	scryToken    *contractinterface.ScryToken    = nil
 )
 
-
 func Initialize(protocolContractAddress common.Address,
-    tokenContractAddress common.Address,
-    clientConn *ethclient.Client) error {
+	tokenContractAddress common.Address,
+	clientConn *ethclient.Client) error {
 	var err error = nil
 
 	scryProtocol, err = contractinterface.NewScryProtocol(protocolContractAddress, clientConn)
@@ -44,8 +43,8 @@ func Initialize(protocolContractAddress common.Address,
 }
 
 func Publish(txParams *op.TransactParams, price *big.Int, metaData []byte, proofDatas [][]byte,
-				proofNum int, descriptionData []byte, supportVerify bool) (string, error)  {
-	defer func(){
+	proofNum int, descriptionData []byte, supportVerify bool) (string, error) {
+	defer func() {
 		if err := recover(); err != nil {
 			rlog.Error("failed to publish data, error:", err)
 		}
@@ -63,7 +62,7 @@ func Publish(txParams *op.TransactParams, price *big.Int, metaData []byte, proof
 
 	//submit proof data
 	cidPds := make([][32]byte, proofNum)
-	for	i := 0; i < proofNum; i++ {
+	for i := 0; i < proofNum; i++ {
 		cidPd, err := ipfsaccess.GetIAInstance().SaveToIPFS(proofDatas[i])
 
 		if err != nil {
@@ -116,10 +115,9 @@ func ipfsHashToBytes32(src string) ([32]byte, error) {
 	return hashArray2, nil
 }
 
-
-func PrepareToBuy(txParams *op.TransactParams, publishId string) (error) {
-	defer func(){
-		if err:=recover(); err!=nil {
+func PrepareToBuy(txParams *op.TransactParams, publishId string) error {
+	defer func() {
+		if err := recover(); err != nil {
 			rlog.Error("failed to prepare to buy , error:", err)
 		}
 	}()
@@ -132,7 +130,7 @@ func PrepareToBuy(txParams *op.TransactParams, publishId string) (error) {
 	return err
 }
 
-func BuyData(txParams *op.TransactParams, txId *big.Int) (error) {
+func BuyData(txParams *op.TransactParams, txId *big.Int) error {
 	tx, err := scryProtocol.BuyData(op.BuildTransactOpts(txParams), uuid.GenerateUUID(), txId)
 	if err == nil {
 		rlog.Debug("BuyData:", tx.Data(), " tx hash:", tx.Hash().String())
@@ -141,7 +139,7 @@ func BuyData(txParams *op.TransactParams, txId *big.Int) (error) {
 	return err
 }
 
-func SubmitMetaDataIdEncWithBuyer(txParams *op.TransactParams, txId *big.Int, encyptedMetaDataId []byte) (error) {
+func SubmitMetaDataIdEncWithBuyer(txParams *op.TransactParams, txId *big.Int, encyptedMetaDataId []byte) error {
 	tx, err := scryProtocol.SubmitMetaDataIdEncWithBuyer(op.BuildTransactOpts(txParams), uuid.GenerateUUID(), txId, encyptedMetaDataId)
 	if err == nil {
 		rlog.Debug("SubmitMetaDataIdEncWithBuyer:", string(tx.Data()), " tx hash:", tx.Hash().String())
@@ -150,7 +148,7 @@ func SubmitMetaDataIdEncWithBuyer(txParams *op.TransactParams, txId *big.Int, en
 	return err
 }
 
-func ConfirmDataTruth(txParams *op.TransactParams, txId *big.Int, truth bool) (error) {
+func ConfirmDataTruth(txParams *op.TransactParams, txId *big.Int, truth bool) error {
 	tx, err := scryProtocol.ConfirmDataTruth(op.BuildTransactOpts(txParams), uuid.GenerateUUID(), txId, truth)
 	if err == nil {
 		rlog.Debug("ConfirmDataTruth:", string(tx.Data()), " tx hash:", tx.Hash().String())
@@ -159,7 +157,7 @@ func ConfirmDataTruth(txParams *op.TransactParams, txId *big.Int, truth bool) (e
 	return err
 }
 
-func ApproveTransfer(txParams *op.TransactParams, spender common.Address, value *big.Int) (error) {
+func ApproveTransfer(txParams *op.TransactParams, spender common.Address, value *big.Int) error {
 	tx, err := scryToken.Approve(op.BuildTransactOpts(txParams), spender, value)
 	if err == nil {
 		rlog.Debug("ApproveTransfer:", string(tx.Data()), " tx hash:", tx.Hash().String())
@@ -168,54 +166,54 @@ func ApproveTransfer(txParams *op.TransactParams, spender common.Address, value 
 	return err
 }
 
-func Vote(txParams *op.TransactParams, txId *big.Int, judge bool, comments string) (error) {
-    tx, err := scryProtocol.Vote(op.BuildTransactOpts(txParams), uuid.GenerateUUID(), txId, judge, comments)
-    if err == nil {
-        rlog.Debug("Vote:", string(tx.Data()), " tx hash:", tx.Hash().String())
-    }
+func Vote(txParams *op.TransactParams, txId *big.Int, judge bool, comments string) error {
+	tx, err := scryProtocol.Vote(op.BuildTransactOpts(txParams), uuid.GenerateUUID(), txId, judge, comments)
+	if err == nil {
+		rlog.Debug("Vote:", string(tx.Data()), " tx hash:", tx.Hash().String())
+	}
 
-    return err
+	return err
 }
 
-func RegisterAsVerifier(txParams *op.TransactParams) (error) {
-    tx, err := scryProtocol.RegisterAsVerifier(op.BuildTransactOpts(txParams), uuid.GenerateUUID())
-    if err == nil {
-        rlog.Debug("RegisterAsVerifier:", string(tx.Data()), " tx hash:", tx.Hash().String())
-    }
+func RegisterAsVerifier(txParams *op.TransactParams) error {
+	tx, err := scryProtocol.RegisterAsVerifier(op.BuildTransactOpts(txParams), uuid.GenerateUUID())
+	if err == nil {
+		rlog.Debug("RegisterAsVerifier:", string(tx.Data()), " tx hash:", tx.Hash().String())
+	}
 
-    return err
+	return err
 }
 
-func CreditsToVerifier(txParams *op.TransactParams, txId *big.Int, to common.Address, credit uint8) (error) {
-    tx, err := scryProtocol.CreditsToVerifier(op.BuildTransactOpts(txParams), uuid.GenerateUUID(), txId, to, credit)
-    if err == nil {
-        rlog.Debug("RegisterAsVerifier:", string(tx.Data()), " tx hash:", tx.Hash().String())
-    }
+func CreditsToVerifier(txParams *op.TransactParams, txId *big.Int, to common.Address, credit uint8) error {
+	tx, err := scryProtocol.CreditsToVerifier(op.BuildTransactOpts(txParams), uuid.GenerateUUID(), txId, to, credit)
+	if err == nil {
+		rlog.Debug("RegisterAsVerifier:", string(tx.Data()), " tx hash:", tx.Hash().String())
+	}
 
-    return err
+	return err
 }
 
-func TransferTokens(txParams *op.TransactParams, to common.Address, value *big.Int) (error)  {
-    tx, err := scryToken.Transfer(op.BuildTransactOpts(txParams), to, value)
-    if err == nil {
-        rlog.Debug("tx:", tx)
-        return err
-    }
+func TransferTokens(txParams *op.TransactParams, to common.Address, value *big.Int) error {
+	tx, err := scryToken.Transfer(op.BuildTransactOpts(txParams), to, value)
+	if err == nil {
+		rlog.Debug("tx:", tx)
+		return err
+	}
 
-    return err
+	return err
 }
 
-func GetTokenBalance(txParams *op.TransactParams, owner common.Address) (*big.Int, error)  {
-    return scryToken.BalanceOf(op.BuildCallOpts(txParams), owner)
+func GetTokenBalance(txParams *op.TransactParams, owner common.Address) (*big.Int, error) {
+	return scryToken.BalanceOf(op.BuildCallOpts(txParams), owner)
 }
 
 func TransferEth(from common.Address,
-    password string,
-    to common.Address,
-    value *big.Int) (*types.Transaction, error) {
-    return op.TransferEth(from, password, to, value, conn)
+	password string,
+	to common.Address,
+	value *big.Int) (*types.Transaction, error) {
+	return op.TransferEth(from, password, to, value, conn)
 }
 
 func GetEthBalance(owner common.Address) (*big.Int, error) {
-    return op.GetEthBalance(owner, conn)
+	return op.GetEthBalance(owner, conn)
 }
