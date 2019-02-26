@@ -2,9 +2,9 @@ package settings
 
 import (
 	"errors"
-	"github.com/iscap/demo/src/sdk/core/ethereum/events"
-	ev "github.com/iscap/demo/src/sdk/core/ethereum/events"
-	cf "github.com/iscap/demo/src/sdk/util/configuration"
+	"github.com/scryInfo/iscap/demo/src/sdk/core/ethereum/events"
+	ev "github.com/scryInfo/iscap/demo/src/sdk/core/ethereum/events"
+	cf "github.com/scryInfo/iscap/demo/src/sdk/util/configuration"
 	rlog "github.com/sirupsen/logrus"
 )
 

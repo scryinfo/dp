@@ -1,9 +1,9 @@
 .DS_Store
 Thumbs.db
-.idea/
+.idea
 bind*
-output
+output/
 vendor*
 windows.syso
 test
-app/my_go-astilectron-demo/
+node_modules
