@@ -11,7 +11,7 @@ import (
 
 // Constants
 const (
-	ABOUT = "test go -> js."
+	ABOUT  = "test go -> js."
 	ABOUT2 = "test <strong>go -> js.</strong><br/> once more"
 )
 
@@ -56,11 +56,11 @@ func main() {
 				},
 			},
 			{
-				Label:astilectron.PtrStr("Main menu 2"),
-				SubMenu:[]*astilectron.MenuItemOptions{
+				Label: astilectron.PtrStr("Main menu 2"),
+				SubMenu: []*astilectron.MenuItemOptions{
 					{
-						Label:astilectron.PtrStr("About2"),
-						OnClick:func(e astilectron.Event) (deleteListener bool) {
+						Label: astilectron.PtrStr("About2"),
+						OnClick: func(e astilectron.Event) (deleteListener bool) {
 							if err := bootstrap.SendMessage(w, "about2", ABOUT2, func(m *bootstrap.MessageIn) {
 								// Unmarshal payload
 								var s string
@@ -75,7 +75,7 @@ func main() {
 							return
 						},
 					},
-					{Role:astilectron.MenuItemRoleReload},
+					{Role: astilectron.MenuItemRoleReload},
 				},
 			},
 		},
