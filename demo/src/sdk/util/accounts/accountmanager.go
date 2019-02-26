@@ -1,7 +1,7 @@
 package accounts
 
 import (
-    "../../interface/accountinterface"
+    "sdk/interface/accountinterface"
     "context"
     "github.com/pkg/errors"
     rlog "github.com/sirupsen/logrus"

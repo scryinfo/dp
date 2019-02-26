@@ -1,9 +1,9 @@
 package settings
 
 import (
-    "../core/ethereum/events"
-    ev "../core/ethereum/events"
-    cf "../util/configuration"
+    "sdk/core/ethereum/events"
+    ev "sdk/core/ethereum/events"
+    cf "sdk/util/configuration"
     rlog "github.com/sirupsen/logrus"
     "errors"
 )

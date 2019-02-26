@@ -1,10 +1,10 @@
 package scryclient
 
 import (
-    "../core/chainevents"
-    "../core/chainoperations"
-    "../util/accounts"
-    "./chaininterfacewrapper"
+    "sdk/core/chainevents"
+    "sdk/core/chainoperations"
+    "sdk/util/accounts"
+    "sdk/scryclient/chaininterfacewrapper"
     "github.com/ethereum/go-ethereum/common"
     "github.com/ethereum/go-ethereum/ethclient"
     rlog "github.com/sirupsen/logrus"

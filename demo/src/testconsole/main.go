@@ -1,13 +1,13 @@
 package main
 
 import (
-    "../sdk"
-    "../sdk/scryclient"
-    cif "../sdk/scryclient/chaininterfacewrapper"
-    "../sdk/core/chainevents"
-    "../sdk/core/chainoperations"
-    "../sdk/core/ethereum/events"
-    "../sdk/util/accounts"
+    "sdk"
+    "sdk/scryclient"
+    cif "sdk/scryclient/chaininterfacewrapper"
+    "sdk/core/chainevents"
+    "sdk/core/chainoperations"
+    "sdk/core/ethereum/events"
+    "sdk/util/accounts"
     "fmt"
     "github.com/ethereum/go-ethereum/common"
     "io/ioutil"

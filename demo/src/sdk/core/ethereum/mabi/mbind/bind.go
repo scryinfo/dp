@@ -28,7 +28,7 @@ import (
 	"text/template"
 	"unicode"
 
-	abi "../../mabi"
+	abi "sdk/core/ethereum/mabi"
 	"golang.org/x/tools/imports"
 )
 
