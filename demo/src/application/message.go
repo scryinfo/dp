@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
+	"math/big"
 )
 
 const (
@@ -58,7 +60,13 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		payload = true
 		return payload, nil
 	case "publish":
-		payload = true
+		var dl PubData = PubData{}
+		err = json.Unmarshal(m.Payload, &dl)
+		if err != nil {
+			break
+		}
+		payload = SellerPublishData(dl)
+		//payload = true
 		return payload, nil
 	}
 
@@ -73,6 +81,13 @@ type Datalist struct {
 	Keys        string
 	Description string
 	Owner       string
+}
+
+type PubData struct {
+	MetaData  string   `json:"Data"`
+	ProofData []string `json:"Proofs"`
+	DespData  string   `json:"Description"`
+	Price     *big.Int `json:"Price"`
 }
 
 type Transaction struct {
