@@ -1,10 +1,10 @@
-let scryProtocol = artifacts.require("./ScryProtocolMock.sol")
+let scryProtocol = artifacts.require("./ScryProtocol.sol")
 let scryToken = artifacts.require("./ScryToken.sol")
 
 let ptl, ste
 let deployer, seller, buyer, verifier1, verifier2, verifier3, chosenVerfiers
 let publishId, txId
-contract('ScryProtocolMock', function (accounts) {
+contract('ScryProtocol', function (accounts) {
 
     before(function() {
         InitUsers()
