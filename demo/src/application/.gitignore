@@ -6,3 +6,4 @@ output
 vendor*
 windows.syso
 test
+app/my_go-astilectron-demo/
