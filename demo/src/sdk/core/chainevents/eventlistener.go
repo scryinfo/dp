@@ -1,22 +1,22 @@
 package chainevents
 
 import (
-    rlog "github.com/sirupsen/logrus"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"sdk/core/ethereum/events"
+	"github.com/iscap/demo/src/sdk/core/ethereum/events"
+	rlog "github.com/sirupsen/logrus"
 	"time"
 )
 
 type ContractInfo struct {
-    Address string
-    Abi string
-    EventNames []string
+	Address    string
+	Abi        string
+	EventNames []string
 }
 
 func ListenEvent(conn *ethclient.Client, contracts []ContractInfo,
-            fromBlock uint64, interval time.Duration,
-            dataChannel chan events.Event, errorChannel chan error) bool {
+	fromBlock uint64, interval time.Duration,
+	dataChannel chan events.Event, errorChannel chan error) bool {
 	rv := true
 	rlog.Info("start listening events...")
 
@@ -27,15 +27,15 @@ func ListenEvent(conn *ethclient.Client, contracts []ContractInfo,
 		}
 	}()
 
-    if len(contracts) == 0 {
-        rlog.Error("invalid contracts parameter")
-        return false
-    }
+	if len(contracts) == 0 {
+		rlog.Error("invalid contracts parameter")
+		return false
+	}
 
-    builder := events.NewScanBuilder()
-    for _, v := range contracts {
-        builder.SetContract(common.HexToAddress(v.Address), v.Abi, v.EventNames...)
-    }
+	builder := events.NewScanBuilder()
+	for _, v := range contracts {
+		builder.SetContract(common.HexToAddress(v.Address), v.Abi, v.EventNames...)
+	}
 
 	recp, err := builder.SetClient(conn).
 		SetFrom(fromBlock).
@@ -53,4 +53,3 @@ func ListenEvent(conn *ethclient.Client, contracts []ContractInfo,
 
 	return rv
 }
-

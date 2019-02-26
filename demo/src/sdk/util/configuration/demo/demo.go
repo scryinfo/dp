@@ -1,9 +1,9 @@
 package main
 
 import (
-    "sdk/util/configuration"
-    "sdk/util/configuration/demo/define"
-    rlog "github.com/sirupsen/logrus"
+	"github.com/iscap/demo/src/sdk/util/configuration"
+	"github.com/iscap/demo/src/sdk/util/configuration/demo/define"
+	rlog "github.com/sirupsen/logrus"
 )
 
 //modify the directory before you run this demo.
@@ -15,10 +15,10 @@ func main() {
 	}
 
 	conf, ok := rv.(*define.Conf)
-    if !ok {
-        rlog.Error("failed to get yaml structure")
-        return
-    }
+	if !ok {
+		rlog.Error("failed to get yaml structure")
+		return
+	}
 
 	rlog.Debug("conf: ", conf)
 
