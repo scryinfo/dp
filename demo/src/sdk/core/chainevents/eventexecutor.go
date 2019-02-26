@@ -1,7 +1,7 @@
 package chainevents
 
 import (
-    "../ethereum/events"
+    "sdk/core/ethereum/events"
     "github.com/ethereum/go-ethereum/common"
     rlog "github.com/sirupsen/logrus"
 )

@@ -1,7 +1,7 @@
 package settings
 
 import (
-    "../core/ethereum/events"
+    "sdk/core/ethereum/events"
 )
 
 type ScryInfo struct {

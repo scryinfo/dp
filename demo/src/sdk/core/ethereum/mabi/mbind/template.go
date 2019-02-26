@@ -16,7 +16,7 @@
 
 package mbind
 
-import abi "../../mabi"
+import abi "sdk/core/ethereum/mabi"
 
 // tmplData is the data structure required to fill the binding template.
 type tmplData struct {

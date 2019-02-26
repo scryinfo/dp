@@ -1,7 +1,7 @@
 package chainoperations
 
 import (
-    "../../util/accounts"
+    "sdk/util/accounts"
     "context"
     "encoding/json"
     "errors"

@@ -5,7 +5,7 @@ import (
     rlog "github.com/sirupsen/logrus"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"../ethereum/events"
+	"sdk/core/ethereum/events"
 )
 
 var (

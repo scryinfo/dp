@@ -403,7 +403,7 @@ contract ScryProtocol {
             }
         } else {
             require(false, "Low deposit value for paying to verifier");
-        }        
+        }
     }
 
     function payToSeller(TransactionItem storage txItem, DataInfoPublished storage data) internal {

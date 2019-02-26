@@ -1,10 +1,10 @@
 package sdk
 
 import (
-    "./scryclient/chaininterfacewrapper"
-    "./core"
-    "./core/chainevents"
-    "./settings"
+    "sdk/scryclient/chaininterfacewrapper"
+    "sdk/core"
+    "sdk/core/chainevents"
+    "sdk/settings"
     "fmt"
     "github.com/ethereum/go-ethereum/common"
     "github.com/pkg/errors"

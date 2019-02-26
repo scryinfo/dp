@@ -1,8 +1,8 @@
 package main
 
 import (
-    "../../configuration"
-    "./define"
+    "sdk/util/configuration"
+    "sdk/util/configuration/demo/define"
     rlog "github.com/sirupsen/logrus"
 )
 

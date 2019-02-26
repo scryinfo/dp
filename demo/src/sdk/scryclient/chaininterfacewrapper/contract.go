@@ -1,11 +1,11 @@
 package chaininterfacewrapper
 
 import (
-    op "../../core/chainoperations"
-    "../../interface/contractinterface"
-    "../../util/accounts"
-    "../../util/storage/ipfsaccess"
-    "../../util/uuid"
+    op "sdk/core/chainoperations"
+    "sdk/interface/contractinterface"
+    "sdk/util/accounts"
+    "sdk/util/storage/ipfsaccess"
+    "sdk/util/uuid"
     "errors"
     "github.com/btcsuite/btcutil/base58"
     "github.com/ethereum/go-ethereum/common"

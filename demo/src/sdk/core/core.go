@@ -1,9 +1,9 @@
 package core
 
 import (
-    "../util/accounts"
-    "../util/storage/ipfsaccess"
-    "./chainevents"
+    "sdk/util/accounts"
+    "sdk/util/storage/ipfsaccess"
+    "sdk/core/chainevents"
     "context"
     "github.com/ethereum/go-ethereum/ethclient"
     rlog "github.com/sirupsen/logrus"

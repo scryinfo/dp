@@ -27,7 +27,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/event"
-	abi "../../mabi"
+	abi "sdk/core/ethereum/mabi"
 )
 
 // SignerFn is a signer function callback when a contract requires a method to
