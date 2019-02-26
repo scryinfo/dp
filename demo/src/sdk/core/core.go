@@ -3,9 +3,9 @@ package core
 import (
 	"context"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/iscap/demo/src/sdk/core/chainevents"
-	"github.com/iscap/demo/src/sdk/util/accounts"
-	"github.com/iscap/demo/src/sdk/util/storage/ipfsaccess"
+	"github.com/scryInfo/iscap/demo/src/sdk/core/chainevents"
+	"github.com/scryInfo/iscap/demo/src/sdk/util/accounts"
+	"github.com/scryInfo/iscap/demo/src/sdk/util/storage/ipfsaccess"
 	rlog "github.com/sirupsen/logrus"
 )
 

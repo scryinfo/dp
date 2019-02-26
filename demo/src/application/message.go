@@ -18,22 +18,22 @@ const (
 func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, error) {
 	var (
 		payload interface{}
-		err     error
+		err     error = nil
 	)
 
 	switch m.Name {
 	case "get.accounts":
 		payload = []string{"0x123456789012345678901234567890", "0x152478321257865520236547951123"}
-		return payload, nil
+		return payload, err
 	case "create.new.account":
 		payload = "0x123123123123123123123123123123"
-		return payload, nil
+		return payload, err
 	case "login.verify":
 		payload = true
-		return payload, nil
+		return payload, err
 	case "save.keystore":
 		payload = true
-		return payload, nil
+		return payload, err
 	case "get.datalist":
 		payload = []Datalist{
 			{"Qm461", "title1", 1, "test tags461", "test description461", "0x123456789012345678901234567890"},
@@ -50,24 +50,26 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 			{"Qm4612", "title12", 12, "test tags4612", "test description4612", "0x123456789012345678901234567890"},
 			{"Qm4613", "title13", 13, "test tags4613", "test description4613", "0x123456789012345678901234567890"},
 		}
-		return payload, nil
+		return payload, err
 	case "get.transaction":
 		payload = []Transaction{
 			{"title1", 1, "0x123456789012345678901234567890", "0x152478321257865520236547951123", Created},
 		}
-		return payload, nil
+		return payload, err
 	case "buy":
 		payload = true
-		return payload, nil
+		return payload, err
 	case "publish":
 		var dl PubData = PubData{}
 		err = json.Unmarshal(m.Payload, &dl)
 		if err != nil {
 			break
 		}
-		payload = SellerPublishData(dl)
-		//payload = true
-		return payload, nil
+		payload, iserr := SellerPublishData(dl)
+		if !iserr {
+			break
+		}
+		return payload, err
 	}
 
 	payload = err.Error()
@@ -88,6 +90,7 @@ type PubData struct {
 	ProofData []string `json:"Proofs"`
 	DespData  string   `json:"Description"`
 	Price     *big.Int `json:"Price"`
+	Seller    string   `json:"Owner"`
 }
 
 type Transaction struct {

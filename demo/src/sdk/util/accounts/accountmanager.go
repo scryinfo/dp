@@ -2,8 +2,8 @@ package accounts
 
 import (
 	"context"
-	"github.com/iscap/demo/src/sdk/interface/accountinterface"
 	"github.com/pkg/errors"
+	"github.com/scryInfo/iscap/demo/src/sdk/interface/accountinterface"
 	rlog "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"sync"

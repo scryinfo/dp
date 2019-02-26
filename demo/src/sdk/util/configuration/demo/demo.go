@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/iscap/demo/src/sdk/util/configuration"
-	"github.com/iscap/demo/src/sdk/util/configuration/demo/define"
+	"github.com/scryInfo/iscap/demo/src/sdk/util/configuration"
+	"github.com/scryInfo/iscap/demo/src/sdk/util/configuration/demo/define"
 	rlog "github.com/sirupsen/logrus"
 )
 

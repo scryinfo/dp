@@ -3,10 +3,10 @@ package scryclient
 import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/iscap/demo/src/sdk/core/chainevents"
-	"github.com/iscap/demo/src/sdk/core/chainoperations"
-	"github.com/iscap/demo/src/sdk/scryclient/chaininterfacewrapper"
-	"github.com/iscap/demo/src/sdk/util/accounts"
+	"github.com/scryInfo/iscap/demo/src/sdk/core/chainevents"
+	"github.com/scryInfo/iscap/demo/src/sdk/core/chainoperations"
+	"github.com/scryInfo/iscap/demo/src/sdk/scryclient/chaininterfacewrapper"
+	"github.com/scryInfo/iscap/demo/src/sdk/util/accounts"
 	rlog "github.com/sirupsen/logrus"
 	"math/big"
 )

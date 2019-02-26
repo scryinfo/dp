@@ -1,7 +1,7 @@
 package settings
 
 import (
-    "github.com/iscap/demo/src/sdk/core/ethereum/events"
+    "github.com/scryInfo/iscap/demo/src/sdk/core/ethereum/events"
 )
 
 type ScryInfo struct {

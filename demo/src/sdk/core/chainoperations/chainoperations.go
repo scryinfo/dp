@@ -9,7 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/iscap/demo/src/sdk/util/accounts"
+	"github.com/scryInfo/iscap/demo/src/sdk/util/accounts"
 	"math/big"
 	"strings"
 )

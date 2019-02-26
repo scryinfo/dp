@@ -25,7 +25,6 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum"
-	bind "sdk/core/ethereum/mabi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/consensus/ethash"
@@ -39,6 +38,7 @@ import (
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rpc"
+	bind "github.com/scryInfo/iscap/demo/src/sdk/core/ethereum/mabi"
 )
 
 // This nil assignment ensures compile time that SimulatedBackend implements bind.ContractBackend.
