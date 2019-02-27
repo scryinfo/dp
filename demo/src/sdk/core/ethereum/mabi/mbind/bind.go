@@ -28,7 +28,7 @@ import (
 	"text/template"
 	"unicode"
 
-	abi "github.com/scryInfo/iscap/demo/src/sdk/core/ethereum/mabi"
+	abi "github.com/scryinfo/iscap/demo/src/sdk/core/ethereum/mabi"
 	"golang.org/x/tools/imports"
 )
 

@@ -1,10 +1,10 @@
 package settings
 
 import (
-    "github.com/scryInfo/iscap/demo/src/sdk/core/ethereum/events"
+    "github.com/scryinfo/iscap/demo/src/sdk/core/ethereum/events"
 )
 
-type ScryInfo struct {
+type scryinfo struct {
     Chain Chain  `yaml:"Chain"`
     Log Log      `yaml:"Log"`
 }

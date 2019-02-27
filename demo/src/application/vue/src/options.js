@@ -50,9 +50,14 @@ let dl_db = {
             c.onsuccess = function(event) {
                 let cursor = event.target.result
                 if (cursor) {
-                    let dl = cursor.value
-                    dl.ID = cursor.key
-                    _this.$store.dispatch('addDL',dl)
+                    _this.$store.state.datalist.push({
+                        Title: cursor.value.Title,
+                        Price: cursor.value.Price,
+                        Keys: cursor.value.Keys,
+                        Description: cursor.value.Description,
+                        Owner: cursor.value.Owner,
+                        ID: cursor.key
+                    })
                     cursor.continue()
                 }
             }
@@ -84,16 +89,21 @@ let mt_db = {
             c.onsuccess = function(event) {
                 let cursor = event.target.result
                 if (cursor) {
-                    let mt = cursor.value
-                    mt.TransactionID = cursor.key
+                    let state
                     switch (parseInt(cursor.State)) {
-                        case 0:mt.State = "Created";break
-                        case 1:mt.State = "Voted";break
-                        case 2:mt.State = "Payed";break
-                        case 3:mt.State = "ReadyForDownload";break
-                        case 4:mt.State = "Closed";break
+                        case 0:state = "Created";break
+                        case 1:state = "Voted";break
+                        case 2:state = "Payed";break
+                        case 3:state = "ReadyForDownload";break
+                        case 4:state = "Closed";break
                     }
-                    _this.$store.dispatch('addMT',mt)
+                    _this.$store.state.mytransaction.push({
+                        Title: cursor.value.Title,
+                        Seller: cursor.value.Seller,
+                        Buyer: cursor.value.Buyer,
+                        State: state,
+                        TransactionID: cursor.key,
+                    })
                     cursor.continue()
                 }
             }
