@@ -6,7 +6,6 @@
         </el-col>
 
         <el-table :data="this.$store.state.mytransaction" highlight-current-row border height=400>
-            <el-table-column type="selection" width="50"></el-table-column>
             <el-table-column prop="Title" label="Title" show-overflow-tooltip></el-table-column>
             <el-table-column prop="TransactionID" label="TransactionID" show-overflow-tooltip></el-table-column>
             <el-table-column prop="Seller" label="Seller" show-overflow-tooltip></el-table-column>

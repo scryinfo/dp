@@ -3,11 +3,11 @@ package sdk
 import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/scryInfo/iscap/demo/src/sdk/core"
-	"github.com/scryInfo/iscap/demo/src/sdk/core/chainevents"
-	"github.com/scryInfo/iscap/demo/src/sdk/scryclient/chaininterfacewrapper"
-	"github.com/scryInfo/iscap/demo/src/sdk/settings"
 	"github.com/pkg/errors"
+	"github.com/scryinfo/iscap/demo/src/sdk/core"
+	"github.com/scryinfo/iscap/demo/src/sdk/core/chainevents"
+	"github.com/scryinfo/iscap/demo/src/sdk/scryclient/chaininterfacewrapper"
+	"github.com/scryinfo/iscap/demo/src/sdk/settings"
 	rlog "github.com/sirupsen/logrus"
 	"os"
 )

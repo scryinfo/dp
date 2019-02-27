@@ -24,7 +24,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	abi "github.com/scryInfo/iscap/demo/src/sdk/core/ethereum/mabi"
+	abi "github.com/scryinfo/iscap/demo/src/sdk/core/ethereum/mabi"
 )
 
 // makeTopics converts a filter query argument list into a filter topic set.
