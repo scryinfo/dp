@@ -1,7 +1,7 @@
 <template>
     <el-form class="pubForm" :model="pubData" label-width="15%">
         <el-form-item label="Title"><el-input v-model="pubData.Title"></el-input></el-form-item>
-        <el-form-item label="Price"><el-input v-model="pubData.Price" placeholder="Unit is DDD"></el-input></el-form-item>
+        <el-form-item label="Price"><el-input v-model.number="pubData.Price" placeholder="Unit is DDD"></el-input></el-form-item>
         <el-form-item label="Keys"><el-input placeholder="Separate each tag with a comma or semicolon"
                                              v-model="pubData.Keys" type="textarea" :rows=2></el-input></el-form-item>
         <el-form-item label="Description">
@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import {dl_db} from "../../options";
+import {dl_db} from "../../options"
 export default {
     name: "PublishNewData",
     data () {
@@ -28,7 +28,7 @@ export default {
                 Data: '',
                 Proofs: [],
                 Owner: this.$store.state.account
-            },
+            }
         }
     },
     methods: {
@@ -64,7 +64,8 @@ export default {
                 Owner: this.pubData.Owner
             }
             astilectron.sendMessage({Name:"publish",Payload:this.pubData}, function (message) {
-                if (message.err == null) {
+                if (message.name !== "error") {
+                    console.log(message)
                     dl_db.write(pub, message.payload)
                     dl_db.init(_this)
                     console.log("Log: Publish new data success.")

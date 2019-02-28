@@ -37,7 +37,7 @@
 
 <script>
 import {lfg} from '../listenFromGo'
-import {dl_db, mt_db, options} from "../options"
+import {dl_db, mt_db, acc_db, options} from "../options"
 export default {
     name: "login",
     data() {
@@ -75,7 +75,7 @@ export default {
         },
         submit_new: function () {
             let _this = this
-            astilectron.sendMessage({Name: "create.new.account", Payload: ""}, function (message) {
+            astilectron.sendMessage({Name: "create.new.account", Payload: this.password}, function (message) {
                 _this.account = message.payload
                 _this.showControl1 = false;_this.showControl2 = true
             })
@@ -99,13 +99,9 @@ export default {
         let _this = this
         dl_db.init(this)
         mt_db.init(this)
+        acc_db.init(this)
         document.addEventListener('astilectron-ready', function() {
             lfg.listen()
-            astilectron.sendMessage({Name : "get.accounts",Payload: ""},function (message) {
-                for(let i=0;i<message.payload.length;i++){
-                    _this.$store.state.accounts.push({address: message.payload[i]})
-                }
-            })
             options.init(_this)
         })
     }

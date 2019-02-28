@@ -41,6 +41,7 @@ let dl_db = {
             this.db = event.target.result
             this.db.createObjectStore(dl_db.db_store_name)
             this.db.createObjectStore("transaction")
+            this.db.createObjectStore("accounts")
         }
         request.onsuccess = function(event) {
             _this.$store.state.datalist = []
@@ -117,5 +118,44 @@ let mt_db = {
         }
     },
 }
+let acc_db = {
+    init:function(_this){
+        this.db_name = "Database"
+        this.db_version = "1"
+        this.db_store_name = "accounts"
 
-export {dl_db, mt_db, options}
+        let request = indexedDB.open(this.db_name,this.db_version)
+        request.onerror = function(event) {
+            alert("open failed with error code: " + event.target.errorCode)
+        }
+        request.onsuccess = function(event) {
+            _this.$store.state.datalist = []
+            acc_db.db = event.target.result
+            let s = acc_db.db.transaction(acc_db.db_store_name,"readonly").objectStore(acc_db.db_store_name)
+            let c = s.openCursor()
+            c.onsuccess = function(event) {
+                let cursor = event.target.result
+                if (cursor) {
+                    _this.$store.state.accounts.push({address: cursor.value.address})
+                    cursor.continue()
+                }
+            }
+        }
+    },
+    write:function(addr) {
+        let store = acc_db.db.transaction(acc_db.db_store_name, "readwrite").objectStore(acc_db.db_store_name)
+        let request = store.put(addr,addr)
+        request.onerror = function(event){
+            console.log(event)
+        }
+    },
+    remove:function (key) {
+        let store = acc_db.db.transaction(acc_db.db_store_name, "readwrite").objectStore(acc_db.db_store_name)
+        let request = store.delete(key)
+        request.onerror = function (event) {
+            console.log(event)
+        }
+    }
+}
+
+export {dl_db, mt_db, acc_db, options}
