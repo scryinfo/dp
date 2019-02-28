@@ -10,6 +10,11 @@ Chain:
       users:
       - "0x0000000000000000000000000000000000000000"
 Log:
+<<<<<<< HEAD
 #  dir: /home/waitgordor/project/iscap2/iscap/demo/src/testconsole/log/
   dir: D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/iscap/demo/src/testconsole/log
   file: scry.log
+=======
+  dir: /home/waitgordor/project/goproject/src/github.com/scryinfo/iscap/demo/src/testconsole/log/
+  file: scry.log
+>>>>>>> 03e3e31fbd26b343c5797eab7628190d61087721
