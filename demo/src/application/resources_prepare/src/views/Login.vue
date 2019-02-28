@@ -75,7 +75,8 @@ export default {
         },
         submit_new: function () {
             let _this = this
-            astilectron.sendMessage({Name: "create.new.account", Payload: this.password}, function (message) {
+            astilectron.sendMessage({Name: "create.new.account", Payload: {address: this.password}}, function (message) {
+                acc_db.write(message.payload)
                 _this.account = message.payload
                 _this.showControl1 = false;_this.showControl2 = true
             })

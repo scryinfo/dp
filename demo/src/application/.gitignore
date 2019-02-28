@@ -5,6 +5,5 @@ bind*
 output/
 vendor*
 windows.syso
-test
 node_modules
 app/
