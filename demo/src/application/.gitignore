@@ -6,4 +6,4 @@ output/
 vendor*
 windows.syso
 node_modules
-app/
+resources/app/

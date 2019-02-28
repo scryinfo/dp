@@ -1,6 +1,5 @@
 <template>
     <section>
-        <!--工具条，暂时还没有功能-->
         <el-col :span="24" style="padding-bottom: 0; background-color: lightgrey;">
             <el-button @click="buy">Buy</el-button>
         </el-col>

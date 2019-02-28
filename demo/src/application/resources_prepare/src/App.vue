@@ -3,7 +3,11 @@
 		<router-view></router-view>
 		<div class="astiloader" id="astiloader">
 			<div class="astiloader-background"></div>
-			<div class="astiloader-table"><div class="astiloader-content"><i class="fa fa-spinner fa-spin fa-3x fa-fw"></i></div></div>
+			<div class="astiloader-table">
+				<div class="astiloader-content">
+					<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
+				</div>
+			</div>
 		</div>
 		<div class="astimodaler" id="astimodaler">
 			<div class="astimodaler-background"></div>
@@ -65,26 +69,6 @@ body {
 .el-menu-item [class^=fa] {
 	vertical-align: baseline;
 	margin-right: 10px;
-}
-
-.toolbar {
-	background: #f2f2f2;
-	padding: 10px;
-	border: 1px solid #dfe6ec;
-	margin: 10px 0;
-	.el-form-item {
-		margin-bottom: 10px;
-	}
-}
-
-.fade-enter-active,
-.fade-leave-active {
-	transition: all .2s ease;
-}
-
-.fade-enter,
-.fade-leave-active {
-	opacity: 0;
 }
 .astiloader {
 	color: #fff;
@@ -178,76 +162,7 @@ body {
 }
 @media (min-width: 768px) {
 	.astinotifier {
-		max-width: 400px;
+		max-width: 500px;
 	}
-}
-.astinotifier-wrapper {
-	padding: 10px 10px 0 10px;
-}
-.astinotifier-item {
-	width: 100%;
-	border-radius: 4px;
-	display: table;
-	padding: 20px;
-	text-shadow: 0 1px 0 rgba(255, 255, 255, .2);
-	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 1px 2px rgba(0, 0, 0, .05);
-	box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 1px 2px rgba(0, 0, 0, .05);
-	box-sizing: border-box;
-}
-.astinotifier-item.success {
-	color: #3c763d;
-	background-color: #dff0d8;
-	background-image: -webkit-linear-gradient(top, #dff0d8 0, #c8e5bc 100%);
-	background-image: -o-linear-gradient(top, #dff0d8 0, #c8e5bc 100%);
-	background-image: -webkit-gradient(linear, left top, left bottom, from(#dff0d8), to(#c8e5bc));
-	background-image: linear-gradient(to bottom, #dff0d8 0, #c8e5bc 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffdff0d8', endColorstr='#ffc8e5bc', GradientType=0);
-	background-repeat: repeat-x;
-	border-color: #b2dba1
-}
-.astinotifier-item.info {
-	color: #31708f;
-	background-color: #d9edf7;
-	background-image: -webkit-linear-gradient(top, #d9edf7 0, #b9def0 100%);
-	background-image: -o-linear-gradient(top, #d9edf7 0, #b9def0 100%);
-	background-image: -webkit-gradient(linear, left top, left bottom, from(#d9edf7), to(#b9def0));
-	background-image: linear-gradient(to bottom, #d9edf7 0, #b9def0 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffd9edf7', endColorstr='#ffb9def0', GradientType=0);
-	background-repeat: repeat-x;
-	border-color: #9acfea
-}
-.astinotifier-item.warning {
-	color: #8a6d3b;
-	background-color: #fcf8e3;
-	background-image: -webkit-linear-gradient(top, #fcf8e3 0, #f8efc0 100%);
-	background-image: -o-linear-gradient(top, #fcf8e3 0, #f8efc0 100%);
-	background-image: -webkit-gradient(linear, left top, left bottom, from(#fcf8e3), to(#f8efc0));
-	background-image: linear-gradient(to bottom, #fcf8e3 0, #f8efc0 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fffcf8e3', endColorstr='#fff8efc0', GradientType=0);
-	background-repeat: repeat-x;
-	border-color: #f5e79e
-}
-.astinotifier-item.error {
-	color: #a94442;
-	background-color: #f2dede;
-	background-image: -webkit-linear-gradient(top, #f2dede 0, #e7c3c3 100%);
-	background-image: -o-linear-gradient(top, #f2dede 0, #e7c3c3 100%);
-	background-image: -webkit-gradient(linear, left top, left bottom, from(#f2dede), to(#e7c3c3));
-	background-image: linear-gradient(to bottom, #f2dede 0, #e7c3c3 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fff2dede', endColorstr='#ffe7c3c3', GradientType=0);
-	background-repeat: repeat-x;
-	border-color: #dca7a7
-}
-.astinotifier-label {
-	display: table-cell;
-	text-align: center;
-	vertical-align: middle;
-}
-.astinotifier-close {
-	cursor: pointer;
-	display: table-cell;
-	text-align: right;
-	vertical-align: middle;
-	width: 25px;
 }
 </style>
