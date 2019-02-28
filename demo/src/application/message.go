@@ -23,12 +23,15 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 
 	switch m.Name {
 	case "create.new.account":
-		var pwd = Password{}
-		err = json.Unmarshal(m.Payload, &pwd)
+		var pwd = new(Password)
+		err = json.Unmarshal(m.Payload, pwd)
 		if err != nil {
 			break
 		}
 		payload, err = scryclient.CreateScryClient(pwd.Password)
+		if err != nil {
+			break
+		}
 		return payload, nil
 	case "login.verify":
 		payload = true
