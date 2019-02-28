@@ -339,7 +339,7 @@ func BuyerApproveTransfer() {
 	buyer.SubscribeEvent("Approval", onApprovalBuyerTransfer)
 
 	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), keyPassword, big.NewInt(0), false}
-	err := cif.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(1000))
+	err := cif.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(1600))
 	if err != nil {
 		fmt.Println("BuyerApproveTransfer:", err)
 	}
