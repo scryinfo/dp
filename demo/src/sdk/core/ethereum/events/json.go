@@ -1,4 +1,4 @@
-package mabi
+package events
 
 import (
 	"encoding/json"
