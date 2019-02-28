@@ -20,9 +20,9 @@ var (
 	txId                    *big.Int = big.NewInt(0)
 	metaDataIdEncWithSeller []byte
 	metaDataIdEncWithBuyer  []byte
-	protocolContractAddr                           = "0x4ae12e473d8eaf98d0410555508cc8ba8c3cf7b6"
-	tokenContractAddr                              = "0x77d631c8c87bd3dd0d5631add4d76364662b2159"
-	deployerKeyJson                                = `{"version":3,"id":"80d7b778-e617-4b35-bb09-f4b224984ed6","address":"d280b60c38bc8db9d309fa5a540ffec499f0a3e8","crypto":{"ciphertext":"58ac20c29dd3029f4d374839508ba83fc84628ae9c3f7e4cc36b05e892bf150d","cipherparams":{"iv":"9ab7a5f9bcc9df7d796b5022023e2d14"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"63a364b8a64928843708b5e9665a79fa00890002b32833b3a9ff99eec78dbf81","n":262144,"r":8,"p":1},"mac":"3a38f91234b52dd95d8438172bca4b7ac1f32e6425387be4296c08d8bddb2098"}}`
+	protocolContractAddr                           = "0xbb7bae05bdbc0ed9e514ce18122fc6b4cbcca346"
+	tokenContractAddr                              = "0xc67d1847fb1b00173dcdbc00c7cbe32651537daa"
+	deployerKeyJson                                = `{"version":3,"id":"8db8b2a0-ec6e-40ea-9808-631117870070","address":"61ad28110ce3911a9aafabba551cdc932a02bd52","crypto":{"ciphertext":"b4835e7a3ea3a132b172f1609ed310b7345323c552791b36017d761e6fe748f0","cipherparams":{"iv":"880c3c504350c97d6b5469d9333c3feb"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"2ae6c42c17a67f271e15de48b743b9a9c400b1413f8d9ccbf8389be86e84b938","n":262144,"r":8,"p":1},"mac":"5c26d0cf4925208e40f1a791d713a2a71b7287b7c09fdf192c21ad8fe158b388"}}`
 	keyPassword                                    = "12345"
 	deployer                *scryclient.ScryClient = nil
 	seller                  *scryclient.ScryClient = nil
@@ -48,9 +48,9 @@ func main() {
 
 	testTransferEth()
 
-	//testTxWithoutVerify()
+	testTxWithoutVerify()
 
-	testTxWithVerify()
+	//testTxWithVerify()
 
 	time.Sleep(100000000000000)
 }
