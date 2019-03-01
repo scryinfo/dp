@@ -8,13 +8,13 @@ import (
 )
 
 const (
-	SETTING_LOCATION = "../sdk/struct/definition.yaml"
+	SETTING_LOCATION = "../sdk/definition/definition.yaml"
 )
 
 func SaveLastEvent(event ev.Event) error {
 	rv, err := LoadSettings()
 	if err != nil {
-		rlog.Error("failed to load struct, error:", err)
+		rlog.Error("failed to load definition, error:", err)
 		return err
 	}
 
@@ -22,7 +22,7 @@ func SaveLastEvent(event ev.Event) error {
 
 	err = cf.SaveChanges(SETTING_LOCATION, rv)
 	if err != nil {
-		rlog.Error("failed to save struct, error:", err)
+		rlog.Error("failed to save definition, error:", err)
 		return err
 	}
 
@@ -32,7 +32,7 @@ func SaveLastEvent(event ev.Event) error {
 func LoadLastEvent() (ev.Event, error) {
 	rv, err := LoadSettings()
 	if err != nil {
-		rlog.Error("failed to load struct, error:", err)
+		rlog.Error("failed to load definition, error:", err)
 		return ev.Event{}, err
 	}
 
@@ -43,7 +43,7 @@ func LoadLastEvent() (ev.Event, error) {
 func LoadLogPath() (*Log, error) {
 	rv, err := LoadSettings()
 	if err != nil {
-		rlog.Error("failed to load struct, error:", err)
+		rlog.Error("failed to load definition, error:", err)
 		return nil, err
 	}
 

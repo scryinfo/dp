@@ -136,7 +136,7 @@ func bindScryToken(address common.Address, caller bind.ContractCaller, transacto
 
 // Call invokes the (constant) contract method with params as input values and
 // sets the output to result. The result type might be a single field for simple
-// returns, a slice of interfaces for anonymous returns and a struct for named
+// returns, a slice of interfaces for anonymous returns and a definition for named
 // returns.
 func (_ScryToken *ScryTokenRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
 	return _ScryToken.Contract.ScryTokenCaller.contract.Call(opts, result, method, params...)
@@ -155,7 +155,7 @@ func (_ScryToken *ScryTokenRaw) Transact(opts *bind.TransactOpts, method string,
 
 // Call invokes the (constant) contract method with params as input values and
 // sets the output to result. The result type might be a single field for simple
-// returns, a slice of interfaces for anonymous returns and a struct for named
+// returns, a slice of interfaces for anonymous returns and a definition for named
 // returns.
 func (_ScryToken *ScryTokenCallerRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
 	return _ScryToken.Contract.contract.Call(opts, result, method, params...)
