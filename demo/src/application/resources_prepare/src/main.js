@@ -6,7 +6,6 @@ import VueRouter from 'vue-router'
 import store from './vuex/store'
 import Vuex from 'vuex'
 import routes from './routes'
-import './styles/font-awesome.min.css'
 
 Vue.use(ElementUI)
 Vue.use(VueRouter)

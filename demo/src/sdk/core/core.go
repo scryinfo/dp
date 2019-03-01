@@ -16,15 +16,15 @@ type Connector struct {
 
 //start
 func StartEngine(ethNodeAddr string,
-	asServiceAddr string,
-	contracts []chainevents.ContractInfo,
-	fromBlock uint64,
-	ipfsNodeAddr string) (*ethclient.Client, error) {
+                    asServiceAddr string,
+                    contracts []chainevents.ContractInfo,
+                    fromBlock uint64,
+                    ipfsNodeAddr string) (*ethclient.Client, error) {
+
 	defer func() {
 		if err := recover(); err != nil {
 			rlog.Error("failed to initialize start engine, error:", err)
 		}
-
 	}()
 
 	err := ipfsaccess.GetIAInstance().Initialize(ipfsNodeAddr)

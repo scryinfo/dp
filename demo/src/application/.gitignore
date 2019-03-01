@@ -2,8 +2,7 @@
 Thumbs.db
 .idea
 bind*
-output/
+output/*
 vendor*
+resources/
 windows.syso
-node_modules
-resources/app

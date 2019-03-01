@@ -11,7 +11,6 @@ import (
 type ContractInfo struct {
 	Address    string
 	Abi        string
-	EventNames []string
 }
 
 func ListenEvent(conn *ethclient.Client, contracts []ContractInfo,
@@ -34,7 +33,7 @@ func ListenEvent(conn *ethclient.Client, contracts []ContractInfo,
 
 	builder := events.NewScanBuilder()
 	for _, v := range contracts {
-		builder.SetContract(common.HexToAddress(v.Address), v.Abi, v.EventNames...)
+		builder.SetContract(common.HexToAddress(v.Address), v.Abi)
 	}
 
 	recp, err := builder.SetClient(conn).
