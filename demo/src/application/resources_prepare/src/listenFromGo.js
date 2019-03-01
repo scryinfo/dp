@@ -14,6 +14,9 @@ let lfg = {
                 case "welcome":
                     asticode.notifier.info(message.payload)
                     break
+                case "onPublish":
+                    console.log(message.payload + " received.")
+                    break
             }
         })
     },

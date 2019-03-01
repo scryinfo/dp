@@ -2,7 +2,10 @@ package sdkinterface
 
 import (
 	"fmt"
+	"github.com/asticode/go-astilectron-bootstrap"
+	"github.com/asticode/go-astilog"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/pkg/errors"
 	"github.com/scryinfo/iscap/demo/src/sdk"
 	"github.com/scryinfo/iscap/demo/src/sdk/core/chainevents"
 	"github.com/scryinfo/iscap/demo/src/sdk/core/chainoperations"
@@ -17,6 +20,7 @@ var (
 	protocolContractAddr                        = "0xbb7bae05bdbc0ed9e514ce18122fc6b4cbcca346"
 	tokenContractAddr                           = "0xc67d1847fb1b00173dcdbc00c7cbe32651537daa"
 	keyPassword                                 = "12345"
+	ss                   *scryclient.ScryClient = nil
 )
 
 func init() {
@@ -27,9 +31,18 @@ func init() {
 	}
 }
 
-func SellerPublishData(pubData PubData) (string, error) {
-	se, _ := scryclient.NewScryClient(pubData.Seller)	// change to global variable.
-	se.SubscribeEvent("DataPublish", onPublish)
+func initAccount(ai AccInfo) bool {
+	var err error
+	var ok bool = true
+	ss, err = scryclient.NewScryClient(ai.Account)
+	if err != nil {
+		ok = false
+	}
+	return ok
+}
+
+func SellerPublishData(pubData PubData, subscriber *scryclient.ScryClient) (string, error) {
+	subscriber.SubscribeEvent("DataPublish", onPublish)
 
 	var pd [][]byte = make([][]byte, len(pubData.ProofData))
 	for i := 0; i < len(pubData.ProofData); i++ {
@@ -37,10 +50,11 @@ func SellerPublishData(pubData PubData) (string, error) {
 	}
 	var s = common.BytesToAddress([]byte(pubData.Seller))
 	var p *big.Int
-	var ok bool
-	if p, ok = new(big.Int).SetString(pubData.Price, 10);!ok {
-		return "Set price failed.", nil
-	}
+	//var ok bool
+	//if p, ok = new(big.Int).SetString(pubData.Price, 10); !ok {
+	//	return "Set price failed.", nil
+	//}
+	p = big.NewInt(0)
 
 	txParam := chainoperations.TransactParams{s, keyPassword, big.NewInt(0), false}
 	result, err := cif.Publish(&txParam, p, []byte(pubData.MetaData), pd, len(pubData.ProofData), []byte(pubData.DespData), false)
@@ -52,8 +66,8 @@ func getContracts() []chainevents.ContractInfo {
 	tokenEvents := []string{"Approval"}
 
 	contracts := []chainevents.ContractInfo{
-		{protocolContractAddr, getAbiText("github.com/scryinfo/iscap/demo/src/testconsole/ScryProtocol.abi"), protocolEvents},
-		{tokenContractAddr, getAbiText("github.com/scryinfo/iscap/demo/src/testconsole/ScryToken.abi"), tokenEvents},
+		{protocolContractAddr, getAbiText("./ScryProtocol.abi"), protocolEvents},
+		{tokenContractAddr, getAbiText("./ScryToken.abi"), tokenEvents},
 	}
 
 	return contracts
@@ -70,5 +84,8 @@ func getAbiText(fileName string) string {
 }
 
 func onPublish(event events.Event) bool {
+	if err := bootstrap.SendMessage(w, "onPublish", "Publish event callback from go"); err != nil {
+		astilog.Error(errors.Wrap(err, "sending onPublish event failed"))
+	}
 	return true
 }

@@ -24,8 +24,6 @@ var (
 func main() {
 	// Run bootstrap
 	if err := bootstrap.Run(bootstrap.Options{
-		Asset:    Asset,
-		AssetDir: AssetDir,
 		AstilectronOptions: astilectron.Options{
 			AppName:            AppName,
 			AppIconDefaultPath: "resources/icon.ico",
@@ -89,7 +87,6 @@ func main() {
 			}()
 			return nil
 		},
-		RestoreAssets: RestoreAssets,
 		Windows: []*bootstrap.Window{{
 			Homepage:       "index.html",
 			MessageHandler: handleMessages,
