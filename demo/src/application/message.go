@@ -2,11 +2,11 @@ package main
 
 import (
 	"encoding/json"
-    "fmt"
 	"errors"
-	"github.com/asticode/go-astilectron"
+    "fmt"
+    "github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
-	"github.com/scryinfo/iscap/demo/src/application/settings"
+	"github.com/scryinfo/iscap/demo/src/application/struct"
 	"github.com/scryinfo/iscap/demo/src/sdk/scryclient"
 	"github.com/scryinfo/iscap/demo/src/application/sdkinterface"
 )
@@ -31,7 +31,7 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 
 	switch m.Name {
 	case "create.new.account":
-		var pwd = new(settings.AccInfo)
+		var pwd = new(_struct.AccInfo)
 		err = json.Unmarshal(m.Payload, pwd)
 		if err != nil {
 			break
@@ -42,7 +42,7 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		}
 		return payload, nil
 	case "login.verify":
-		var ai = new(settings.AccInfo)
+		var ai = new(_struct.AccInfo)
 		err = json.Unmarshal(m.Payload, ai)
 		if err != nil {
 			break
@@ -54,7 +54,7 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		payload = true
 		return payload, nil
 	case "get.datalist":
-		payload = []settings.Datalist{
+		payload = []_struct.Datalist{
 			{"Qm461", "title1", 1, "test tags461", "test description461", "0x1234567890123456789012345678901234567890"},
 			{"Qm462", "title2", 2, "test tags462", "test description462", "0x1234567890123456789012345678901234567890"},
 			{"Qm463", "title3", 3, "test tags463", "test description463", "0x1234567890123456789012345678901234567890"},
@@ -71,7 +71,7 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		}
 		return payload, nil
 	case "get.transaction":
-		payload = []settings.Transaction{
+		payload = []_struct.Transaction{
 			{"title1", 1, "0x1234567890123456789012345678901234567890", "0x1524783212578655202365479511235413256752", Created},
 		}
 		return payload, nil
@@ -79,7 +79,7 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		payload = true
 		return payload, nil
 	case "publish":
-		var dl settings.PubData = settings.PubData{}
+		var dl _struct.PubData = _struct.PubData{}
 		if err = json.Unmarshal(m.Payload, &dl); err != nil {
 			break
 		}

@@ -3,23 +3,24 @@ package sdkinterface
 import (
     "errors"
     "fmt"
-    "io/ioutil"
-    "github.com/scryinfo/iscap/demo/src/application/sdkinterface/settings"
     "github.com/scryinfo/iscap/demo/src/sdk"
+
     "github.com/scryinfo/iscap/demo/src/sdk/core/chainevents"
     "github.com/scryinfo/iscap/demo/src/sdk/core/ethereum/events"
     "github.com/scryinfo/iscap/demo/src/sdk/scryclient"
+    "github.com/scryinfo/iscap/demo/src/application/sdkinterface/settings"
+	"io/ioutil"
 )
 
 var (
-    scryInfo *settings.ScryInfo = nil
+    scryInfo *settings.ScryInfo        = nil
     scryClient *scryclient.ScryClient = nil
 
     failedToInitSDK = "failed to initialize sdk. "
 )
 
 func Initialize() error {
-    // load settings
+    // load struct
     scryInfo, err := settings.LoadSettings()
     if err != nil {
         fmt.Println(failedToInitSDK, err)
