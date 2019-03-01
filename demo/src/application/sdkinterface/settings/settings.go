@@ -10,8 +10,6 @@ const (
     SETTING_LOCATION = "./definition.yaml"
 )
 
-
-
 func LoadSettings() (*ScryInfo, error) {
     rv, err := cf.GetYAMLStructure(SETTING_LOCATION, &ScryInfo{})
     if err != nil {

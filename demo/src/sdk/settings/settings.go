@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	SETTING_LOCATION = "../sdk/definition/definition.yaml"
+	SETTING_LOCATION = "../sdk/settings/definition.yaml"
 )
 
 func SaveLastEvent(event ev.Event) error {

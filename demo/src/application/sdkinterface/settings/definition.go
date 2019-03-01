@@ -15,6 +15,8 @@ type Contracts struct {
     TokenAddr string `yaml:"token_contract_addr"`
     ProtocolAbiPath string `yaml:"protocol_contract_abi_path"`
     TokenAbiPath string `yaml:"token_contract_abi_path"`
+    ProtocolEvents string `yaml:"protocol_contract_events"`
+    TokenEvents string `yaml:"token_contract_events"`
 }
 
 type Ethereum struct {
