@@ -7,7 +7,8 @@ const state = {
     datalist: [],
     mytransaction: [],
     accounts: [
-        {address: ""}
+        {address: ""},
+        {address: "0x5124852365789564128564723598621475354895"}
     ],
     account: ""
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/scryinfo/iscap/demo/src/sdk/scryclient"
@@ -17,13 +18,13 @@ const (
 
 func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, error) {
 	var (
-		payload interface{}
-		err     error = nil
+		payload interface{} = nil
+		err     error       = errors.New("")
 	)
 
 	switch m.Name {
 	case "create.new.account":
-		var pwd = new(Password)
+		var pwd = new(AccInfo)
 		err = json.Unmarshal(m.Payload, pwd)
 		if err != nil {
 			break
@@ -34,7 +35,12 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		}
 		return payload, nil
 	case "login.verify":
-		payload = true
+		var ai = new(AccInfo)
+		err = json.Unmarshal(m.Payload, ai)
+		if err != nil {
+			break
+		}
+		payload = initAccount(*ai)
 		return payload, nil
 	case "save.keystore":
 		payload = true
@@ -66,10 +72,10 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		return payload, nil
 	case "publish":
 		var dl PubData = PubData{}
-		if err = json.Unmarshal(m.Payload, &dl);err != nil {
+		if err = json.Unmarshal(m.Payload, &dl); err != nil {
 			break
 		}
-		if payload, err = SellerPublishData(dl);err != nil {
+		if payload, err = SellerPublishData(dl, ss); err != nil {
 			break
 		}
 		return payload, nil
@@ -79,7 +85,10 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 	return payload, err
 }
 
-type Password struct { Password string `json:"password"` }
+type AccInfo struct {
+	Account  string `json:"account"`
+	Password string `json:"password"`
+}
 
 type Datalist struct {
 	ID          string
@@ -94,7 +103,7 @@ type PubData struct {
 	MetaData  string   `json:"Data"`
 	ProofData []string `json:"Proofs"`
 	DespData  string   `json:"Description"`
-	Price     string   `json:"Price"`
+	Price     float64  `json:"Price"`
 	Seller    string   `json:"Owner"`
 }
 

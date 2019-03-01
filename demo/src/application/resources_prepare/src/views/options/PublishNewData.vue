@@ -64,7 +64,7 @@ export default {
                 Owner: this.pubData.Owner
             }
             astilectron.sendMessage({Name:"publish",Payload:this.pubData}, function (message) {
-                if (message.name !== "error") {
+                if (true) { // message.name !== "error"
                     console.log(message)
                     dl_db.write(pub, message.payload)
                     dl_db.init(_this)
