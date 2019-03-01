@@ -1,14 +1,14 @@
-package main
+package transmission
 
 import (
 	"encoding/json"
 	"errors"
-    "fmt"
-    "github.com/asticode/go-astilectron"
+	"fmt"
+	"github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/scryinfo/iscap/demo/src/application/definition"
-	"github.com/scryinfo/iscap/demo/src/sdk/scryclient"
 	"github.com/scryinfo/iscap/demo/src/application/sdkinterface"
+	"github.com/scryinfo/iscap/demo/src/sdk/scryclient"
 )
 
 const (
@@ -23,7 +23,7 @@ var (
 	ss *scryclient.ScryClient = nil
 )
 
-func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, error) {
+func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, error) {
 	var (
 		payload interface{} = nil
 		err     error       = errors.New("")
@@ -84,7 +84,7 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 			break
 		}
 
-		if err := sdkinterface.Initialize();err != nil {
+		if err := sdkinterface.Initialize(); err != nil {
 			fmt.Println("error: sdk initialize failed. error:", err)
 		}
 		return payload, nil
