@@ -20,12 +20,10 @@ var (
 )
 
 func Init(ethNodeAddr string,
-	asServiceAddr string,
-	contracts []chainevents.ContractInfo,
-	fromBlock uint64,
-	ipfsNodeAddr string,
-	protocolContractAddress common.Address,
-	tokenContractAddress common.Address) error {
+            asServiceAddr string,
+            contracts []chainevents.ContractInfo,
+            fromBlock uint64,
+            ipfsNodeAddr string) error {
 
 	err := initLog()
 	if err != nil {
@@ -39,7 +37,9 @@ func Init(ethNodeAddr string,
 		return errors.New(START_ENGINE_FAILED)
 	}
 
-	err = chaininterfacewrapper.Initialize(protocolContractAddress, tokenContractAddress, conn)
+	err = chaininterfacewrapper.Initialize(common.HexToAddress(contracts[0].Address),
+                                            common.HexToAddress(contracts[1].Address),
+                                            conn)
 	if err != nil {
 		rlog.Error(INIT_CONTRACT_INTERFACE_WRAPPER_FAILED, err)
 		return errors.New(INIT_CONTRACT_INTERFACE_WRAPPER_FAILED)

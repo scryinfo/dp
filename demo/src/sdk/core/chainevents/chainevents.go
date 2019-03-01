@@ -13,12 +13,12 @@ var (
 	externalEventRepo  = NewEventRepository()
 	dataChannel        = make(chan events.Event, maxChannelEventNum)
 	errorChannel       = make(chan error, 1)
-	settingPath        = "../../settings/settings.yaml"
+	settingPath        = "../../settings/definition.yaml"
 )
 
 func StartEventProcessing(conn *ethclient.Client,
-	contracts []ContractInfo,
-	fromBlock uint64) {
+                            contracts []ContractInfo,
+                            fromBlock uint64) {
 	rlog.Info("start event processing...")
 
 	go ExecuteEvents(dataChannel, externalEventRepo)

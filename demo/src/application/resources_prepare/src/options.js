@@ -129,7 +129,10 @@ let acc_db = {
             alert("open failed with error code: " + event.target.errorCode)
         }
         request.onsuccess = function(event) {
-            _this.$store.state.datalist = []
+            _this.$store.state.accounts = [
+                    {address: ""},
+                    {address: "0x5124852365789564128564723598621475354895"}
+            ]
             acc_db.db = event.target.result
             let s = acc_db.db.transaction(acc_db.db_store_name,"readonly").objectStore(acc_db.db_store_name)
             let c = s.openCursor()

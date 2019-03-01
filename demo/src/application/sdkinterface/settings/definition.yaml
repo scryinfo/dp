@@ -1,0 +1,12 @@
+chain:
+  ethereum:
+    node: http://127.0.0.1:7545/
+  contracts:
+    protocol_contract_addr: 0x4ae12e473d8eaf98d0410555508cc8ba8c3cf7b6
+    token_contract_addr: 0x77d631c8c87bd3dd0d5631add4d76364662b2159
+    protocol_contract_abi_path:
+    token_contract_abi_path:
+services:
+  ipfs: /ip4/127.0.0.1/tcp/5001
+  keystore: 192.168.1.6:48080
+

@@ -2,7 +2,6 @@ package settings
 
 import (
 	"errors"
-	"github.com/scryinfo/iscap/demo/src/sdk/core/ethereum/events"
 	ev "github.com/scryinfo/iscap/demo/src/sdk/core/ethereum/events"
 	cf "github.com/scryinfo/iscap/demo/src/sdk/util/configuration"
 	rlog "github.com/sirupsen/logrus"
@@ -30,11 +29,11 @@ func SaveLastEvent(event ev.Event) error {
 	return nil
 }
 
-func LoadLastEvent() (events.Event, error) {
+func LoadLastEvent() (ev.Event, error) {
 	rv, err := LoadSettings()
 	if err != nil {
 		rlog.Error("failed to load settings, error:", err)
-		return events.Event{}, err
+		return ev.Event{}, err
 	}
 
 	return rv.Chain.LastEvent, nil
