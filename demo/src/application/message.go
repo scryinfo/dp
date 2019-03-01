@@ -31,7 +31,7 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 
 	switch m.Name {
 	case "create.new.account":
-		var pwd = new(_struct.AccInfo)
+		var pwd = new(definition.AccInfo)
 		err = json.Unmarshal(m.Payload, pwd)
 		if err != nil {
 			break
@@ -42,7 +42,7 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		}
 		return payload, nil
 	case "login.verify":
-		var ai = new(_struct.AccInfo)
+		var ai = new(definition.AccInfo)
 		err = json.Unmarshal(m.Payload, ai)
 		if err != nil {
 			break
@@ -54,7 +54,7 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		payload = true
 		return payload, nil
 	case "get.datalist":
-		payload = []_struct.Datalist{
+		payload = []definition.Datalist{
 			{"Qm461", "title1", 1, "test tags461", "test description461", "0x1234567890123456789012345678901234567890"},
 			{"Qm462", "title2", 2, "test tags462", "test description462", "0x1234567890123456789012345678901234567890"},
 			{"Qm463", "title3", 3, "test tags463", "test description463", "0x1234567890123456789012345678901234567890"},
@@ -71,7 +71,7 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		}
 		return payload, nil
 	case "get.transaction":
-		payload = []_struct.Transaction{
+		payload = []definition.Transaction{
 			{"title1", 1, "0x1234567890123456789012345678901234567890", "0x1524783212578655202365479511235413256752", Created},
 		}
 		return payload, nil
@@ -79,7 +79,7 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		payload = true
 		return payload, nil
 	case "publish":
-		var dl _struct.PubData = _struct.PubData{}
+		var dl definition.PubData = definition.PubData{}
 		if err = json.Unmarshal(m.Payload, &dl); err != nil {
 			break
 		}

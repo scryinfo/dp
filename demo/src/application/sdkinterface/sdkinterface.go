@@ -8,11 +8,13 @@ import (
     "github.com/scryinfo/iscap/demo/src/sdk/core/chainevents"
     "github.com/scryinfo/iscap/demo/src/sdk/core/ethereum/events"
     "io/ioutil"
+    "strings"
 )
 
 var (
     scryInfo *settings.ScryInfo        = nil
     failedToInitSDK = "failed to initialize sdk. "
+    sep = "|"
 )
 
 func Initialize() error {
@@ -27,7 +29,9 @@ func Initialize() error {
     contracts := getContracts(scryInfo.Chain.Contracts.ProtocolAddr,
         scryInfo.Chain.Contracts.TokenAddr,
         scryInfo.Chain.Contracts.ProtocolAbiPath,
-        scryInfo.Chain.Contracts.TokenAbiPath)
+        scryInfo.Chain.Contracts.TokenAbiPath,
+        scryInfo.Chain.Contracts.ProtocolEvents,
+        scryInfo.Chain.Contracts.TokenEvents)
 
     err = sdk.Init(scryInfo.Chain.Ethereum.EthNode,
         scryInfo.Services.Keystore,
@@ -45,10 +49,15 @@ func Initialize() error {
 func getContracts(protocolContractAddr string,
                   tokenContractAddr string,
                   protocolAbiPath string,
-                  tokenAbiPath string) []chainevents.ContractInfo {
+                  tokenAbiPath string,
+                  protocolEvents string,
+                  tokenEvents string) []chainevents.ContractInfo {
+    pe := strings.Split(protocolEvents, sep)
+    te := strings.Split(tokenEvents, sep)
+
 	contracts := []chainevents.ContractInfo{
-		{protocolContractAddr, getAbiText(protocolAbiPath)},
-		{tokenContractAddr, getAbiText(tokenAbiPath)},
+		{protocolContractAddr, getAbiText(protocolAbiPath), pe},
+		{tokenContractAddr, getAbiText(tokenAbiPath), te},
 	}
 
 	return contracts

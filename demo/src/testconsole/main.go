@@ -20,9 +20,9 @@ var (
 	txId                    *big.Int = big.NewInt(0)
 	metaDataIdEncWithSeller []byte
 	metaDataIdEncWithBuyer  []byte
-	protocolContractAddr                           = "0xbb7bae05bdbc0ed9e514ce18122fc6b4cbcca346"
-	tokenContractAddr                              = "0xc67d1847fb1b00173dcdbc00c7cbe32651537daa"
-	deployerKeyJson                                = `{"version":3,"id":"8db8b2a0-ec6e-40ea-9808-631117870070","address":"61ad28110ce3911a9aafabba551cdc932a02bd52","crypto":{"ciphertext":"b4835e7a3ea3a132b172f1609ed310b7345323c552791b36017d761e6fe748f0","cipherparams":{"iv":"880c3c504350c97d6b5469d9333c3feb"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"2ae6c42c17a67f271e15de48b743b9a9c400b1413f8d9ccbf8389be86e84b938","n":262144,"r":8,"p":1},"mac":"5c26d0cf4925208e40f1a791d713a2a71b7287b7c09fdf192c21ad8fe158b388"}}`
+	protocolContractAddr                           = "0xeefe95840a6382e6b48525b7b99446c68d367d4a"
+	tokenContractAddr                              = "0xb612f2e625207545bb589cf0ac1ef9274daca6d9"
+	deployerKeyJson                                = `{"version":3,"id":"8c3b7cd5-f0d7-4d27-bbcf-ce44fe318ff2","address":"d280b60c38bc8db9d309fa5a540ffec499f0a3e8","crypto":{"ciphertext":"fe3c3628e335da346923bf0f5ee4bccd267ac56fc70ece2eece059c7986affda","cipherparams":{"iv":"e098d1a0febe59c98a96333d8c7ed792"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"e3bc15722ac328915223370950c1ea522bec0a0665132847a2bfd49c0531ed37","n":262144,"r":8,"p":1},"mac":"da34625f1b1f4ad99be3986ba2aeacbf6fce3b9abeea9d0d40ef9ac42443a9f7"}}`
 	keyPassword                                    = "12345"
 	deployer                *scryclient.ScryClient = nil
 	seller                  *scryclient.ScryClient = nil
@@ -36,7 +36,7 @@ var (
 
 func main() {
 	//note: asServiceAddr is the host of key management service which is outside
-	err := sdk.Init("http://127.0.0.1:7545/", "192.168.1.6:48080", getContracts(), 0, "/ip4/127.0.0.1/tcp/5001", common.HexToAddress(protocolContractAddr), common.HexToAddress(tokenContractAddr))
+	err := sdk.Init("http://127.0.0.1:7545/", "192.168.1.6:48080", getContracts(), 0, "/ip4/127.0.0.1/tcp/5001")
 	if err != nil {
 		fmt.Println("failed to initialize sdk, error:", err)
 		return
