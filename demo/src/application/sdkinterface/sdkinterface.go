@@ -2,10 +2,8 @@ package sdkinterface
 
 import (
 	"fmt"
-	"github.com/asticode/go-astilectron-bootstrap"
-	"github.com/asticode/go-astilog"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/pkg/errors"
+	"github.com/scryinfo/iscap/demo/src/application/settings"
 	"github.com/scryinfo/iscap/demo/src/sdk"
 	"github.com/scryinfo/iscap/demo/src/sdk/core/chainevents"
 	"github.com/scryinfo/iscap/demo/src/sdk/core/chainoperations"
@@ -31,7 +29,7 @@ func init() {
 	}
 }
 
-func initAccount(ai AccInfo) bool {
+func InitAccount(ai settings.AccInfo) bool {
 	var err error
 	var ok bool = true
 	ss, err = scryclient.NewScryClient(ai.Account)
@@ -41,7 +39,7 @@ func initAccount(ai AccInfo) bool {
 	return ok
 }
 
-func SellerPublishData(pubData PubData, subscriber *scryclient.ScryClient) (string, error) {
+func SellerPublishData(pubData settings.PubData, subscriber *scryclient.ScryClient) (string, error) {
 	subscriber.SubscribeEvent("DataPublish", onPublish)
 
 	var pd [][]byte = make([][]byte, len(pubData.ProofData))
@@ -84,8 +82,8 @@ func getAbiText(fileName string) string {
 }
 
 func onPublish(event events.Event) bool {
-	if err := bootstrap.SendMessage(w, "onPublish", "Publish event callback from go"); err != nil {
-		astilog.Error(errors.Wrap(err, "sending onPublish event failed"))
-	}
+	//if err := bootstrap.SendMessage(w, "onPublish", "Publish event callback from go"); err != nil {
+	//	astilog.Error(errors.Wrap(err, "sending onPublish event failed"))
+	//}
 	return true
 }
