@@ -13,7 +13,7 @@ var (
 	externalEventRepo  = NewEventRepository()
 	dataChannel        = make(chan events.Event, maxChannelEventNum)
 	errorChannel       = make(chan error, 1)
-	settingPath        = "../../settings/setting.yaml"
+	settingPath        = "../../settings/settings.yaml"
 )
 
 func StartEventProcessing(conn *ethclient.Client,
