@@ -1,9 +1,7 @@
 .DS_Store
 Thumbs.db
-.idea
-bind*
+.idea/
 output/
-vendor*
+resources/
+bind*
 windows.syso
-node_modules
-resources/app

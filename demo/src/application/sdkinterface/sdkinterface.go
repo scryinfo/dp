@@ -18,7 +18,6 @@ var (
 	protocolContractAddr                        = "0xbb7bae05bdbc0ed9e514ce18122fc6b4cbcca346"
 	tokenContractAddr                           = "0xc67d1847fb1b00173dcdbc00c7cbe32651537daa"
 	keyPassword                                 = "12345"
-	ss                   *scryclient.ScryClient = nil
 )
 
 func init() {
@@ -29,7 +28,7 @@ func init() {
 	}
 }
 
-func InitAccount(ai settings.AccInfo) bool {
+func InitAccount(ai settings.AccInfo, ss *scryclient.ScryClient) bool {
 	var err error
 	var ok bool = true
 	ss, err = scryclient.NewScryClient(ai.Account)

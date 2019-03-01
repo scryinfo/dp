@@ -5,8 +5,8 @@ import (
 	"errors"
 	"github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
-	"github.com/scryinfo/iscap/demo/src/application/settings"
 	"github.com/scryinfo/iscap/demo/src/application/sdkinterface"
+	"github.com/scryinfo/iscap/demo/src/application/settings"
 	"github.com/scryinfo/iscap/demo/src/sdk/scryclient"
 )
 
@@ -16,6 +16,10 @@ const (
 	Payed
 	ReadyForDownload
 	Closed
+)
+
+var (
+	ss *scryclient.ScryClient = nil
 )
 
 func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, error) {
@@ -42,7 +46,7 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err != nil {
 			break
 		}
-		payload = sdkinterface.InitAccount(*ai)
+		payload = sdkinterface.InitAccount(*ai, ss)
 		return payload, nil
 	case "save.keystore":
 		payload = true
@@ -77,7 +81,7 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err = json.Unmarshal(m.Payload, &dl); err != nil {
 			break
 		}
-		if payload, err = sdkinterface.SellerPublishData(dl, sdkinterface.ss); err != nil {
+		if payload, err = sdkinterface.SellerPublishData(dl, ss); err != nil {
 			break
 		}
 		return payload, nil
