@@ -5,6 +5,8 @@ import (
 	"errors"
 	"github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
+	"github.com/scryinfo/iscap/demo/src/application/settings"
+	"github.com/scryinfo/iscap/demo/src/application/sdkinterface"
 	"github.com/scryinfo/iscap/demo/src/sdk/scryclient"
 )
 
@@ -24,7 +26,7 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 
 	switch m.Name {
 	case "create.new.account":
-		var pwd = new(AccInfo)
+		var pwd = new(settings.AccInfo)
 		err = json.Unmarshal(m.Payload, pwd)
 		if err != nil {
 			break
@@ -35,18 +37,18 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		}
 		return payload, nil
 	case "login.verify":
-		var ai = new(AccInfo)
+		var ai = new(settings.AccInfo)
 		err = json.Unmarshal(m.Payload, ai)
 		if err != nil {
 			break
 		}
-		payload = initAccount(*ai)
+		payload = sdkinterface.InitAccount(*ai)
 		return payload, nil
 	case "save.keystore":
 		payload = true
 		return payload, nil
 	case "get.datalist":
-		payload = []Datalist{
+		payload = []settings.Datalist{
 			{"Qm461", "title1", 1, "test tags461", "test description461", "0x1234567890123456789012345678901234567890"},
 			{"Qm462", "title2", 2, "test tags462", "test description462", "0x1234567890123456789012345678901234567890"},
 			{"Qm463", "title3", 3, "test tags463", "test description463", "0x1234567890123456789012345678901234567890"},
@@ -63,7 +65,7 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		}
 		return payload, nil
 	case "get.transaction":
-		payload = []Transaction{
+		payload = []settings.Transaction{
 			{"title1", 1, "0x1234567890123456789012345678901234567890", "0x1524783212578655202365479511235413256752", Created},
 		}
 		return payload, nil
@@ -71,11 +73,11 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		payload = true
 		return payload, nil
 	case "publish":
-		var dl PubData = PubData{}
+		var dl settings.PubData = settings.PubData{}
 		if err = json.Unmarshal(m.Payload, &dl); err != nil {
 			break
 		}
-		if payload, err = SellerPublishData(dl, ss); err != nil {
+		if payload, err = sdkinterface.SellerPublishData(dl, sdkinterface.ss); err != nil {
 			break
 		}
 		return payload, nil
@@ -83,34 +85,4 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 
 	payload = err.Error()
 	return payload, err
-}
-
-type AccInfo struct {
-	Account  string `json:"account"`
-	Password string `json:"password"`
-}
-
-type Datalist struct {
-	ID          string
-	Title       string
-	Price       int
-	Keys        string
-	Description string
-	Owner       string
-}
-
-type PubData struct {
-	MetaData  string   `json:"Data"`
-	ProofData []string `json:"Proofs"`
-	DespData  string   `json:"Description"`
-	Price     float64  `json:"Price"`
-	Seller    string   `json:"Owner"`
-}
-
-type Transaction struct {
-	Title         string
-	TransactionID int
-	Seller        string
-	Buyer         string
-	State         byte
 }
