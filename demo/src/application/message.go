@@ -6,7 +6,7 @@ import (
     "fmt"
     "github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
-	"github.com/scryinfo/iscap/demo/src/application/struct"
+	"github.com/scryinfo/iscap/demo/src/application/definition"
 	"github.com/scryinfo/iscap/demo/src/sdk/scryclient"
 	"github.com/scryinfo/iscap/demo/src/application/sdkinterface"
 )

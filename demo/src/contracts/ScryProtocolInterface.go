@@ -136,7 +136,7 @@ func bindScryProtocol(address common.Address, caller bind.ContractCaller, transa
 
 // Call invokes the (constant) contract method with params as input values and
 // sets the output to result. The result type might be a single field for simple
-// returns, a slice of interfaces for anonymous returns and a struct for named
+// returns, a slice of interfaces for anonymous returns and a definition for named
 // returns.
 func (_ScryProtocol *ScryProtocolRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
 	return _ScryProtocol.Contract.ScryProtocolCaller.contract.Call(opts, result, method, params...)
@@ -155,7 +155,7 @@ func (_ScryProtocol *ScryProtocolRaw) Transact(opts *bind.TransactOpts, method s
 
 // Call invokes the (constant) contract method with params as input values and
 // sets the output to result. The result type might be a single field for simple
-// returns, a slice of interfaces for anonymous returns and a struct for named
+// returns, a slice of interfaces for anonymous returns and a definition for named
 // returns.
 func (_ScryProtocol *ScryProtocolCallerRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
 	return _ScryProtocol.Contract.contract.Call(opts, result, method, params...)

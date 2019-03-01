@@ -1,4 +1,4 @@
-package _struct
+package definition
 
 type AccInfo struct {
 	Account  string `json:"account"`
