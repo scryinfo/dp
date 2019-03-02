@@ -2,8 +2,8 @@ package ipfsaccess
 
 import (
 	"errors"
-    rlog "github.com/sirupsen/logrus"
 	"github.com/ipfs/go-ipfs-api"
+	rlog "github.com/sirupsen/logrus"
 	"strings"
 	"sync"
 )
