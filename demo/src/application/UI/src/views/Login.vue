@@ -76,9 +76,12 @@ export default {
         submit_new: function () {
             let _this = this
             astilectron.sendMessage({Name: "create.new.account", Payload: {address: this.password}}, function (message) {
-                acc_db.write(message.payload)
-                _this.account = message.payload
-                _this.showControl1 = false;_this.showControl2 = true
+                if (true) { // message.name !== "error"
+                    acc_db.write(message.payload)
+                    acc_db.init(_this)
+                    _this.account = message.payload
+                    _this.showControl1 = false;_this.showControl2 = true
+                }
             })
         },
         submit_keystore: function () {
@@ -87,7 +90,8 @@ export default {
             let _this = this
             astilectron.sendMessage({Name: "save.keystore", Payload: {account: this.$store.state.account,
                     password: pwd}}, function (message) {
-                if (message.payload) {
+                if (true) { // message.name !== "error"
+                    acc_db.write(_this.account)
                     _this.$router.push({ name: 'home', params: {acc: _this.account}})
                 } else {
                     alert("save account information failed.")

@@ -1,4 +1,4 @@
-package transmission
+package main
 
 import (
 	"encoding/json"
@@ -6,7 +6,9 @@ import (
 	"github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/scryinfo/iscap/demo/src/application/definition"
+	"github.com/scryinfo/iscap/demo/src/application/sdkinterface"
 	"github.com/scryinfo/iscap/demo/src/sdk/scryclient"
+	"math/big"
 )
 
 const (
@@ -18,10 +20,10 @@ const (
 )
 
 var (
-	ss *scryclient.ScryClient = nil
+	user *scryclient.ScryClient = nil
 )
 
-func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, error) {
+func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, error) {
 	var (
 		payload interface{} = nil
 		err     error       = errors.New("")
@@ -34,10 +36,15 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err != nil {
 			break
 		}
-		payload, err = scryclient.CreateScryClient(pwd.Password)
+		user, err = sdkinterface.CreateUserWithLogin(pwd.Password)
 		if err != nil {
 			break
 		}
+		err = sdkinterface.TransferTokenFromDeployer(big.NewInt(1000))	// test
+		if err != nil {
+			break
+		}
+		payload = user.Account.Address
 		return payload, nil
 	case "login.verify":
 		var ai = new(definition.AccInfo)
