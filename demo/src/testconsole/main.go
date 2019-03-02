@@ -258,12 +258,7 @@ func CreateClientWithToken(token *big.Int, eth *big.Int) (*scryclient.ScryClient
 }
 
 func getClient(keyJson string) *scryclient.ScryClient {
-	client, err := scryclient.NewScryClient(getPublicAddress(keyJson))
-	if err != nil {
-		fmt.Println("failed to create contract client. error:", err)
-		return nil
-	}
-
+	client := scryclient.NewScryClient(getPublicAddress(keyJson))
 	return client
 }
 
@@ -274,12 +269,7 @@ func ImportAccount(keyJson string, oldPassword string, newPassword string) (*scr
 		return nil, err
 	}
 
-	client, err := scryclient.NewScryClient(address)
-	if err != nil {
-		fmt.Println("failed to create contract client. error:", err)
-		return nil, err
-	}
-
+	client := scryclient.NewScryClient(address)
 	return client, nil
 }
 
