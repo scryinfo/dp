@@ -15,10 +15,10 @@ type ScryClient struct {
 	Account *accounts.Account
 }
 
-func NewScryClient(publicKey string) (*ScryClient, error) {
+func NewScryClient(publicKey string) (*ScryClient) {
 	return &ScryClient{
 		Account: &accounts.Account{publicKey},
-	}, nil
+	}
 }
 
 func CreateScryClient(password string) (*ScryClient, error) {
