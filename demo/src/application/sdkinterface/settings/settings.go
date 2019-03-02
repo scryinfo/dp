@@ -7,7 +7,7 @@ import (
 )
 
 const (
-    SETTING_LOCATION = "D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/iscap/demo/src/application/sdkinterface/settings/definition.yaml"
+    SETTING_LOCATION = "/home/waitgordor/project/goproject/src/github.com/scryinfo/iscap/demo/src/application/sdkinterface/settings/definition.yaml"
 )
 
 func LoadSettings() (*ScryInfo, error) {
