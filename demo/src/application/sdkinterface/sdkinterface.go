@@ -8,6 +8,7 @@ import (
     "github.com/scryinfo/iscap/demo/src/sdk"
     "github.com/scryinfo/iscap/demo/src/sdk/core/chainevents"
     "github.com/scryinfo/iscap/demo/src/sdk/core/chainoperations"
+    "github.com/scryinfo/iscap/demo/src/sdk/core/ethereum/events"
     "github.com/scryinfo/iscap/demo/src/sdk/scryclient"
     "github.com/scryinfo/iscap/demo/src/application/definition"
     cif "github.com/scryinfo/iscap/demo/src/sdk/scryclient/chaininterfacewrapper"
@@ -22,7 +23,7 @@ const (
 
 var (
     curUser *scryclient.ScryClient = nil
-    scryInfo *settings.ScryInfo        = nil
+    scryInfo *settings.ScryInfo = nil
     sep = "|"
 )
 
@@ -99,6 +100,7 @@ func PublishData(data definition.PubData, password string) (string, error) {
         return "", nil
     }
 
+    curUser.SubscribeEvent("DataPublish", onPublish)
     txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
                                              Password: password,
                                              Value: big.NewInt(0),
@@ -148,4 +150,9 @@ func getAbiText(fileName string) string {
 	}
 
 	return string(abi)
+}
+
+func onPublish(event events.Event) bool {
+    fmt.Println("onpublish: ", event)
+    return true
 }
