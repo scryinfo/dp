@@ -1,14 +1,24 @@
 package sdkinterface
 
-import "testing"
+import (
+    "math/big"
+    "testing"
+)
 
 func TestInitialize(t *testing.T) {
     err := Initialize()
     if err != nil {
         t.Fail()
     }
+}
 
-    if scryInfo == nil {
+func TestTransferTokenFromDeployer(t *testing.T) {
+    Initialize()
+
+    CreateUserWithLogin("111111")
+
+    err := TransferTokenFromDeployer(big.NewInt(100))
+    if err != nil {
         t.Fail()
     }
 }

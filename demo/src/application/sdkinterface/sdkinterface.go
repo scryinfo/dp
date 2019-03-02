@@ -32,7 +32,8 @@ var (
 
 func Initialize() error {
     // load definition
-    scryInfo, err := settings.LoadSettings()
+    var err error
+    scryInfo, err = settings.LoadSettings()
     if err != nil {
         fmt.Println(failedToInitSDK, err)
         return err
@@ -119,6 +120,11 @@ func TransferTokenFromDeployer(token *big.Int) (error) {
             fmt.Println("failed to transfer token, error:", err)
             return err
         }
+    }
+
+    if curUser == nil {
+        fmt.Println("failed to transfer token, null current user")
+        return errors.New("failed to transfer token, null current user")
     }
 
     txParam := chainoperations.TransactParams{From: common.HexToAddress(deployer.Account.Address),
