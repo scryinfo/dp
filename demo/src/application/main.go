@@ -7,7 +7,6 @@ import (
 	"github.com/asticode/go-astilog"
 	"github.com/pkg/errors"
 	"github.com/scryinfo/iscap/demo/src/application/sdkinterface"
-	"github.com/scryinfo/iscap/demo/src/application/transmission"
 	"time"
 )
 
@@ -112,7 +111,7 @@ func main() {
 		},
 		Windows: []*bootstrap.Window{{
 			Homepage:       "index.html",
-			MessageHandler: transmission.HandleMessages,
+			MessageHandler: handleMessages,
 			Options: &astilectron.WindowOptions{
 				Center: astilectron.PtrBool(true),
 				Width:  astilectron.PtrInt(1000),
