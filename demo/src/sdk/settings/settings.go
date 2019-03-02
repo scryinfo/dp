@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	SETTING_LOCATION = "../sdk/settings/definition.yaml"
+	SETTING_LOCATION = "D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/iscap/demo/src/sdk/settings/definition.yaml"
 )
 
 func SaveLastEvent(event ev.Event) error {
