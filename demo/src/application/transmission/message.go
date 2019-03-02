@@ -3,11 +3,9 @@ package transmission
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/scryinfo/iscap/demo/src/application/definition"
-	"github.com/scryinfo/iscap/demo/src/application/sdkinterface"
 	"github.com/scryinfo/iscap/demo/src/sdk/scryclient"
 )
 
@@ -47,8 +45,7 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err != nil {
 			break
 		}
-
-		//payload = sdkinterface.InitAccount(*ai)
+		payload = true
 		return payload, nil
 	case "save.keystore":
 		payload = true
@@ -82,10 +79,6 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		var dl definition.PubData = definition.PubData{}
 		if err = json.Unmarshal(m.Payload, &dl); err != nil {
 			break
-		}
-
-		if err := sdkinterface.Initialize(); err != nil {
-			fmt.Println("error: sdk initialize failed. error:", err)
 		}
 		return payload, nil
 	}

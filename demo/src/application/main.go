@@ -6,6 +6,7 @@ import (
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/asticode/go-astilog"
 	"github.com/pkg/errors"
+	"github.com/scryinfo/iscap/demo/src/application/sdkinterface"
 	"github.com/scryinfo/iscap/demo/src/application/transmission"
 	"time"
 )
@@ -20,7 +21,12 @@ const (
 var (
 	AppName string
 	w       *astilectron.Window
+	err error
 )
+
+func init() {
+	err = sdkinterface.Initialize()
+}
 
 func main() {
 	// Run bootstrap
@@ -75,6 +81,22 @@ func main() {
 						},
 					},
 					{Role: astilectron.MenuItemRoleReload},
+				},
+			},
+			{
+				Label: astilectron.PtrStr("Main menu 3"),
+				SubMenu: []*astilectron.MenuItemOptions{
+					{
+						Label: astilectron.PtrStr("test"),
+						OnClick: func(e astilectron.Event) (deleteListener bool) {
+							if err != nil {
+								if err := bootstrap.SendMessage(w, "sdkInit", err.Error()); err != nil {
+									astilog.Error(errors.Wrap(err, "sending welcome event failed"))
+								}
+							}
+							return
+						},
+					},
 				},
 			},
 		},
