@@ -1,19 +1,20 @@
 package sdkinterface
 
 import (
-    "errors"
     "fmt"
     "github.com/scryinfo/iscap/demo/src/application/sdkinterface/settings"
     "github.com/scryinfo/iscap/demo/src/sdk"
     "github.com/scryinfo/iscap/demo/src/sdk/core/chainevents"
-    "github.com/scryinfo/iscap/demo/src/sdk/core/ethereum/events"
     "io/ioutil"
     "strings"
 )
 
+const (
+	failedToInitSDK = "failed to initialize sdk."
+)
+
 var (
     scryInfo *settings.ScryInfo        = nil
-    failedToInitSDK = "failed to initialize sdk. "
     sep = "|"
 )
 
@@ -22,7 +23,7 @@ func Initialize() error {
     scryInfo, err := settings.LoadSettings()
     if err != nil {
         fmt.Println(failedToInitSDK, err)
-        return errors.New(failedToInitSDK)
+        return err
     }
 
     // initialization
@@ -40,7 +41,7 @@ func Initialize() error {
         scryInfo.Services.Ipfs)
     if err != nil {
         fmt.Println(failedToInitSDK, err)
-        return errors.New(failedToInitSDK)
+        return err
     }
 
     return nil
@@ -71,11 +72,4 @@ func getAbiText(fileName string) string {
 	}
 
 	return string(abi)
-}
-
-func onPublish(event events.Event) bool {
-	//if err := bootstrap.SendMessage(w, "onPublish", "Publish event callback from go"); err != nil {
-	//	astilog.Error(errors.Wrap(err, "sending onPublish event failed"))
-	//}
-	return true
 }
