@@ -8,6 +8,8 @@ chain:
     token_contract_abi_path: github.com\scryinfo\iscap\demo\src\application\sdkinterface\ScryToken.abi
     protocol_contract_events: DataPublish|TransactionCreate|RegisterVerifier|VerifiersChosen|Vote|Buy|ReadyForDownload|TransactionClose
     token_contract_events: Approval
+    deployer_keyjson: {"version":3,"id":"8c3b7cd5-f0d7-4d27-bbcf-ce44fe318ff2","address":"d280b60c38bc8db9d309fa5a540ffec499f0a3e8","crypto":{"ciphertext":"fe3c3628e335da346923bf0f5ee4bccd267ac56fc70ece2eece059c7986affda","cipherparams":{"iv":"e098d1a0febe59c98a96333d8c7ed792"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"e3bc15722ac328915223370950c1ea522bec0a0665132847a2bfd49c0531ed37","n":262144,"r":8,"p":1},"mac":"da34625f1b1f4ad99be3986ba2aeacbf6fce3b9abeea9d0d40ef9ac42443a9f7"}}
+    deployer_password: 12345
 services:
   ipfs: /ip4/127.0.0.1/tcp/5001
   keystore: 192.168.1.6:48080

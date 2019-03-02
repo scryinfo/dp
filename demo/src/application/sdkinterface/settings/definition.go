@@ -17,6 +17,8 @@ type Contracts struct {
     TokenAbiPath string `yaml:"token_contract_abi_path"`
     ProtocolEvents string `yaml:"protocol_contract_events"`
     TokenEvents string `yaml:"token_contract_events"`
+    DeployerKeyJson string `yaml:"deployer_keyjson"`
+    DeployerPassword string `yaml:"deployer_password"`
 }
 
 type Ethereum struct {

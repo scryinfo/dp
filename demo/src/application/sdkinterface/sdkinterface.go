@@ -12,6 +12,7 @@ import (
     "github.com/scryinfo/iscap/demo/src/sdk/scryclient"
     "github.com/scryinfo/iscap/demo/src/application/definition"
     cif "github.com/scryinfo/iscap/demo/src/sdk/scryclient/chaininterfacewrapper"
+    "github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
     "io/ioutil"
     "math/big"
     "strings"
@@ -23,8 +24,10 @@ const (
 
 var (
     curUser *scryclient.ScryClient = nil
+    deployer *scryclient.ScryClient = nil
     scryInfo *settings.ScryInfo = nil
     sep = "|"
+
 )
 
 func Initialize() error {
@@ -80,7 +83,7 @@ func CreateUserWithLogin(password string) (*scryclient.ScryClient, error) {
 func UserLogin(address string, password string) (bool, error) {
     client := scryclient.NewScryClient(address)
     if client == nil {
-        return false, errors.New("failed to NewScryClient")
+        return false, errors.New("failed to call NewScryClient")
     }
 
     succ, err := client.Authenticate(password)
@@ -95,8 +98,45 @@ func UserLogin(address string, password string) (bool, error) {
     return succ, nil
 }
 
+func ImportAccount(keyJson string, oldPassword string, newPassword string) (*scryclient.ScryClient, error) {
+    address, err := accounts.GetAMInstance().ImportAccount([]byte(keyJson), oldPassword, newPassword)
+    if err != nil {
+        fmt.Println("failed to import account. error:", err)
+        return nil, err
+    }
+
+    client := scryclient.NewScryClient(address)
+    return client, nil
+}
+
+func TransferTokenFromDeployer(token *big.Int) (error) {
+    var err error
+    if deployer == nil {
+        deployer, err = ImportAccount(scryInfo.Chain.Contracts.DeployerKeyJson,
+                                        scryInfo.Chain.Contracts.DeployerPassword,
+                                        scryInfo.Chain.Contracts.DeployerPassword)
+        if err != nil {
+            fmt.Println("failed to transfer token, error:", err)
+            return err
+        }
+    }
+
+    txParam := chainoperations.TransactParams{From: common.HexToAddress(deployer.Account.Address),
+                                              Password: scryInfo.Chain.Contracts.DeployerPassword,
+                                              Value: big.NewInt(0),
+                                              Pending: false}
+    err = cif.TransferTokens(&txParam, common.HexToAddress(curUser.Account.Address), token)
+    if err != nil {
+        fmt.Println("failed to transfer token, error:", err)
+        return err
+    }
+
+    return nil
+}
+
 func PublishData(data definition.PubData, password string) (string, error) {
     if curUser == nil {
+        fmt.Println("no current user")
         return "", nil
     }
 
