@@ -49,9 +49,14 @@ export default {
             this.$confirm('Are you sure to logout?', 'Tips:', {
                 confirmButtonText: "Yes",
                 cancelButtonText: "No",
-                type: 'warning'
+                type: "warning"
             }).then(() => {
                 this.$router.push('/')
+            }).catch(() => {
+                this.$message({
+                    type:"info",
+                    message:"keep login. ^_^"
+                })
             })
         }
     },

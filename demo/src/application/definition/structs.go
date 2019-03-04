@@ -20,6 +20,7 @@ type PubData struct {
 	DespData  string   `json:"Description"`
 	Price     float64  `json:"Price"`
 	Seller    string   `json:"Owner"`
+	Password  string   `json:"Password"`
 }
 
 type Transaction struct {

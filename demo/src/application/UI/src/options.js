@@ -103,7 +103,7 @@ let mt_db = {
                         Seller: cursor.value.Seller,
                         Buyer: cursor.value.Buyer,
                         State: state,
-                        TransactionID: cursor.key,
+                        TransactionID: cursor.key
                     })
                     cursor.continue()
                 }
@@ -139,7 +139,7 @@ let acc_db = {
             c.onsuccess = function(event) {
                 let cursor = event.target.result
                 if (cursor) {
-                    _this.$store.state.accounts.push({address: cursor.value.address})
+                    _this.$store.state.accounts.push({address: cursor.key})
                     cursor.continue()
                 }
             }

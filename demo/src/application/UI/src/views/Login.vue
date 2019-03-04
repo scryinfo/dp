@@ -16,8 +16,8 @@
             <el-col :span="16">
                 <div class="right" id="show" v-if="showControl1">
                     <div class="right-show">{{describe}}
-                        <el-input class="right-pwd" v-model="password"
-                                  placeholder="password" type="password" :clearable="true"></el-input>
+                        <el-input class="right-pwd" v-model="password" placeholder="password"
+                                  type="password" clearable show-password></el-input>
                     </div>
                     <div><button class="right-button" @click="hide">Back</button>
                     <button class="right-button" @click="submit_login" v-if="buttonControl">Submit</button>
@@ -59,7 +59,7 @@ export default {
             }
             this.describe = description + ":"
         },
-        hide: function () {this.showControl1 = false;this.showControl2 = false;this.password = ""},
+        hide: function () { this.showControl1 = false; this.showControl2 = false; this.password = "" },
         submit_login: function () {
             let pwd = this.password
             this.password = ""
@@ -69,18 +69,20 @@ export default {
                 if (message.payload) {
                     _this.$router.push({ name: 'home', params: {acc: _this.account}})
                 } else {
-                    alert("account or password is wrong.")
+                    alert("account or password is wrong.", message.payload)
                 }
             })
         },
         submit_new: function () {
             let _this = this
-            astilectron.sendMessage({Name: "create.new.account", Payload: {address: this.password}}, function (message) {
-                if (true) { // message.name !== "error"
+            astilectron.sendMessage({Name: "create.new.account", Payload: {password: this.password}}, function (message) {
+                if (message.name !== "error") {
                     acc_db.write(message.payload)
                     acc_db.init(_this)
                     _this.account = message.payload
                     _this.showControl1 = false;_this.showControl2 = true
+                }else {
+                    alert("create new account failed.", message.payload)
                 }
             })
         },
@@ -90,11 +92,10 @@ export default {
             let _this = this
             astilectron.sendMessage({Name: "save.keystore", Payload: {account: this.$store.state.account,
                     password: pwd}}, function (message) {
-                if (true) { // message.name !== "error"
-                    acc_db.write(_this.account)
+                if (message.name !== "error") {
                     _this.$router.push({ name: 'home', params: {acc: _this.account}})
                 } else {
-                    alert("save account information failed.")
+                    alert("save account information failed.", message.payload)
                 }
             })
         }

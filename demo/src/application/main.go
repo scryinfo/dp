@@ -13,7 +13,7 @@ import (
 // Constants
 const (
 	ABOUT  = "test go -> js."
-	ABOUT2 = "test <strong>go -> js.</strong><br/> once more"
+	ABOUT2 = "test go -> js once more."
 )
 
 // Vars

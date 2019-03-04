@@ -6,10 +6,10 @@
                                              v-model="pubData.Keys" type="textarea" :rows=2></el-input></el-form-item>
         <el-form-item label="Description">
             <el-input v-model="pubData.Description" type="textarea" :rows=3></el-input></el-form-item>
-        <el-form-item label="Data"><el-input ref="seldata" @change="selFile" type="file"></el-input></el-form-item>
-        <el-form-item label="Proofs"><el-input ref="selproof" @change="selFiles" type="file" multiple></el-input></el-form-item>
+        <el-form-item label="Data"><el-input ref="selectedData" @change="getData" type="file"></el-input></el-form-item>
+        <el-form-item label="Proofs"><el-input ref="selectedProofs" @change="getProofs" type="file" multiple></el-input></el-form-item>
         <el-form-item>
-            <el-button type="primary" @click="pub">Publish</el-button>
+            <el-button type="primary" @click="pubPwd">Publish</el-button>
         </el-form-item>
     </el-form>
 </template>
@@ -27,32 +27,47 @@ export default {
                 Description: '',
                 Data: '',
                 Proofs: [],
-                Owner: this.$store.state.account
+                Owner: this.$store.state.account,
+                Password: ''
             }
         }
     },
     methods: {
-        selFile: function () {
-            let dp = this.$refs.seldata
-            let dpf = dp.$refs.input.files[0]
+        getData: function () {
+            this.pubData.Data = ""
+            let data = this.$refs.selectedData.$refs.input.files[0]
             let reader = new FileReader()
             let _this = this
-            reader.readAsDataURL(dpf)
+            reader.readAsDataURL(data)
             reader.onload = function (evt) {
                 _this.pubData.Data = evt.target.result
             }
         },
-        selFiles: function () {
-            let pp = this.$refs.selproof
-            let ppf = pp.$refs.input.files
+        getProofs: function () {
+            this.pubData.Proofs = []
+            let proofs = this.$refs.selectedProofs.$refs.input.files
             let _this = this
             for (let i=0;i<ppf.length;i++) {
                 let reader = new FileReader()
-                reader.readAsDataURL(ppf[i])
+                reader.readAsDataURL(proofs[i])
                 reader.onload = function (evt) {
                     _this.pubData.Proofs.push(evt.target.result)
                 }
             }
+        },
+        pubPwd: function () {
+            this.$prompt(this.$store.state.account, 'Input password for this account:', {
+                confirmButtonText: "Submit",
+                cancelButtonText: "Cancel"
+            }).then(({ value }) => {
+                this.pubData.Password = value
+                this.pub()
+            }).catch(() => {
+                this.$message({
+                    type: "info",
+                    message: "Cancel publish."
+                })
+            })
         },
         pub: function () {
             let _this = this
@@ -64,16 +79,15 @@ export default {
                 Owner: this.pubData.Owner
             }
             astilectron.sendMessage({Name:"publish",Payload:this.pubData}, function (message) {
-                if (true) { // message.name !== "error"
-                    console.log(message)
+                if (message.name !== "error") {
                     dl_db.write(pub, message.payload)
                     dl_db.init(_this)
-                    console.log("Log: Publish new data success.")
+                    console.log("Info: Publish new data success.")
                 }else {
                     alert("Publish data failed: ", message.payload)
                 }
             })
-            // this.resetData()
+            // this.resetData(), especially pwd.
         }
     }
 }
