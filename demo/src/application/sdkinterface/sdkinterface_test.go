@@ -51,9 +51,10 @@ func TestPublishData(t *testing.T) {
         "evil data",
         10000,
         "seller",
+        "111111",
     }
 
-    _, err := PublishData(data, "111111")
+    _, err := PublishData(data)
     if err != nil {
         t.Fail()
     }

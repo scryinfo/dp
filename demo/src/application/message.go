@@ -31,8 +31,8 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 
 	switch m.Name {
 	case "create.new.account":
-		var pwd = new(definition.AccInfo)
-		err = json.Unmarshal(m.Payload, pwd)
+		var pwd definition.AccInfo = definition.AccInfo{}
+		err = json.Unmarshal(m.Payload, &pwd)
 		if err != nil {
 			break
 		}
@@ -40,21 +40,27 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err != nil {
 			break
 		}
-		err = sdkinterface.TransferTokenFromDeployer(big.NewInt(1000))	// test
-		if err != nil {
-			break
-		}
 		payload = user.Account.Address
 		return payload, nil
 	case "login.verify":
-		var ai = new(definition.AccInfo)
-		err = json.Unmarshal(m.Payload, ai)
+		var ai definition.AccInfo = definition.AccInfo{}
+		err = json.Unmarshal(m.Payload, &ai)
 		if err != nil {
 			break
 		}
-		payload = true
+		var ok bool
+		ok, err = sdkinterface.UserLogin(ai.Account,ai.Password)
+		if !ok {
+			break
+		}
+		err = sdkinterface.TransferTokenFromDeployer(big.NewInt(10000))	// test
+		payload = ok
 		return payload, nil
 	case "save.keystore":
+		err = sdkinterface.TransferTokenFromDeployer(big.NewInt(10000))	// test
+		if err != nil {
+			break
+		}
 		payload = true
 		return payload, nil
 	case "get.datalist":
@@ -83,8 +89,12 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		payload = true
 		return payload, nil
 	case "publish":
-		var dl definition.PubData = definition.PubData{}
-		if err = json.Unmarshal(m.Payload, &dl); err != nil {
+		var pd definition.PubData = definition.PubData{}
+		if err = json.Unmarshal(m.Payload, &pd); err != nil {
+			break
+		}
+		payload, err = sdkinterface.PublishData(pd)
+		if err != nil {
 			break
 		}
 		return payload, nil
