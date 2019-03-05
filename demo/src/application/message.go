@@ -86,6 +86,11 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		}
 		return payload, nil
 	case "buy":
+		var bd definition.BuyData = definition.BuyData{}
+		if err = json.Unmarshal(m.Payload, &bd); err != nil {
+			break
+		}
+
 		payload = true
 		return payload, nil
 	case "publish":

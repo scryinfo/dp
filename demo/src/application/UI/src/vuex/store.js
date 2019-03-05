@@ -4,11 +4,14 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 const state = {
-    datalist: [],
-    mytransaction: [],
+    datalist: [
+        {Title: "", Price: 0, Keys: "", Description: "", Owner: "", pID: ""} // primary key: publishID.
+    ],
+    mytransaction: [
+        {Buyer: "", Seller: "", State: "", Title: "", tID: ""} // primary key: transactionID.
+    ],
     accounts: [
-        {address: ""},
-        {address: "0x5124852365789564128564723598621475354895"}
+        {address: ""} // primary key: address.
     ],
     account: ""
 }

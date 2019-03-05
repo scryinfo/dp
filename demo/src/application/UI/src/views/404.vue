@@ -1,13 +1,13 @@
 <template>
     <p class="page-container">
-        404: WebPage Not Found<br/>
+        404:&nbsp;&nbsp;&nbsp;WillPage Not Found<br/>
         Redirect to login page after {{count}} seconds.
     </p>
 </template>
 
 <script>
 export default {
-    name: 'notFound.vue',
+    name: "notFound.vue",
     data () {
         return {
             count: 5
@@ -19,7 +19,7 @@ export default {
             if (this.count < 0) {
                 window.clearInterval(clock)
                 this.count = 5
-                this.$router.push({ path: '/'})
+                this.$router.push({ path: "/"})
             }
         },1000)
     }

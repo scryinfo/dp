@@ -1,7 +1,7 @@
-let options = {
+let DBoptions = {
     init: function (_this) {
-        options.getDatalist(_this)
-        options.getTransaction(_this)
+        DBoptions.getDatalist(_this)
+        DBoptions.getTransaction(_this)
     },
     getDatalist:function (_this) {
         astilectron.sendMessage({Name:"get.datalist",Payload:""},function (message) {
@@ -90,13 +90,14 @@ let mt_db = {
             c.onsuccess = function(event) {
                 let cursor = event.target.result
                 if (cursor) {
-                    let state
-                    switch (parseInt(cursor.State)) {
-                        case 0:state = "Created";break
-                        case 1:state = "Voted";break
-                        case 2:state = "Payed";break
-                        case 3:state = "ReadyForDownload";break
-                        case 4:state = "Closed";break
+                    let state = ""
+                    switch (cursor.value.State) {
+                        case 0: state = "Created"; break
+                        case 1: state = "Voted"; break
+                        case 2: state = "Payed"; break
+                        case 3: state = "ReadyForDownload"; break
+                        case 4: state = "Closed"; break
+                        default: state = "State parse error."; break
                     }
                     _this.$store.state.mytransaction.push({
                         Title: cursor.value.Title,
@@ -129,17 +130,14 @@ let acc_db = {
             alert("open failed with error code: " + event.target.errorCode)
         }
         request.onsuccess = function(event) {
-            _this.$store.state.accounts = [
-                    {address: ""},
-                    {address: "0x5124852365789564128564723598621475354895"}
-            ]
+            _this.$store.state.accounts = [{ address: "" }]
             acc_db.db = event.target.result
             let s = acc_db.db.transaction(acc_db.db_store_name,"readonly").objectStore(acc_db.db_store_name)
             let c = s.openCursor()
             c.onsuccess = function(event) {
                 let cursor = event.target.result
                 if (cursor) {
-                    _this.$store.state.accounts.push({address: cursor.key})
+                    _this.$store.state.accounts.push({ address: cursor.key })
                     cursor.continue()
                 }
             }
@@ -152,6 +150,7 @@ let acc_db = {
             console.log(event)
         }
     },
+    // prepare a single remove function, for delete a account, maybe I can put a
     remove:function (key) {
         let store = acc_db.db.transaction(acc_db.db_store_name, "readwrite").objectStore(acc_db.db_store_name)
         let request = store.delete(key)
@@ -161,4 +160,4 @@ let acc_db = {
     }
 }
 
-export {dl_db, mt_db, acc_db, options}
+export {dl_db, mt_db, acc_db, DBoptions}
