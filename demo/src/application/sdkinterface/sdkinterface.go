@@ -1,22 +1,21 @@
 package sdkinterface
 
 import (
-	"errors"
-	"fmt"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/scryinfo/iscap/demo/src/application/definition"
-	"github.com/scryinfo/iscap/demo/src/application/sdkinterface/settings"
-	"github.com/scryinfo/iscap/demo/src/sdk"
-	"github.com/scryinfo/iscap/demo/src/sdk/core/chainevents"
-	"github.com/scryinfo/iscap/demo/src/sdk/core/chainoperations"
-	"github.com/scryinfo/iscap/demo/src/sdk/core/ethereum/events"
-	"github.com/scryinfo/iscap/demo/src/sdk/scryclient"
-	cif "github.com/scryinfo/iscap/demo/src/sdk/scryclient/chaininterfacewrapper"
-	"github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
-	rlog "github.com/sirupsen/logrus"
-	"io/ioutil"
-	"math/big"
-	"strings"
+    "errors"
+    "fmt"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/scryinfo/iscap/demo/src/application/definition"
+    "github.com/scryinfo/iscap/demo/src/application/sdkinterface/settings"
+    "github.com/scryinfo/iscap/demo/src/sdk"
+    "github.com/scryinfo/iscap/demo/src/sdk/core/chainevents"
+    "github.com/scryinfo/iscap/demo/src/sdk/core/chainoperations"
+    "github.com/scryinfo/iscap/demo/src/sdk/scryclient"
+    cif "github.com/scryinfo/iscap/demo/src/sdk/scryclient/chaininterfacewrapper"
+    "github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
+    rlog "github.com/sirupsen/logrus"
+    "io/ioutil"
+    "math/big"
+    "strings"
 )
 
 const (
@@ -141,13 +140,18 @@ func TransferTokenFromDeployer(token *big.Int) error {
 	return nil
 }
 
-func PublishData(data definition.PubData) (string, error) {
+func PublishData(data definition.PubData, cb chainevents.EventCallback) (string, error) {
 	if curUser == nil {
 		fmt.Println("no current user")
-		return "", nil
+		return "", errors.New("failed to publish data, current user is null")
 	}
 
-	curUser.SubscribeEvent("DataPublish", onPublish)
+    if cb == nil {
+        fmt.Println("null callback function")
+        return "", errors.New("failed to publish data, callback function is null")
+    }
+
+	curUser.SubscribeEvent("DataPublish", cb)
 	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
 		Password: data.Password,
 		Value:    big.NewInt(0),
@@ -160,7 +164,60 @@ func PublishData(data definition.PubData) (string, error) {
 		proofs,
 		len(data.ProofData),
 		[]byte(data.DespData),
-		true)
+		data.SupportVerify)
+}
+
+func ApproveTransferForBuying(password string, cb chainevents.EventCallback) (error) {
+    return approveTransfer(cb,
+        password,
+        common.HexToAddress(scryInfo.Chain.Contracts.ProtocolAddr))
+}
+
+func approveTransfer(cb chainevents.EventCallback,
+    password string,
+    protocolContractAddr common.Address) (error) {
+    if curUser == nil {
+        fmt.Println("no current user")
+        return errors.New("failed to approve transfer, current user is null")
+    }
+
+    curUser.SubscribeEvent("Approval", cb)
+
+    txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
+        Password: password,
+        Value: big.NewInt(0),
+        Pending: false}
+    err := cif.ApproveTransfer(&txParam,
+        protocolContractAddr,
+        big.NewInt(1600))
+    if err != nil {
+        fmt.Println("ApproveTransfer:", err)
+        return errors.New("failed to approve transfer, error:" + err.Error())
+    }
+
+    return nil
+}
+
+func CreateTransaction(publishId string, password string, cb chainevents.EventCallback) (error) {
+    if curUser == nil {
+        fmt.Println("no current user")
+        return errors.New("failed to prepare to buy, current user is null")
+    }
+
+    curUser.SubscribeEvent("TransactionCreate", cb)
+
+    txParam := chainoperations.TransactParams{
+        From: common.HexToAddress(curUser.Account.Address),
+        Password: password,
+        Value: big.NewInt(0),
+        Pending: false}
+    err := cif.PrepareToBuy(&txParam, publishId)
+    if err != nil {
+        fmt.Println("failed to prepareToBuy, error:", err)
+        return errors.New("failed to prepareToBuy, error:" + err.Error())
+    }
+
+    return nil
 }
 
 func convertProofs(data definition.PubData) [][]byte {
@@ -197,10 +254,4 @@ func getAbiText(fileName string) string {
 	}
 
 	return string(abi)
-}
-
-func onPublish(event events.Event) bool {
-	fmt.Println("onpublish: ", event)
-	rlog.Info("Node: onPublish.emit. ", event) // need variable w from package main.
-	return true
 }
