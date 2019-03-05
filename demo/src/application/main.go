@@ -5,7 +5,8 @@ import (
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/asticode/go-astilog"
 	"github.com/pkg/errors"
-	"github.com/scryinfo/iscap/demo/src/application/sdkinterface"
+    "github.com/scryinfo/iscap/demo/src/application/communication"
+    "github.com/scryinfo/iscap/demo/src/application/sdkinterface"
 	"time"
 )
 
@@ -20,6 +21,10 @@ var (
 	w       *astilectron.Window
 	err error = nil
 )
+
+func getWindow() (*astilectron.Window) {
+    return w
+}
 
 func init() {
 	err = sdkinterface.Initialize()

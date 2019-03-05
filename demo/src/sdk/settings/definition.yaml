@@ -10,5 +10,5 @@ Chain:
       users:
       - "0x0000000000000000000000000000000000000000"
 Log:
-  dir: D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/iscap/demo/src/log
+  dir: /home/waitgordor/project/goproject/src/github.com/scryinfo/iscap/demo/src/testconsole/log/
   file: scry.log
