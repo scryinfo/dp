@@ -1,31 +1,82 @@
 <template>
     <section>
-        <!--工具条，暂时还没有功能-->
         <el-col :span="24" style="padding-bottom: 0; background-color: lightgrey;">
-            tool bar.
+            <el-button size="mini" type="primary" @click="purchasePwd" >Purchase</el-button>
         </el-col>
 
-        <el-table :data="this.$store.state.mytransaction" highlight-current-row border height=400>
+        <el-table :data="this.$store.state.mytransaction" highlight-current-row border height=400 @selection-change="selectedChange">
+            <el-table-column type="selectrin" width=50></el-table-column>
+            <el-table-column type="expand">
+                <el-form label-position="left" inline slot-scope="props">
+                    <el-form-item label="transactionID"><span>{{ props.row.transactionID }}</span></el-form-item>
+                    <el-form-item label="Title"><span>{{ props.row.Title }}</span></el-form-item>
+                    <el-form-item label="State"><span>{{ props.row.State }}</span></el-form-item>
+                    <el-form-item label="Buyer"><span>{{ props.row.Buyer }}</span></el-form-item>
+                    <el-form-item label="Seller"><span>{{ props.row.Seller }}</span></el-form-item>
+                    <el-form-item label="Verifier1Response"><span>{{ props.row.Verifier1Response }}</span></el-form-item>
+                    <el-form-item label="Verifier2Response"><span>{{ props.row.Verifier2Response }}</span></el-form-item>
+                    <el-form-item label="Verifier3Response"><span>{{ props.row.Verifier3Response }}</span></el-form-item>
+                    <el-form-item label="ArbitrateResult"><span>{{ props.row.ArbitrateResult }}</span></el-form-item>
+                </el-form>
+            </el-table-column>
+            <el-table-column prop="tID" label="TransactionID" show-overflow-tooltip></el-table-column>
             <el-table-column prop="Title" label="Title" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="TransactionID" label="TransactionID" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="Seller" label="Seller" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="Buyer" label="Buyer" show-overflow-tooltip></el-table-column>
             <el-table-column prop="State" label="State" show-overflow-tooltip></el-table-column>
         </el-table>
     </section>
 </template>
 
 <script>
-    export default {
-        name: "MyTransaction.vue",
-        data () {
-            return {
-
+export default {
+    name: "MyTransaction",
+    data () {
+        return {
+            selectsMT: [
+                {ID: ""}
+            ]
+        }
+    },
+    methods: {
+        selectedChange: function (sels) {
+            this.selectsMT = []
+            for (let i=0;i<sels.length;i++) {
+                this.selectsMT.push({ ID: sels[i].ID })
             }
         },
+        purchasePwd:function () {
+            this.$prompt(this.$store.state.account, "Input password for this account:", {
+                confirmButtonText: "Submit",
+                cancelButtonText: "Cancel"
+            }).then(({ value }) => {
+                this.purchase(value)
+            }).catch(() => {
+                this.$message({
+                    type: "info",
+                    message: "Cancel purchase."
+                })
+            })
+        },
+        purchase:function (pwd) {
+            // not support buy a group of data one time, give the first id for instead.
+            astilectron.sendMessage({ Name:"purchase",Payload:{buyer: this.$store.state.account, password: pwd,
+                    ids: this.selectsMT[0]} }, function (message) {
+                if (message.payload) {
+                    console.log("Purchase data succeed.")
+                }else {
+                    console.log("Node: purchase failed.", message)
+                    alert("Purchase data failed.")
+                }
+            })
+        }
+    },
+    created() {
+        this.selectsMT = []
     }
+}
 </script>
 
 <style scoped>
-
+.el-form-item {
+    width: 100%;
+}
 </style>

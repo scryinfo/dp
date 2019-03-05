@@ -20,6 +20,10 @@ type Transaction struct {
 	Seller        string
 	Buyer         string
 	State         byte
+	Verifier1Response string
+	Verifier2Response string
+	Verifier3Response string
+	ArbitrateResult bool
 }
 
 type PubData struct {
