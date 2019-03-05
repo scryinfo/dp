@@ -36,8 +36,8 @@
 </template>
 
 <script>
-import {dl_db, mt_db, acc_db, DBoptions} from "./DBoptions.js"
-import {utils} from "./utils.js"
+import {dl_db, mt_db, acc_db, DBoptions} from "../DBoptions.js"
+import {utils} from "../utils.js"
 export default {
     name: "Login",
     data() {
@@ -109,7 +109,7 @@ export default {
         mt_db.init(this)
         acc_db.init(this)
         document.addEventListener("astilectron-ready", function() {
-            utils.listen()
+            utils.listen(_this)
             DBoptions.init(_this)
         })
     }

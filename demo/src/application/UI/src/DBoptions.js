@@ -7,8 +7,13 @@ let DBoptions = {
         astilectron.sendMessage({Name:"get.datalist",Payload:""},function (message) {
             for (let i=0;i<message.payload.length;i++) {
                 let t = message.payload[i]
-                let p = {}
-                p.Title = t.Title;p.Price = t.Price;p.Keys = t.Keys;p.Description = t.Description;p.Owner = t.Owner
+                let p = {
+                    Title: t.Title,
+                    Price: t.Price,
+                    Keys: t.Keys,
+                    Description: t.Description,
+                    Owner: t.Owner,
+                }
                 dl_db.write(p,t.ID)
             }
             dl_db.init(_this)
@@ -18,8 +23,16 @@ let DBoptions = {
         astilectron.sendMessage({Name:"get.transaction",Payload:_this.$store.state.account}, function (message) {
             for (let i=0;i<message.payload.length;i++) {
                 let t = message.payload[i]
-                let p = {}
-                p.Title = t.Title;p.Seller = t.Seller;p.Buyer = t.Buyer;p.State = t.State
+                let p = {
+                    Title: t.Title,
+                    Seller: t.Seller,
+                    Buyer: t.Buyer,
+                    State: t.State,
+                    Verifier1Response: t.Verifier1Response,
+                    Verifier2Response: t.Verifier2Response,
+                    Verifier3Response: t.Verifier3Response,
+                    ArbitrateResult: t.ArbitrateResult
+                }
                 mt_db.write(p,t.TransactionID)
             }
             mt_db.init(_this)

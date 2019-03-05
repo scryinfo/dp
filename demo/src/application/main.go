@@ -11,7 +11,6 @@ import (
 
 // Constants
 const (
-	ABOUT  = "test go -> js."
 	ShortMessage = "You have new short-message, remember to checkout it."
 )
 

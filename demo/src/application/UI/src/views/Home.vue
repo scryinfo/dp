@@ -35,8 +35,8 @@
 </template>
 
 <script>
-import {dl_db, mt_db, DBoptions} from "./DBoptions.js"
-import {utils} from "./utils.js"
+import {dl_db, mt_db, DBoptions} from "../DBoptions.js"
+import {utils} from "../utils.js"
 export default {
     name: "Home",
     data () {
@@ -70,7 +70,7 @@ export default {
         dl_db.init(this)
         mt_db.init(this)
         document.addEventListener("astilectron-ready", function() {
-            utils.listen()
+            utils.listen(_this)
             DBoptions.init(_this)
         })
     }
