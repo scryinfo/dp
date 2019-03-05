@@ -29,6 +29,7 @@ type PubData struct {
 	Price     float64  `json:"Price"`
 	Seller    string   `json:"Owner"`
 	Password  string   `json:"Password"`
+	SupportVerify bool `json:"supportVerify"`
 }
 
 type BuyData struct {
