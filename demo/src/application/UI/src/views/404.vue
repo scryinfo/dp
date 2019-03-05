@@ -1,6 +1,6 @@
 <template>
     <p class="page-container">
-        404:&nbsp;&nbsp;&nbsp;WillPage Not Found<br/>
+        404 :&nbsp;&nbsp;&nbsp;WallPage Not Found<br/>
         Redirect to login page after {{count}} seconds.
     </p>
 </template>

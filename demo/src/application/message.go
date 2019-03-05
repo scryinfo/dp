@@ -82,7 +82,8 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		return payload, nil
 	case "get.transaction":
 		payload = []definition.Transaction{
-			{"title1", 1, "0x1234567890123456789012345678901234567890", "0x1524783212578655202365479511235413256752", Created},
+			{"title1", 1, "0x1234567890123456789012345678901234567890", "0x1524783212578655202365479511235413256752", Created,
+				"1,v1r", "2,v2r", "3,v3r", true},
 		}
 		return payload, nil
 	case "buy":
@@ -91,6 +92,9 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 			break
 		}
 
+		payload = true
+		return payload, nil
+	case "purchase":
 		payload = true
 		return payload, nil
 	case "publish":

@@ -2,8 +2,8 @@
     <div>
         <el-row>
             <el-col :span="24" class="top">
-                <el-col :span="20">My Astilectron demo</el-col>
-                <el-col :span="4">
+                <el-col :span="18">My Astilectron demo</el-col>
+                <el-col :span="6">
                     <el-dropdown class="top-dropdown" trigger="click">
                         <span>{{acc}}</span>
                         <el-dropdown-menu slot="dropdown">
@@ -26,7 +26,7 @@
                 </el-col>
                 <el-col :span="20">
                     <section class="section">
-                        <div><el-col :span="24"><router-view></router-view></el-col></div>
+                        <router-view></router-view>
                     </section>
                 </el-col>
             </el-col>
@@ -35,7 +35,8 @@
 </template>
 
 <script>
-import {dl_db, mt_db, DBoptions} from "../DBoptions"
+import {dl_db, mt_db, DBoptions} from "./DBoptions.js"
+import {utils} from "./utils.js"
 export default {
     name: "Home",
     data () {
@@ -60,22 +61,6 @@ export default {
                     message:"keep login.  ^_^ "
                 })
             })
-        },
-        listen: function () {
-            let _this = this
-            astilectron.onMessage(function(message) {
-                switch (message.name) {
-                    case "welcome": console.log(message.payload); break
-                    case "sdkInit": console.log(message.name + ": " + message.payload); break
-                    case "sendMessage":
-                        _this.$notify({
-                            title: "Notify: ",
-                            message: message.payload,
-                            position: "top-left"
-                        })
-                        break
-                }
-            })
         }
     },
     created() {
@@ -85,14 +70,22 @@ export default {
         dl_db.init(this)
         mt_db.init(this)
         document.addEventListener("astilectron-ready", function() {
-            _this.listen()
+            utils.listen()
             DBoptions.init(_this)
         })
     }
 }
 </script>
 
-<style>
+<style scoped>
+.top {
+    background-color: grey;
+    font-size: 20px;
+    color: white;
+    height: 50px;
+    text-align: center;
+    line-height: 50px;
+}
 .top-dropdown {
     color: lightgrey;
     font-size: 12px;

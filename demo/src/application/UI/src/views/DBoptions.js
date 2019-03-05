@@ -83,7 +83,7 @@ let mt_db = {
             alert("open failed with error code: " + event.target.errorCode)
         }
         request.onsuccess = function(event) {
-            _this.$store.state.mytransaction = []
+            // _this.$store.state.mytransaction = []
             mt_db.db = event.target.result
             let s = mt_db.db.transaction(mt_db.db_store_name,"readonly").objectStore(mt_db.db_store_name)
             let c = s.openCursor()
@@ -104,7 +104,11 @@ let mt_db = {
                         Seller: cursor.value.Seller,
                         Buyer: cursor.value.Buyer,
                         State: state,
-                        TransactionID: cursor.key
+                        TransactionID: cursor.key,
+                        Verifier1Response: cursor.value.Verifier1Response,
+                        Verifier2Response: cursor.value.Verifier2Response,
+                        Verifier3Response: cursor.value.Verifier3Response,
+                        ArbitrateResult: cursor.value.ArbitrateResult
                     })
                     cursor.continue()
                 }
