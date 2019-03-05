@@ -13,9 +13,9 @@
     "element-ui": "2.6.0",
     "font-awesome": "^4.7.0",
     "nprogress": "^0.2.0",
-    "vue": "^2.2.2",
-    "vue-router": "^2.3.0",
-    "vuex": "^2.0.0-rc.6"
+    "vue": "^2.6.6",
+    "vue-router": "^2.5.3",
+    "vuex": "^2.4.1"
   },
   "devDependencies": {
     "autoprefixer": "^6.7.2",

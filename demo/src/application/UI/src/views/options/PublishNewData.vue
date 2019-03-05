@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import {dl_db} from "../../DBoptions"
+import {dl_db} from "../DBoptions"
 export default {
     name: "PublishNewData",
     data () {

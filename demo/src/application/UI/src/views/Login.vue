@@ -3,7 +3,7 @@
         <el-row class="row">
             <el-col :span="24"><div class="top">My Astilectron demo</div></el-col>
             <el-col :span="8">
-                <div class="left-overall">
+                <div class="left">
                     <div class="left-explain">select account:</div>
                     <el-select class="left-account" v-model="account" placeholder="select account">
                         <el-option v-for="acc in this.$store.state.accounts" :key="acc.address"
@@ -36,7 +36,8 @@
 </template>
 
 <script>
-import {dl_db, mt_db, acc_db, DBoptions} from "../DBoptions"
+import {dl_db, mt_db, acc_db, DBoptions} from "./DBoptions.js"
+import {utils} from "./utils.js"
 export default {
     name: "Login",
     data() {
@@ -99,22 +100,6 @@ export default {
                     alert("save account information failed.", message.payload)
                 }
             })
-        },
-        listen: function () {
-            let _this = this
-            astilectron.onMessage(function(message) {
-                switch (message.name !== "error") {
-                    case "welcome": console.log(message.payload); break
-                    case "sdkInit": console.log(message.name + ": " + message.payload); break
-                    case "sendMessage":
-                        _this.$notify({
-                            title: "Notify: ",
-                            message: message.payload,
-                            position: "top-left"
-                        })
-                        break
-                }
-            })
         }
     },
     created() {
@@ -124,14 +109,14 @@ export default {
         mt_db.init(this)
         acc_db.init(this)
         document.addEventListener("astilectron-ready", function() {
-            _this.listen()
+            utils.listen()
             DBoptions.init(_this)
         })
     }
 }
 </script>
 
-<style>
+<style scoped>
 .top {
     background-color: grey;
     font-size: 20px;
@@ -140,7 +125,7 @@ export default {
     text-align: center;
     line-height: 50px;
 }
-.left-overall {
+.left {
     background-color: lightgray;
     height: 500px;
 }
