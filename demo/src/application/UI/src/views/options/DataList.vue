@@ -30,7 +30,7 @@
                 astilectron.sendMessage({ Name:"buy",Payload:{buyer: this.$store.state.account, ids: this.selectsDL} },
                     function (message) {
                         if (message.payload) {
-                            // options.getTransaction();
+                            // DBoptions.getTransaction();
                             console.log("Buy data succeed.")
                         }else {
                             alert("Buy data failed.")

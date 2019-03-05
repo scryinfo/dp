@@ -14,6 +14,14 @@ type Datalist struct {
 	Owner       string
 }
 
+type Transaction struct {
+	Title         string
+	TransactionID int
+	Seller        string
+	Buyer         string
+	State         byte
+}
+
 type PubData struct {
 	MetaData  string   `json:"Data"`
 	ProofData []string `json:"Proofs"`
@@ -23,10 +31,7 @@ type PubData struct {
 	Password  string   `json:"Password"`
 }
 
-type Transaction struct {
-	Title         string
-	TransactionID int
-	Seller        string
-	Buyer         string
-	State         byte
+type BuyData struct {
+	Buyer string   `json:"buyer"`
+	IDs   []string `json:"ids"`
 }

@@ -1,34 +1,38 @@
 <template>
-    <el-form class="pubForm" :model="pubData" label-width="15%">
-        <el-form-item label="Title"><el-input v-model="pubData.Title"></el-input></el-form-item>
-        <el-form-item label="Price"><el-input v-model.number="pubData.Price" placeholder="Unit is DDD"></el-input></el-form-item>
-        <el-form-item label="Keys"><el-input placeholder="Separate each tag with a comma or semicolon"
-                                             v-model="pubData.Keys" type="textarea" :rows=2></el-input></el-form-item>
-        <el-form-item label="Description">
-            <el-input v-model="pubData.Description" type="textarea" :rows=3></el-input></el-form-item>
-        <el-form-item label="Data"><el-input ref="selectedData" @change="getData" type="file"></el-input></el-form-item>
-        <el-form-item label="Proofs"><el-input ref="selectedProofs" @change="getProofs" type="file" multiple></el-input></el-form-item>
-        <el-form-item>
-            <el-button type="primary" @click="pubPwd">Publish</el-button>
-        </el-form-item>
-    </el-form>
+    <section>
+        <el-form class="pubForm" :model="pubData" label-width="15%">
+            <el-form-item label="Title"><el-input v-model="pubData.Title" clearable></el-input></el-form-item>
+            <el-form-item label="Price">
+                <el-input v-model.number="pubData.Price" placeholder="Unit is DDD" clearable></el-input></el-form-item>
+            <el-form-item label="Keys"><el-input placeholder="Separate each tag with a comma or semicolon" :rows=2
+                                                 v-model="pubData.Keys" type="textarea" clearable></el-input></el-form-item>
+            <el-form-item label="Description">
+                <el-input v-model="pubData.Description" type="textarea" :rows=3 clearable></el-input></el-form-item>
+            <el-form-item label="Data"><el-input ref="selectedData" @change="getData" type="file"></el-input></el-form-item>
+            <el-form-item label="Proofs">
+                <el-input ref="selectedProofs" @change="getProofs" type="file" multiple></el-input></el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="pubPwd">Publish</el-button>
+            </el-form-item>
+        </el-form>
+    </section>
 </template>
 
 <script>
-import {dl_db} from "../../options"
+import {dl_db} from "../../DBoptions"
 export default {
     name: "PublishNewData",
     data () {
         return {
             pubData: {
-                Title: '',
+                Title: "",
                 Price: 0,
-                Keys: '',
-                Description: '',
-                Data: '',
+                Keys: "",
+                Description: "",
+                Data: "",
                 Proofs: [],
                 Owner: this.$store.state.account,
-                Password: ''
+                Password: ""
             }
         }
     },
@@ -56,7 +60,7 @@ export default {
             }
         },
         pubPwd: function () {
-            this.$prompt(this.$store.state.account, 'Input password for this account:', {
+            this.$prompt(this.$store.state.account, "Input password for this account:", {
                 confirmButtonText: "Submit",
                 cancelButtonText: "Cancel"
             }).then(({ value }) => {
@@ -84,6 +88,7 @@ export default {
                     dl_db.init(_this)
                     console.log("Info: Publish new data success.")
                 }else {
+                    console.log("Node: publish.newData failed. ", message)
                     alert("Publish data failed: ", message.payload)
                 }
             })

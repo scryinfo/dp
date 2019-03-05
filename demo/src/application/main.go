@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/asticode/go-astilog"
@@ -13,14 +12,14 @@ import (
 // Constants
 const (
 	ABOUT  = "test go -> js."
-	ABOUT2 = "test go -> js once more."
+	ShortMessage = "You have new short-message, remember to checkout it."
 )
 
 // Vars
 var (
 	AppName string
 	w       *astilectron.Window
-	err error
+	err error = nil
 )
 
 func init() {
@@ -37,61 +36,31 @@ func main() {
 		Debug: true,
 		MenuOptions: []*astilectron.MenuItemOptions{
 			{
-				Label: astilectron.PtrStr("Main menu 1"),
+				Label: astilectron.PtrStr("Options"),
 				SubMenu: []*astilectron.MenuItemOptions{
-					{
-						Label: astilectron.PtrStr("About"),
-						OnClick: func(e astilectron.Event) (deleteListener bool) {
-							if err := bootstrap.SendMessage(w, "about", ABOUT, func(m *bootstrap.MessageIn) {
-								// Unmarshal payload
-								var s string
-								if err := json.Unmarshal(m.Payload, &s); err != nil {
-									astilog.Error(errors.Wrap(err, "unmarshal payload failed"))
-									return
-								}
-								astilog.Infof("About modal has been displayed and payload is %s!", s)
-							}); err != nil {
-								astilog.Error(errors.Wrap(err, "sending about event failed"))
-							}
-							return
-						},
-					},
+					{Role: astilectron.MenuItemRoleReload},
 					{Role: astilectron.MenuItemRoleClose},
 				},
 			},
 			{
-				Label: astilectron.PtrStr("Main menu 2"),
+				Label:astilectron.PtrStr("Tests (go -> js)"),
 				SubMenu: []*astilectron.MenuItemOptions{
 					{
-						Label: astilectron.PtrStr("About2"),
-						OnClick: func(e astilectron.Event) (deleteListener bool) {
-							if err := bootstrap.SendMessage(w, "about2", ABOUT2, func(m *bootstrap.MessageIn) {
-								// Unmarshal payload
-								var s string
-								if err := json.Unmarshal(m.Payload, &s); err != nil {
-									astilog.Error(errors.Wrap(err, "unmarshal payload failed"))
-									return
-								}
-								astilog.Infof("About2 modal has been displayed and payload is %s!", s)
-							}); err != nil {
-								astilog.Error(errors.Wrap(err, "sending about2 event failed"))
-							}
-							return
-						},
-					},
-					{Role: astilectron.MenuItemRoleReload},
-				},
-			},
-			{
-				Label: astilectron.PtrStr("Main menu 3"),
-				SubMenu: []*astilectron.MenuItemOptions{
-					{
-						Label: astilectron.PtrStr("test"),
+						Label: astilectron.PtrStr("test sdk init."),
 						OnClick: func(e astilectron.Event) (deleteListener bool) {
 							if err != nil {
 								if err := bootstrap.SendMessage(w, "sdkInit", err.Error()); err != nil {
 									astilog.Error(errors.Wrap(err, "sending welcome event failed"))
 								}
+							}
+							return
+						},
+					},
+					{
+						Label: astilectron.PtrStr("test send short-message."),
+						OnClick: func(e astilectron.Event) (deleteListener bool) {
+							if err := bootstrap.SendMessage(w, "sendMessage", ShortMessage); err != nil {
+								astilog.Error(errors.Wrap(err, "sending welcome event failed"))
 							}
 							return
 						},
@@ -102,7 +71,7 @@ func main() {
 		OnWait: func(_ *astilectron.Astilectron, ws []*astilectron.Window, _ *astilectron.Menu, _ *astilectron.Tray, _ *astilectron.Menu) error {
 			w = ws[0]
 			go func() {
-				time.Sleep(3 * time.Second)
+				time.Sleep(time.Second)
 				if err := bootstrap.SendMessage(w, "welcome", "Welcome to my go-astilectron demo!"); err != nil {
 					astilog.Error(errors.Wrap(err, "sending welcome event failed"))
 				}
