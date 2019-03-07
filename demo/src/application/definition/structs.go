@@ -15,25 +15,34 @@ type Datalist struct {
 }
 
 type Transaction struct {
-	Title         string
-	TransactionID int
-	Seller        string
-	Buyer         string
-	State         byte
+	Title             string
+	TransactionID     int
+	Seller            string
+	Buyer             string
+	State             byte
 	Verifier1Response string
 	Verifier2Response string
 	Verifier3Response string
-	ArbitrateResult bool
+	ArbitrateResult   bool
 }
 
 type PubData struct {
-	MetaData  string   `json:"Data"`
-	ProofData []string `json:"Proofs"`
-	DespData  string   `json:"Description"`
-	Price     float64  `json:"Price"`
-	Seller    string   `json:"Owner"`
-	Password  string   `json:"Password"`
-	SupportVerify bool `json:"supportVerify"`
+	MetaData      string   `json:"Data"`
+	ProofData     []string `json:"Proofs"`
+	DespData      string   `json:"Description"`
+	Price         float64  `json:"Price"`
+	Seller        string   `json:"Owner"`
+	Password      string   `json:"Password"`
+	SupportVerify bool     `json:"SupportVerify"`
+}
+
+type PubDataIDs struct {
+	MetaDataID    string   `json:"metaDataID"`
+	ProofDataIDs  []string `json:"proofDataIDs"`
+	DetailsID     string   `json:"detailsID"`
+	Price         float64  `json:"Price"`
+	SupportVerify bool     `json:"supportVerify"`
+	Password      string   `json:"password"`
 }
 
 type BuyData struct {

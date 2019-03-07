@@ -9,7 +9,6 @@ import (
 	op "github.com/scryinfo/iscap/demo/src/sdk/core/chainoperations"
 	"github.com/scryinfo/iscap/demo/src/sdk/interface/contractinterface"
 	"github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
-	"github.com/scryinfo/iscap/demo/src/sdk/util/storage/ipfsaccess"
 	"github.com/scryinfo/iscap/demo/src/sdk/util/uuid"
 	rlog "github.com/sirupsen/logrus"
 	"math/big"
@@ -42,8 +41,8 @@ func Initialize(protocolContractAddress common.Address,
 	return nil
 }
 
-func Publish(txParams *op.TransactParams, price *big.Int, metaData []byte, proofDatas [][]byte,
-	proofNum int, descriptionData []byte, supportVerify bool) (string, error) {
+func Publish(txParams *op.TransactParams, price *big.Int, metaDataID []byte, proofDataIDs [][]byte,
+	proofNum int, detailsID []byte, supportVerify bool) (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			rlog.Error("failed to publish data, error:", err)
@@ -54,23 +53,33 @@ func Publish(txParams *op.TransactParams, price *big.Int, metaData []byte, proof
 	publishId := uuid.GenerateUUID()
 
 	//submit meta data
-	cidMd, err := ipfsaccess.GetIAInstance().SaveToIPFS(metaData)
-	if err != nil {
-		rlog.Error("failed to save meta data to ipfs, error: ", err)
-		return "", err
-	}
+	//cidMd, err := ipfsaccess.GetIAInstance().SaveToIPFS(metaData)
+	//if err != nil {
+	//	rlog.Error("failed to save meta data to ipfs, error: ", err)
+	//	return "", err
+	//}
 
 	//submit proof data
-	cidPds := make([][32]byte, proofNum)
-	for i := 0; i < proofNum; i++ {
-		cidPd, err := ipfsaccess.GetIAInstance().SaveToIPFS(proofDatas[i])
+	//cidPds := make([][32]byte, proofNum)
+	//for i := 0; i < proofNum; i++ {
+	//	cidPd, err := ipfsaccess.GetIAInstance().SaveToIPFS(proofDatas[i])
+	//
+	//	if err != nil {
+	//		rlog.Error("failed to save proof data to ipfs, error: ", err)
+	//		return "", err
+	//	}
+	//
+	//	cidPds[i], err = ipfsHashToBytes32(cidPd)
+	//	if err != nil {
+	//		rlog.Error("failed to convert ipfs hash to bytes32")
+	//		return "", err
+	//	}
+	//}
 
-		if err != nil {
-			rlog.Error("failed to save proof data to ipfs, error: ", err)
-			return "", err
-		}
-
-		cidPds[i], err = ipfsHashToBytes32(cidPd)
+	pdIDs := make([][32]byte, proofNum)
+	var err error = nil
+	for i := 0;i < proofNum;i++ {
+		pdIDs[i], err = ipfsHashToBytes32(string(proofDataIDs[i]))
 		if err != nil {
 			rlog.Error("failed to convert ipfs hash to bytes32")
 			return "", err
@@ -78,21 +87,20 @@ func Publish(txParams *op.TransactParams, price *big.Int, metaData []byte, proof
 	}
 
 	//submit description data
-	cidDd, err := ipfsaccess.GetIAInstance().SaveToIPFS(descriptionData)
-	if err != nil {
-		rlog.Error("failed to save description data to ipfs, error: ", err)
-		return "", err
-	}
+	//cidDd, err := ipfsaccess.GetIAInstance().SaveToIPFS(descriptionData)
+	//if err != nil {
+	//	rlog.Error("failed to save description data to ipfs, error: ", err)
+	//	return "", err
+	//}
 
-	b := []byte(cidMd)
-	encMetaId, err := accounts.GetAMInstance().Encrypt(b, txParams.From.String(), txParams.Password)
+	encMetaId, err := accounts.GetAMInstance().Encrypt(metaDataID, txParams.From.String(), txParams.Password)
 	if err != nil {
 		rlog.Error("failed to encrypt meta data hash, error: ", err)
 		return "", err
 	}
 
 	//upload meta_data_id_enc_seller and other cids to contracts
-	tx, err := scryProtocol.PublishDataInfo(op.BuildTransactOpts(txParams), uuid.GenerateUUID(), publishId, price, encMetaId, cidPds, cidDd, supportVerify)
+	tx, err := scryProtocol.PublishDataInfo(op.BuildTransactOpts(txParams), uuid.GenerateUUID(), publishId, price, encMetaId, pdIDs, string(detailsID), supportVerify)
 	if err != nil {
 		rlog.Error("failed to publish data information, error: ", err)
 		return "", err

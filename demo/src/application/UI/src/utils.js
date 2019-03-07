@@ -11,6 +11,14 @@ let utils = {
                         position: "top-left"
                     })
                     break
+                case "onPublish":
+                    console.log(message.payload)
+                    _this.$notify({
+                        title: "Callback: ",
+                        message: message.payload,
+                        position: "top-left"
+                    })
+                    break
             }
         })
     }

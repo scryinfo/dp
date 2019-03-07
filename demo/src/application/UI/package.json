@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A Vue.js project",
   "author": "mats9693 <982254249@qq.com>",
-  "license": "",
+  "license": "MIT",
   "scripts": {
     "dev": "node build/dev-server.js",
     "start": "node build/dev-server.js",
@@ -12,6 +12,7 @@
   "dependencies": {
     "element-ui": "2.6.0",
     "font-awesome": "^4.7.0",
+    "ipfs-api": "^26.1.2",
     "nprogress": "^0.2.0",
     "vue": "^2.6.6",
     "vue-router": "^2.5.3",

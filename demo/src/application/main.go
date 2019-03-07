@@ -5,8 +5,8 @@ import (
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/asticode/go-astilog"
 	"github.com/pkg/errors"
-    "github.com/scryinfo/iscap/demo/src/application/communication"
     "github.com/scryinfo/iscap/demo/src/application/sdkinterface"
+	"github.com/scryinfo/iscap/demo/src/application/transmission"
 	"time"
 )
 
@@ -74,6 +74,7 @@ func main() {
 		},
 		OnWait: func(_ *astilectron.Astilectron, ws []*astilectron.Window, _ *astilectron.Menu, _ *astilectron.Tray, _ *astilectron.Menu) error {
 			w = ws[0]
+			transmission.SetWindow(w)
 			go func() {
 				time.Sleep(time.Second)
 				if err := bootstrap.SendMessage(w, "welcome", "Welcome to my go-astilectron demo!"); err != nil {
@@ -84,7 +85,7 @@ func main() {
 		},
 		Windows: []*bootstrap.Window{{
 			Homepage:       "index.html",
-			MessageHandler: handleMessages,
+			MessageHandler: transmission.HandleMessages,
 			Options: &astilectron.WindowOptions{
 				Center: astilectron.PtrBool(true),
 				Width:  astilectron.PtrInt(1000),

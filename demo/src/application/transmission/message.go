@@ -1,4 +1,4 @@
-package main
+package transmission
 
 import (
 	"encoding/json"
@@ -7,7 +7,9 @@ import (
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/scryinfo/iscap/demo/src/application/definition"
 	"github.com/scryinfo/iscap/demo/src/application/sdkinterface"
+	"github.com/scryinfo/iscap/demo/src/sdk/core/ethereum/events"
 	"github.com/scryinfo/iscap/demo/src/sdk/scryclient"
+	rlog "github.com/sirupsen/logrus"
 	"math/big"
 )
 
@@ -20,10 +22,15 @@ const (
 )
 
 var (
-	user *scryclient.ScryClient = nil
+	user   *scryclient.ScryClient = nil
+	window *astilectron.Window    = nil
 )
 
-func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, error) {
+func SetWindow(w *astilectron.Window) {
+	window = w
+}
+
+func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, error) {
 	var (
 		payload interface{} = nil
 		err     error       = errors.New("")
@@ -49,15 +56,15 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 			break
 		}
 		var ok bool
-		ok, err = sdkinterface.UserLogin(ai.Account,ai.Password)
+		ok, err = sdkinterface.UserLogin(ai.Account, ai.Password)
 		if !ok {
 			break
 		}
-		err = sdkinterface.TransferTokenFromDeployer(big.NewInt(10000))	// test
+		err = sdkinterface.TransferTokenFromDeployer(big.NewInt(10000)) // test
 		payload = ok
 		return payload, nil
 	case "save.keystore":
-		err = sdkinterface.TransferTokenFromDeployer(big.NewInt(10000))	// test
+		err = sdkinterface.TransferTokenFromDeployer(big.NewInt(10000)) // test
 		if err != nil {
 			break
 		}
@@ -98,11 +105,12 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		payload = true
 		return payload, nil
 	case "publish":
-		var pd definition.PubData = definition.PubData{}
+		var pd definition.PubDataIDs = definition.PubDataIDs{}
+		rlog.Info("Node: show publish file. ", pd)
 		if err = json.Unmarshal(m.Payload, &pd); err != nil {
 			break
 		}
-		payload, err = sdkinterface.PublishData(pd)
+		payload, err = sdkinterface.PublishData(&pd, onPublish)
 		if err != nil {
 			break
 		}
@@ -111,4 +119,13 @@ func handleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 
 	payload = err.Error()
 	return payload, err
+}
+
+func onPublish(event events.Event) bool {
+	go func() {
+		if err := bootstrap.SendMessage(window, "onPublish", event); err != nil {
+			rlog.Error("failed to send onPublish event, error:", err)
+		}
+	}()
+	return true
 }
