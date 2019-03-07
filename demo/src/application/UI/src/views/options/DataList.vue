@@ -35,6 +35,7 @@ export default {
                 confirmButtonText: "Submit",
                 cancelButtonText: "Cancel"
             }).then(({ value }) => {
+                // login.verify
                 this.buy(value)
             }).catch(() => {
                 this.$message({

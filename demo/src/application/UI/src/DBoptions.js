@@ -96,7 +96,7 @@ let mt_db = {
             alert("open failed with error code: " + event.target.errorCode)
         }
         request.onsuccess = function(event) {
-            // _this.$store.state.mytransaction = []
+            _this.$store.state.mytransaction = []
             mt_db.db = event.target.result
             let s = mt_db.db.transaction(mt_db.db_store_name,"readonly").objectStore(mt_db.db_store_name)
             let c = s.openCursor()

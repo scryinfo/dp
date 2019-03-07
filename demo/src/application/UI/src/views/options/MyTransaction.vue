@@ -7,7 +7,7 @@
         <el-table :data="this.$store.state.mytransaction" highlight-current-row border height=400 @selection-change="selectedChange">
             <el-table-column type="selection" width=50></el-table-column>
             <el-table-column type="expand">
-                <el-form label-position="left" inline slot-scope="props">
+                <el-form label-position="left" inline slot-scope="props" label-width="150">
                     <el-form-item label="transactionID"><span>{{ props.row.transactionID }}</span></el-form-item>
                     <el-form-item label="Title"><span>{{ props.row.Title }}</span></el-form-item>
                     <el-form-item label="State"><span>{{ props.row.State }}</span></el-form-item>
@@ -46,6 +46,7 @@ export default {
                 confirmButtonText: "Submit",
                 cancelButtonText: "Cancel"
             }).then(({ value }) => {
+                // login.verify
                 this.purchase(value)
             }).catch(() => {
                 this.$message({
@@ -76,5 +77,8 @@ export default {
 <style scoped>
 .el-form-item {
     width: 100%;
+}
+.el-form-item__label {
+    color: #99a9bf;
 }
 </style>
