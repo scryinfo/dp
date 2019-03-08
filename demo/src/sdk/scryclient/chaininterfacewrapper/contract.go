@@ -41,8 +41,8 @@ func Initialize(protocolContractAddress common.Address,
 	return nil
 }
 
-func Publish(txParams *op.TransactParams, price *big.Int, metaDataID []byte, proofDataIDs [][]byte,
-	proofNum int, detailsID []byte, supportVerify bool) (string, error) {
+func Publish(txParams *op.TransactParams, price *big.Int, metaDataID []byte, proofDataIDs []string,
+	proofNum int, detailsID string, supportVerify bool) (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			rlog.Error("failed to publish data, error:", err)
@@ -79,7 +79,7 @@ func Publish(txParams *op.TransactParams, price *big.Int, metaDataID []byte, pro
 	pdIDs := make([][32]byte, proofNum)
 	var err error = nil
 	for i := 0;i < proofNum;i++ {
-		pdIDs[i], err = ipfsHashToBytes32(string(proofDataIDs[i]))
+		pdIDs[i], err = ipfsHashToBytes32(proofDataIDs[i])
 		if err != nil {
 			rlog.Error("failed to convert ipfs hash to bytes32")
 			return "", err
@@ -100,7 +100,8 @@ func Publish(txParams *op.TransactParams, price *big.Int, metaDataID []byte, pro
 	}
 
 	//upload meta_data_id_enc_seller and other cids to contracts
-	tx, err := scryProtocol.PublishDataInfo(op.BuildTransactOpts(txParams), uuid.GenerateUUID(), publishId, price, encMetaId, pdIDs, string(detailsID), supportVerify)
+	tx, err := scryProtocol.PublishDataInfo(op.BuildTransactOpts(txParams), uuid.GenerateUUID(), publishId, price,
+		encMetaId, pdIDs, detailsID, supportVerify)
 	if err != nil {
 		rlog.Error("failed to publish data information, error: ", err)
 		return "", err

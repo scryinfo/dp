@@ -157,13 +157,12 @@ func PublishData(data *definition.PubDataIDs, cb chainevents.EventCallback) (str
 		Value:    big.NewInt(0),
 		Pending:  false}
 
-	proofs := convertProofs(*data)
 	return cif.Publish(&txParam,
 		big.NewInt(int64(data.Price)),
 		[]byte(data.MetaDataID),
-		proofs,
+		data.ProofDataIDs,
 		len(data.ProofDataIDs),
-		[]byte(data.DetailsID),
+		data.DetailsID,
 		data.SupportVerify)
 }
 
@@ -220,14 +219,6 @@ func CreateTransaction(publishId string, password string, cb chainevents.EventCa
     return nil
 }
 
-func convertProofs(data definition.PubDataIDs) [][]byte {
-	proofs := make([][]byte, len(data.ProofDataIDs))
-	for _, proof := range data.ProofDataIDs {
-		proofs = append(proofs, []byte(proof))
-	}
-
-	return proofs
-}
 
 func getContracts(protocolContractAddr string,
 	tokenContractAddr string,

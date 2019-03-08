@@ -14,11 +14,26 @@ let utils = {
                 case "onPublish":
                     console.log(message.payload)
                     _this.$notify({
-                        title: "Callback: ",
+                        title: "onPublish.callback: ",
                         message: message.payload,
                         position: "top-left"
                     })
                     break
+                case "onApprove":
+                    console.log(message.payload)
+                    _this.$notify({
+                        title: "onApprove.callback: ",
+                        message: message.payload,
+                        position: "top-left"
+                    })
+                    break
+                case "onTransactionCreat":
+                    console.log(message.payload)
+                    _this.$notify({
+                        title: "onTransactionCreat.callback: ",
+                        message: message.payload,
+                        position: "top-left"
+                    })
             }
         })
     }

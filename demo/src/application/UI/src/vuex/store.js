@@ -7,11 +7,11 @@ const state = {
     // show data dictionary.
 
     datalist: [],
-    // {Title: "", Price: 0, Keys: "", Description: "", Owner: "", pID: ""}  // primary key: publishID.
+    // {Title: "", Price: 0, Keys: "", Description: "", SupportVerify: false, pID: ""}  // primary key: publishID.
 
     mytransaction: [],
-    // {Buyer: "0x0000", Seller: "0x0001", State: "Created", Title: "test title", ArbitrateResult: false, tID: "test transactionID",
-    //     Verifier1Response: "1,v1r", Verifier2Response: "1,v2r", Verifier3Response: "1,v3r"} // primary key: transactionID.
+    // {Buyer: "", Seller: "", State: "", Title: "", ArbitrateResult: false, Price: 0, tID: "",
+    //     Verifier1Response: "", Verifier2Response: "", Verifier3Response: ""} // primary key: transactionID.
     
     accounts: [],
     // {address: ""} // primary key: address.

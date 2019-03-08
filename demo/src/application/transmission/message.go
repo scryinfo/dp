@@ -13,14 +13,6 @@ import (
 	"math/big"
 )
 
-const (
-	Created = byte(iota)
-	Voted
-	Payed
-	ReadyForDownload
-	Closed
-)
-
 var (
 	user   *scryclient.ScryClient = nil
 	window *astilectron.Window    = nil
@@ -37,18 +29,7 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 	)
 
 	switch m.Name {
-	case "create.new.account":
-		var pwd definition.AccInfo = definition.AccInfo{}
-		err = json.Unmarshal(m.Payload, &pwd)
-		if err != nil {
-			break
-		}
-		user, err = sdkinterface.CreateUserWithLogin(pwd.Password)
-		if err != nil {
-			break
-		}
-		payload = user.Account.Address
-		return payload, nil
+	// when an user jump from login page to home page, he will get 10000 tokens for test.
 	case "login.verify":
 		var ai definition.AccInfo = definition.AccInfo{}
 		err = json.Unmarshal(m.Payload, &ai)
@@ -63,6 +44,18 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		err = sdkinterface.TransferTokenFromDeployer(big.NewInt(10000)) // test
 		payload = ok
 		return payload, nil
+	case "create.new.account":
+		var pwd definition.AccInfo = definition.AccInfo{}
+		err = json.Unmarshal(m.Payload, &pwd)
+		if err != nil {
+			break
+		}
+		user, err = sdkinterface.CreateUserWithLogin(pwd.Password)
+		if err != nil {
+			break
+		}
+		payload = user.Account.Address
+		return payload, nil
 	case "save.keystore":
 		err = sdkinterface.TransferTokenFromDeployer(big.NewInt(10000)) // test
 		if err != nil {
@@ -72,30 +65,38 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		return payload, nil
 	case "get.datalist":
 		payload = []definition.Datalist{
-			{"Qm461", "title1", 1, "test tags461", "test description461", "0x1234567890123456789012345678901234567890"},
-			{"Qm462", "title2", 2, "test tags462", "test description462", "0x1234567890123456789012345678901234567890"},
-			{"Qm463", "title3", 3, "test tags463", "test description463", "0x1234567890123456789012345678901234567890"},
-			{"Qm464", "title4", 4, "test tags464", "test description464", "0x1234567890123456789012345678901234567890"},
-			{"Qm465", "title5", 5, "test tags465", "test description465", "0x1234567890123456789012345678901234567890"},
-			{"Qm466", "title6", 6, "test tags466", "test description466", "0x1234567890123456789012345678901234567890"},
-			{"Qm467", "title7", 7, "test tags467", "test description467", "0x1234567890123456789012345678901234567890"},
-			{"Qm468", "title8", 8, "test tags468", "test description468", "0x1234567890123456789012345678901234567890"},
-			{"Qm469", "title9", 9, "test tags469", "test description469", "0x1234567890123456789012345678901234567890"},
-			{"Qm4610", "title10", 10, "test tags4610", "test description4610", "0x1234567890123456789012345678901234567890"},
-			{"Qm4611", "title11", 11, "test tags4611", "test description4611", "0x1234567890123456789012345678901234567890"},
-			{"Qm4612", "title12", 12, "test tags4612", "test description4612", "0x1234567890123456789012345678901234567890"},
-			{"Qm4613", "title13", 13, "test tags4613", "test description4613", "0x1234567890123456789012345678901234567890"},
+			{"Qm461", "title1", 1, "test tags461", "test description461", false},
+			{"Qm462", "title2", 2, "test tags462", "test description462", false},
+			{"Qm463", "title3", 3, "test tags463", "test description463", false},
+			{"Qm464", "title4", 4, "test tags464", "test description464", false},
+			{"Qm465", "title5", 5, "test tags465", "test description465", false},
+			{"Qm466", "title6", 6, "test tags466", "test description466", false},
+			{"Qm467", "title7", 7, "test tags467", "test description467", false},
+			{"Qm468", "title8", 8, "test tags468", "test description468", false},
+			{"Qm469", "title9", 9, "test tags469", "test description469", false},
+			{"Qm4610", "title10", 10, "test tags4610", "test description4610", false},
+			{"Qm4611", "title11", 11, "test tags4611", "test description4611", false},
+			{"Qm4612", "title12", 12, "test tags4612", "test description4612", false},
+			{"Qm4613", "title13", 13, "test tags4613", "test description4613", false},
 		}
 		return payload, nil
 	case "get.transaction":
 		payload = []definition.Transaction{
-			{"title1", 1, "0x1234567890123456789012345678901234567890", "0x1524783212578655202365479511235413256752", Created,
+			{"title1", 1, 1, "0x1234567890123456789012345678901234567890", "0x1524783212578655202365479511235413256752", definition.Created,
 				"1,v1r", "2,v2r", "3,v3r", true},
 		}
 		return payload, nil
 	case "buy":
 		var bd definition.BuyData = definition.BuyData{}
 		if err = json.Unmarshal(m.Payload, &bd); err != nil {
+			break
+		}
+		// optimize: approve contract transfer how much money (1600 now) ? data price + rewards may be a solution.
+		if err = sdkinterface.ApproveTransferForBuying(bd.Password, onApprove); err != nil {
+			break
+		}
+		// optimize: not support buy a group of data one time, 'ids'([]string) adjust to 'id'(string).
+		if err = sdkinterface.CreateTransaction(bd.IDs, bd.Password, onTransactionCreat); err != nil {
 			break
 		}
 
@@ -106,10 +107,11 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		return payload, nil
 	case "publish":
 		var pd definition.PubDataIDs = definition.PubDataIDs{}
-		rlog.Info("Node: show publish file. ", pd)
+		rlog.Info("Node: show publish data from js. ", m.Payload)
 		if err = json.Unmarshal(m.Payload, &pd); err != nil {
 			break
 		}
+		rlog.Info("Node: show publish file. ", pd)
 		payload, err = sdkinterface.PublishData(&pd, onPublish)
 		if err != nil {
 			break
@@ -125,6 +127,25 @@ func onPublish(event events.Event) bool {
 	go func() {
 		if err := bootstrap.SendMessage(window, "onPublish", event); err != nil {
 			rlog.Error("failed to send onPublish event, error:", err)
+		}
+	}()
+	return true
+}
+
+func onApprove(event events.Event) bool {
+	go func() {
+		if err := bootstrap.SendMessage(window, "onApprove", event); err != nil {
+			rlog.Error("failed to send onApprove event, error:", err)
+		}
+	}()
+	return true
+}
+
+func onTransactionCreat(event events.Event) bool {
+	//txId = event.Data.Get("transactionId").(*big.Int)
+	go func() {
+		if err := bootstrap.SendMessage(window, "onTransactionCreat", event); err != nil {
+			rlog.Error("failed to send onTransactionCreat event, error:", err)
 		}
 	}()
 	return true
