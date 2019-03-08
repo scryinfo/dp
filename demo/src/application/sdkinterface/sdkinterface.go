@@ -166,15 +166,13 @@ func PublishData(data *definition.PubDataIDs, cb chainevents.EventCallback) (str
 		data.SupportVerify)
 }
 
-func ApproveTransferForBuying(password string, cb chainevents.EventCallback) (error) {
+func ApproveTransferForBuying(password string, cb chainevents.EventCallback) error {
     return approveTransfer(cb,
         password,
         common.HexToAddress(scryInfo.Chain.Contracts.ProtocolAddr))
 }
 
-func approveTransfer(cb chainevents.EventCallback,
-    password string,
-    protocolContractAddr common.Address) (error) {
+func approveTransfer(cb chainevents.EventCallback, password string, protocolContractAddr common.Address) error {
     if curUser == nil {
         fmt.Println("no current user")
         return errors.New("failed to approve transfer, current user is null")
@@ -197,7 +195,7 @@ func approveTransfer(cb chainevents.EventCallback,
     return nil
 }
 
-func CreateTransaction(publishId string, password string, cb chainevents.EventCallback) (error) {
+func CreateTransaction(publishId string, password string, cb chainevents.EventCallback) error {
     if curUser == nil {
         fmt.Println("no current user")
         return errors.New("failed to prepare to buy, current user is null")

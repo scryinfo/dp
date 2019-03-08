@@ -88,9 +88,11 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		return payload, nil
 	case "buy":
 		var bd definition.BuyData = definition.BuyData{}
+		rlog.Debug("Node: show buy details from js. ", string(m.Payload))
 		if err = json.Unmarshal(m.Payload, &bd); err != nil {
 			break
 		}
+		rlog.Debug("Node: show buy details. ", bd)
 		// optimize: approve contract transfer how much money (1600 now) ? data price + rewards may be a solution.
 		if err = sdkinterface.ApproveTransferForBuying(bd.Password, onApprove); err != nil {
 			break
@@ -106,12 +108,12 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		payload = true
 		return payload, nil
 	case "publish":
+		rlog.Debug("Node: show publish data from js. ", string(m.Payload))
 		var pd definition.PubDataIDs = definition.PubDataIDs{}
-		rlog.Info("Node: show publish data from js. ", m.Payload)
 		if err = json.Unmarshal(m.Payload, &pd); err != nil {
 			break
 		}
-		rlog.Info("Node: show publish file. ", pd)
+		rlog.Debug("Node: show publish data. ", pd)
 		payload, err = sdkinterface.PublishData(&pd, onPublish)
 		if err != nil {
 			break
@@ -125,6 +127,7 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 
 func onPublish(event events.Event) bool {
 	go func() {
+		rlog.Debug("Node: publish.callback. ", event)
 		if err := bootstrap.SendMessage(window, "onPublish", event); err != nil {
 			rlog.Error("failed to send onPublish event, error:", err)
 		}
@@ -134,6 +137,7 @@ func onPublish(event events.Event) bool {
 
 func onApprove(event events.Event) bool {
 	go func() {
+		rlog.Debug("Node: approve.callback. ", event)
 		if err := bootstrap.SendMessage(window, "onApprove", event); err != nil {
 			rlog.Error("failed to send onApprove event, error:", err)
 		}
@@ -144,6 +148,7 @@ func onApprove(event events.Event) bool {
 func onTransactionCreat(event events.Event) bool {
 	//txId = event.Data.Get("transactionId").(*big.Int)
 	go func() {
+		rlog.Debug("Node: transaction.create.callback. ", event)
 		if err := bootstrap.SendMessage(window, "onTransactionCreat", event); err != nil {
 			rlog.Error("failed to send onTransactionCreat event, error:", err)
 		}
