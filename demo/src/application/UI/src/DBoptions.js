@@ -12,9 +12,9 @@ let DBoptions = {
                     Price: t.Price,
                     Keys: t.Keys,
                     Description: t.Description,
-                    Owner: t.Owner,
+                    SupportVerify: t.SupportVerify
                 }
-                dl_db.write(p,t.ID)
+                dl_db.write(p,t.PublishID)
             }
             dl_db.init(_this)
         })
@@ -25,6 +25,7 @@ let DBoptions = {
                 let t = message.payload[i]
                 let p = {
                     Title: t.Title,
+                    Price: t.Price,
                     Seller: t.Seller,
                     Buyer: t.Buyer,
                     State: t.State,
@@ -52,8 +53,8 @@ let dl_db = {
         }
         request.onupgradeneeded = function(event) {
             this.db = event.target.result
-            this.db.createObjectStore(dl_db.db_store_name)
-            this.db.createObjectStore("transaction")
+            this.db.createObjectStore(dl_db.db_store_name, {keyPath: "PublishID"})
+            this.db.createObjectStore("transaction", {keyPath: "TransactionID"})
             this.db.createObjectStore("accounts")
         }
         request.onsuccess = function(event) {
@@ -69,8 +70,8 @@ let dl_db = {
                         Price: cursor.value.Price,
                         Keys: cursor.value.Keys,
                         Description: cursor.value.Description,
-                        Owner: cursor.value.Owner,
-                        ID: cursor.key
+                        SupportVerify: cursor.value.SupportVerify,
+                        PublishID: cursor.key
                     })
                     cursor.continue()
                 }
@@ -114,6 +115,7 @@ let mt_db = {
                     }
                     _this.$store.state.mytransaction.push({
                         Title: cursor.value.Title,
+                        Price: cursor.value.Price,
                         Seller: cursor.value.Seller,
                         Buyer: cursor.value.Buyer,
                         State: state,

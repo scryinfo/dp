@@ -10,7 +10,7 @@
             <el-table-column prop="Price" label="Price" show-overflow-tooltip></el-table-column>
             <el-table-column prop="Keys" label="Keys" show-overflow-tooltip></el-table-column>
             <el-table-column prop="Description" label="Description" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="Owner" label="Owner" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="SupportVerify" label="SupportVerify" show-overflow-tooltip></el-table-column>
         </el-table>
     </section>
 </template>
@@ -27,7 +27,7 @@ export default {
         selectedChange: function (sels) {
             this.selectsDL = []
             for (let i=0;i<sels.length;i++) {
-                this.selectsDL.push({ ID: sels[i].ID })
+                this.selectsDL.push( sels[i].PublishID )
             }
         },
         buyPwd: function () {

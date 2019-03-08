@@ -75,6 +75,7 @@ export default {
                 Description: this.pubData.details.Description,
                 SupportVerify: this.pubData.SupportVerify
             }
+            console.log("Node: publish.send. ", this.send)
             astilectron.sendMessage({Name:"publish",Payload:this.send}, function (message) {
                 if (message.name !== "error") {
                     dl_db.write(pub, message.payload)
@@ -89,7 +90,9 @@ export default {
         },
         getIDs: function () {
             const ipfsAPI = require("ipfs-api")
-            const ipfs = ipfsAPI("/ip4/127.0.0.1/tcp/5001")     // send message to go and listen response.
+            // send message to go and listen response to set ipfs port.
+            // let ipfs = ipfsAPI("/ip4/127.0.0.1/tcp/5001")
+            let ipfs = ipfsAPI({host: 'localhost', port: '5001', protocol: 'http'})
             let ok1 = this.uploadData(ipfs, this)
             let ok2 = this.uploadProofs(ipfs, this)
             let ok3 = this.uploadDetails(ipfs, this)

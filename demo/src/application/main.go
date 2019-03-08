@@ -22,10 +22,6 @@ var (
 	err error = nil
 )
 
-func getWindow() (*astilectron.Window) {
-    return w
-}
-
 func init() {
 	err = sdkinterface.Initialize()
 }
