@@ -43,7 +43,7 @@ func main() {
 				},
 			},
 			{
-				Label:astilectron.PtrStr("Tests (go -> js)"),
+				Label: astilectron.PtrStr("Tests (go -> js)"),
 				SubMenu: []*astilectron.MenuItemOptions{
 					{
 						Label: astilectron.PtrStr("test sdk init."),

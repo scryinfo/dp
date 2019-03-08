@@ -57,10 +57,11 @@ export default {
             })
         },
         purchase:function (pwd) {
+            let _this = this
             // not support buy a group of data one time, give the first id for instead.
-            astilectron.sendMessage({ Name:"purchase",Payload:{buyer: this.$store.state.account, password: pwd,
-                    ids: this.selectsMT[0]} }, function (message) {
+            astilectron.sendMessage({ Name:"purchase",Payload:{password: pwd, ids: this.selectsMT[0]} }, function (message) {
                 if (message.payload) {
+                    _this.selectsMT = []
                     console.log("Purchase data succeed.")
                 }else {
                     console.log("Node: purchase failed.", message)
@@ -68,9 +69,6 @@ export default {
                 }
             })
         }
-    },
-    created() {
-        this.selectsMT = []
     }
 }
 </script>
@@ -79,7 +77,7 @@ export default {
 .el-form-item {
     width: 100%;
 }
-.el-form-item label {
+.el-form-item__label {
     color: #99a9bf;
 }
 </style>

@@ -46,8 +46,7 @@ export default {
         },
         buy: function (pwd) {
             // not support buy a group of data one time, give the first id for instead.
-            astilectron.sendMessage({ Name:"buy",Payload:{buyer: this.$store.state.account, password: pwd,
-                        ids: this.selectsDL[0]} }, function (message) {
+            astilectron.sendMessage({ Name:"buy",Payload:{password: pwd, ids: this.selectsDL[0]} }, function (message) {
                     if (message.payload) {
                         // DBoptions.getTransaction();
                         console.log("Buy data succeed.")
