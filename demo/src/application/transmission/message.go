@@ -88,11 +88,9 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		return payload, nil
 	case "buy":
 		var bd definition.BuyData = definition.BuyData{}
-		rlog.Debug("Node: show buy details from js. ", string(m.Payload))
 		if err = json.Unmarshal(m.Payload, &bd); err != nil {
 			break
 		}
-		rlog.Debug("Node: show buy details. ", bd)
 		// optimize: approve contract transfer how much money (1600 now) ? data price + rewards may be a solution.
 		if err = sdkinterface.ApproveTransferForBuying(bd.Password, onApprove); err != nil {
 			break
@@ -101,10 +99,20 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err = sdkinterface.CreateTransaction(bd.IDs, bd.Password, onTransactionCreat); err != nil {
 			break
 		}
-
 		payload = true
 		return payload, nil
 	case "purchase":
+		var pd definition.PurchaseData = definition.PurchaseData{}
+		// optimize: not support buy a group of data one time, 'ids'([]string) adjust to 'id'(string).
+		if err = json.Unmarshal(m.Payload, &pd); err != nil {
+			break
+		}
+		if err = sdkinterface.Buy(pd.TransactionID, pd.Password, onPurchase); err != nil {
+			break
+		}
+		if err = sdkinterface.ConfirmDataTruth(pd.TransactionID, pd.Password, onClose); err != nil {
+			break
+		}
 		payload = true
 		return payload, nil
 	case "publish":
@@ -153,5 +161,27 @@ func onTransactionCreat(event events.Event) bool {
 			rlog.Error("failed to send onTransactionCreat event, error:", err)
 		}
 	}()
+	return true
+}
+
+func onPurchase(event events.Event) bool {
+	go func() {
+		rlog.Debug("Node: purchase.callback. ", event)
+		// event.data.metaDataIdEncWithSeller → ...EncWithBuyer
+		if err := bootstrap.SendMessage(window, "onPurchase", event); err != nil {
+			rlog.Error("failed to send onPurchase event, error:", err)
+		}
+	}()
+	return true
+}
+
+func onClose(event events.Event) bool {
+	go func() {
+		rlog.Debug("Node: confirm.data.truth.callback. ", event)
+		if err := bootstrap.SendMessage(window, "onClose", event); err != nil {
+			rlog.Error("failed to send onClose event, error:", err)
+		}
+	}()
+
 	return true
 }

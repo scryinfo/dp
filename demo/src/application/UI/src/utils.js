@@ -1,3 +1,4 @@
+import {mt_db} from "./DBoptions.js"
 let utils = {
     listen: function (_this) {
         astilectron.onMessage(function(message) {
@@ -34,6 +35,36 @@ let utils = {
                         message: message.payload,
                         position: "top-left"
                     })
+                    // go send the whole callback.event to js now, here will adjust later. core param is tID.
+                    mt_db.write({
+                        Title: "test title",
+                        Price: 0,
+                        Seller: "0x0000",
+                        Buyer: message.payload.data.users,
+                        State: 0,
+                        Verifier1Response: "3,v1r",
+                        Verifier2Response: "3,v2r",
+                        Verifier3Response: "3,v3r",
+                        ArbitrateResult: false
+                    }, message.payload.data.transactionId)
+                    mt_db.init(_this)
+                    break
+                case "onPurchase":
+                    console.log(message.payload)
+                    _this.$notify({
+                        title: "onPurchase.callback: ",
+                        message: message.payload.data.metaDataIdEncWithSeller,
+                        position: "top-left"
+                    })
+                    break
+                case "onClose":
+                    console.log(message.payload)
+                    _this.$notify({
+                        title: "onClose.callback: ",
+                        message: message.payload,
+                        position: "top-left"
+                    })
+                    break
             }
         })
     }

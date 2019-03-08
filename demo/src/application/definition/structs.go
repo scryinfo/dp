@@ -55,7 +55,11 @@ type PubDataIDs struct {
 }
 
 type BuyData struct {
-	Buyer    string `json:"buyer"`
 	Password string `json:"password"`
 	IDs      string `json:"ids"`
+}
+
+type PurchaseData struct {
+	Password      string  `json:"password"`
+	TransactionID float64 `json:"ids"`
 }

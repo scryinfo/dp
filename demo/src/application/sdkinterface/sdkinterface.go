@@ -217,6 +217,44 @@ func CreateTransaction(publishId string, password string, cb chainevents.EventCa
     return nil
 }
 
+func Buy(txId float64, password string, cb chainevents.EventCallback) error {
+	if curUser == nil {
+		fmt.Println("no current user")
+		return errors.New("failed to buy, current user is null")
+	}
+
+	curUser.SubscribeEvent("Buy", cb)
+
+	txParam := chainoperations.TransactParams{
+		From: common.HexToAddress(curUser.Account.Address),
+		Password: password,
+		Value: big.NewInt(0),
+		Pending: false}
+
+	err := cif.BuyData(&txParam, big.NewInt(int64(txId)))
+	if err != nil {
+		fmt.Println("failed to buyData, error:", err)
+		return errors.New("failed to buyData, error:" + err.Error())
+	}
+
+	return nil
+}
+
+func ConfirmDataTruth(txId float64, password string, cb chainevents.EventCallback) error {
+	curUser.SubscribeEvent("TransactionClose", cb)
+
+	txParam := chainoperations.TransactParams{
+		From: common.HexToAddress(curUser.Account.Address),
+		Password: password,
+		Value: big.NewInt(0),
+		Pending: false}
+	err := cif.ConfirmDataTruth(&txParam, big.NewInt(int64(txId)), true)
+	if err != nil {
+		fmt.Println("failed to ConfirmDataTruth, error:", err)
+		return errors.New("failed to ConfirmDataTruth, error:" + err.Error())
+	}
+	return nil
+}
 
 func getContracts(protocolContractAddr string,
 	tokenContractAddr string,
