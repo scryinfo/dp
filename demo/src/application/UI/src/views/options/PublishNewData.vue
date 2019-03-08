@@ -40,7 +40,8 @@ export default {
                 price: 0,
                 supportVerify: false,  // this.send.SupportVerify = this.pubData.SupportVerify
                 password: ""
-            }
+            },
+            count: 0
         }
     },
     methods: {
@@ -48,17 +49,13 @@ export default {
             this.$prompt(this.$store.state.account, "Input password for this account:", {
                 confirmButtonText: "Submit",
                 cancelButtonText: "Cancel"
-            }).then( ({ value }) => {
-                // login.verify
+            }).then( (pwd) => {
+                // unnecessary login.verify?
+                this.count = this.$refs.selectedProofs.$refs.input.files.length + 1
                 this.send.price = this.pubData.Price
                 this.send.supportVerify = this.pubData.SupportVerify
-                this.send.password = value
-                this.getIDs()   // return this.getIDs()
-            }).then( () => {    // param: ok
-                // if (ok) {
-                //     // if it is necessary to judge it?
-                // }
-                this.pub()
+                this.send.password = pwd.value
+                this.setIDs()
             }).catch((err) => {
                 this.$message({
                     type: "info",
@@ -66,85 +63,97 @@ export default {
                 })
             })
         },
-        pub: function () {
-            let _this = this
-            let pub = {
-                Title: this.pubData.details.Title,
-                Price: this.pubData.Price,
-                Keys: this.pubData.details.Keys,
-                Description: this.pubData.details.Description,
-                SupportVerify: this.pubData.SupportVerify
-            }
-            console.log("Node: publish.send. ", this.send)
-            astilectron.sendMessage({Name:"publish",Payload:this.send}, function (message) {
-                if (message.name !== "error") {
-                    dl_db.write(pub, message.payload)
-                    dl_db.init(_this)
-                    console.log("Info: Publish new data success.")
-                }else {
-                    console.log("Node: publish.newData failed. ", message)
-                    alert("Publish data failed: ", message.payload)
-                }
-            })
-            // this.resetData(), especially pwd and some arrays.
-        },
-        getIDs: function () {
-            const ipfsAPI = require("ipfs-api")
-            // send message to go and listen response to set ipfs port.
-            // let ipfs = ipfsAPI("/ip4/127.0.0.1/tcp/5001")
+        setIDs: function() {
+            let ipfsAPI = require("ipfs-api")
             let ipfs = ipfsAPI({host: 'localhost', port: '5001', protocol: 'http'})
-            let ok1 = this.uploadData(ipfs, this)
-            let ok2 = this.uploadProofs(ipfs, this)
-            let ok3 = this.uploadDetails(ipfs, this)
-            return (ok1 && ok2 && ok3)
+            this.setDataID(ipfs, this)
+            this.setProofIDs(ipfs, this)
+            this.setDetailsID(ipfs, this)
         },
-        uploadData: function (ipfs, _this) {
+        setDataID: function (ipfs, _this) {
             let data = this.$refs.selectedData.$refs.input.files[0]
             this.pubData.details.metaDataExtension = data.name.split(".").pop()
             let reader = new FileReader()
-            let ok = true
             reader.readAsArrayBuffer(data)
             reader.onload = function (evt) {
                 ipfs.add(Buffer.from(evt.target.result, "utf-8")).then(function (result) {
                     _this.send.metaDataID = result[0].hash
+                    _this.count--
                 }).catch(function (err) {
-                    ok = false
                     console.log("Node: add.metaData.failed. ", err)
                     alert("Add meta data failed. ", err)
                 })
             }
-            ok = (this.pubData.details.metaDataExtension !== "") && ok
-            return ok
         },
-        uploadProofs: function (ipfs, _this) {
+        setProofIDs: function (ipfs, _this) {
+            _this.send.proofDataIDs = []
             let proofs = this.$refs.selectedProofs.$refs.input.files
-            let ok = true
             for (let i=0;i<proofs.length;i++) {
                 this.pubData.details.proofDataExtensions.push( proofs[i].name.split(".").pop() )
                 let reader = new FileReader()
                 reader.readAsArrayBuffer(proofs[i])
                 reader.onload = function (evt) {
                     ipfs.add(Buffer.from(evt.target.result, "utf-8")).then(function (result) {
-                        _this.send.proofDataIDs.push( result[0].hash )
+                        _this.send.proofDataIDs.push(result[0].hash)
+                        _this.count--
                     }).catch(function (err) {
-                        ok = false
                         console.log("Node: add.proofsData.failed. ", err)
                         alert("Add proofs data failed. ", err)
                     })
                 }
             }
-            return ok
+            return true
         },
-        uploadDetails: function (ipfs, _this) {
-            let ok = true
+        setDetailsID: function (ipfs, _this) {
             ipfs.add(Buffer.from(JSON.stringify(this.pubData.details), "utf-8")).then(function (result) {
                 _this.send.detailsID = result[0].hash
+                _this.count--
             }).catch(function (err) {
-                ok = false
                 console.log("Node: add.detailsData.failed. ", err)
                 alert("Add details data failed. ", err)
             })
-            return ok
+            return true
+        },
+        pub: function () {
+            let _this = this
+            let pub = {
+                Title: this.pubData.details.Title,
+                Keys: this.pubData.details.Keys,
+                Description: this.pubData.details.Description,
+                Price: this.pubData.Price,
+                SupportVerify: this.pubData.SupportVerify
+            }
+            let str = JSON.stringify(this.send)
+            console.log("Node: before send to go. ", str)
+            astilectron.sendMessage({Name:"publish",Payload: this.send}, function (message) {
+                if (message.name !== "error") {
+                    dl_db.write(pub, message.payload)
+                    dl_db.init(_this)
+                    _this.resetSend()
+                    console.log("Publish new data success.")
+                }else {
+                    console.log("Node: publish.newData failed. ", message)
+                    alert("Publish data failed: ", message.payload)
+                }
+            })
+        },
+        resetSend: function () {
+            this.send = {
+                metaDataID: "",
+                proofDataIDs: [],
+                detailsID: "",
+                price: 0,
+                supportVerify: false,
+                password: ""
+            }
+        }
+    },
+    watch: {
+        count: function () {
+            if (this.count === -1) {
+                this.pub()
+                this.count = 0
+            }
         }
     }
 }

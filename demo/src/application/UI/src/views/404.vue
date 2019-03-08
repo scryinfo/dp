@@ -1,13 +1,13 @@
 <template>
     <p class="page-container">
-        404 :&nbsp;&nbsp;&nbsp;WallPage Not Found<br/>
+        404 :&nbsp;&nbsp;&nbsp;WALLPAGE NOT FOUND.<br/>
         Redirect to login page after {{count}} seconds.
     </p>
 </template>
 
 <script>
 export default {
-    name: "notFound.vue",
+    name: "notFound",
     data () {
         return {
             count: 5

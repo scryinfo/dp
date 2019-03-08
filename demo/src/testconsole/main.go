@@ -278,8 +278,8 @@ func SellerPublishData(supportVerify bool) {
 
 	//publish data
 	metaData := []byte{'1', '2', '3', '3'}
-	proofData := [][]byte{{'4', '5', '6', '3'}, {'2', '2', '1'}}
-	despData := []byte{'7', '8', '9', '3'}
+	proofData := []string{"982254249", "3398612893"}
+	despData := "2162056636"
 
 	txParam := chainoperations.TransactParams{common.HexToAddress(seller.Account.Address), keyPassword, big.NewInt(0), false}
 	cif.Publish(&txParam, big.NewInt(1000), metaData, proofData, 2, despData, supportVerify)
