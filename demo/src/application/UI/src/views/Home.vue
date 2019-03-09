@@ -102,4 +102,7 @@ export default {
     padding: 10px 10%;
     height: 480px;
 }
+.el-form-item__label {
+    color: #99a9bf;
+}
 </style>

@@ -67,6 +67,31 @@ func main() {
 					},
 				},
 			},
+			{
+				Label: astilectron.PtrStr("Initialize"),
+				SubMenu: []*astilectron.MenuItemOptions{
+					{
+						Label: astilectron.PtrStr("init data list"),
+						OnClick: func(e astilectron.Event) (deleteListener bool) {
+							if err != nil {
+								if err := bootstrap.SendMessage(w, "initDL", ""); err != nil {
+									astilog.Error(errors.Wrap(err, "sending initDL event failed"))
+								}
+							}
+							return
+						},
+					},
+					{
+						Label: astilectron.PtrStr("init my transaction"),
+						OnClick: func(e astilectron.Event) (deleteListener bool) {
+							if err := bootstrap.SendMessage(w, "initMT", ""); err != nil {
+								astilog.Error(errors.Wrap(err, "sending initMT event failed"))
+							}
+							return
+						},
+					},
+				},
+			},
 		},
 		OnWait: func(_ *astilectron.Astilectron, ws []*astilectron.Window, _ *astilectron.Menu, _ *astilectron.Tray, _ *astilectron.Menu) error {
 			w = ws[0]

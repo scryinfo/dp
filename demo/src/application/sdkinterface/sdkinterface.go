@@ -1,21 +1,21 @@
 package sdkinterface
 
 import (
-    "errors"
-    "fmt"
-    "github.com/ethereum/go-ethereum/common"
-    "github.com/scryinfo/iscap/demo/src/application/definition"
-    "github.com/scryinfo/iscap/demo/src/application/sdkinterface/settings"
-    "github.com/scryinfo/iscap/demo/src/sdk"
-    "github.com/scryinfo/iscap/demo/src/sdk/core/chainevents"
-    "github.com/scryinfo/iscap/demo/src/sdk/core/chainoperations"
-    "github.com/scryinfo/iscap/demo/src/sdk/scryclient"
-    cif "github.com/scryinfo/iscap/demo/src/sdk/scryclient/chaininterfacewrapper"
-    "github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
-    rlog "github.com/sirupsen/logrus"
-    "io/ioutil"
-    "math/big"
-    "strings"
+	"errors"
+	"fmt"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/scryinfo/iscap/demo/src/application/definition"
+	"github.com/scryinfo/iscap/demo/src/application/sdkinterface/settings"
+	"github.com/scryinfo/iscap/demo/src/sdk"
+	"github.com/scryinfo/iscap/demo/src/sdk/core/chainevents"
+	"github.com/scryinfo/iscap/demo/src/sdk/core/chainoperations"
+	"github.com/scryinfo/iscap/demo/src/sdk/scryclient"
+	cif "github.com/scryinfo/iscap/demo/src/sdk/scryclient/chaininterfacewrapper"
+	"github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
+	rlog "github.com/sirupsen/logrus"
+	"io/ioutil"
+	"math/big"
+	"strings"
 )
 
 const (
@@ -237,6 +237,25 @@ func Buy(txId float64, password string, cb chainevents.EventCallback) error {
 		return errors.New("failed to buyData, error:" + err.Error())
 	}
 
+	return nil
+}
+
+func SubmitMetaDataIdEncWithBuyer(txId float64, password string, cb chainevents.EventCallback) error {
+	curUser.SubscribeEvent("ReadyForDownload", cb)
+
+	txParam := chainoperations.TransactParams{
+		From: common.HexToAddress(curUser.Account.Address),
+		Password: password,
+		Value: big.NewInt(0),
+		Pending: false}
+
+	metaDataIdEncWithBuyer := []byte("qzfCOkBRLj50jBos+eIk2J4Dl5D2caxeyQQTVzxgcGe6qfL7qNXBT9LgGYGrl98andDM3oS" +
+		"AE1dXDHceS1yiyqnGw/f23pN3lBNcTVuRPB9JZ699mErK4J3ryokdlgLJ3lzUU/RMXFw4nU8894Jsv/nlG+db3fq0fyvl6vTZrw==")
+	err := cif.SubmitMetaDataIdEncWithBuyer(&txParam, big.NewInt(int64(txId)), metaDataIdEncWithBuyer)
+	if err != nil {
+		fmt.Println("failed to SubmitMetaDataIdEncWithBuyer, error:", err)
+		return errors.New("failed to SubmitMetaDataIdEncWithBuyer, error:" + err.Error())
+	}
 	return nil
 }
 

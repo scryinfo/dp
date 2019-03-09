@@ -60,9 +60,9 @@ export default {
             let _this = this
             // not support buy a group of data one time, give the first id for instead.
             astilectron.sendMessage({ Name:"purchase",Payload:{password: pwd, ids: this.selectsMT[0]} }, function (message) {
-                if (message.payload) {
+                if (message.name !== "error") {
                     _this.selectsMT = []
-                    console.log("Purchase data succeed.")
+                    console.log("Purchase data success.")
                 }else {
                     console.log("Node: purchase failed.", message)
                     alert("Purchase data failed.")
