@@ -123,14 +123,12 @@ export default {
                 Price: this.pubData.Price,
                 SupportVerify: this.pubData.SupportVerify
             }
-            let str = JSON.stringify(this.send)
-            console.log("Node: before send to go. ", str)
             astilectron.sendMessage({Name:"publish",Payload: this.send}, function (message) {
                 if (message.name !== "error") {
                     dl_db.write(pub, message.payload)
                     dl_db.init(_this)
-                    _this.resetSend()
                     console.log("Publish new data success.")
+                    _this.resetSend()
                 }else {
                     console.log("Node: publish.newData failed. ", message)
                     alert("Publish data failed: ", message.payload)

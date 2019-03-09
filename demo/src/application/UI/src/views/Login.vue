@@ -66,7 +66,7 @@ export default {
             let _this = this
             astilectron.sendMessage({Name: "login.verify", Payload: {account: this.account,
                         password: pwd}}, function (message) {
-                if (message.payload) {
+                if (message.name !== "error") {
                     _this.$router.push({ name: "home", params: {acc: _this.account}})
                 } else {
                     console.log("Node: login.verify failed. ", message)

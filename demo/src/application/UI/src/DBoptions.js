@@ -7,14 +7,13 @@ let DBoptions = {
         astilectron.sendMessage({Name:"get.datalist",Payload:""},function (message) {
             for (let i=0;i<message.payload.length;i++) {
                 let t = message.payload[i]
-                let p = {
+                dl_db.write({
                     Title: t.Title,
                     Price: t.Price,
                     Keys: t.Keys,
                     Description: t.Description,
                     SupportVerify: t.SupportVerify
-                }
-                dl_db.write(p,t.PublishID)
+                },t.PublishID)
             }
             dl_db.init(_this)
         })
@@ -23,7 +22,7 @@ let DBoptions = {
         astilectron.sendMessage({Name:"get.transaction",Payload:_this.$store.state.account}, function (message) {
             for (let i=0;i<message.payload.length;i++) {
                 let t = message.payload[i]
-                let p = {
+                mt_db.write({
                     Title: t.Title,
                     Price: t.Price,
                     Seller: t.Seller,
@@ -33,8 +32,7 @@ let DBoptions = {
                     Verifier2Response: t.Verifier2Response,
                     Verifier3Response: t.Verifier3Response,
                     ArbitrateResult: t.ArbitrateResult
-                }
-                mt_db.write(p,t.TransactionID)
+                },t.TransactionID)
             }
             mt_db.init(_this)
         })
@@ -65,12 +63,17 @@ let dl_db = {
             c.onsuccess = function(event) {
                 let cursor = event.target.result
                 if (cursor) {
+                    let sv = ""
+                    switch (cursor.value.SupportVerify) {
+                        case true: sv = "Yes."; break
+                        case false: sv = "No."; break
+                    }
                     _this.$store.state.datalist.push({
                         Title: cursor.value.Title,
                         Price: cursor.value.Price,
                         Keys: cursor.value.Keys,
                         Description: cursor.value.Description,
-                        SupportVerify: cursor.value.SupportVerify,
+                        SupportVerify: sv,
                         PublishID: cursor.key
                     })
                     cursor.continue()
@@ -111,7 +114,7 @@ let mt_db = {
                         case 2: state = "Payed"; break
                         case 3: state = "ReadyForDownload"; break
                         case 4: state = "Closed"; break
-                        default: state = "State parse error."; break
+                        default: state = "undefined state."; break
                     }
                     _this.$store.state.mytransaction.push({
                         Title: cursor.value.Title,

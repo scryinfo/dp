@@ -1,4 +1,4 @@
-import {mt_db} from "./DBoptions.js"
+import {dl_db, mt_db} from "./DBoptions.js"
 let utils = {
     listen: function (_this) {
         astilectron.onMessage(function(message) {
@@ -12,8 +12,10 @@ let utils = {
                         position: "top-left"
                     })
                     break
+                case "initDL": dl_db.init(_this); break
+                case "initMT": mt_db.init(_this); break
                 case "onPublish":
-                    console.log(message.payload)
+                    console.log("Node: onPublish.callback. ", message.payload)
                     _this.$notify({
                         title: "onPublish.callback: ",
                         message: message.payload,
@@ -21,7 +23,7 @@ let utils = {
                     })
                     break
                 case "onApprove":
-                    console.log(message.payload)
+                    console.log("Node: onApprove.callback. ", message.payload)
                     _this.$notify({
                         title: "onApprove.callback: ",
                         message: message.payload,
@@ -29,7 +31,7 @@ let utils = {
                     })
                     break
                 case "onTransactionCreat":
-                    console.log(message.payload)
+                    console.log("Node: onTransactionCreat.callback. ", message.payload)
                     _this.$notify({
                         title: "onTransactionCreat.callback: ",
                         message: message.payload,
@@ -40,25 +42,32 @@ let utils = {
                         Title: "test title",
                         Price: 0,
                         Seller: "0x0000",
-                        Buyer: message.payload.data.users,
+                        Buyer: "0x0001",
                         State: 0,
                         Verifier1Response: "3,v1r",
                         Verifier2Response: "3,v2r",
                         Verifier3Response: "3,v3r",
                         ArbitrateResult: false
-                    }, message.payload.data.transactionId)
-                    mt_db.init(_this)
+                    }, message.payload.Data.transactionId)
                     break
                 case "onPurchase":
-                    console.log(message.payload)
+                    console.log("Node: onPurchase.callback. ", message.payload)
                     _this.$notify({
                         title: "onPurchase.callback: ",
-                        message: message.payload.data.metaDataIdEncWithSeller,
+                        message: message.payload,
+                        position: "top-left"
+                    })
+                    break
+                case "onReadyForDownload":
+                    console.log("Node: onReadyForDownload.callback. ", message.payload)
+                    _this.$notify({
+                        title: "onReadyForDownload.callback: ",
+                        message: message.payload,
                         position: "top-left"
                     })
                     break
                 case "onClose":
-                    console.log(message.payload)
+                    console.log("Node: onClose.callback. ", message.payload)
                     _this.$notify({
                         title: "onClose.callback: ",
                         message: message.payload,

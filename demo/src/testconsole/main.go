@@ -371,7 +371,8 @@ func SubmitMetaDataIdEncWithBuyer(txId *big.Int) {
 func ConfirmDataTruth(txId *big.Int) {
 	buyer.SubscribeEvent("TransactionClose", onClose)
 
-	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), keyPassword, big.NewInt(0), false}
+	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address),
+		keyPassword, big.NewInt(0), false}
 	err := cif.ConfirmDataTruth(&txParam, txId, true)
 	if err != nil {
 		fmt.Println("failed to ConfirmDataTruth, error:", err)
