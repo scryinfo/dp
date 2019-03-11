@@ -1,44 +1,3 @@
-let DBoptions = {
-    init: function (_this) {
-        DBoptions.getDatalist(_this)
-        DBoptions.getTransaction(_this)
-    },
-    getDatalist:function (_this) {
-        astilectron.sendMessage({Name:"get.datalist",Payload:""},function (message) {
-            for (let i=0;i<message.payload.length;i++) {
-                let t = message.payload[i]
-                dl_db.write({
-                    Title: t.Title,
-                    Price: t.Price,
-                    Keys: t.Keys,
-                    Description: t.Description,
-                    SupportVerify: t.SupportVerify
-                },t.PublishID)
-            }
-            dl_db.init(_this)
-        })
-    },
-    getTransaction:function (_this) {
-        astilectron.sendMessage({Name:"get.transaction",Payload:_this.$store.state.account}, function (message) {
-            for (let i=0;i<message.payload.length;i++) {
-                let t = message.payload[i]
-                mt_db.write({
-                    Title: t.Title,
-                    Price: t.Price,
-                    Seller: t.Seller,
-                    Buyer: t.Buyer,
-                    State: t.State,
-                    Verifier1Response: t.Verifier1Response,
-                    Verifier2Response: t.Verifier2Response,
-                    Verifier3Response: t.Verifier3Response,
-                    ArbitrateResult: t.ArbitrateResult
-                },t.TransactionID)
-            }
-            mt_db.init(_this)
-        })
-    },
-}
-
 let dl_db = {
     init:function(_this){
         this.db_name = "Database"
@@ -89,7 +48,7 @@ let dl_db = {
         }
     }
 }
-let mt_db = {
+let tx_db = {
     init:function (_this) {
         this.db_name = "Database"
         this.db_version = "1"
@@ -101,8 +60,8 @@ let mt_db = {
         }
         request.onsuccess = function(event) {
             _this.$store.state.mytransaction = []
-            mt_db.db = event.target.result
-            let s = mt_db.db.transaction(mt_db.db_store_name,"readonly").objectStore(mt_db.db_store_name)
+            tx_db.db = event.target.result
+            let s = tx_db.db.transaction(tx_db.db_store_name,"readonly").objectStore(tx_db.db_store_name)
             let c = s.openCursor()
             c.onsuccess = function(event) {
                 let cursor = event.target.result
@@ -116,25 +75,32 @@ let mt_db = {
                         case 4: state = "Closed"; break
                         default: state = "undefined state."; break
                     }
-                    _this.$store.state.mytransaction.push({
+                    let t = {
                         Title: cursor.value.Title,
                         Price: cursor.value.Price,
                         Seller: cursor.value.Seller,
                         Buyer: cursor.value.Buyer,
                         State: state,
+                        PublishID: cursor.value.PublishID,
                         TransactionID: cursor.key,
                         Verifier1Response: cursor.value.Verifier1Response,
                         Verifier2Response: cursor.value.Verifier2Response,
-                        Verifier3Response: cursor.value.Verifier3Response,
                         ArbitrateResult: cursor.value.ArbitrateResult
-                    })
+                    }
+                    let acc = _this.$store.state.account
+                    if (cursor.value.Buyer === acc) {
+                        _this.$store.state.transactionbuy.push(t)
+                    }
+                    if (cursor.value.Seller === acc) {
+                        _this.$store.state.transactionsell.push(t)
+                    }
                     cursor.continue()
                 }
             }
         }
     },
     write:function(params, key) {
-        let store = mt_db.db.transaction(mt_db.db_store_name, "readwrite").objectStore(mt_db.db_store_name)
+        let store = tx_db.db.transaction(tx_db.db_store_name, "readwrite").objectStore(tx_db.db_store_name)
         let request = store.put(params,key)
         request.onerror = function(event){
             console.log(event)
@@ -182,4 +148,4 @@ let acc_db = {
     }
 }
 
-export {dl_db, mt_db, acc_db, DBoptions}
+export {dl_db, tx_db, acc_db}
