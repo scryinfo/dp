@@ -112,7 +112,7 @@ func main() {
 				Width:  astilectron.PtrInt(1000),
 				Height: astilectron.PtrInt(700),
 				WebPreferences: &astilectron.WebPreferences{
-					NodeIntegration: astilectron.PtrBool(true),
+					NodeIntegration: astilectron.PtrBool(false),
 					WebSecurity:     astilectron.PtrBool(true),
 				},
 			},

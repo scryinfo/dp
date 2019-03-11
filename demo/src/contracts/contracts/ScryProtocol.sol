@@ -63,14 +63,15 @@ contract ScryProtocol {
 
     event RegisterVerifier(string seqNo, address[] users);
     event DataPublish(string seqNo, string publishId, uint256 price, string despDataId, address[] users);
-    event TransactionCreate(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool supportVerify, address[] users);
+    event TransactionCreate(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool supportVerify,
+        TransactionState state, address[] users);
     event VerifiersChosen(string seqNo, uint256 transactionId, bytes32[] proofIds, address[] users);
-    event Vote(string seqNo, uint256 transactionId, bool judge, string comments, address[] users);
-    event Buy(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, address[] users);
-    event ReadyForDownload(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, address[] users);
-    event ArbitratingBegin(string seqNo,uint256 transactionId, address[] users);
+    event Vote(string seqNo, uint256 transactionId, bool judge, string comments, TransactionState state, address[] users);
+    event Buy(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, TransactionState state, address[] users);
+    event ReadyForDownload(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, TransactionState state, address[] users);
+    event ArbitratingBegin(string seqNo,uint256 transactionId, TransactionState state, address[] users);
     event Payed(string seqNo,uint256 txId,TransactionState state);
-    event TransactionClose(string seqNo, uint256 transactionId, address[] users);
+    event TransactionClose(string seqNo, uint256 transactionId, TransactionState state, address[] users);
     event VerifierDisable(string seqNo, address verifier, address[] users);
 
     uint256 transactionSeq = 0;
@@ -155,7 +156,7 @@ contract ScryProtocol {
 
         address[] memory users = new address[](1);
         users[0] = msg.sender;
-        emit TransactionCreate(seqNo, txId, publishId, data.proofDataIds, data.supportVerify, users);
+        emit TransactionCreate(seqNo, txId, publishId, data.proofDataIds, data.supportVerify, TransactionState.Created, users);
 
         mapTransaction[txId] = TransactionItem(TransactionState.Created, msg.sender, data.seller, selectedVerifiers, creditGived,
             publishId, metaDataIdEncBuyer, data.metaDataIdEncSeller, fee, verifierBonus, true);
@@ -234,7 +235,7 @@ contract ScryProtocol {
 
         address[] memory users = new address[](1);
         users[0] = txItem.buyer;
-        emit Vote(seqNo, txId, judge, comments, users);
+        emit Vote(seqNo, txId, judge, comments, txItem.state, users);
     }
 
     function chooseArbitrators(uint8 num, address[] vs) internal view returns (address[] memory) {
@@ -310,7 +311,7 @@ contract ScryProtocol {
 
         address[] memory users = new address[](1);
         users[0] = txItem.seller;
-        emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, users);
+        emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, txItem.state , users);
     }
 
     function submitMetaDataIdEncWithBuyer(string seqNo, uint256 txId, bytes encryptedMetaDataId) external {
@@ -326,7 +327,7 @@ contract ScryProtocol {
         //ReadyForDownload event
         address[] memory users = new address[](1);
         users[0] = txItem.buyer;
-        emit ReadyForDownload(seqNo, txId, txItem.metaDataIdEncSeller, users);
+        emit ReadyForDownload(seqNo, txId, txItem.metaDataIdEncSeller, txItem.state, users);
     }
 
     function confirmDataTruth(string seqNo, uint256 txId, bool truth) external {
@@ -338,7 +339,7 @@ contract ScryProtocol {
         DataInfoPublished storage data = mapPublishedData[txItem.publishId];
         require(data.used, "Publish data does not exist");
 
-        require(txItem.state == TransactionState.ReadyForDownload);
+        require(txItem.state == TransactionState.ReadyForDownload, "Invalid transaction state");
         if (!data.supportVerify) {
             if(truth) {
                 payToSeller(txItem, data);
@@ -351,7 +352,7 @@ contract ScryProtocol {
                 closeTransaction(txItem, seqNo, txId);
             } else {
                 txItem.state = TransactionState.Arbitrating;
-                emit ArbitratingBegin(seqNo,txId,selectedArbitrators);
+                emit ArbitratingBegin(seqNo, txId, txItem.state, selectedArbitrators);
             }
 
         }
@@ -390,7 +391,7 @@ contract ScryProtocol {
 
         address[] memory users = new address[](1);
         users[0] = address(0x00);
-        emit TransactionClose(seqNo, txId, users);
+        emit TransactionClose(seqNo, txId, txItem.state, users);
     }
 
     function payToVerifier(TransactionItem storage txItem, address verifier) internal {

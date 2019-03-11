@@ -149,6 +149,32 @@ func (am AccountManager) ReEncrypt(cipherText []byte, address1 string,
 	return out.Data, nil
 }
 
+func (am AccountManager) Decrypt(cipherText []byte, address string, password string)([]byte, error) {
+
+	defer func() {
+		if err := recover(); err != nil {
+			rlog.Error("failed to decrypt, error:", err)
+		}
+	}()
+
+	if am.client == nil {
+		return nil, errors.New("failed to decrypt, error: null account service")
+	}
+
+	in := scryinfo.CipherParameter{
+		Message: cipherText,
+		Address: address,
+		Password: password,
+	}
+	out, _ := am.client.ContentDecrypt(context.Background(), &in)
+	if out.Status != scryinfo.Status_OK {
+		rlog.Error("failed to decrypt, error:", out.Msg)
+		return nil, errors.New("failed to decrypt, error:" + out.Msg)
+	}
+
+	return out.Data, nil
+}
+
 func (am AccountManager) SignTransaction(message []byte, address string, password string) ([]byte, error) {
 	defer func() {
 		if err := recover(); err != nil {
