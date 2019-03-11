@@ -136,7 +136,7 @@ func bindScryToken(address common.Address, caller bind.ContractCaller, transacto
 
 // Call invokes the (constant) contract method with params as input values and
 // sets the output to result. The result type might be a single field for simple
-// returns, a slice of interfaces for anonymous returns and a definition for named
+// returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
 func (_ScryToken *ScryTokenRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
 	return _ScryToken.Contract.ScryTokenCaller.contract.Call(opts, result, method, params...)
@@ -155,7 +155,7 @@ func (_ScryToken *ScryTokenRaw) Transact(opts *bind.TransactOpts, method string,
 
 // Call invokes the (constant) contract method with params as input values and
 // sets the output to result. The result type might be a single field for simple
-// returns, a slice of interfaces for anonymous returns and a definition for named
+// returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
 func (_ScryToken *ScryTokenCallerRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
 	return _ScryToken.Contract.contract.Call(opts, result, method, params...)
@@ -200,7 +200,7 @@ func (_ScryToken *ScryTokenCallerSession) INITIALSUPPLY() (*big.Int, error) {
 
 // Allowance is a free data retrieval call binding the contract method 0xdd62ed3e.
 //
-// Solidity: function allowance(_owner address, _spender address) constant returns(uint256)
+// Solidity: function allowance(address _owner, address _spender) constant returns(uint256)
 func (_ScryToken *ScryTokenCaller) Allowance(opts *bind.CallOpts, _owner common.Address, _spender common.Address) (*big.Int, error) {
 	var (
 		ret0 = new(*big.Int)
@@ -212,21 +212,21 @@ func (_ScryToken *ScryTokenCaller) Allowance(opts *bind.CallOpts, _owner common.
 
 // Allowance is a free data retrieval call binding the contract method 0xdd62ed3e.
 //
-// Solidity: function allowance(_owner address, _spender address) constant returns(uint256)
+// Solidity: function allowance(address _owner, address _spender) constant returns(uint256)
 func (_ScryToken *ScryTokenSession) Allowance(_owner common.Address, _spender common.Address) (*big.Int, error) {
 	return _ScryToken.Contract.Allowance(&_ScryToken.CallOpts, _owner, _spender)
 }
 
 // Allowance is a free data retrieval call binding the contract method 0xdd62ed3e.
 //
-// Solidity: function allowance(_owner address, _spender address) constant returns(uint256)
+// Solidity: function allowance(address _owner, address _spender) constant returns(uint256)
 func (_ScryToken *ScryTokenCallerSession) Allowance(_owner common.Address, _spender common.Address) (*big.Int, error) {
 	return _ScryToken.Contract.Allowance(&_ScryToken.CallOpts, _owner, _spender)
 }
 
 // BalanceOf is a free data retrieval call binding the contract method 0x70a08231.
 //
-// Solidity: function balanceOf(_owner address) constant returns(uint256)
+// Solidity: function balanceOf(address _owner) constant returns(uint256)
 func (_ScryToken *ScryTokenCaller) BalanceOf(opts *bind.CallOpts, _owner common.Address) (*big.Int, error) {
 	var (
 		ret0 = new(*big.Int)
@@ -238,14 +238,14 @@ func (_ScryToken *ScryTokenCaller) BalanceOf(opts *bind.CallOpts, _owner common.
 
 // BalanceOf is a free data retrieval call binding the contract method 0x70a08231.
 //
-// Solidity: function balanceOf(_owner address) constant returns(uint256)
+// Solidity: function balanceOf(address _owner) constant returns(uint256)
 func (_ScryToken *ScryTokenSession) BalanceOf(_owner common.Address) (*big.Int, error) {
 	return _ScryToken.Contract.BalanceOf(&_ScryToken.CallOpts, _owner)
 }
 
 // BalanceOf is a free data retrieval call binding the contract method 0x70a08231.
 //
-// Solidity: function balanceOf(_owner address) constant returns(uint256)
+// Solidity: function balanceOf(address _owner) constant returns(uint256)
 func (_ScryToken *ScryTokenCallerSession) BalanceOf(_owner common.Address) (*big.Int, error) {
 	return _ScryToken.Contract.BalanceOf(&_ScryToken.CallOpts, _owner)
 }
@@ -356,105 +356,105 @@ func (_ScryToken *ScryTokenCallerSession) TotalSupply() (*big.Int, error) {
 
 // Approve is a paid mutator transaction binding the contract method 0x095ea7b3.
 //
-// Solidity: function approve(_spender address, _value uint256) returns(bool)
+// Solidity: function approve(address _spender, uint256 _value) returns(bool)
 func (_ScryToken *ScryTokenTransactor) Approve(opts *bind.TransactOpts, _spender common.Address, _value *big.Int) (*types.Transaction, error) {
 	return _ScryToken.contract.Transact(opts, "approve", _spender, _value)
 }
 
 // Approve is a paid mutator transaction binding the contract method 0x095ea7b3.
 //
-// Solidity: function approve(_spender address, _value uint256) returns(bool)
+// Solidity: function approve(address _spender, uint256 _value) returns(bool)
 func (_ScryToken *ScryTokenSession) Approve(_spender common.Address, _value *big.Int) (*types.Transaction, error) {
 	return _ScryToken.Contract.Approve(&_ScryToken.TransactOpts, _spender, _value)
 }
 
 // Approve is a paid mutator transaction binding the contract method 0x095ea7b3.
 //
-// Solidity: function approve(_spender address, _value uint256) returns(bool)
+// Solidity: function approve(address _spender, uint256 _value) returns(bool)
 func (_ScryToken *ScryTokenTransactorSession) Approve(_spender common.Address, _value *big.Int) (*types.Transaction, error) {
 	return _ScryToken.Contract.Approve(&_ScryToken.TransactOpts, _spender, _value)
 }
 
 // DecreaseApproval is a paid mutator transaction binding the contract method 0x66188463.
 //
-// Solidity: function decreaseApproval(_spender address, _subtractedValue uint256) returns(bool)
+// Solidity: function decreaseApproval(address _spender, uint256 _subtractedValue) returns(bool)
 func (_ScryToken *ScryTokenTransactor) DecreaseApproval(opts *bind.TransactOpts, _spender common.Address, _subtractedValue *big.Int) (*types.Transaction, error) {
 	return _ScryToken.contract.Transact(opts, "decreaseApproval", _spender, _subtractedValue)
 }
 
 // DecreaseApproval is a paid mutator transaction binding the contract method 0x66188463.
 //
-// Solidity: function decreaseApproval(_spender address, _subtractedValue uint256) returns(bool)
+// Solidity: function decreaseApproval(address _spender, uint256 _subtractedValue) returns(bool)
 func (_ScryToken *ScryTokenSession) DecreaseApproval(_spender common.Address, _subtractedValue *big.Int) (*types.Transaction, error) {
 	return _ScryToken.Contract.DecreaseApproval(&_ScryToken.TransactOpts, _spender, _subtractedValue)
 }
 
 // DecreaseApproval is a paid mutator transaction binding the contract method 0x66188463.
 //
-// Solidity: function decreaseApproval(_spender address, _subtractedValue uint256) returns(bool)
+// Solidity: function decreaseApproval(address _spender, uint256 _subtractedValue) returns(bool)
 func (_ScryToken *ScryTokenTransactorSession) DecreaseApproval(_spender common.Address, _subtractedValue *big.Int) (*types.Transaction, error) {
 	return _ScryToken.Contract.DecreaseApproval(&_ScryToken.TransactOpts, _spender, _subtractedValue)
 }
 
 // IncreaseApproval is a paid mutator transaction binding the contract method 0xd73dd623.
 //
-// Solidity: function increaseApproval(_spender address, _addedValue uint256) returns(bool)
+// Solidity: function increaseApproval(address _spender, uint256 _addedValue) returns(bool)
 func (_ScryToken *ScryTokenTransactor) IncreaseApproval(opts *bind.TransactOpts, _spender common.Address, _addedValue *big.Int) (*types.Transaction, error) {
 	return _ScryToken.contract.Transact(opts, "increaseApproval", _spender, _addedValue)
 }
 
 // IncreaseApproval is a paid mutator transaction binding the contract method 0xd73dd623.
 //
-// Solidity: function increaseApproval(_spender address, _addedValue uint256) returns(bool)
+// Solidity: function increaseApproval(address _spender, uint256 _addedValue) returns(bool)
 func (_ScryToken *ScryTokenSession) IncreaseApproval(_spender common.Address, _addedValue *big.Int) (*types.Transaction, error) {
 	return _ScryToken.Contract.IncreaseApproval(&_ScryToken.TransactOpts, _spender, _addedValue)
 }
 
 // IncreaseApproval is a paid mutator transaction binding the contract method 0xd73dd623.
 //
-// Solidity: function increaseApproval(_spender address, _addedValue uint256) returns(bool)
+// Solidity: function increaseApproval(address _spender, uint256 _addedValue) returns(bool)
 func (_ScryToken *ScryTokenTransactorSession) IncreaseApproval(_spender common.Address, _addedValue *big.Int) (*types.Transaction, error) {
 	return _ScryToken.Contract.IncreaseApproval(&_ScryToken.TransactOpts, _spender, _addedValue)
 }
 
 // Transfer is a paid mutator transaction binding the contract method 0xa9059cbb.
 //
-// Solidity: function transfer(_to address, _value uint256) returns(bool)
+// Solidity: function transfer(address _to, uint256 _value) returns(bool)
 func (_ScryToken *ScryTokenTransactor) Transfer(opts *bind.TransactOpts, _to common.Address, _value *big.Int) (*types.Transaction, error) {
 	return _ScryToken.contract.Transact(opts, "transfer", _to, _value)
 }
 
 // Transfer is a paid mutator transaction binding the contract method 0xa9059cbb.
 //
-// Solidity: function transfer(_to address, _value uint256) returns(bool)
+// Solidity: function transfer(address _to, uint256 _value) returns(bool)
 func (_ScryToken *ScryTokenSession) Transfer(_to common.Address, _value *big.Int) (*types.Transaction, error) {
 	return _ScryToken.Contract.Transfer(&_ScryToken.TransactOpts, _to, _value)
 }
 
 // Transfer is a paid mutator transaction binding the contract method 0xa9059cbb.
 //
-// Solidity: function transfer(_to address, _value uint256) returns(bool)
+// Solidity: function transfer(address _to, uint256 _value) returns(bool)
 func (_ScryToken *ScryTokenTransactorSession) Transfer(_to common.Address, _value *big.Int) (*types.Transaction, error) {
 	return _ScryToken.Contract.Transfer(&_ScryToken.TransactOpts, _to, _value)
 }
 
 // TransferFrom is a paid mutator transaction binding the contract method 0x23b872dd.
 //
-// Solidity: function transferFrom(_from address, _to address, _value uint256) returns(bool)
+// Solidity: function transferFrom(address _from, address _to, uint256 _value) returns(bool)
 func (_ScryToken *ScryTokenTransactor) TransferFrom(opts *bind.TransactOpts, _from common.Address, _to common.Address, _value *big.Int) (*types.Transaction, error) {
 	return _ScryToken.contract.Transact(opts, "transferFrom", _from, _to, _value)
 }
 
 // TransferFrom is a paid mutator transaction binding the contract method 0x23b872dd.
 //
-// Solidity: function transferFrom(_from address, _to address, _value uint256) returns(bool)
+// Solidity: function transferFrom(address _from, address _to, uint256 _value) returns(bool)
 func (_ScryToken *ScryTokenSession) TransferFrom(_from common.Address, _to common.Address, _value *big.Int) (*types.Transaction, error) {
 	return _ScryToken.Contract.TransferFrom(&_ScryToken.TransactOpts, _from, _to, _value)
 }
 
 // TransferFrom is a paid mutator transaction binding the contract method 0x23b872dd.
 //
-// Solidity: function transferFrom(_from address, _to address, _value uint256) returns(bool)
+// Solidity: function transferFrom(address _from, address _to, uint256 _value) returns(bool)
 func (_ScryToken *ScryTokenTransactorSession) TransferFrom(_from common.Address, _to common.Address, _value *big.Int) (*types.Transaction, error) {
 	return _ScryToken.Contract.TransferFrom(&_ScryToken.TransactOpts, _from, _to, _value)
 }
@@ -536,7 +536,7 @@ type ScryTokenApproval struct {
 
 // FilterApproval is a free log retrieval operation binding the contract event 0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925.
 //
-// Solidity: e Approval(owner indexed address, spender indexed address, value uint256)
+// Solidity: event Approval(address indexed owner, address indexed spender, uint256 value)
 func (_ScryToken *ScryTokenFilterer) FilterApproval(opts *bind.FilterOpts, owner []common.Address, spender []common.Address) (*ScryTokenApprovalIterator, error) {
 
 	var ownerRule []interface{}
@@ -557,7 +557,7 @@ func (_ScryToken *ScryTokenFilterer) FilterApproval(opts *bind.FilterOpts, owner
 
 // WatchApproval is a free log subscription operation binding the contract event 0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925.
 //
-// Solidity: e Approval(owner indexed address, spender indexed address, value uint256)
+// Solidity: event Approval(address indexed owner, address indexed spender, uint256 value)
 func (_ScryToken *ScryTokenFilterer) WatchApproval(opts *bind.WatchOpts, sink chan<- *ScryTokenApproval, owner []common.Address, spender []common.Address) (event.Subscription, error) {
 
 	var ownerRule []interface{}
@@ -678,7 +678,7 @@ type ScryTokenTransfer struct {
 
 // FilterTransfer is a free log retrieval operation binding the contract event 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef.
 //
-// Solidity: e Transfer(from indexed address, to indexed address, value uint256)
+// Solidity: event Transfer(address indexed from, address indexed to, uint256 value)
 func (_ScryToken *ScryTokenFilterer) FilterTransfer(opts *bind.FilterOpts, from []common.Address, to []common.Address) (*ScryTokenTransferIterator, error) {
 
 	var fromRule []interface{}
@@ -699,7 +699,7 @@ func (_ScryToken *ScryTokenFilterer) FilterTransfer(opts *bind.FilterOpts, from 
 
 // WatchTransfer is a free log subscription operation binding the contract event 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef.
 //
-// Solidity: e Transfer(from indexed address, to indexed address, value uint256)
+// Solidity: event Transfer(address indexed from, address indexed to, uint256 value)
 func (_ScryToken *ScryTokenFilterer) WatchTransfer(opts *bind.WatchOpts, sink chan<- *ScryTokenTransfer, from []common.Address, to []common.Address) (event.Subscription, error) {
 
 	var fromRule []interface{}
