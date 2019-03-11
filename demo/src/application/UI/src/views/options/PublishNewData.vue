@@ -157,7 +157,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 .pubForm {
     padding: 0 20% 0 10%;
 }

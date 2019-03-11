@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import {dl_db, mt_db, DBoptions} from "../DBoptions.js"
+import {dl_db, tx_db} from "../DBoptions.js"
 import {utils} from "../utils.js"
 export default {
     name: "Home",
@@ -68,7 +68,7 @@ export default {
         this.$store.state.account = this.$route.params.acc
         let _this = this
         dl_db.init(this)
-        mt_db.init(this)
+        tx_db.init(this)
         document.addEventListener("astilectron-ready", function() {
             utils.listen(_this)
             DBoptions.init(_this)
@@ -102,7 +102,7 @@ export default {
     padding: 10px 10%;
     height: 480px;
 }
-.el-form-item__label {
-    color: #99a9bf;
+.el-form-item {
+    width: 100%;
 }
 </style>

@@ -5,7 +5,8 @@
             <el-col :span="8">
                 <div class="left">
                     <div class="left-explain">select account:</div>
-                    <el-select class="left-account" v-model="account" placeholder="select account">
+                    <el-select class="left-account" v-model="account" placeholder="select account"
+                        clearable allow-create filterable>
                         <el-option v-for="acc in this.$store.state.accounts" :key="acc.address"
                                    :value="acc.address" :label="acc.address"></el-option>
                     </el-select>
@@ -36,7 +37,7 @@
 </template>
 
 <script>
-import {dl_db, mt_db, acc_db, DBoptions} from "../DBoptions.js"
+import {dl_db, tx_db, acc_db} from "../DBoptions.js"
 import {utils} from "../utils.js"
 export default {
     name: "Login",
@@ -106,7 +107,7 @@ export default {
         this.password = "";this.describe = "";this.account = ""
         let _this = this
         dl_db.init(this)
-        mt_db.init(this)
+        tx_db.init(this)
         acc_db.init(this)
         document.addEventListener("astilectron-ready", function() {
             utils.listen(_this)

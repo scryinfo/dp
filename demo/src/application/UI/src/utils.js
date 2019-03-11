@@ -1,4 +1,4 @@
-import {dl_db, mt_db} from "./DBoptions.js"
+import {dl_db, tx_db} from "./DBoptions.js"
 let utils = {
     listen: function (_this) {
         astilectron.onMessage(function(message) {
@@ -13,7 +13,7 @@ let utils = {
                     })
                     break
                 case "initDL": dl_db.init(_this); break
-                case "initMT": mt_db.init(_this); break
+                case "initMT": tx_db.init(_this); break
                 case "onPublish":
                     console.log("Node: onPublish.callback. ", message.payload)
                     _this.$notify({
@@ -38,15 +38,15 @@ let utils = {
                         position: "top-left"
                     })
                     // go send the whole callback.event to js now, here will adjust later. core param is tID.
-                    mt_db.write({
+                    tx_db.write({
                         Title: "test title",
                         Price: 0,
                         Seller: "0x0000",
                         Buyer: "0x0001",
                         State: 0,
+                        PublishID: "1234-1234",
                         Verifier1Response: "3,v1r",
                         Verifier2Response: "3,v2r",
-                        Verifier3Response: "3,v3r",
                         ArbitrateResult: false
                     }, message.payload.Data.transactionId)
                     break

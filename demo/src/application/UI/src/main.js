@@ -1,11 +1,11 @@
-import Vue from 'vue'
-import App from './App'
-import ElementUI from 'element-ui'
-import 'element-ui/lib/theme-chalk/index.css'
-import VueRouter from 'vue-router'
-import store from './vuex/store'
-import Vuex from 'vuex'
-import routes from './routes'
+import Vue from "vue"
+import App from "./App"
+import ElementUI from "element-ui"
+import "element-ui/lib/theme-chalk/index.css"
+import VueRouter from "vue-router"
+import store from "./vuex/store"
+import Vuex from "vuex"
+import routes from "./routes"
 
 Vue.use(ElementUI)
 Vue.use(VueRouter)
@@ -16,11 +16,11 @@ const router = new VueRouter({
 })
 
 new Vue({
-  //el: '#app',
-  //template: '<App/>',
+  //el: "#app",
+  //template: "<App/>",
   router,
   store,
   //components: { App }
   render: h => h(App)
-}).$mount('#app')
+}).$mount("#app")
 

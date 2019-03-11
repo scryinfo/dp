@@ -1,6 +1,6 @@
 <template>
     <section>
-        <el-col :span="24" style="padding-bottom: 0; background-color: lightgrey;">
+        <el-col :span="24" class="section-item">
             <el-button size="mini" type="primary" @click="buyPwd">Buy</el-button>
         </el-col>
 
@@ -34,9 +34,9 @@ export default {
             this.$prompt(this.$store.state.account, "Input password for this account:", {
                 confirmButtonText: "Submit",
                 cancelButtonText: "Cancel"
-            }).then(({ value }) => {
+            }).then(( pwd ) => {
                 // login.verify
-                this.buy(value)
+                this.buy(pwd.value)
             }).catch(() => {
                 this.$message({
                     type: "info",
@@ -45,10 +45,12 @@ export default {
             })
         },
         buy: function (pwd) {
+            let _this = this
             // not support buy a group of data one time, give the first id for instead.
             astilectron.sendMessage({ Name:"buy",Payload:{password: pwd, ids: this.selectsDL[0]} }, function (message) {
                     if (message.name !== "error") {
                         // DBoptions.getTransaction();
+                        _this.selectsDL = []
                         console.log("Buy data success.")
                     }else {
                         console.log("Node: buy failed.", message)
@@ -56,13 +58,10 @@ export default {
                     }
             })
         }
-    },
-    created() {
-        this.selectsDL = []
     }
 }
 </script>
 
-<style scoped>
+<style>
 
 </style>
