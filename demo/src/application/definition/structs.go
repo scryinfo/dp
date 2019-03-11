@@ -16,7 +16,7 @@ type AccInfo struct {
 type Datalist struct {
 	PublishID     string
 	Title         string
-	Price         int
+	Price         float64
 	Keys          string
 	Description   string
 	SupportVerify bool
@@ -24,14 +24,14 @@ type Datalist struct {
 
 type Transaction struct {
 	Title             string
-	TransactionID     int
+	TransactionID     float64
+	PublishID         string
 	Price             float64
 	Seller            string
 	Buyer             string
 	State             byte
 	Verifier1Response string
 	Verifier2Response string
-	Verifier3Response string
 	ArbitrateResult   bool
 }
 
@@ -62,4 +62,13 @@ type BuyData struct {
 type PurchaseData struct {
 	Password      string  `json:"password"`
 	TransactionID float64 `json:"ids"`
+}
+
+type ReEncryptData struct {
+	Password   string     `json:"password"`
+	SelectedTx SelectedTx `json:"ids"`
+}
+type SelectedTx struct {
+	TransactionID float64 `json:"ID"`
+	Buyer         string  `json:"Buyer"`
 }

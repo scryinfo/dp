@@ -14,3 +14,5 @@ cp -f build/contracts/*.abi ../testconsole/
 cp -f *.go ../sdk/interface/contractinterface/
 
 echo "end."
+
+ sleep 10
