@@ -85,9 +85,7 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err = sdkinterface.Buy(pd.TransactionID, pd.Password, onPurchase); err != nil {
 			break
 		}
-		//if err = sdkinterface.ConfirmDataTruth(pd.TransactionID, pd.Password, onClose); err != nil {
-		//	break
-		//}
+
 		payload = true
 		return payload, nil
 	case "reEncrypt":
@@ -101,6 +99,14 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		}
 		payload = true
 		return payload, nil
+	case "confirm":
+		var cd definition.ConfirmData = definition.ConfirmData{}
+		if err = json.Unmarshal(m.Payload, &cd); err != nil {
+			break
+		}
+		if err = sdkinterface.ConfirmDataTruth(cd.TransactionID, cd.Password,cd.Arbitrate, onClose); err != nil {
+			break
+		}
 	case "publish":
 		var pd definition.PubDataIDs = definition.PubDataIDs{}
 		if err = json.Unmarshal(m.Payload, &pd); err != nil {

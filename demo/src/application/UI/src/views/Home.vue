@@ -71,7 +71,6 @@ export default {
         tx_db.init(this)
         document.addEventListener("astilectron-ready", function() {
             utils.listen(_this)
-            DBoptions.init(_this)
         })
     }
 }

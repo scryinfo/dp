@@ -11,7 +11,7 @@ export default {
 
 </script>
 
-<style lang="scss">
+<style>
 body {
 	margin: 0;
 	padding: 0;
@@ -19,7 +19,6 @@ body {
 	font-size: 16px;
 	-webkit-font-smoothing: antialiased;
 }
-
 #app {
 	position: absolute;
 	top: 0;

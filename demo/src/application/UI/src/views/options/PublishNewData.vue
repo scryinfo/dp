@@ -64,7 +64,7 @@ export default {
             })
         },
         setIDs: function() {
-            let ipfsAPI = require("ipfs-api")
+            let ipfsAPI = require("ipfs-http-client")
             let ipfs = ipfsAPI({host: 'localhost', port: '5001', protocol: 'http'})
             this.setDataID(ipfs, this)
             this.setProofIDs(ipfs, this)

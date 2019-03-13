@@ -26,7 +26,7 @@ export default {
 }
 </script>
 
-<style lang="scss" slot="scoped">
+<style scoped>
 .page-container {
     font-size: 40px;
     text-align: center;
