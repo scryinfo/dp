@@ -15,4 +15,4 @@ cp -f *.go ../sdk/interface/contractinterface/
 
 echo "end."
 
- sleep 10
+sleep 10
