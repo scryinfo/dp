@@ -259,7 +259,7 @@ func SubmitMetaDataIdEncWithBuyer(txId float64, password string, cb chainevents.
 	return nil
 }
 
-func ConfirmDataTruth(txId float64, password string, cb chainevents.EventCallback) error {
+func ConfirmDataTruth(txId float64, password string,arbitrate bool, cb chainevents.EventCallback) error {
 	curUser.SubscribeEvent("TransactionClose", cb)
 
 	txParam := chainoperations.TransactParams{
@@ -267,7 +267,7 @@ func ConfirmDataTruth(txId float64, password string, cb chainevents.EventCallbac
 		Password: password,
 		Value: big.NewInt(0),
 		Pending: false}
-	err := cif.ConfirmDataTruth(&txParam, big.NewInt(int64(txId)), true)
+	err := cif.ConfirmDataTruth(&txParam, big.NewInt(int64(txId)), arbitrate)
 	if err != nil {
 		fmt.Println("failed to ConfirmDataTruth, error:", err)
 		return errors.New("failed to ConfirmDataTruth, error:" + err.Error())

@@ -3,6 +3,7 @@
         <el-col :span="24" class="section-item">
             <el-button size="mini" type="primary" @click="purchasePwd">Purchase</el-button>
             <el-button size="mini" type="primary" @click="cancelMsg">Cancel</el-button>
+            <el-button size="mini" type="primary" @click="confirmPwd">Confirm</el-button>
         </el-col>
 
         <el-table :data="this.$store.state.transactionbuy" highlight-current-row border height=400 @selection-change="selectedChange">
@@ -86,6 +87,32 @@ export default {
         cancelBuying:function () {
             console.log("Node: cancel buying function, which has not realized.")
             // cancel buying and close the transaction, sdk is also blank.
+        },
+        confirmPwd:function () {
+            this.$prompt(this.$store.state.account, "Input password and confirm if meta data is true?", {
+                confirmButtonText: "I think it is true.",
+                cancelButtonText: "I think it is fake."
+            }).then((pwd) => {
+                // think if it is necessary to add another pop box for user can make sure twice?
+                this.confirm(pwd.value, true)
+            }).catch((pwd) => {
+                // arbitrate is not finished, even user think meta data is fake, program will goes still.
+                this.confirm(pwd.value, true)
+            })
+        },
+        confirm:function (pwd, judge) {
+            let _this = this
+            // not support buy a group of data one time, give the first id for instead.
+            astilectron.sendMessage({ Name:"confirm",Payload:{password: pwd, ids: this.selectsTx[0], startArbitrate: judge}},
+                function (message) {
+                if (message.name !== "error") {
+                    _this.selectsTx = []
+                    console.log("Confirm data success.")
+                }else {
+                    console.log("Node: confirm failed.", message)
+                    alert("Confirm data failed.")
+                }
+            })
         }
     }
 }

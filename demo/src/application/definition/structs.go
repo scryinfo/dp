@@ -72,3 +72,9 @@ type SelectedTx struct {
 	TransactionID float64 `json:"ID"`
 	Buyer         string  `json:"Buyer"`
 }
+
+type ConfirmData struct {
+	Password      string  `json:"password"`
+	TransactionID float64 `json:"ids"`
+	Arbitrate     bool    `json:"startArbitrate"`
+}

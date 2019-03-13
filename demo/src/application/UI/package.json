@@ -4,15 +4,17 @@
   "description": "A Vue.js project",
   "author": "mats9693 <982254249@qq.com>",
   "private": true,
+  "license": "",
+  "repository": {},
   "scripts": {
     "dev": "node build/dev-server.js",
     "start": "node build/dev-server.js",
     "build": "node build/build.js"
   },
   "dependencies": {
-    "element-ui": "2.6.0",
+    "element-ui": "^2.6.0",
     "font-awesome": "^4.7.0",
-    "ipfs-api": "^26.1.2",
+    "ipfs-http-client": "^29.1.1",
     "nprogress": "^0.2.0",
     "vue": "^2.6.6",
     "vue-router": "^2.5.3",
