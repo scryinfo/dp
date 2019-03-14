@@ -12,6 +12,7 @@ import (
 	"github.com/scryinfo/iscap/demo/src/sdk/scryclient"
 	cif "github.com/scryinfo/iscap/demo/src/sdk/scryclient/chaininterfacewrapper"
 	"github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
+	"github.com/scryinfo/iscap/demo/src/sdk/util/storage/ipfsaccess"
 	rlog "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"math/big"
@@ -21,6 +22,7 @@ import (
 const (
 	failedToInitSDK = "failed to initialize sdk."
 	sep             = "|"
+	IPFSOutDir      = "D:/desktop"
 )
 
 var (
@@ -61,14 +63,14 @@ func Initialize() error {
 }
 
 //new user
-func CreateUser(password string) (*scryclient.ScryClient, error) {
-	client, err := scryclient.CreateScryClient(password)
-	if err != nil {
-		return nil, err
-	}
-
-	return client, nil
-}
+//func CreateUser(password string) (*scryclient.ScryClient, error) {
+//	client, err := scryclient.CreateScryClient(password)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	return client, nil
+//}
 
 func CreateUserWithLogin(password string) (*scryclient.ScryClient, error) {
 	client, err := scryclient.CreateScryClient(password)
@@ -146,10 +148,10 @@ func PublishData(data *definition.PubDataIDs, cb chainevents.EventCallback) (str
 		return "", errors.New("failed to publish data, current user is null")
 	}
 
-    if cb == nil {
-        fmt.Println("null callback function")
-        return "", errors.New("failed to publish data, callback function is null")
-    }
+	if cb == nil {
+		fmt.Println("null callback function")
+		return "", errors.New("failed to publish data, callback function is null")
+	}
 
 	curUser.SubscribeEvent("DataPublish", cb)
 	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
@@ -167,54 +169,54 @@ func PublishData(data *definition.PubDataIDs, cb chainevents.EventCallback) (str
 }
 
 func ApproveTransferForBuying(password string, cb chainevents.EventCallback) error {
-    return approveTransfer(cb,
-        password,
-        common.HexToAddress(scryInfo.Chain.Contracts.ProtocolAddr))
+	return approveTransfer(cb,
+		password,
+		common.HexToAddress(scryInfo.Chain.Contracts.ProtocolAddr))
 }
 
 func approveTransfer(cb chainevents.EventCallback, password string, protocolContractAddr common.Address) error {
-    if curUser == nil {
-        fmt.Println("no current user")
-        return errors.New("failed to approve transfer, current user is null")
-    }
+	if curUser == nil {
+		fmt.Println("no current user")
+		return errors.New("failed to approve transfer, current user is null")
+	}
 
-    curUser.SubscribeEvent("Approval", cb)
+	curUser.SubscribeEvent("Approval", cb)
 
-    txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
-        Password: password,
-        Value: big.NewInt(0),
-        Pending: false}
-    err := cif.ApproveTransfer(&txParam,
-        protocolContractAddr,
-        big.NewInt(1600))
-    if err != nil {
-        fmt.Println("ApproveTransfer:", err)
-        return errors.New("failed to approve transfer, error:" + err.Error())
-    }
+	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
+		Password: password,
+		Value:    big.NewInt(0),
+		Pending:  false}
+	err := cif.ApproveTransfer(&txParam,
+		protocolContractAddr,
+		big.NewInt(1600))
+	if err != nil {
+		fmt.Println("ApproveTransfer:", err)
+		return errors.New("failed to approve transfer, error:" + err.Error())
+	}
 
-    return nil
+	return nil
 }
 
 func CreateTransaction(publishId string, password string, cb chainevents.EventCallback) error {
-    if curUser == nil {
-        fmt.Println("no current user")
-        return errors.New("failed to prepare to buy, current user is null")
-    }
+	if curUser == nil {
+		fmt.Println("no current user")
+		return errors.New("failed to prepare to buy, current user is null")
+	}
 
-    curUser.SubscribeEvent("TransactionCreate", cb)
+	curUser.SubscribeEvent("TransactionCreate", cb)
 
-    txParam := chainoperations.TransactParams{
-        From: common.HexToAddress(curUser.Account.Address),
-        Password: password,
-        Value: big.NewInt(0),
-        Pending: false}
-    err := cif.PrepareToBuy(&txParam, publishId)
-    if err != nil {
-        fmt.Println("failed to prepareToBuy, error:", err)
-        return errors.New("failed to prepareToBuy, error:" + err.Error())
-    }
+	txParam := chainoperations.TransactParams{
+		From:     common.HexToAddress(curUser.Account.Address),
+		Password: password,
+		Value:    big.NewInt(0),
+		Pending:  false}
+	err := cif.PrepareToBuy(&txParam, publishId)
+	if err != nil {
+		fmt.Println("failed to prepareToBuy, error:", err)
+		return errors.New("failed to prepareToBuy, error:" + err.Error())
+	}
 
-    return nil
+	return nil
 }
 
 func Buy(txId float64, password string, cb chainevents.EventCallback) error {
@@ -226,10 +228,10 @@ func Buy(txId float64, password string, cb chainevents.EventCallback) error {
 	curUser.SubscribeEvent("Buy", cb)
 
 	txParam := chainoperations.TransactParams{
-		From: common.HexToAddress(curUser.Account.Address),
+		From:     common.HexToAddress(curUser.Account.Address),
 		Password: password,
-		Value: big.NewInt(0),
-		Pending: false}
+		Value:    big.NewInt(0),
+		Pending:  false}
 
 	err := cif.BuyData(&txParam, big.NewInt(int64(txId)))
 	if err != nil {
@@ -240,18 +242,23 @@ func Buy(txId float64, password string, cb chainevents.EventCallback) error {
 	return nil
 }
 
-func SubmitMetaDataIdEncWithBuyer(txId float64, password string, cb chainevents.EventCallback) error {
+func SubmitMetaDataIdEncWithBuyer(txId float64, password, metaDataIDEncSeller, buyer, seller string, cb chainevents.EventCallback) error {
 	curUser.SubscribeEvent("ReadyForDownload", cb)
 
 	txParam := chainoperations.TransactParams{
-		From: common.HexToAddress(curUser.Account.Address),
+		From:     common.HexToAddress(curUser.Account.Address),
 		Password: password,
-		Value: big.NewInt(0),
-		Pending: false}
+		Value:    big.NewInt(0),
+		Pending:  false}
 
-	metaDataIdEncWithBuyer := []byte("qzfCOkBRLj50jBos+eIk2J4Dl5D2caxeyQQTVzxgcGe6qfL7qNXBT9LgGYGrl98andDM3oS" +
-		"AE1dXDHceS1yiyqnGw/f23pN3lBNcTVuRPB9JZ699mErK4J3ryokdlgLJ3lzUU/RMXFw4nU8894Jsv/nlG+db3fq0fyvl6vTZrw==")
-	err := cif.SubmitMetaDataIdEncWithBuyer(&txParam, big.NewInt(int64(txId)), metaDataIdEncWithBuyer)
+	metaDataIdEncWithBuyer := []byte(metaDataIDEncSeller)
+	var err error
+	metaDataIdEncWithBuyer, err = accounts.GetAMInstance().ReEncrypt(metaDataIdEncWithBuyer, seller, buyer, password)
+	if err != nil {
+		fmt.Println("failed to reEncrypt meta data ID, error:", err)
+		return errors.New("failed to SubmitMetaDataIdEncWithBuyer, error:" + err.Error())
+	}
+	err = cif.SubmitMetaDataIdEncWithBuyer(&txParam, big.NewInt(int64(txId)), metaDataIdEncWithBuyer)
 	if err != nil {
 		fmt.Println("failed to SubmitMetaDataIdEncWithBuyer, error:", err)
 		return errors.New("failed to SubmitMetaDataIdEncWithBuyer, error:" + err.Error())
@@ -259,14 +266,32 @@ func SubmitMetaDataIdEncWithBuyer(txId float64, password string, cb chainevents.
 	return nil
 }
 
-func ConfirmDataTruth(txId float64, password string,arbitrate bool, cb chainevents.EventCallback) error {
+func BuyerDecryptAndGetMetaDataFromIPFS(password string, metaDataIdEncWithBuyer []byte, buyer string) (string, error) {
+	metaDataIDByte, err := accounts.GetAMInstance().Decrypt(metaDataIdEncWithBuyer, buyer, password)
+	if err != nil {
+		return "", errors.New("failed to decrypt meta data ID, error:" + err.Error())
+	}
+	metaDataID := string(metaDataIDByte)
+	if err := ipfsaccess.GetIAInstance().GetFromIPFS(metaDataID, IPFSOutDir); err != nil {
+		return "", errors.New("failed to get meta data from ipfs, error:" + err.Error())
+	}
+	fileNameWithExtension := modifyFileName(metaDataID)
+	return fileNameWithExtension, nil
+}
+
+func modifyFileName(metaDataID string) string {
+	// here modify file name which add extension into it and return new file name.
+	return IPFSOutDir + "/" + metaDataID + "." + "jpg"
+}
+
+func ConfirmDataTruth(txId float64, password string, arbitrate bool, cb chainevents.EventCallback) error {
 	curUser.SubscribeEvent("TransactionClose", cb)
 
 	txParam := chainoperations.TransactParams{
-		From: common.HexToAddress(curUser.Account.Address),
+		From:     common.HexToAddress(curUser.Account.Address),
 		Password: password,
-		Value: big.NewInt(0),
-		Pending: false}
+		Value:    big.NewInt(0),
+		Pending:  false}
 	err := cif.ConfirmDataTruth(&txParam, big.NewInt(int64(txId)), arbitrate)
 	if err != nil {
 		fmt.Println("failed to ConfirmDataTruth, error:", err)

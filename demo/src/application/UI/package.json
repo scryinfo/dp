@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "A Vue.js project",
   "author": "mats9693 <982254249@qq.com>",
-  "private": true,
-  "license": "",
-  "repository": {},
   "scripts": {
     "dev": "node build/dev-server.js",
     "start": "node build/dev-server.js",

@@ -43,8 +43,8 @@ let dl_db = {
     write:function(params, key) {
         let store = dl_db.db.transaction(dl_db.db_store_name, "readwrite").objectStore(dl_db.db_store_name)
         let request = store.put(params,key)
-        request.onerror = function(event){
-            console.log(event)
+        request.onerror = function(err){
+            console.log(err)
         }
     }
 }
@@ -80,6 +80,8 @@ let tx_db = {
                         Price: cursor.value.Price,
                         Seller: cursor.value.Seller,
                         Buyer: cursor.value.Buyer,
+                        MetaDataIDEncWithSeller: cursor.value.MetaDataIDEncWithSeller,
+                        MetaDataIDEncWithBuyer: cursor.value.MetaDataIDEncWithBuyer,
                         State: state,
                         PublishID: cursor.value.PublishID,
                         TransactionID: cursor.key,
@@ -102,10 +104,31 @@ let tx_db = {
     write:function(params, key) {
         let store = tx_db.db.transaction(tx_db.db_store_name, "readwrite").objectStore(tx_db.db_store_name)
         let request = store.put(params,key)
-        request.onerror = function(event){
-            console.log(event)
+        request.onerror = function(err){
+            console.log(err)
         }
     },
+    // hrer can only update encSeller and encBuyer.
+    update:function (encSeller, encBuyer, key) {
+        let store = tx_db.db.transaction(tx_db.db_store_name, "readwrite").objectStore(tx_db.db_store_name)
+        let requestGet = store.get(key)
+        requestGet.onsuccess = function (event) {
+            let params = event.target.result
+            if (encSeller !== "") {
+                params.MetaDataIDEncWithSeller = encSeller
+            }
+            if (encBuyer !== "") {
+                params.MetaDataIDEncWithBuyer = encBuyer
+            }
+            let requestUpdata = store.put(params, key)
+            requestUpdata.onerror = function (err) {
+                console.log(err)
+            }
+        }
+        requestGet.onerror = function (err) {
+            console.log(err)
+        }
+    }
 }
 let acc_db = {
     init:function(_this){
@@ -134,16 +157,16 @@ let acc_db = {
     write:function(addr) {
         let store = acc_db.db.transaction(acc_db.db_store_name, "readwrite").objectStore(acc_db.db_store_name)
         let request = store.put(addr,addr)
-        request.onerror = function(event){
-            console.log(event)
+        request.onerror = function(err){
+            console.log(err)
         }
     },
     // prepare a single remove function, for delete a account, maybe I can put a
     remove:function (key) {
         let store = acc_db.db.transaction(acc_db.db_store_name, "readwrite").objectStore(acc_db.db_store_name)
         let request = store.delete(key)
-        request.onerror = function (event) {
-            console.log(event)
+        request.onerror = function (err) {
+            console.log(err)
         }
     }
 }

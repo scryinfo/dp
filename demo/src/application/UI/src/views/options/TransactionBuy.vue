@@ -3,6 +3,7 @@
         <el-col :span="24" class="section-item">
             <el-button size="mini" type="primary" @click="purchasePwd">Purchase</el-button>
             <el-button size="mini" type="primary" @click="cancelMsg">Cancel</el-button>
+            <el-button size="mini" type="primary" @click="decryptPwd">Decrypt</el-button>
             <el-button size="mini" type="primary" @click="confirmPwd">Confirm</el-button>
         </el-col>
 
@@ -86,7 +87,34 @@ export default {
         },
         cancelBuying:function () {
             console.log("Node: cancel buying function, which has not realized.")
-            // cancel buying and close the transaction, sdk is also blank.
+            // cancel buying and close the transaction, sdk is not finish.
+        },
+        decryptPwd:function () {
+            this.$prompt(this.$store.state.account, "Input password for this account:", {
+                confirmButtonText: "Submit",
+                cancelButtonText: "Cancel"
+            }).then(({ value }) => {
+                this.decrypt(value)
+            }).catch(() => {
+                this.$message({
+                    type: "info",
+                    message: "Cancel decrypt."
+                })
+            })
+        },
+        decrypt:function (pwd, metaDataIDEncWithBuyer, ) {
+            let _this = this
+            // not support buy a group of data one time, give the first id for instead.
+            astilectron.sendMessage({ Name:"decrypt",Payload:{password: pwd, metaDataIDEncWithBuyer: metaDataIDEncWithBuyer,
+                    buyer: _this.$store.state.account}}, function (message) {
+                    if (message.name !== "error") {
+                        alert("Meta data: ", message.payload)
+                        console.log("Decrypt data success.")
+                    }else {
+                        console.log("Node: decrypt failed.", message)
+                        alert("Decrypt data failed.")
+                    }
+                })
         },
         confirmPwd:function () {
             this.$prompt(this.$store.state.account, "Input password and confirm if meta data is true?", {

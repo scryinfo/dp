@@ -31,14 +31,19 @@ export default {
     name: "TransactionSell",
     data () {
         return {
-            selectsTx: []  // {ID: "", Buyer: ""}
+            selectsTx: []  // {ID: "", Buyer: "", Seller: "", MetaDataIDEncWithSeller: ""}
         }
     },
     methods: {
         selectedChange: function (sels) {
             this.selectsTx = []
             for (let i=0;i<sels.length;i++) {
-                this.selectsTx.push({ ID: sels[i].TransactionID, Buyer: sels[i].Buyer })
+                this.selectsTx.push({
+                    ID: sels[i].TransactionID,
+                    Buyer: sels[i].Buyer,
+                    Seller: sels[i].Seller,
+                    MetaDataIDEncWithSeller: sels[i].MetaDataIDEncWithSeller // transmission between go and js buy not show out to user.
+                })
             }
         },
         reEncryptPwd:function () {
@@ -46,7 +51,6 @@ export default {
                 confirmButtonText: "Submit",
                 cancelButtonText: "Cancel"
             }).then(({ value }) => {
-                // login.verify
                 this.reEncrypt(value)
             }).catch(() => {
                 this.$message({

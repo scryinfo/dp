@@ -31,7 +31,7 @@ export default {
                     proofDataExtensions: []
                 },
                 Price: 0,
-                SupportVerify: false,
+                SupportVerify: false
             },
             send: {
                 metaDataID: "",
@@ -121,7 +121,9 @@ export default {
                 Keys: this.pubData.details.Keys,
                 Description: this.pubData.details.Description,
                 Price: this.pubData.Price,
-                SupportVerify: this.pubData.SupportVerify
+                SupportVerify: this.pubData.SupportVerify,
+                MetaDataExtension: this.pubData.details.metaDataExtension,
+                ProofDataExtensions: this.pubData.details.proofDataExtensions
             }
             astilectron.sendMessage({Name:"publish",Payload: this.send}, function (message) {
                 if (message.name !== "error") {

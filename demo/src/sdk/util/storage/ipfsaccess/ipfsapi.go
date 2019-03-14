@@ -43,3 +43,12 @@ func (ia *IpfsAccessor) SaveToIPFS(content []byte) (string, error) {
 
 	return ia.sh.Add(strings.NewReader(string(content)))
 }
+
+func (ia *IpfsAccessor) GetFromIPFS(hash, outdir string) error {
+	if ia.sh == nil {
+		rlog.Error("ipfs api shell is nil")
+		return errors.New("ipfs api shell is nil")
+	}
+
+	return ia.sh.Get(hash, outdir)
+}

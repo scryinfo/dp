@@ -34,8 +34,7 @@ export default {
             this.$prompt(this.$store.state.account, "Input password for this account:", {
                 confirmButtonText: "Submit",
                 cancelButtonText: "Cancel"
-            }).then(( pwd ) => {
-                // login.verify
+            }).then((pwd) => {
                 this.buy(pwd.value)
             }).catch(() => {
                 this.$message({
@@ -49,7 +48,6 @@ export default {
             // not support buy a group of data one time, give the first id for instead.
             astilectron.sendMessage({ Name:"buy",Payload:{password: pwd, ids: this.selectsDL[0]} }, function (message) {
                     if (message.name !== "error") {
-                        // DBoptions.getTransaction();
                         _this.selectsDL = []
                         console.log("Buy data success.")
                     }else {
