@@ -7,11 +7,12 @@ const state = {
     // show data dictionary.
 
     datalist: [],
-    // {Title: "", Price: 0, Keys: "", Description: "", SupportVerify: false, pID: ""}  // primary key: publishID.
+    // {Title: "", Price: 0, Keys: "", Description: "", SupportVerify: false, pID: ""}  // primary key: publishId.
 
     transactionbuy: [],
-    // {Buyer: "", Seller: "", State: "", Title: "", Price: 0, pID: "", tID: "",
-    //     Verifier1Response: "", Verifier2Response: "", ArbitrateResult: false} // primary key: transactionID.
+    // {Buyer: "", Seller: "", State: "", Title: "", Price: 0, MetaDataIDEncWithSeller: "", MetaDataIDEncWithBuyer: "",
+    //     Verifier1Response: "", Verifier2Response: "", ArbitrateResult: false, pID: "", tID: "",} 
+    //  primary key: transactionId.
 
     transactionsell: [],
     // the same as transactionbuy.

@@ -21,6 +21,7 @@ let utils = {
                         message: message.payload,
                         position: "top-left"
                     })
+                    // dl_db.write(message.payload)
                     break
                 case "onApprove":
                     console.log("Node: onApprove.callback. ", message.payload)
@@ -38,33 +39,37 @@ let utils = {
                         position: "top-left"
                     })
                     // go send the whole callback.event to js now, here will adjust later. core param is tID.
-                    tx_db.write({
-                        Title: "test title",
-                        Price: 0,
-                        Seller: "0x0000",
-                        Buyer: "0x0001",
-                        State: 0,
-                        PublishID: "1234-1234",
-                        Verifier1Response: "3,v1r",
-                        Verifier2Response: "3,v2r",
-                        ArbitrateResult: false
-                    }, message.payload.Data.transactionId)
+                    // tx_db.write({
+                    //     Title: "test title",
+                    //     Price: 0,
+                    //     Seller: "0x0000",
+                    //     Buyer: "0x0001",
+                    //     MetaDataIDEncWithSeller: "123456-123456",
+                    //     MetaDataIDEncWithBuyer: "456789-456789",
+                    //     State: 0,
+                    //     PublishID: "1234-1234",
+                    //     Verifier1Response: "3,v1r",
+                    //     Verifier2Response: "3,v2r",
+                    //     ArbitrateResult: false
+                    // }, message.payload.Data.transactionId)
                     break
                 case "onPurchase":
                     console.log("Node: onPurchase.callback. ", message.payload)
                     _this.$notify({
                         title: "onPurchase.callback: ",
-                        message: message.payload,
+                        message: message.payload, // message.payload.Data.metaDataIdEncSeller
                         position: "top-left"
                     })
+                    // tx_db.update(message.payload.Data.metaDataIdEncSeller, "", message.payload.Data.transactionId)
                     break
                 case "onReadyForDownload":
                     console.log("Node: onReadyForDownload.callback. ", message.payload)
                     _this.$notify({
                         title: "onReadyForDownload.callback: ",
-                        message: message.payload,
+                        message: message.payload, // message.payload.Data.metaDataIdEncBuyer
                         position: "top-left"
                     })
+                    // tx_db.update("", message.payload.Data.metaDataIdEncBuyer, message.payload.Data.transactionId)
                     break
                 case "onClose":
                     console.log("Node: onClose.callback. ", message.payload)

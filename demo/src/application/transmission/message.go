@@ -93,11 +93,21 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err = json.Unmarshal(m.Payload, &re); err != nil {
 			break
 		}
-		if err = sdkinterface.SubmitMetaDataIdEncWithBuyer(re.SelectedTx.TransactionID, re.Password, onReadyForDownload);
-		err != nil {
+		if err = sdkinterface.SubmitMetaDataIdEncWithBuyer(re.SelectedTx.TransactionID, re.Password,
+			re.SelectedTx.MetaDataIDEncWithSeller, re.SelectedTx.Buyer, re.SelectedTx.Seller, onReadyForDownload); err != nil {
 			break
 		}
 		payload = true
+		return payload, nil
+	case "decrypt":
+		var dd definition.DecryptData = definition.DecryptData{}
+		if err = json.Unmarshal(m.Payload, &dd); err != nil {
+			break
+		}
+		if payload, err = sdkinterface.BuyerDecryptAndGetMetaDataFromIPFS(dd.Password, []byte(dd.MetaDataIDEncWithBuyer),
+			dd.Buyer); err != nil {
+				break
+		}
 		return payload, nil
 	case "confirm":
 		var cd definition.ConfirmData = definition.ConfirmData{}

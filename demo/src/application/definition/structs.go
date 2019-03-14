@@ -3,8 +3,10 @@ package definition
 const (
 	Created = byte(iota)
 	Voted
-	Payed
+	Buying
 	ReadyForDownload
+	Arbitrating
+	Payed
 	Closed
 )
 
@@ -53,6 +55,15 @@ type PubDataIDs struct {
 	SupportVerify bool     `json:"supportVerify"`
 	Password      string   `json:"password"`
 }
+type DataDetails struct {
+	Title               string   `json:"Title"`
+	Keys                string   `json:"Keys"`
+	Description         string   `json:"Description"`
+	MetaDataExtension   string   `json:"metaDataExtension"`
+	ProofDataExtensions []string `json:"proofDataExtensions"`
+	Price               float64
+	SupportVerify       bool	// not implement.
+}
 
 type BuyData struct {
 	Password string `json:"password"`
@@ -69,8 +80,16 @@ type ReEncryptData struct {
 	SelectedTx SelectedTx `json:"ids"`
 }
 type SelectedTx struct {
-	TransactionID float64 `json:"ID"`
-	Buyer         string  `json:"Buyer"`
+	TransactionID           float64 `json:"ID"`
+	Buyer                   string  `json:"Buyer"`
+	Seller                  string  `json:"Seller"`
+	MetaDataIDEncWithSeller string  `json:"MetaDataIDEncWithSeller"`
+}
+
+type DecryptData struct {
+	Password               string `json:"password"`
+	MetaDataIDEncWithBuyer string `json:"metaDataIDEncWithBuyer"`
+	Buyer                  string `json:"buyer"`
 }
 
 type ConfirmData struct {
