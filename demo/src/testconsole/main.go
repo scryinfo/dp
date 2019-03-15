@@ -20,9 +20,9 @@ var (
 	txId                    *big.Int = big.NewInt(0)
 	metaDataIdEncWithSeller []byte
 	metaDataIdEncWithBuyer  []byte
-	protocolContractAddr                           = "0xeefe95840a6382e6b48525b7b99446c68d367d4a"
-	tokenContractAddr                              = "0xb612f2e625207545bb589cf0ac1ef9274daca6d9"
-	deployerKeyJson                                = `{"version":3,"id":"8c3b7cd5-f0d7-4d27-bbcf-ce44fe318ff2","address":"d280b60c38bc8db9d309fa5a540ffec499f0a3e8","crypto":{"ciphertext":"fe3c3628e335da346923bf0f5ee4bccd267ac56fc70ece2eece059c7986affda","cipherparams":{"iv":"e098d1a0febe59c98a96333d8c7ed792"},"cipher":"aes-128-ctr","kdf":"scrypt","kdfparams":{"dklen":32,"salt":"e3bc15722ac328915223370950c1ea522bec0a0665132847a2bfd49c0531ed37","n":262144,"r":8,"p":1},"mac":"da34625f1b1f4ad99be3986ba2aeacbf6fce3b9abeea9d0d40ef9ac42443a9f7"}}`
+	protocolContractAddr                           = "0xbb7bae05bdbc0ed9e514ce18122fc6b4cbcca346"
+	tokenContractAddr                              = "0xc67d1847fb1b00173dcdbc00c7cbe32651537daa"
+	deployerKeyJson                                = "{\"version\":3,\"id\":\"953e9184-1326-4047-a968-c06dd3da8438\",\"address\":\"61ad28110ce3911a9aafabba551cdc932a02bd52\",\"crypto\":{\"ciphertext\":\"b63c0b70749515f23f3a85556596d579a7935f67e90c3876f37aebcadf97e59f\",\"cipherparams\":{\"iv\":\"9c1d33e7d549b0a8e50bdae190eb9e41\"},\"cipher\":\"aes-128-ctr\",\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"salt\":\"db461e3cf6836560b4a304ac03682ec8cb12d55e6f9b76dae2837086a06ba167\",\"n\":262144,\"r\":8,\"p\":1},\"mac\":\"14cfca4d97867161c4dafcef45ddd411f08cc71931d31d6f47b5630e7101cc45\"}}"
 	keyPassword                                    = "12345"
 	deployer                *scryclient.ScryClient = nil
 	seller                  *scryclient.ScryClient = nil
@@ -416,9 +416,10 @@ func getContracts() []chainevents.ContractInfo {
 	protocolEvents := []string{"DataPublish", "TransactionCreate", "RegisterVerifier", "VerifiersChosen", "Vote", "Buy", "ReadyForDownload", "TransactionClose"}
 	tokenEvents := []string{"Approval"}
 
+	var fileDir = "D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/iscap/demo/src/testconsole/"
 	contracts := []chainevents.ContractInfo{
-		{protocolContractAddr, getAbiText("./ScryProtocol.abi"), protocolEvents},
-		{tokenContractAddr, getAbiText("./ScryToken.abi"), tokenEvents},
+		{protocolContractAddr, getAbiText(fileDir+"ScryProtocol.abi"), protocolEvents},
+		{tokenContractAddr, getAbiText(fileDir+"ScryToken.abi"), tokenEvents},
 	}
 
 	return contracts

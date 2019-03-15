@@ -34,14 +34,19 @@ export default {
     name: "TransactionBuy",
     data () {
         return {
-            selectsTx: []  // {ID: ""}
+            selectsTx: []  // {tID: "", Buyer: "", MetaDataIDEncWithSeller: ""}
         }
     },
     methods: {
         selectedChange: function (sels) {
             this.selectsTx = []
             for (let i=0;i<sels.length;i++) {
-                this.selectsTx.push( sels[i].TransactionID )
+                this.selectsTx.push({
+                    TransactionID: sels[i].TransactionID,
+                    Buyer: sels[i].Buyer,
+                    MetaDataIDEncWithBuyer: sels[i].MetaDataIDEncWithBuyer,
+                    MetaDataExtension: sels[i].MetaDataExtension
+                })
             }
         },
         purchasePwd:function () {
@@ -61,7 +66,7 @@ export default {
         purchase:function (pwd) {
             let _this = this
             // not support buy a group of data one time, give the first id for instead.
-            astilectron.sendMessage({ Name:"purchase",Payload:{password: pwd, ids: this.selectsTx[0]} }, function (message) {
+            astilectron.sendMessage({ Name:"purchase",Payload:{password: pwd, ids: this.selectsTx[0].TransactionID} }, function (message) {
                 if (message.name !== "error") {
                     _this.selectsTx = []
                     console.log("Purchase data success.")
@@ -86,7 +91,7 @@ export default {
             })
         },
         cancelBuying:function () {
-            console.log("Node: cancel buying function, which has not realized.")
+            console.log("Node: cancel buying has not implemented.")
             // cancel buying and close the transaction, sdk is not finish.
         },
         decryptPwd:function () {
@@ -102,11 +107,9 @@ export default {
                 })
             })
         },
-        decrypt:function (pwd, metaDataIDEncWithBuyer, ) {
-            let _this = this
-            // not support buy a group of data one time, give the first id for instead.
-            astilectron.sendMessage({ Name:"decrypt",Payload:{password: pwd, metaDataIDEncWithBuyer: metaDataIDEncWithBuyer,
-                    buyer: _this.$store.state.account}}, function (message) {
+        decrypt:function (pwd) {
+            // not support decrypt a group of data one time, give the first id for instead.
+            astilectron.sendMessage({ Name:"decrypt",Payload:{password: pwd, ids: this.selectsTx[0]}}, function (message) {
                     if (message.name !== "error") {
                         alert("Meta data: ", message.payload)
                         console.log("Decrypt data success.")
@@ -117,7 +120,8 @@ export default {
                 })
         },
         confirmPwd:function () {
-            this.$prompt(this.$store.state.account, "Input password and confirm if meta data is true?", {
+            this.$prompt(this.$store.state.account, "Input password and confirm if the meta data is true?", {
+                distinguishCancelAndClose: true,
                 confirmButtonText: "I think it is true.",
                 cancelButtonText: "I think it is fake."
             }).then((pwd) => {

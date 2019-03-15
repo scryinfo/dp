@@ -31,7 +31,7 @@ export default {
     name: "TransactionSell",
     data () {
         return {
-            selectsTx: []  // {ID: "", Buyer: "", Seller: "", MetaDataIDEncWithSeller: ""}
+            selectsTx: []  // {tID: "", Buyer: "", Seller: "", MetaDataIDEncWithSeller: "", pID: ""}
         }
     },
     methods: {
@@ -42,6 +42,7 @@ export default {
                     ID: sels[i].TransactionID,
                     Buyer: sels[i].Buyer,
                     Seller: sels[i].Seller,
+                    PublishID: sels[i].PublishID,
                     MetaDataIDEncWithSeller: sels[i].MetaDataIDEncWithSeller // transmission between go and js buy not show out to user.
                 })
             }
@@ -62,7 +63,9 @@ export default {
         reEncrypt:function (pwd) {
             let _this = this
             // not support buy a group of data one time, give the first id for instead.
-            astilectron.sendMessage({ Name:"reEncrypt",Payload:{password: pwd, ids: this.selectsTx[0]} }, function (message) {
+            let txDetails = dl_db.read(this.selectsTx[0].PublishID)
+            astilectron.sendMessage({ Name:"reEncrypt",Payload:{password: pwd, ids: this.selectsTx[0],
+                    extension: txDetails.MetaDataExtension} }, function (message) {
                 if (message.name !== "error") {
                     _this.selectsTx = []
                     console.log("ReEncrypt data success.")

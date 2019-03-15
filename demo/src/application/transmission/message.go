@@ -11,10 +11,7 @@ import (
 	"math/big"
 )
 
-var (
-	user   *scryclient.ScryClient = nil
-	window *astilectron.Window    = nil
-)
+var	window *astilectron.Window    = nil
 
 func SetWindow(w *astilectron.Window) {
 	window = w
@@ -30,13 +27,11 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 	// when an user jump from login page to home page, he will get 1000,0000 tokens for test.
 	case "login.verify":
 		var ai definition.AccInfo = definition.AccInfo{}
-		err = json.Unmarshal(m.Payload, &ai)
-		if err != nil {
+		if err = json.Unmarshal(m.Payload, &ai); err != nil {
 			break
 		}
 		var ok bool
-		ok, err = sdkinterface.UserLogin(ai.Account, ai.Password)
-		if !ok {
+		if ok, err = sdkinterface.UserLogin(ai.Account, ai.Password); !ok {
 			break
 		}
 		err = sdkinterface.TransferTokenFromDeployer(big.NewInt(10000000)) // test
@@ -44,29 +39,37 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		return payload, nil
 	case "create.new.account":
 		var pwd definition.AccInfo = definition.AccInfo{}
-		err = json.Unmarshal(m.Payload, &pwd)
-		if err != nil {
+		if err = json.Unmarshal(m.Payload, &pwd); err != nil {
 			break
 		}
-		user, err = sdkinterface.CreateUserWithLogin(pwd.Password)
-		if err != nil {
+		var user *scryclient.ScryClient = nil
+		if user, err = sdkinterface.CreateUserWithLogin(pwd.Password); err != nil {
 			break
 		}
 		payload = user.Account.Address
 		return payload, nil
 	case "save.keystore":
-		err = sdkinterface.TransferTokenFromDeployer(big.NewInt(10000000)) // test
-		if err != nil {
+		if err = sdkinterface.TransferTokenFromDeployer(big.NewInt(10000000)); err != nil {   // test
 			break
 		}
 		payload = true
+		return payload, nil
+	case "publish":
+		var pd definition.PubDataIDs = definition.PubDataIDs{}
+		if err = json.Unmarshal(m.Payload, &pd); err != nil {
+			break
+		}
+		payload, err = sdkinterface.PublishData(&pd, onPublish)
+		if err != nil {
+			break
+		}
 		return payload, nil
 	case "buy":
 		var bd definition.BuyData = definition.BuyData{}
 		if err = json.Unmarshal(m.Payload, &bd); err != nil {
 			break
 		}
-		// optimize: approve transfer how much money (1600 now)? data price + rewards + gas estimated may be a solution.
+		// optimize: approve transfer how much money (1600 now)? data price + rewards may be a solution.
 		if err = sdkinterface.ApproveTransferForBuying(bd.Password, onApprove); err != nil {
 			break
 		}
@@ -85,7 +88,6 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err = sdkinterface.Buy(pd.TransactionID, pd.Password, onPurchase); err != nil {
 			break
 		}
-
 		payload = true
 		return payload, nil
 	case "reEncrypt":
@@ -104,8 +106,8 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err = json.Unmarshal(m.Payload, &dd); err != nil {
 			break
 		}
-		if payload, err = sdkinterface.BuyerDecryptAndGetMetaDataFromIPFS(dd.Password, []byte(dd.MetaDataIDEncWithBuyer),
-			dd.Buyer); err != nil {
+		if payload, err = sdkinterface.BuyerDecryptAndGetMetaDataFromIPFS(dd.Password, []byte(dd.SelectedTx.MetaDataIDEncWithBuyer),
+			dd.SelectedTx.MetaDataExtension, dd.SelectedTx.Buyer); err != nil {
 				break
 		}
 		return payload, nil
@@ -117,15 +119,7 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err = sdkinterface.ConfirmDataTruth(cd.TransactionID, cd.Password,cd.Arbitrate, onClose); err != nil {
 			break
 		}
-	case "publish":
-		var pd definition.PubDataIDs = definition.PubDataIDs{}
-		if err = json.Unmarshal(m.Payload, &pd); err != nil {
-			break
-		}
-		payload, err = sdkinterface.PublishData(&pd, onPublish)
-		if err != nil {
-			break
-		}
+		payload = true
 		return payload, nil
 	}
 

@@ -116,36 +116,27 @@ export default {
         },
         pub: function () {
             let _this = this
-            let pub = {
-                Title: this.pubData.details.Title,
-                Keys: this.pubData.details.Keys,
-                Description: this.pubData.details.Description,
-                Price: this.pubData.Price,
-                SupportVerify: this.pubData.SupportVerify,
-                MetaDataExtension: this.pubData.details.metaDataExtension,
-                ProofDataExtensions: this.pubData.details.proofDataExtensions
-            }
             astilectron.sendMessage({Name:"publish",Payload: this.send}, function (message) {
                 if (message.name !== "error") {
-                    dl_db.write(pub, message.payload)
+                    dl_db.write({
+                        Title: _this.pubData.details.Title,
+                        Keys: _this.pubData.details.Keys,
+                        Description: _this.pubData.details.Description,
+                        Price: _this.pubData.Price,
+                        Seller: _this.$store.state.account,
+                        SupportVerify: _this.pubData.SupportVerify,
+                        MetaDataExtension: _this.pubData.details.metaDataExtension,
+                        ProofDataExtensions: _this.pubData.details.proofDataExtensions,
+                        PublishID: message.payload
+                    })
                     dl_db.init(_this)
                     console.log("Publish new data success.")
-                    _this.resetSend()
+                    // reset datas.
                 }else {
                     console.log("Node: publish.newData failed. ", message)
                     alert("Publish data failed: ", message.payload)
                 }
             })
-        },
-        resetSend: function () {
-            this.send = {
-                metaDataID: "",
-                proofDataIDs: [],
-                detailsID: "",
-                price: 0,
-                supportVerify: false,
-                password: ""
-            }
         }
     },
     watch: {
