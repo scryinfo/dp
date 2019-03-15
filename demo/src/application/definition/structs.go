@@ -1,40 +1,8 @@
 package definition
 
-const (
-	Created = byte(iota)
-	Voted
-	Buying
-	ReadyForDownload
-	Arbitrating
-	Payed
-	Closed
-)
-
 type AccInfo struct {
 	Account  string `json:"account"`
 	Password string `json:"password"`
-}
-
-type Datalist struct {
-	PublishID     string
-	Title         string
-	Price         float64
-	Keys          string
-	Description   string
-	SupportVerify bool
-}
-
-type Transaction struct {
-	Title             string
-	TransactionID     float64
-	PublishID         string
-	Price             float64
-	Seller            string
-	Buyer             string
-	State             byte
-	Verifier1Response string
-	Verifier2Response string
-	ArbitrateResult   bool
 }
 
 //type PubData struct {
@@ -55,14 +23,16 @@ type PubDataIDs struct {
 	SupportVerify bool     `json:"supportVerify"`
 	Password      string   `json:"password"`
 }
+
 type DataDetails struct {
 	Title               string   `json:"Title"`
 	Keys                string   `json:"Keys"`
 	Description         string   `json:"Description"`
 	MetaDataExtension   string   `json:"metaDataExtension"`
 	ProofDataExtensions []string `json:"proofDataExtensions"`
-	Price               float64
-	SupportVerify       bool	// not implement.
+	Price               string
+	PublishID           string
+	SupportVerify       bool // not implement.
 }
 
 type BuyData struct {
@@ -70,9 +40,23 @@ type BuyData struct {
 	IDs      string `json:"ids"`
 }
 
+
+type TransactionDetails struct {
+	TransactionID  string
+	PublishID      string
+	ProofFileNames []string
+	TxState        string
+}
+
 type PurchaseData struct {
-	Password      string  `json:"password"`
-	TransactionID float64 `json:"ids"`
+	Password      string `json:"password"`
+	TransactionID string `json:"ids"`
+}
+
+type PurchaseDetails struct {
+	TransactionID           string
+	MetaDataIdEncWithSeller string
+	TxState                 string
 }
 
 type ReEncryptData struct {
@@ -80,20 +64,30 @@ type ReEncryptData struct {
 	SelectedTx SelectedTx `json:"ids"`
 }
 type SelectedTx struct {
-	TransactionID           float64 `json:"ID"`
-	Buyer                   string  `json:"Buyer"`
-	Seller                  string  `json:"Seller"`
-	MetaDataIDEncWithSeller string  `json:"MetaDataIDEncWithSeller"`
+	TransactionID           string `json:"TransactionID"`
+	Buyer                   string `json:"Buyer"`
+	Seller                  string `json:"Seller"`
+	MetaDataIDEncWithSeller string `json:"MetaDataIDEncWithSeller"`
+}
+
+type ReEncryptDetails struct {
+	TransactionID          string
+	MetaDataIdEncWithBuyer string
+	TxState                string
 }
 
 type DecryptData struct {
-	Password               string `json:"password"`
-	MetaDataIDEncWithBuyer string `json:"metaDataIDEncWithBuyer"`
-	Buyer                  string `json:"buyer"`
+	Password   string      `json:"password"`
+	SelectedTx SelectedTxD `json:"ids"`
+}
+type SelectedTxD struct {
+	MetaDataIDEncWithBuyer string `json:"MetaDataIDEncWithBuyer"`
+	MetaDataExtension      string `json:"MetaDataExtension"`
+	Buyer                  string `json:"Buyer"`
 }
 
 type ConfirmData struct {
-	Password      string  `json:"password"`
-	TransactionID float64 `json:"ids"`
-	Arbitrate     bool    `json:"startArbitrate"`
+	Password      string `json:"password"`
+	TransactionID string `json:"ids"`
+	Arbitrate     bool   `json:"startArbitrate"`
 }

@@ -12,7 +12,7 @@ let dl_db = {
             this.db = event.target.result
             this.db.createObjectStore(dl_db.db_store_name, {keyPath: "PublishID"})
             this.db.createObjectStore("transaction", {keyPath: "TransactionID"})
-            this.db.createObjectStore("accounts")
+            this.db.createObjectStore("accounts", {keyPath: "address"})
         }
         request.onsuccess = function(event) {
             _this.$store.state.datalist = []
@@ -22,29 +22,38 @@ let dl_db = {
             c.onsuccess = function(event) {
                 let cursor = event.target.result
                 if (cursor) {
-                    let sv = ""
-                    switch (cursor.value.SupportVerify) {
-                        case true: sv = "Yes."; break
-                        case false: sv = "No."; break
-                    }
                     _this.$store.state.datalist.push({
                         Title: cursor.value.Title,
                         Price: cursor.value.Price,
                         Keys: cursor.value.Keys,
                         Description: cursor.value.Description,
-                        SupportVerify: sv,
-                        PublishID: cursor.key
+                        Seller: cursor.value.Seller,
+                        SupportVerify: cursor.value.SupportVerify,
+                        MetaDataExtension: cursor.value.MetaDataExtension,
+                        ProofDataExtensions: cursor.value.ProofDataExtensions,
+                        PublishID: cursor.value.PublishID
                     })
                     cursor.continue()
                 }
             }
         }
     },
-    write:function(params, key) {
+    write:function(params) {
         let store = dl_db.db.transaction(dl_db.db_store_name, "readwrite").objectStore(dl_db.db_store_name)
-        let request = store.put(params,key)
+        let request = store.put(params)
         request.onerror = function(err){
             console.log(err)
+        }
+    },
+    read:function (key) {
+        let store = dl_db.db.transaction(dl_db.db_store_name, "readwrite").objectStore(dl_db.db_store_name)
+        let request = store.get(key)
+        request.onerror = function (err) {
+            console.log(err)
+        }
+        request.onsuccess = function (event) {
+            console.log("Node: indexedDB get result.",event.target.result)
+            return event.target.result
         }
     }
 }
@@ -66,28 +75,24 @@ let tx_db = {
             c.onsuccess = function(event) {
                 let cursor = event.target.result
                 if (cursor) {
-                    let state = ""
-                    switch (cursor.value.State) {
-                        case 0: state = "Created"; break
-                        case 1: state = "Voted"; break
-                        case 2: state = "Payed"; break
-                        case 3: state = "ReadyForDownload"; break
-                        case 4: state = "Closed"; break
-                        default: state = "undefined state."; break
-                    }
                     let t = {
                         Title: cursor.value.Title,
                         Price: cursor.value.Price,
-                        Seller: cursor.value.Seller,
+                        Keys: cursor.value.Keys,
+                        Description: cursor.value.Description,
                         Buyer: cursor.value.Buyer,
+                        Seller: cursor.value.Seller,
+                        State: cursor.value.State,
+                        SupportVerify: cursor.value.SupportVerify,
+                        MetaDataExtension: cursor.value.MetaDataExtension,
+                        ProofDataExtensions: cursor.value.ProofDataExtensions,
                         MetaDataIDEncWithSeller: cursor.value.MetaDataIDEncWithSeller,
                         MetaDataIDEncWithBuyer: cursor.value.MetaDataIDEncWithBuyer,
-                        State: state,
-                        PublishID: cursor.value.PublishID,
-                        TransactionID: cursor.key,
                         Verifier1Response: cursor.value.Verifier1Response,
                         Verifier2Response: cursor.value.Verifier2Response,
-                        ArbitrateResult: cursor.value.ArbitrateResult
+                        ArbitrateResult: cursor.value.ArbitrateResult,
+                        PublishID: cursor.value.PublishID,
+                        TransactionID: cursor.value.TransactionID
                     }
                     let acc = _this.$store.state.account
                     if (cursor.value.Buyer === acc) {
@@ -101,32 +106,22 @@ let tx_db = {
             }
         }
     },
-    write:function(params, key) {
+    write:function(params) {
         let store = tx_db.db.transaction(tx_db.db_store_name, "readwrite").objectStore(tx_db.db_store_name)
-        let request = store.put(params,key)
+        let request = store.put(params)
         request.onerror = function(err){
             console.log(err)
         }
     },
-    // hrer can only update encSeller and encBuyer.
-    update:function (encSeller, encBuyer, key) {
+    read:function (key) {
         let store = tx_db.db.transaction(tx_db.db_store_name, "readwrite").objectStore(tx_db.db_store_name)
-        let requestGet = store.get(key)
-        requestGet.onsuccess = function (event) {
-            let params = event.target.result
-            if (encSeller !== "") {
-                params.MetaDataIDEncWithSeller = encSeller
-            }
-            if (encBuyer !== "") {
-                params.MetaDataIDEncWithBuyer = encBuyer
-            }
-            let requestUpdata = store.put(params, key)
-            requestUpdata.onerror = function (err) {
-                console.log(err)
-            }
-        }
-        requestGet.onerror = function (err) {
+        let request = store.get(key)
+        request.onerror = function (err) {
             console.log(err)
+        }
+        request.onsuccess = function (event) {
+            console.log("Node: indexedDB get result.",event.target.result)
+            return event.target.result
         }
     }
 }
@@ -148,7 +143,7 @@ let acc_db = {
             c.onsuccess = function(event) {
                 let cursor = event.target.result
                 if (cursor) {
-                    _this.$store.state.accounts.push({ address: cursor.key })
+                    _this.$store.state.accounts.push({address: cursor.value.address})
                     cursor.continue()
                 }
             }
@@ -156,7 +151,7 @@ let acc_db = {
     },
     write:function(addr) {
         let store = acc_db.db.transaction(acc_db.db_store_name, "readwrite").objectStore(acc_db.db_store_name)
-        let request = store.put(addr,addr)
+        let request = store.put(addr)
         request.onerror = function(err){
             console.log(err)
         }

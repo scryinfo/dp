@@ -94,7 +94,7 @@ export default {
             astilectron.sendMessage({Name: "save.keystore", Payload: {account: this.$store.state.account,
                     password: pwd}}, function (message) {
                 if (message.name !== "error") {
-                    acc_db.write(_this.account)
+                    acc_db.write({ address: _this.account })
                     _this.$router.push({ name: "home", params: {acc: _this.account}})
                 } else {
                     console.log("Node: save.keystore failed. ", message)

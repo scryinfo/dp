@@ -20,7 +20,7 @@ export default {
     name: "DataList",
     data () {
         return {
-            selectsDL: []    // {ID: ""}
+            selectsDL: []    // {tID: ""}
         }
     },
     methods: {

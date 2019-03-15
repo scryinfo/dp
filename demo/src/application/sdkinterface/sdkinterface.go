@@ -2,7 +2,6 @@ package sdkinterface
 
 import (
 	"errors"
-	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/scryinfo/iscap/demo/src/application/definition"
 	"github.com/scryinfo/iscap/demo/src/application/sdkinterface/settings"
@@ -36,7 +35,7 @@ func Initialize() error {
 	var err error
 	scryInfo, err = settings.LoadSettings()
 	if err != nil {
-		fmt.Println(failedToInitSDK, err)
+		rlog.Error(failedToInitSDK, err)
 		return err
 	}
 
@@ -54,7 +53,7 @@ func Initialize() error {
 		0,
 		scryInfo.Services.Ipfs)
 	if err != nil {
-		fmt.Println(failedToInitSDK, err)
+		rlog.Error(failedToInitSDK, err)
 		return err
 	}
 	rlog.Info("Node: sdk init finished. ")
@@ -104,7 +103,7 @@ func UserLogin(address string, password string) (bool, error) {
 func ImportAccount(keyJson string, oldPassword string, newPassword string) (*scryclient.ScryClient, error) {
 	address, err := accounts.GetAMInstance().ImportAccount([]byte(keyJson), oldPassword, newPassword)
 	if err != nil {
-		fmt.Println("failed to import account. error:", err)
+		rlog.Error("failed to import account. error:", err)
 		return nil, err
 	}
 
@@ -119,13 +118,13 @@ func TransferTokenFromDeployer(token *big.Int) error {
 			scryInfo.Chain.Contracts.DeployerPassword,
 			scryInfo.Chain.Contracts.DeployerPassword)
 		if err != nil {
-			fmt.Println("failed to transfer token, error:", err)
+			rlog.Error("failed to transfer token, error:", err)
 			return err
 		}
 	}
 
 	if curUser == nil {
-		fmt.Println("failed to transfer token, null current user")
+		rlog.Error("failed to transfer token, null current user")
 		return errors.New("failed to transfer token, null current user")
 	}
 
@@ -135,7 +134,7 @@ func TransferTokenFromDeployer(token *big.Int) error {
 		Pending:  false}
 	err = cif.TransferTokens(&txParam, common.HexToAddress(curUser.Account.Address), token)
 	if err != nil {
-		fmt.Println("failed to transfer token, error:", err)
+		rlog.Error("failed to transfer token, error:", err)
 		return err
 	}
 
@@ -144,12 +143,12 @@ func TransferTokenFromDeployer(token *big.Int) error {
 
 func PublishData(data *definition.PubDataIDs, cb chainevents.EventCallback) (string, error) {
 	if curUser == nil {
-		fmt.Println("no current user")
+		rlog.Error("no current user")
 		return "", errors.New("failed to publish data, current user is null")
 	}
 
 	if cb == nil {
-		fmt.Println("null callback function")
+		rlog.Error("null callback function")
 		return "", errors.New("failed to publish data, callback function is null")
 	}
 
@@ -176,7 +175,7 @@ func ApproveTransferForBuying(password string, cb chainevents.EventCallback) err
 
 func approveTransfer(cb chainevents.EventCallback, password string, protocolContractAddr common.Address) error {
 	if curUser == nil {
-		fmt.Println("no current user")
+		rlog.Error("no current user")
 		return errors.New("failed to approve transfer, current user is null")
 	}
 
@@ -190,7 +189,7 @@ func approveTransfer(cb chainevents.EventCallback, password string, protocolCont
 		protocolContractAddr,
 		big.NewInt(1600))
 	if err != nil {
-		fmt.Println("ApproveTransfer:", err)
+		rlog.Error("ApproveTransfer:", err)
 		return errors.New("failed to approve transfer, error:" + err.Error())
 	}
 
@@ -199,7 +198,7 @@ func approveTransfer(cb chainevents.EventCallback, password string, protocolCont
 
 func CreateTransaction(publishId string, password string, cb chainevents.EventCallback) error {
 	if curUser == nil {
-		fmt.Println("no current user")
+		rlog.Error("no current user")
 		return errors.New("failed to prepare to buy, current user is null")
 	}
 
@@ -212,16 +211,16 @@ func CreateTransaction(publishId string, password string, cb chainevents.EventCa
 		Pending:  false}
 	err := cif.PrepareToBuy(&txParam, publishId)
 	if err != nil {
-		fmt.Println("failed to prepareToBuy, error:", err)
+		rlog.Error("failed to prepareToBuy, error:", err)
 		return errors.New("failed to prepareToBuy, error:" + err.Error())
 	}
 
 	return nil
 }
 
-func Buy(txId float64, password string, cb chainevents.EventCallback) error {
+func Buy(txId string, password string, cb chainevents.EventCallback) error {
 	if curUser == nil {
-		fmt.Println("no current user")
+		rlog.Error("no current user")
 		return errors.New("failed to buy, current user is null")
 	}
 
@@ -233,16 +232,21 @@ func Buy(txId float64, password string, cb chainevents.EventCallback) error {
 		Value:    big.NewInt(0),
 		Pending:  false}
 
-	err := cif.BuyData(&txParam, big.NewInt(int64(txId)))
+	tID, ok :=  new(big.Int).SetString(txId, 10)
+	if !ok {
+		rlog.Error("failed to set txID to *big.Int.")
+		return errors.New("failed to set txID to *big.Int")
+	}
+	err := cif.BuyData(&txParam, tID)
 	if err != nil {
-		fmt.Println("failed to buyData, error:", err)
+		rlog.Error("failed to buyData, error:", err)
 		return errors.New("failed to buyData, error:" + err.Error())
 	}
 
 	return nil
 }
 
-func SubmitMetaDataIdEncWithBuyer(txId float64, password, metaDataIDEncSeller, buyer, seller string, cb chainevents.EventCallback) error {
+func SubmitMetaDataIdEncWithBuyer(txId string, password, metaDataIDEncSeller, buyer, seller string, cb chainevents.EventCallback) error {
 	curUser.SubscribeEvent("ReadyForDownload", cb)
 
 	txParam := chainoperations.TransactParams{
@@ -255,18 +259,23 @@ func SubmitMetaDataIdEncWithBuyer(txId float64, password, metaDataIDEncSeller, b
 	var err error
 	metaDataIdEncWithBuyer, err = accounts.GetAMInstance().ReEncrypt(metaDataIdEncWithBuyer, seller, buyer, password)
 	if err != nil {
-		fmt.Println("failed to reEncrypt meta data ID, error:", err)
+		rlog.Error("failed to reEncrypt meta data ID, error:", err)
 		return errors.New("failed to SubmitMetaDataIdEncWithBuyer, error:" + err.Error())
 	}
-	err = cif.SubmitMetaDataIdEncWithBuyer(&txParam, big.NewInt(int64(txId)), metaDataIdEncWithBuyer)
+	tID, ok :=  new(big.Int).SetString(txId, 10)
+	if !ok {
+		rlog.Error("failed to set txID to *big.Int.")
+		return errors.New("failed to set txID to *big.Int")
+	}
+	err = cif.SubmitMetaDataIdEncWithBuyer(&txParam, tID, metaDataIdEncWithBuyer)
 	if err != nil {
-		fmt.Println("failed to SubmitMetaDataIdEncWithBuyer, error:", err)
+		rlog.Error("failed to SubmitMetaDataIdEncWithBuyer, error:", err)
 		return errors.New("failed to SubmitMetaDataIdEncWithBuyer, error:" + err.Error())
 	}
 	return nil
 }
 
-func BuyerDecryptAndGetMetaDataFromIPFS(password string, metaDataIdEncWithBuyer []byte, buyer string) (string, error) {
+func BuyerDecryptAndGetMetaDataFromIPFS(password string, metaDataIdEncWithBuyer []byte, buyer, extension string) (string, error) {
 	metaDataIDByte, err := accounts.GetAMInstance().Decrypt(metaDataIdEncWithBuyer, buyer, password)
 	if err != nil {
 		return "", errors.New("failed to decrypt meta data ID, error:" + err.Error())
@@ -275,16 +284,11 @@ func BuyerDecryptAndGetMetaDataFromIPFS(password string, metaDataIdEncWithBuyer 
 	if err := ipfsaccess.GetIAInstance().GetFromIPFS(metaDataID, IPFSOutDir); err != nil {
 		return "", errors.New("failed to get meta data from ipfs, error:" + err.Error())
 	}
-	fileNameWithExtension := modifyFileName(metaDataID)
+	fileNameWithExtension := IPFSOutDir + "/" + metaDataID + "." + extension
 	return fileNameWithExtension, nil
 }
 
-func modifyFileName(metaDataID string) string {
-	// here modify file name which add extension into it and return new file name.
-	return IPFSOutDir + "/" + metaDataID + "." + "jpg"
-}
-
-func ConfirmDataTruth(txId float64, password string, arbitrate bool, cb chainevents.EventCallback) error {
+func ConfirmDataTruth(txId string, password string, arbitrate bool, cb chainevents.EventCallback) error {
 	curUser.SubscribeEvent("TransactionClose", cb)
 
 	txParam := chainoperations.TransactParams{
@@ -292,9 +296,14 @@ func ConfirmDataTruth(txId float64, password string, arbitrate bool, cb chaineve
 		Password: password,
 		Value:    big.NewInt(0),
 		Pending:  false}
-	err := cif.ConfirmDataTruth(&txParam, big.NewInt(int64(txId)), arbitrate)
+	tID, ok :=  new(big.Int).SetString(txId, 10)
+	if !ok {
+		rlog.Error("failed to set txID to *big.Int.")
+		return errors.New("failed to set txID to *big.Int")
+	}
+	err := cif.ConfirmDataTruth(&txParam, tID, arbitrate)
 	if err != nil {
-		fmt.Println("failed to ConfirmDataTruth, error:", err)
+		rlog.Error("failed to ConfirmDataTruth, error:", err)
 		return errors.New("failed to ConfirmDataTruth, error:" + err.Error())
 	}
 	return nil
@@ -320,7 +329,7 @@ func getContracts(protocolContractAddr string,
 func getAbiText(fileName string) string {
 	abi, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		fmt.Println("failed to read abi text", err)
+		rlog.Error("failed to read abi text", err)
 		return ""
 	}
 
