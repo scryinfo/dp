@@ -198,31 +198,31 @@ func initClients() {
 		panic(err)
 	}
 
-	seller, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(1000000000000000000))
+	seller, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(10000000))
 	if err != nil {
 		fmt.Println("failed to init clients, error:", err)
 		panic(err)
 	}
 
-	buyer, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(1000000000000000000))
+	buyer, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(10000000))
 	if err != nil {
 		fmt.Println("failed to init clients, error:", err)
 		panic(err)
 	}
 
-	verifier1, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(1000000000000000000))
+	verifier1, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(10000000))
 	if err != nil {
 		fmt.Println("failed to init clients, error:", err)
 		panic(err)
 	}
 
-	verifier2, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(1000000000000000000))
+	verifier2, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(10000000))
 	if err != nil {
 		fmt.Println("failed to init clients, error:", err)
 		panic(err)
 	}
 
-	verifier3, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(1000000000000000000))
+	verifier3, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(10000000))
 	if err != nil {
 		fmt.Println("failed to init clients, error:", err)
 		panic(err)
@@ -277,9 +277,9 @@ func SellerPublishData(supportVerify bool) {
 	seller.SubscribeEvent("DataPublish", onPublish)
 
 	//publish data
-	metaData := []byte{'1', '2', '3', '3'}
-	proofData := []string{"982254249", "3398612893"}
-	despData := "2162056636"
+	metaData := []byte("QmcHXkMXwgvZP56tsUJNtcfedojHkqrDsgkC4fbsBM1zre")
+	proofData := []string{"QmNrTHX545s7hGfbEVrJuCiMqKVwUWJ4cPwXrAPv3GW5pm", "Qmb7csVP7wGco16XHVNqqRXUE7vQMjuA24QRypnZdkeQMD"}
+	despData := "QmQXqZdEwXnWgKpfJmUVaACuVar9R7vpBxtZgddQMTa2UN"
 
 	txParam := chainoperations.TransactParams{common.HexToAddress(seller.Account.Address), keyPassword, big.NewInt(0), false}
 	cif.Publish(&txParam, big.NewInt(1000), metaData, proofData, 2, despData, supportVerify)
@@ -341,7 +341,8 @@ func PrepareToBuy(publishId string) {
 	verifier2.SubscribeEvent("VerifiersChosen", onVerifier2Chosen)
 	verifier3.SubscribeEvent("VerifiersChosen", onVerifier3Chosen)
 
-	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), keyPassword, big.NewInt(0), false}
+	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), keyPassword,
+		big.NewInt(0), false}
 	err := cif.PrepareToBuy(&txParam, publishId)
 	if err != nil {
 		fmt.Println("failed to prepareToBuy, error:", err)

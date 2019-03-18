@@ -36,10 +36,9 @@ type DataDetails struct {
 }
 
 type BuyData struct {
-	Password string `json:"password"`
-	IDs      string `json:"ids"`
+	Password  string `json:"password"`
+	PublishID string `json:"pID"`
 }
-
 
 type TransactionDetails struct {
 	TransactionID  string
@@ -50,7 +49,7 @@ type TransactionDetails struct {
 
 type PurchaseData struct {
 	Password      string `json:"password"`
-	TransactionID string `json:"ids"`
+	TransactionID string `json:"tID"`
 }
 
 type PurchaseDetails struct {
@@ -61,7 +60,7 @@ type PurchaseDetails struct {
 
 type ReEncryptData struct {
 	Password   string     `json:"password"`
-	SelectedTx SelectedTx `json:"ids"`
+	SelectedTx SelectedTx `json:"tID"`
 }
 type SelectedTx struct {
 	TransactionID           string `json:"TransactionID"`
@@ -78,7 +77,7 @@ type ReEncryptDetails struct {
 
 type DecryptData struct {
 	Password   string      `json:"password"`
-	SelectedTx SelectedTxD `json:"ids"`
+	SelectedTx SelectedTxD `json:"tID"`
 }
 type SelectedTxD struct {
 	MetaDataIDEncWithBuyer string `json:"MetaDataIDEncWithBuyer"`
@@ -88,6 +87,6 @@ type SelectedTxD struct {
 
 type ConfirmData struct {
 	Password      string `json:"password"`
-	TransactionID string `json:"ids"`
+	TransactionID string `json:"tID"`
 	Arbitrate     bool   `json:"startArbitrate"`
 }

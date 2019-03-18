@@ -2,7 +2,6 @@ package transmission
 
 import (
 	"encoding/json"
-	"errors"
 	"github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/scryinfo/iscap/demo/src/application/definition"
@@ -11,7 +10,7 @@ import (
 	"math/big"
 )
 
-var	window *astilectron.Window    = nil
+var window *astilectron.Window    = nil
 
 func SetWindow(w *astilectron.Window) {
 	window = w
@@ -20,7 +19,7 @@ func SetWindow(w *astilectron.Window) {
 func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, error) {
 	var (
 		payload interface{} = nil
-		err     error       = errors.New("")
+		err     error       = nil
 	)
 
 	switch m.Name {
@@ -69,19 +68,16 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err = json.Unmarshal(m.Payload, &bd); err != nil {
 			break
 		}
-		// optimize: approve transfer how much money (1600 now)? data price + rewards may be a solution.
 		if err = sdkinterface.ApproveTransferForBuying(bd.Password, onApprove); err != nil {
 			break
 		}
-		// optimize: not support buy a group of data one time, 'ids'([]string) adjust to 'id'(string).
-		if err = sdkinterface.CreateTransaction(bd.IDs, bd.Password, onTransactionCreat); err != nil {
+		if err = sdkinterface.CreateTransaction(bd.PublishID, bd.Password, onTransactionCreate); err != nil {
 			break
 		}
 		payload = true
 		return payload, nil
 	case "purchase":
 		var pd definition.PurchaseData = definition.PurchaseData{}
-		// optimize: not support buy a group of data one time, 'ids'([]string) adjust to 'id'(string).
 		if err = json.Unmarshal(m.Payload, &pd); err != nil {
 			break
 		}

@@ -10,8 +10,8 @@
                         <el-option v-for="acc in this.$store.state.accounts" :key="acc.address"
                                    :value="acc.address" :label="acc.address"></el-option>
                     </el-select>
-                    <div><button class="left-button" @click="right('Login')">Login</button></div>
-                    <div><button class="left-button" @click="right('New')">Create New Account</button></div>
+                    <el-button class="left-button" @click="right('Login')">Login</el-button>
+                    <el-button class="left-button" @click="right('New')">Create New Account</el-button>
                 </div>
             </el-col>
             <el-col :span="16">
@@ -20,16 +20,18 @@
                         <el-input class="right-pwd" v-model="password" placeholder="password"
                                   clearable show-password></el-input>
                     </div>
-                    <div><button class="right-button" @click="hide">Back</button>
-                    <button class="right-button" @click="submit_login" v-if="buttonControl">Submit</button>
-                    <button class="right-button" @click="submit_new" v-if="!buttonControl">Submit</button></div>
+                    <el-button class="right-button" @click="hide">Back</el-button>
+                    <el-button class="right-button" @click="submit_login" v-if="buttonControl">Submit</el-button>
+                    <el-button class="right-button" @click="submit_new" v-if="!buttonControl">Submit</el-button>
                 </div>
                 <div class="right" id="show_new" v-if="showControl2">
-                    <div>Your account is created : &nbsp;{{account}}<br/>
-                        account information will saves at local :&nbsp;&nbsp;&nbsp;indexDB<br/>
-                        please be familiar with it.<br/><hr/><br/>Do you want login with this account?</div>
-                    <div class="right-pwd"><button class="right-button" @click="hide">No</button>
-                        <button class="right-button" @click="submit_keystore">Yes</button></div>
+                    Your account is created : &nbsp;{{account}}<br/>
+                    account information will saves at local :&nbsp;&nbsp;&nbsp;indexDB<br/>
+                    please remember it.<br/><hr/><br/>Do you want login with this account?
+                    <div class="right-pwd">
+                        <el-button class="right-button" @click="hide">No</el-button>
+                        <el-button class="right-button" @click="submit_keystore">Yes</el-button>
+                    </div>
                 </div>
             </el-col>
         </el-row>
@@ -138,8 +140,8 @@ export default {
     margin: 30px 15% 70px 15%;
 }
 .left-button {
-    border-radius: 4px;
     width: 65%;
+    padding: 5px 20px;
     margin: 5px 17%;
 }
 .right {
@@ -155,7 +157,6 @@ export default {
     margin: 30px 0 70px 0;
 }
 .right-button {
-    border-radius: 4px;
     width: 40%;
     margin: 0 2.5%;
 }

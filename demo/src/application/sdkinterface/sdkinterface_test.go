@@ -50,17 +50,16 @@ func TestPublishData(t *testing.T) {
     Initialize()
     CreateUserWithLogin("111111")
 
-    proofData := []string{"proof1", "proof2", "proof3"}
-    data := definition.PubData{
-        MetaData: "i am a solid man",
-        ProofData: proofData,
-        DespData: "evil data",
-        Price: 10000,
-        Seller: "seller",
-        Password: "111111",
+    data := definition.PubDataIDs{
+        //MetaData: "i am a solid man",
+        //ProofData: proofData,
+        //DespData: "evil data",
+        //Price: 10000,
+        //Seller: "seller",
+        //Password: "111111",
     }
 
-    _, err := PublishData(data, OnPublish)
+    _, err := PublishData(&data, OnPublish)
     if err != nil {
         t.Fail()
     }
@@ -104,18 +103,16 @@ func TestCreateTransaction(t *testing.T) {
 
     //seller
     CreateUserWithLogin(password)
-    proofData := []string{"proof1", "proof2", "proof3"}
-    data := definition.PubData{
-        MetaData: "i am a solid man",
-        ProofData: proofData,
-        DespData: "evil data",
-        Price: 1000,
-        Seller: "seller",
-        Password: "111111",
+    data := definition.PubDataIDs{
+        MetaDataID: "QmYwc8HnQk4PN8EKkfqbgiYZJ7hifrKCuxNz1uKpCQuAJJ",
+        ProofDataIDs: []string{"QmSWagq8cP4xB72A3c3XVefGqD67T2Rs7PJDTWsB5UYyxC", "QmRuvUaxsbVE8cdtxC5Tqk4BfnZpUw3yfZkGETJ58eW5S8 "},
+        DetailsID: "QmQjUxR3hDUZyWDSN3vRVUaxW9GoBhecAQMKAsEeGYpD35",
+        Price: float64(1000),
         SupportVerify: false,
+        Password: "13245",
     }
 
-    publishId, err := PublishData(data, OnPublish)
+    publishId, err := PublishData(&data, OnPublish)
 
     //buyer
     CreateUserWithLogin(password)

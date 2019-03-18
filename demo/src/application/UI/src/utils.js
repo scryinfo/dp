@@ -3,8 +3,8 @@ let utils = {
     listen: function (_this) {
         astilectron.onMessage(function(message) {
             switch (message.name) {
-                case "welcome": console.log(message.payload); break
-                case "sdkInit": console.log(message.name + ": " + message.payload); break
+                case "welcome": console.log(message.payload)
+                    break
                 case "sendMessage":
                     _this.$notify({
                         title: "Notify: ",
@@ -12,8 +12,10 @@ let utils = {
                         position: "top-left"
                     })
                     break
-                case "initDL": dl_db.init(_this); break
-                case "initMT": tx_db.init(_this); break
+                case "initDL": dl_db.init(_this)
+                    break
+                case "initTx":tx_db.init(_this)
+                    break
                 case "onPublish":
                     console.log("Node: onPublish.callback. ", message.payload)
                     _this.$notify({
@@ -42,10 +44,10 @@ let utils = {
                         position: "top-left"
                     })
                     break
-                case "onTransactionCreat":
-                    console.log("Node: onTransactionCreat.callback. ", message.payload)
+                case "onTransactionCreate":
+                    console.log("Node: onTransactionCreate.callback. ", message.payload)
                     _this.$notify({
-                        title: "onTransactionCreat.callback: ",
+                        title: "onTransactionCreate.callback: ",
                         message: message.payload,
                         position: "top-left"
                     })
