@@ -9,6 +9,7 @@ import (
 	"github.com/scryinfo/iscap/demo/src/sdk/util/storage/ipfsaccess"
 	rlog "github.com/sirupsen/logrus"
 	"io/ioutil"
+	"math/big"
 	"os"
 )
 
@@ -21,17 +22,17 @@ func onPublish(event events.Event) bool {
 			err error
 		)
 		if details, err = getPubDataDetails(event.Data.Get("despDataId").(string)); err != nil {
-			rlog.Error("Node - onPublish.callback: get publish data details failed. ", err)
+			rlog.Error("Node: get publish data details failed. ", err)
 		}
-		details.Price = event.Data.Get("price").(string)
+
+		bigint := event.Data.Get("price").(*big.Int)
+		details.Price = bigint.String()
 		details.PublishID = event.Data.Get("publishId").(string)
 		// details.SupportVerify is not implement.
 
-		rlog.Info("Node: in.onPublish.callback.before.send.struct.to.js. ")
 		if err := bootstrap.SendMessage(window, "onPublish", details); err != nil {
 			rlog.Error("failed to send onPublish event, error:", err)
 		}
-		rlog.Info("Node: in.onPublish.callback.after.send.struct.to.js. ")
 	}()
 	return true
 }
@@ -80,33 +81,44 @@ func onApprove(event events.Event) bool {
 	return true
 }
 
-func onTransactionCreat(event events.Event) bool {
+func onTransactionCreate(event events.Event) bool {
 	go func() {
+		rlog.Info("Node: in onTransactionCreate.callback. ")
 		var transaction definition.TransactionDetails = definition.TransactionDetails{}
-		transaction.ProofFileNames = getProofFiles(event.Data.Get("proofIds").([][32]byte))
+		transaction.ProofFileNames = getProofFiles(event.Data.Get("proofIds").([]string))
 		transaction.PublishID = event.Data.Get("publishId").(string)
 		transaction.TransactionID = event.Data.Get("transactionId").(string)
 		transaction.TxState = event.Data.Get("state").(string)
 
-		if err := bootstrap.SendMessage(window, "onTransactionCreat", transaction); err != nil {
-			rlog.Error("failed to send onTransactionCreat event, error:", err)
+		rlog.Info("Node: before send message to js. ")
+		if err := bootstrap.SendMessage(window, "onTransactionCreate", transaction); err != nil {
+			rlog.Error("failed to send onTransactionCreate event, error:", err)
 		}
+		rlog.Info("Node: after send message to js. ")
 	}()
 	return true
 }
 
 // Get proof files from proofIDs.
 // ipfsGet -> modify file name, how can I get extension?
-func getProofFiles(ipfsIDs [][32]byte) []string {
+func getProofFiles(ipfsIDs []string) []string {
 	var (
 		err    error
 		proofs []string
 	)
+	var proofIDsByte32 [][32]byte = make([][32]byte, len(ipfsIDs))
+	for i := 0; i< len(ipfsIDs); i++ {
+		if len(ipfsIDs[i]) != 32 {
+			rlog.Error("proofIDs' length is not 32. ")
+			return nil
+		}
+		copy(proofIDsByte32[i][:], ipfsIDs[i])
+	}
 	for i := 0; i < len(ipfsIDs); i++ {
-		var ipfsID string = ipfsBytes32ToHash(ipfsIDs[i])
+		var ipfsID string = ipfsBytes32ToHash(proofIDsByte32[i])
 		// optimize: user can set IPFS out dir himself.
 		if err = ipfsaccess.GetIAInstance().GetFromIPFS(ipfsID, IPFSOutDir); err != nil {
-			rlog.Error("Node - onTransactionCreat.callback: ipfs get failed. ", err.Error())
+			rlog.Error("Node - onTransactionCreate.callback: ipfs get failed. ", err.Error())
 			return nil
 		}
 		// add extension here.

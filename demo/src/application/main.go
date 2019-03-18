@@ -46,17 +46,6 @@ func main() {
 				Label: astilectron.PtrStr("Tests (go -> js)"),
 				SubMenu: []*astilectron.MenuItemOptions{
 					{
-						Label: astilectron.PtrStr("test sdk init."),
-						OnClick: func(e astilectron.Event) (deleteListener bool) {
-							if err != nil {
-								if err := bootstrap.SendMessage(w, "sdkInit", err.Error()); err != nil {
-									astilog.Error(errors.Wrap(err, "sending welcome event failed"))
-								}
-							}
-							return
-						},
-					},
-					{
 						Label: astilectron.PtrStr("test send short-message."),
 						OnClick: func(e astilectron.Event) (deleteListener bool) {
 							if err := bootstrap.SendMessage(w, "sendMessage", ShortMessage); err != nil {
@@ -73,10 +62,8 @@ func main() {
 					{
 						Label: astilectron.PtrStr("init data list"),
 						OnClick: func(e astilectron.Event) (deleteListener bool) {
-							if err != nil {
-								if err := bootstrap.SendMessage(w, "initDL", ""); err != nil {
-									astilog.Error(errors.Wrap(err, "sending initDL event failed"))
-								}
+							if err := bootstrap.SendMessage(w, "initDL", ""); err != nil {
+								astilog.Error(errors.Wrap(err, "sending initDL event failed"))
 							}
 							return
 						},
@@ -84,7 +71,7 @@ func main() {
 					{
 						Label: astilectron.PtrStr("init my transaction"),
 						OnClick: func(e astilectron.Event) (deleteListener bool) {
-							if err := bootstrap.SendMessage(w, "initMT", ""); err != nil {
+							if err := bootstrap.SendMessage(w, "initTx", ""); err != nil {
 								astilog.Error(errors.Wrap(err, "sending initMT event failed"))
 							}
 							return

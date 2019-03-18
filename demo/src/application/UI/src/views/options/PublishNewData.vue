@@ -130,7 +130,7 @@ export default {
                         PublishID: message.payload
                     })
                     dl_db.init(_this)
-                    console.log("Publish new data success.")
+                    console.log("Publish new data success.", message)
                     // reset datas.
                 }else {
                     console.log("Node: publish.newData failed. ", message)

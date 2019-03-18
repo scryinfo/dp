@@ -1,6 +1,6 @@
 #!/bin/sh
 
-PRJ_PATH=/home/waitgordor/project/iscap2/iscap/demo/src
+PRJ_PATH=D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/iscap/demo/src
 PROTO_PATH="$PRJ_PATH/sdk/interface/accountinterface"
 PROTO_FILE="account-service.proto"
 OUTPUT_FILEPATH="$PRJ_PATH/sdk/interface/accountinterface"

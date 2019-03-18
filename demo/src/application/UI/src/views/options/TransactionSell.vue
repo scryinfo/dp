@@ -4,8 +4,7 @@
             <el-button size="mini" type="primary" @click="reEncryptPwd" >ReEncrypt</el-button>
         </el-col>
 
-        <el-table :data="this.$store.state.transactionsell" highlight-current-row border height=400 @selection-change="selectedChange">
-            <el-table-column type="selection" width=50></el-table-column>
+        <el-table :data="this.$store.state.transactionsell" highlight-current-row border height=400 @selection-change="currentChange">
             <el-table-column type="expand">
                 <el-form slot-scope="props" label-position="left" class="tx-table-expand">
                     <el-form-item label="TransactionID"><span>{{ props.row.TransactionID }}</span></el-form-item>
@@ -31,20 +30,17 @@ export default {
     name: "TransactionSell",
     data () {
         return {
-            selectsTx: []  // {tID: "", Buyer: "", Seller: "", MetaDataIDEncWithSeller: "", pID: ""}
+            selectedTx: {}  // {tID: "", Buyer: "", Seller: "", MetaDataIDEncWithSeller: "", pID: ""}
         }
     },
     methods: {
-        selectedChange: function (sels) {
-            this.selectsTx = []
-            for (let i=0;i<sels.length;i++) {
-                this.selectsTx.push({
-                    ID: sels[i].TransactionID,
-                    Buyer: sels[i].Buyer,
-                    Seller: sels[i].Seller,
-                    PublishID: sels[i].PublishID,
-                    MetaDataIDEncWithSeller: sels[i].MetaDataIDEncWithSeller // transmission between go and js buy not show out to user.
-                })
+        currentChange: function (curRow) {
+            this.selectedTx = {
+                ID: curRow.TransactionID,
+                Buyer: curRow.Buyer,
+                Seller: curRow.Seller,
+                PublishID: curRow.PublishID,
+                MetaDataIDEncWithSeller: curRow.MetaDataIDEncWithSeller // transmission between go and js buy not show out to user.
             }
         },
         reEncryptPwd:function () {
@@ -61,14 +57,10 @@ export default {
             })
         },
         reEncrypt:function (pwd) {
-            let _this = this
             // not support buy a group of data one time, give the first id for instead.
-            let txDetails = dl_db.read(this.selectsTx[0].PublishID)
-            astilectron.sendMessage({ Name:"reEncrypt",Payload:{password: pwd, ids: this.selectsTx[0],
-                    extension: txDetails.MetaDataExtension} }, function (message) {
+            astilectron.sendMessage({ Name:"reEncrypt",Payload:{password: pwd, tID: this.selectedTx}}, function (message) {
                 if (message.name !== "error") {
-                    _this.selectsTx = []
-                    console.log("ReEncrypt data success.")
+                    console.log("ReEncrypt data success.", message)
                 }else {
                     console.log("Node: reEncrypt failed.", message)
                     alert("ReEncrypt data failed.")

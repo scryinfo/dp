@@ -33,8 +33,8 @@ func CreateScryClient(password string) (*ScryClient, error) {
 	}, nil
 }
 
-func (client ScryClient) SubscribeEvent(eventName string, callback chainevents.EventCallback) {
-	chainevents.SubscribeExternal(common.HexToAddress(client.Account.Address), eventName, callback)
+func (client ScryClient) SubscribeEvent(eventName string, callback chainevents.EventCallback) error {
+	return chainevents.SubscribeExternal(common.HexToAddress(client.Account.Address), eventName, callback)
 }
 
 func (client ScryClient) Authenticate(password string) (bool, error) {

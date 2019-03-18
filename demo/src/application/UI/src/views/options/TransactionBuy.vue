@@ -7,8 +7,7 @@
             <el-button size="mini" type="primary" @click="confirmPwd">Confirm</el-button>
         </el-col>
 
-        <el-table :data="this.$store.state.transactionbuy" highlight-current-row border height=400 @selection-change="selectedChange">
-            <el-table-column type="selection" width=50></el-table-column>
+        <el-table :data="this.$store.state.transactionbuy" highlight-current-row border height=400 @selection-change="currentChange">
             <el-table-column type="expand">
                 <el-form slot-scope="props" label-position="left" class="tx-table-expand">
                     <el-form-item label="TransactionID"><span>{{ props.row.TransactionID }}</span></el-form-item>
@@ -34,19 +33,16 @@ export default {
     name: "TransactionBuy",
     data () {
         return {
-            selectsTx: []  // {tID: "", Buyer: "", MetaDataIDEncWithSeller: ""}
+            selectedTx: {}  // {tID: "", Buyer: "", MetaDataIDEncWithBuyer: "", MetaDataExtension: ""}
         }
     },
     methods: {
-        selectedChange: function (sels) {
-            this.selectsTx = []
-            for (let i=0;i<sels.length;i++) {
-                this.selectsTx.push({
-                    TransactionID: sels[i].TransactionID,
-                    Buyer: sels[i].Buyer,
-                    MetaDataIDEncWithBuyer: sels[i].MetaDataIDEncWithBuyer,
-                    MetaDataExtension: sels[i].MetaDataExtension
-                })
+        currentChange: function (curRow) {
+            this.selectedTx = {
+                TransactionID: curRow.TransactionID,
+                Buyer: curRow.Buyer,
+                MetaDataIDEncWithBuyer: curRow.MetaDataIDEncWithBuyer,
+                MetaDataExtension: curRow.MetaDataExtension
             }
         },
         purchasePwd:function () {
@@ -66,10 +62,9 @@ export default {
         purchase:function (pwd) {
             let _this = this
             // not support buy a group of data one time, give the first id for instead.
-            astilectron.sendMessage({ Name:"purchase",Payload:{password: pwd, ids: this.selectsTx[0].TransactionID} }, function (message) {
+            astilectron.sendMessage({ Name:"purchase",Payload:{password: pwd, tID: this.selectedTx.TransactionID}}, function (message) {
                 if (message.name !== "error") {
-                    _this.selectsTx = []
-                    console.log("Purchase data success.")
+                    console.log("Purchase data success.", message)
                 }else {
                     console.log("Node: purchase failed.", message)
                     alert("Purchase data failed.")
@@ -109,7 +104,7 @@ export default {
         },
         decrypt:function (pwd) {
             // not support decrypt a group of data one time, give the first id for instead.
-            astilectron.sendMessage({ Name:"decrypt",Payload:{password: pwd, ids: this.selectsTx[0]}}, function (message) {
+            astilectron.sendMessage({ Name:"decrypt",Payload:{password: pwd, tID: this.selectedTx}}, function (message) {
                     if (message.name !== "error") {
                         alert("Meta data: ", message.payload)
                         console.log("Decrypt data success.")
@@ -133,13 +128,11 @@ export default {
             })
         },
         confirm:function (pwd, judge) {
-            let _this = this
             // not support buy a group of data one time, give the first id for instead.
-            astilectron.sendMessage({ Name:"confirm",Payload:{password: pwd, ids: this.selectsTx[0], startArbitrate: judge}},
+            astilectron.sendMessage({ Name:"confirm",Payload:{password: pwd, tID: this.selectedTx.TransactionID, startArbitrate: judge}},
                 function (message) {
                 if (message.name !== "error") {
-                    _this.selectsTx = []
-                    console.log("Confirm data success.")
+                    console.log("Confirm data success.", message)
                 }else {
                     console.log("Node: confirm failed.", message)
                     alert("Confirm data failed.")

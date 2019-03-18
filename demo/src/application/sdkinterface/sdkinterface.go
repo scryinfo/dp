@@ -28,6 +28,7 @@ var (
 	curUser  *scryclient.ScryClient = nil
 	deployer *scryclient.ScryClient = nil
 	scryInfo *settings.ScryInfo     = nil
+	err      error                  = nil
 )
 
 func Initialize() error {
@@ -56,7 +57,6 @@ func Initialize() error {
 		rlog.Error(failedToInitSDK, err)
 		return err
 	}
-	rlog.Info("Node: sdk init finished. ")
 
 	return nil
 }
@@ -152,11 +152,12 @@ func PublishData(data *definition.PubDataIDs, cb chainevents.EventCallback) (str
 		return "", errors.New("failed to publish data, callback function is null")
 	}
 
-	curUser.SubscribeEvent("DataPublish", cb)
+	if err = curUser.SubscribeEvent("DataPublish", cb); err != nil {
+		rlog.Error("failed to subscribe DataPublish.callback. ", err)
+		return "", err
+	}
 	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
-		Password: data.Password,
-		Value:    big.NewInt(0),
-		Pending:  false}
+		Password: data.Password, Value: big.NewInt(0), Pending: false}
 
 	return cif.Publish(&txParam,
 		big.NewInt(int64(data.Price)),
@@ -179,12 +180,13 @@ func approveTransfer(cb chainevents.EventCallback, password string, protocolCont
 		return errors.New("failed to approve transfer, current user is null")
 	}
 
-	curUser.SubscribeEvent("Approval", cb)
+	if err = curUser.SubscribeEvent("Approval", cb); err != nil {
+		rlog.Error("failed to subscribe Approval.callback. ", err)
+		return err
+	}
 
 	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
-		Password: password,
-		Value:    big.NewInt(0),
-		Pending:  false}
+		Password: password, Value: big.NewInt(0), Pending: false}
 	err := cif.ApproveTransfer(&txParam,
 		protocolContractAddr,
 		big.NewInt(1600))
@@ -199,20 +201,20 @@ func approveTransfer(cb chainevents.EventCallback, password string, protocolCont
 func CreateTransaction(publishId string, password string, cb chainevents.EventCallback) error {
 	if curUser == nil {
 		rlog.Error("no current user")
-		return errors.New("failed to prepare to buy, current user is null")
+		return errors.New("failed to CreateTransaction, current user is null")
 	}
 
-	curUser.SubscribeEvent("TransactionCreate", cb)
+	if err = curUser.SubscribeEvent("TransactionCreate", cb); err != nil {
+		rlog.Error("failed to subscribe TransactionCreate.callback. ", err)
+		return err
+	}
 
-	txParam := chainoperations.TransactParams{
-		From:     common.HexToAddress(curUser.Account.Address),
-		Password: password,
-		Value:    big.NewInt(0),
-		Pending:  false}
+	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
+		Password: password, Value: big.NewInt(0), Pending: false}
 	err := cif.PrepareToBuy(&txParam, publishId)
 	if err != nil {
-		rlog.Error("failed to prepareToBuy, error:", err)
-		return errors.New("failed to prepareToBuy, error:" + err.Error())
+		rlog.Error("failed to CreateTransaction, error:", err)
+		return errors.New("failed to CreateTransaction, error:" + err.Error())
 	}
 
 	return nil
@@ -224,15 +226,15 @@ func Buy(txId string, password string, cb chainevents.EventCallback) error {
 		return errors.New("failed to buy, current user is null")
 	}
 
-	curUser.SubscribeEvent("Buy", cb)
+	if err = curUser.SubscribeEvent("Buy", cb); err != nil {
+		rlog.Error("failed to subscribe Buy.callback. ", err)
+		return err
+	}
 
-	txParam := chainoperations.TransactParams{
-		From:     common.HexToAddress(curUser.Account.Address),
-		Password: password,
-		Value:    big.NewInt(0),
-		Pending:  false}
+	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
+		Password: password, Value: big.NewInt(0), Pending: false}
 
-	tID, ok :=  new(big.Int).SetString(txId, 10)
+	tID, ok := new(big.Int).SetString(txId, 10)
 	if !ok {
 		rlog.Error("failed to set txID to *big.Int.")
 		return errors.New("failed to set txID to *big.Int")
@@ -247,13 +249,13 @@ func Buy(txId string, password string, cb chainevents.EventCallback) error {
 }
 
 func SubmitMetaDataIdEncWithBuyer(txId string, password, metaDataIDEncSeller, buyer, seller string, cb chainevents.EventCallback) error {
-	curUser.SubscribeEvent("ReadyForDownload", cb)
+	if err = curUser.SubscribeEvent("ReadyForDownload", cb); err != nil {
+		rlog.Error("failed to subscribe ReadyForDownload.callback. ", err)
+		return err
+	}
 
-	txParam := chainoperations.TransactParams{
-		From:     common.HexToAddress(curUser.Account.Address),
-		Password: password,
-		Value:    big.NewInt(0),
-		Pending:  false}
+	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
+		Password: password, Value: big.NewInt(0), Pending: false}
 
 	metaDataIdEncWithBuyer := []byte(metaDataIDEncSeller)
 	var err error
@@ -262,7 +264,7 @@ func SubmitMetaDataIdEncWithBuyer(txId string, password, metaDataIDEncSeller, bu
 		rlog.Error("failed to reEncrypt meta data ID, error:", err)
 		return errors.New("failed to SubmitMetaDataIdEncWithBuyer, error:" + err.Error())
 	}
-	tID, ok :=  new(big.Int).SetString(txId, 10)
+	tID, ok := new(big.Int).SetString(txId, 10)
 	if !ok {
 		rlog.Error("failed to set txID to *big.Int.")
 		return errors.New("failed to set txID to *big.Int")
@@ -289,14 +291,14 @@ func BuyerDecryptAndGetMetaDataFromIPFS(password string, metaDataIdEncWithBuyer 
 }
 
 func ConfirmDataTruth(txId string, password string, arbitrate bool, cb chainevents.EventCallback) error {
-	curUser.SubscribeEvent("TransactionClose", cb)
+	if err = curUser.SubscribeEvent("TransactionClose", cb); err != nil {
+		rlog.Error("failed to subscribe TransactionClose.callback. ", err)
+		return err
+	}
 
-	txParam := chainoperations.TransactParams{
-		From:     common.HexToAddress(curUser.Account.Address),
-		Password: password,
-		Value:    big.NewInt(0),
-		Pending:  false}
-	tID, ok :=  new(big.Int).SetString(txId, 10)
+	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
+		Password: password, Value: big.NewInt(0), Pending: false}
+	tID, ok := new(big.Int).SetString(txId, 10)
 	if !ok {
 		rlog.Error("failed to set txID to *big.Int.")
 		return errors.New("failed to set txID to *big.Int")
