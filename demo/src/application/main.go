@@ -5,20 +5,20 @@ import (
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/asticode/go-astilog"
 	"github.com/pkg/errors"
-    "github.com/scryinfo/iscap/demo/src/application/sdkinterface"
+	"github.com/scryinfo/iscap/demo/src/application/sdkinterface"
 	"github.com/scryinfo/iscap/demo/src/application/transmission"
 	"time"
 )
 
 // Constants
 const (
-	ShortMessage = "You have new short-message, remember to checkout it."
+	ShortMessage               = "You have new short-message, remember to checkout it."
 )
 
 // Vars
 var (
-	AppName string
-	w       *astilectron.Window
+	AppName    string
+	w          *astilectron.Window
 	err error = nil
 )
 
@@ -69,7 +69,7 @@ func main() {
 						},
 					},
 					{
-						Label: astilectron.PtrStr("init my transaction"),
+						Label: astilectron.PtrStr("init transaction"),
 						OnClick: func(e astilectron.Event) (deleteListener bool) {
 							if err := bootstrap.SendMessage(w, "initTx", ""); err != nil {
 								astilog.Error(errors.Wrap(err, "sending initMT event failed"))

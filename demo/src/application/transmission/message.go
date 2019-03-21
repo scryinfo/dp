@@ -33,7 +33,6 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if ok, err = sdkinterface.UserLogin(ai.Account, ai.Password); !ok {
 			break
 		}
-		err = sdkinterface.TransferTokenFromDeployer(big.NewInt(10000000)) // test
 		payload = ok
 		return payload, nil
 	case "create.new.account":
@@ -48,7 +47,22 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		payload = user.Account.Address
 		return payload, nil
 	case "save.keystore":
+		payload = true
+		return payload, nil
+	case "sdk.init":
+		var sid definition.SDKInitData = definition.SDKInitData{}
+		if err = json.Unmarshal(m.Payload, &sid); err != nil {
+			break
+		}
+		//if err = sdkinterface.Initialize(); err != nil {
+		//	break
+		//}
 		if err = sdkinterface.TransferTokenFromDeployer(big.NewInt(10000000)); err != nil {   // test
+			break
+		}
+		if err = sdkinterface.SubScribeEvents(
+			[]string{"DataPublish", "Approval", "TransactionCreate", "Buy", "ReadyForDownload", "TransactionClose"},
+			onPublish, onApprove, onTransactionCreate, onPurchase, onReadyForDownload, onClose); err != nil {
 			break
 		}
 		payload = true
@@ -58,7 +72,7 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err = json.Unmarshal(m.Payload, &pd); err != nil {
 			break
 		}
-		payload, err = sdkinterface.PublishData(&pd, onPublish)
+		payload, err = sdkinterface.PublishData(&pd)
 		if err != nil {
 			break
 		}
@@ -68,10 +82,11 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err = json.Unmarshal(m.Payload, &bd); err != nil {
 			break
 		}
-		if err = sdkinterface.ApproveTransferForBuying(bd.Password, onApprove); err != nil {
+		// optimize: here need to give out the summary of token buyer approve contract transfer, now it is 1600.
+		if err = sdkinterface.ApproveTransferForBuying(bd.Password); err != nil {
 			break
 		}
-		if err = sdkinterface.CreateTransaction(bd.PublishID, bd.Password, onTransactionCreate); err != nil {
+		if err = sdkinterface.CreateTransaction(bd.PublishID, bd.Password); err != nil {
 			break
 		}
 		payload = true
@@ -81,7 +96,7 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err = json.Unmarshal(m.Payload, &pd); err != nil {
 			break
 		}
-		if err = sdkinterface.Buy(pd.TransactionID, pd.Password, onPurchase); err != nil {
+		if err = sdkinterface.Buy(pd.SelectedTx.TransactionID, pd.Password); err != nil {
 			break
 		}
 		payload = true
@@ -91,8 +106,8 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err = json.Unmarshal(m.Payload, &re); err != nil {
 			break
 		}
-		if err = sdkinterface.SubmitMetaDataIdEncWithBuyer(re.SelectedTx.TransactionID, re.Password,
-			re.SelectedTx.MetaDataIDEncWithSeller, re.SelectedTx.Buyer, re.SelectedTx.Seller, onReadyForDownload); err != nil {
+		if err = sdkinterface.SubmitMetaDataIdEncWithBuyer(re.SelectedTx.TransactionID, re.Password, re.SelectedTx.Buyer,
+			re.SelectedTx.Seller, re.SelectedTx.MetaDataIDEncWithSeller); err != nil {
 			break
 		}
 		payload = true
@@ -102,8 +117,8 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err = json.Unmarshal(m.Payload, &dd); err != nil {
 			break
 		}
-		if payload, err = sdkinterface.BuyerDecryptAndGetMetaDataFromIPFS(dd.Password, []byte(dd.SelectedTx.MetaDataIDEncWithBuyer),
-			dd.SelectedTx.MetaDataExtension, dd.SelectedTx.Buyer); err != nil {
+		if payload, err = sdkinterface.BuyerDecryptAndGetMetaDataFromIPFS(dd.Password, dd.SelectedTx.MetaDataIDEncWithBuyer,
+			dd.SelectedTx.Buyer, dd.SelectedTx.MetaDataExtension); err != nil {
 				break
 		}
 		return payload, nil
@@ -112,7 +127,7 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err = json.Unmarshal(m.Payload, &cd); err != nil {
 			break
 		}
-		if err = sdkinterface.ConfirmDataTruth(cd.TransactionID, cd.Password,cd.Arbitrate, onClose); err != nil {
+		if err = sdkinterface.ConfirmDataTruth(cd.SelectedTx.TransactionID, cd.Password, cd.Arbitrate); err != nil {
 			break
 		}
 		payload = true

@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import {dl_db, tx_db} from "../DBoptions.js"
+import {dl_db, tx_db, acc_db} from "../DBoptions.js"
 import {utils} from "../utils.js"
 export default {
     name: "Home",
@@ -71,6 +71,20 @@ export default {
         tx_db.init(this)
         document.addEventListener("astilectron-ready", function() {
             utils.listen(_this)
+            acc_db.read(_this.acc, function (acc) {
+                astilectron.sendMessage({ Name:"sdk.init", Payload: { fromBlock: acc.fromBlock } }, function (message) {
+                    if (message.name !== "error") {
+                        console.log("SDK init success.", message)
+                    }else {
+                        console.log("Node: sdk init failed.", message.payload)
+                        _this.$alert(message.payload, "Error: sdk init failed.", {
+                            confirmButtonText: "I've got it.",
+                            showClose: false,
+                            type: "error"
+                        })
+                    }
+                })
+            })
         })
     }
 }

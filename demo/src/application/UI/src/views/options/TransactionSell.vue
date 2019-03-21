@@ -4,7 +4,8 @@
             <el-button size="mini" type="primary" @click="reEncryptPwd" >ReEncrypt</el-button>
         </el-col>
 
-        <el-table :data="this.$store.state.transactionsell" highlight-current-row border height=400 @selection-change="currentChange">
+        <el-table :data="this.$store.state.transactionsell.slice((curPage-1)*pageSize, curPage*pageSize)"
+                  highlight-current-row border height=368 @current-change="currentChange">
             <el-table-column type="expand">
                 <el-form slot-scope="props" label-position="left" class="tx-table-expand">
                     <el-form-item label="TransactionID"><span>{{ props.row.TransactionID }}</span></el-form-item>
@@ -22,6 +23,9 @@
             <el-table-column prop="Title" label="Title" show-overflow-tooltip></el-table-column>
             <el-table-column prop="State" label="State" show-overflow-tooltip></el-table-column>
         </el-table>
+        <el-pagination class="pagination" @current-change="setCurPage" @size-change="setPageSize" :total="total"
+                       layout="sizes, total, prev, pager, next, jumper" :page-sizes="[5, 6]" :page-size="pageSize"
+        ></el-pagination>
     </section>
 </template>
 
@@ -30,13 +34,22 @@ export default {
     name: "TransactionSell",
     data () {
         return {
-            selectedTx: {}  // {tID: "", Buyer: "", Seller: "", MetaDataIDEncWithSeller: "", pID: ""}
+            selectedTx: {},  // {tID: "", Buyer: "", Seller: "", MetaDataIDEncWithSeller: "", pID: ""}
+            curPage: 1,
+            pageSize: 6,
+            total: 0
         }
     },
     methods: {
+        setCurPage: function (curPageReturn) {
+            this.curPage = curPageReturn
+        },
+        setPageSize: function (newPageSize) {
+            this.pageSize = newPageSize
+        },
         currentChange: function (curRow) {
             this.selectedTx = {
-                ID: curRow.TransactionID,
+                TransactionID: curRow.TransactionID,
                 Buyer: curRow.Buyer,
                 Seller: curRow.Seller,
                 PublishID: curRow.PublishID,
@@ -57,16 +70,35 @@ export default {
             })
         },
         reEncrypt:function (pwd) {
+            let _this = this
             // not support buy a group of data one time, give the first id for instead.
             astilectron.sendMessage({ Name:"reEncrypt",Payload:{password: pwd, tID: this.selectedTx}}, function (message) {
                 if (message.name !== "error") {
                     console.log("ReEncrypt data success.", message)
                 }else {
-                    console.log("Node: reEncrypt failed.", message)
-                    alert("ReEncrypt data failed.")
+                    console.log("Node: reEncrypt failed.", message.payload)
+                    _this.$alert(message.payload, "Error: ReEncrypt data failed: ", {
+                        confirmButtonText: "I've got it.",
+                        showClose: false,
+                        type: "error"
+                    })
                 }
             })
         }
+    },
+    computed: {
+        listenTxSRefresh() {
+            return this.$store.state.transactionsell
+        }
+    },
+    watch: {
+        listenTxSRefresh: function () {
+            this.curPage = 1
+            this.total = this.$store.state.transactionsell.length
+        }
+    },
+    created () {
+        this.total = this.$store.state.transactionsell.length
     }
 }
 </script>

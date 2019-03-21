@@ -22,7 +22,7 @@ var (
 	metaDataIdEncWithBuyer  []byte
 	protocolContractAddr                           = "0xbb7bae05bdbc0ed9e514ce18122fc6b4cbcca346"
 	tokenContractAddr                              = "0xc67d1847fb1b00173dcdbc00c7cbe32651537daa"
-	deployerKeyJson                                = "{\"version\":3,\"id\":\"953e9184-1326-4047-a968-c06dd3da8438\",\"address\":\"61ad28110ce3911a9aafabba551cdc932a02bd52\",\"crypto\":{\"ciphertext\":\"b63c0b70749515f23f3a85556596d579a7935f67e90c3876f37aebcadf97e59f\",\"cipherparams\":{\"iv\":\"9c1d33e7d549b0a8e50bdae190eb9e41\"},\"cipher\":\"aes-128-ctr\",\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"salt\":\"db461e3cf6836560b4a304ac03682ec8cb12d55e6f9b76dae2837086a06ba167\",\"n\":262144,\"r\":8,\"p\":1},\"mac\":\"14cfca4d97867161c4dafcef45ddd411f08cc71931d31d6f47b5630e7101cc45\"}}"
+	deployerKeyJson                                = "{\"version\":3,\"id\":\"d2178973-77c3-43a1-8eae-0c126a249fd2\",\"address\":\"61ad28110ce3911a9aafabba551cdc932a02bd52\",\"crypto\":{\"ciphertext\":\"2956ee94b367d8c758474ee14da86070b3825ba01dcfbb2b2a1427043855a009\",\"cipherparams\":{\"iv\":\"5350131ef1d2bc22790cf3806aba7683\"},\"cipher\":\"aes-128-ctr\",\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"salt\":\"c8733d9edb48ec0f5cb00376f715c802c5e3041cae0c8e1d845f2fc7d4e37f1a\",\"n\":262144,\"r\":8,\"p\":1},\"mac\":\"bdbb6f2dcda1517f9440f3253a2e4a8066a38c27ca4b9f11723656c02c088728\"}}"
 	keyPassword                                    = "12345"
 	deployer                *scryclient.ScryClient = nil
 	seller                  *scryclient.ScryClient = nil
@@ -383,6 +383,7 @@ func ConfirmDataTruth(txId *big.Int) {
 func onPurchase(event events.Event) bool {
 	fmt.Println("onPurchase:", event)
 	metaDataIdEncWithSeller = event.Data.Get("metaDataIdEncSeller").([]byte)
+	fmt.Println("Node: EncID. ", metaDataIdEncWithSeller)
 	metaDataIdEncWithBuyer = make([]byte, len(metaDataIdEncWithSeller))
 	copy(metaDataIdEncWithBuyer, metaDataIdEncWithSeller)
 

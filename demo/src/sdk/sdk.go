@@ -12,37 +12,37 @@ import (
 	"os"
 )
 
-var (
-	START_ENGINE_FAILED                    = "failed to start engine"
-	INIT_CONTRACT_INTERFACE_WRAPPER_FAILED = "failed to initialize contract interface"
-	LOAD_PATH_FAILED                       = "failed to load log path"
-	INIT_SDK_FAILED                        = "failed to initialize sdk"
+const (
+	StartEngineFailed                  = "failed to start engine"
+	InitConTractInterfaceWrapperFailed = "failed to initialize contract interface"
+	LoadPathFailed                     = "failed to load log path"
+	InitSDKFailed                      = "failed to initialize sdk"
 )
 
 func Init(ethNodeAddr string,
-            asServiceAddr string,
-            contracts []chainevents.ContractInfo,
-            fromBlock uint64,
-            ipfsNodeAddr string) error {
+	asServiceAddr string,
+	contracts []chainevents.ContractInfo,
+	fromBlock uint64,
+	ipfsNodeAddr string) error {
 
 	err := initLog()
 	if err != nil {
-		fmt.Println(INIT_SDK_FAILED, err)
+		fmt.Println(InitSDKFailed, err)
 		return err
 	}
 
 	conn, err := core.StartEngine(ethNodeAddr, asServiceAddr, contracts, fromBlock, ipfsNodeAddr)
 	if err != nil {
-		rlog.Error(START_ENGINE_FAILED, err)
-		return errors.New(START_ENGINE_FAILED)
+		rlog.Error(StartEngineFailed, err)
+		return errors.New(StartEngineFailed)
 	}
 
 	err = chaininterfacewrapper.Initialize(common.HexToAddress(contracts[0].Address),
-                                            common.HexToAddress(contracts[1].Address),
-                                            conn)
+		common.HexToAddress(contracts[1].Address),
+		conn)
 	if err != nil {
-		rlog.Error(INIT_CONTRACT_INTERFACE_WRAPPER_FAILED, err)
-		return errors.New(INIT_CONTRACT_INTERFACE_WRAPPER_FAILED)
+		rlog.Error(InitConTractInterfaceWrapperFailed, err)
+		return errors.New(InitConTractInterfaceWrapperFailed)
 	}
 
 	return nil
@@ -51,14 +51,14 @@ func Init(ethNodeAddr string,
 func initLog() error {
 	ph, err := settings.LoadLogPath()
 	if err != nil {
-		fmt.Println(LOAD_PATH_FAILED, err)
+		fmt.Println(LoadPathFailed, err)
 		return err
 	}
 
 	filePath := ph.Dir + "/" + ph.File
 	f, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
-		fmt.Println(LOAD_PATH_FAILED, err)
+		fmt.Println(LoadPathFailed, err)
 		return err
 	}
 
