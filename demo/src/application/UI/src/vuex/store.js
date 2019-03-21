@@ -13,7 +13,7 @@ let state = {
 
     transactionbuy: [],
     // {Title: "", Price: 0, Keys: "", Description: "", Buyer: "", Seller: "", State: "", SupportVerify: false,
-    //     MetaDataExtension: "", ProofDataExtensions: [], MetaDataIDEncWithSeller: "", MetaDataIDEncWithBuyer: "",
+    //     MetaDataExtension: "", ProofDataExtensions: [], MetaDataIDEncWithSeller: [], MetaDataIDEncWithBuyer: [],
     //     Verifier1Response: "", Verifier2Response: "", ArbitrateResult: false, pID: "", tID: "",}
     //
     // transaction's data dictionary = [datalist] + {Buyer, State, MetaDataIDEncWithSeller, MetaDataIDEncWithBuyer,
@@ -24,7 +24,7 @@ let state = {
     // the same as transactionbuy, the two arrays use the same database.
     
     accounts: [],
-    // {address: ""} 
+    // {address: "", fromBlock: 0(uint64)}
     //  primary key: address.
 
     account: ""

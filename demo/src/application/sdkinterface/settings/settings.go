@@ -7,11 +7,11 @@ import (
 )
 
 const (
-    SETTING_LOCATION = "D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/iscap/demo/src/application/sdkinterface/settings/definition.yaml"
+    SettingLocation = "D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/iscap/demo/src/application/sdkinterface/settings/definition.yaml"
 )
 
 func LoadSettings() (*ScryInfo, error) {
-    rv, err := cf.GetYAMLStructure(SETTING_LOCATION, &ScryInfo{})
+    rv, err := cf.GetYAMLStructure(SettingLocation, &ScryInfo{})
     if err != nil {
         rlog.Error("failed to get yaml structure, error:", err)
         return nil, err

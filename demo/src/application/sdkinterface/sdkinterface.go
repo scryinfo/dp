@@ -15,6 +15,7 @@ import (
 	rlog "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"math/big"
+	"os"
 	"strings"
 )
 
@@ -33,7 +34,6 @@ var (
 
 func Initialize() error {
 	// load definition
-	var err error
 	scryInfo, err = settings.LoadSettings()
 	if err != nil {
 		rlog.Error(failedToInitSDK, err)
@@ -141,21 +141,31 @@ func TransferTokenFromDeployer(token *big.Int) error {
 	return nil
 }
 
-func PublishData(data *definition.PubDataIDs, cb chainevents.EventCallback) (string, error) {
+func SubScribeEvents(eventName []string, cb ...chainevents.EventCallback) error {
+	if cb == nil {
+		rlog.Error("null callback function")
+		return errors.New("failed to subscribe event, callback function is null")
+	}
+	if len(cb) != len(eventName) {
+		rlog.Error("invalid callback function numbers")
+		return errors.New("failed to subscribe event, callback function's quantity invalid")
+	}
+
+	for i := 0; i < len(eventName); i++ {
+		if err = curUser.SubscribeEvent(eventName[i], cb[i]); err != nil {
+			rlog.Error("subscribe ", eventName[i], " event failed. ")
+			return errors.New("failed to subscribe " + eventName[i] + " event" + err.Error())
+		}
+	}
+	return nil
+}
+
+func PublishData(data *definition.PubDataIDs) (string, error) {
 	if curUser == nil {
 		rlog.Error("no current user")
 		return "", errors.New("failed to publish data, current user is null")
 	}
 
-	if cb == nil {
-		rlog.Error("null callback function")
-		return "", errors.New("failed to publish data, callback function is null")
-	}
-
-	if err = curUser.SubscribeEvent("DataPublish", cb); err != nil {
-		rlog.Error("failed to subscribe DataPublish.callback. ", err)
-		return "", err
-	}
 	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
 		Password: data.Password, Value: big.NewInt(0), Pending: false}
 
@@ -168,21 +178,16 @@ func PublishData(data *definition.PubDataIDs, cb chainevents.EventCallback) (str
 		data.SupportVerify)
 }
 
-func ApproveTransferForBuying(password string, cb chainevents.EventCallback) error {
-	return approveTransfer(cb,
+func ApproveTransferForBuying(password string) error {
+	return approveTransfer(
 		password,
 		common.HexToAddress(scryInfo.Chain.Contracts.ProtocolAddr))
 }
 
-func approveTransfer(cb chainevents.EventCallback, password string, protocolContractAddr common.Address) error {
+func approveTransfer(password string, protocolContractAddr common.Address) error {
 	if curUser == nil {
 		rlog.Error("no current user")
 		return errors.New("failed to approve transfer, current user is null")
-	}
-
-	if err = curUser.SubscribeEvent("Approval", cb); err != nil {
-		rlog.Error("failed to subscribe Approval.callback. ", err)
-		return err
 	}
 
 	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
@@ -198,15 +203,10 @@ func approveTransfer(cb chainevents.EventCallback, password string, protocolCont
 	return nil
 }
 
-func CreateTransaction(publishId string, password string, cb chainevents.EventCallback) error {
+func CreateTransaction(publishId string, password string) error {
 	if curUser == nil {
 		rlog.Error("no current user")
 		return errors.New("failed to CreateTransaction, current user is null")
-	}
-
-	if err = curUser.SubscribeEvent("TransactionCreate", cb); err != nil {
-		rlog.Error("failed to subscribe TransactionCreate.callback. ", err)
-		return err
 	}
 
 	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
@@ -220,15 +220,10 @@ func CreateTransaction(publishId string, password string, cb chainevents.EventCa
 	return nil
 }
 
-func Buy(txId string, password string, cb chainevents.EventCallback) error {
+func Buy(txId string, password string) error {
 	if curUser == nil {
 		rlog.Error("no current user")
 		return errors.New("failed to buy, current user is null")
-	}
-
-	if err = curUser.SubscribeEvent("Buy", cb); err != nil {
-		rlog.Error("failed to subscribe Buy.callback. ", err)
-		return err
 	}
 
 	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
@@ -236,7 +231,7 @@ func Buy(txId string, password string, cb chainevents.EventCallback) error {
 
 	tID, ok := new(big.Int).SetString(txId, 10)
 	if !ok {
-		rlog.Error("failed to set txID to *big.Int.")
+		rlog.Error("failed to set txID to *big.Int. ", txId)
 		return errors.New("failed to set txID to *big.Int")
 	}
 	err := cif.BuyData(&txParam, tID)
@@ -248,18 +243,13 @@ func Buy(txId string, password string, cb chainevents.EventCallback) error {
 	return nil
 }
 
-func SubmitMetaDataIdEncWithBuyer(txId string, password, metaDataIDEncSeller, buyer, seller string, cb chainevents.EventCallback) error {
-	if err = curUser.SubscribeEvent("ReadyForDownload", cb); err != nil {
-		rlog.Error("failed to subscribe ReadyForDownload.callback. ", err)
-		return err
-	}
-
+func SubmitMetaDataIdEncWithBuyer(txId string, password, buyer, seller string, metaDataIDEncSeller []byte) error {
 	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
 		Password: password, Value: big.NewInt(0), Pending: false}
 
-	metaDataIdEncWithBuyer := []byte(metaDataIDEncSeller)
+	var metaDataIdEncWithBuyer []byte
 	var err error
-	metaDataIdEncWithBuyer, err = accounts.GetAMInstance().ReEncrypt(metaDataIdEncWithBuyer, seller, buyer, password)
+	metaDataIdEncWithBuyer, err = accounts.GetAMInstance().ReEncrypt([]byte(metaDataIDEncSeller), seller, buyer, password)
 	if err != nil {
 		rlog.Error("failed to reEncrypt meta data ID, error:", err)
 		return errors.New("failed to SubmitMetaDataIdEncWithBuyer, error:" + err.Error())
@@ -280,20 +270,25 @@ func SubmitMetaDataIdEncWithBuyer(txId string, password, metaDataIDEncSeller, bu
 func BuyerDecryptAndGetMetaDataFromIPFS(password string, metaDataIdEncWithBuyer []byte, buyer, extension string) (string, error) {
 	metaDataIDByte, err := accounts.GetAMInstance().Decrypt(metaDataIdEncWithBuyer, buyer, password)
 	if err != nil {
-		return "", errors.New("failed to decrypt meta data ID, error:" + err.Error())
+		return "", err
 	}
 	metaDataID := string(metaDataIDByte)
 	if err := ipfsaccess.GetIAInstance().GetFromIPFS(metaDataID, IPFSOutDir); err != nil {
-		return "", errors.New("failed to get meta data from ipfs, error:" + err.Error())
+		return "", err
 	}
-	fileNameWithExtension := IPFSOutDir + "/" + metaDataID + "." + extension
-	return fileNameWithExtension, nil
+	oldFileName := IPFSOutDir + "/" + metaDataID
+	newFileName := oldFileName + "." + extension
+	if err = os.Rename(oldFileName, newFileName); err != nil {
+		rlog.Error("Node: rename meta data failed. ", err)
+		return "", err
+	}
+	return newFileName, nil
 }
 
-func ConfirmDataTruth(txId string, password string, arbitrate bool, cb chainevents.EventCallback) error {
-	if err = curUser.SubscribeEvent("TransactionClose", cb); err != nil {
-		rlog.Error("failed to subscribe TransactionClose.callback. ", err)
-		return err
+func ConfirmDataTruth(txId string, password string, arbitrate bool) error {
+	if curUser == nil {
+		rlog.Error("no current user")
+		return errors.New("failed to buy, current user is null")
 	}
 
 	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),

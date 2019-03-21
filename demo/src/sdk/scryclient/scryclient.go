@@ -15,7 +15,7 @@ type ScryClient struct {
 	Account *accounts.Account
 }
 
-func NewScryClient(publicKey string) (*ScryClient) {
+func NewScryClient(publicKey string) *ScryClient {
 	return &ScryClient{
 		Account: &accounts.Account{publicKey},
 	}

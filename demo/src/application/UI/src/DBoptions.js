@@ -38,22 +38,24 @@ let dl_db = {
             }
         }
     },
-    write:function(params) {
+    write:function(params, cb) {
         let store = dl_db.db.transaction(dl_db.db_store_name, "readwrite").objectStore(dl_db.db_store_name)
         let request = store.put(params)
         request.onerror = function(err){
             console.log(err)
         }
+        request.onsuccess = function () {
+            cb()
+        }
     },
-    read:function (key) {
+    read:function (key, cb) {
         let store = dl_db.db.transaction(dl_db.db_store_name, "readwrite").objectStore(dl_db.db_store_name)
         let request = store.get(key)
         request.onerror = function (err) {
             console.log(err)
         }
         request.onsuccess = function (event) {
-            console.log("Node: indexedDB get result.",event.target.result)
-            return event.target.result
+            cb(event.target.result)
         }
     }
 }
@@ -68,8 +70,10 @@ let tx_db = {
             alert("open failed with error code: " + event.target.errorCode)
         }
         request.onsuccess = function(event) {
-            _this.$store.state.mytransaction = []
+            _this.$store.state.transactionbuy = []
+            _this.$store.state.transactionsell = []
             tx_db.db = event.target.result
+            let curUser = _this.$store.state.account.toLowerCase()
             let s = tx_db.db.transaction(tx_db.db_store_name,"readonly").objectStore(tx_db.db_store_name)
             let c = s.openCursor()
             c.onsuccess = function(event) {
@@ -94,11 +98,10 @@ let tx_db = {
                         PublishID: cursor.value.PublishID,
                         TransactionID: cursor.value.TransactionID
                     }
-                    let acc = _this.$store.state.account
-                    if (cursor.value.Buyer === acc) {
+                    if (t.Buyer.toLowerCase() === curUser) {
                         _this.$store.state.transactionbuy.push(t)
                     }
-                    if (cursor.value.Seller === acc) {
+                    if (t.Seller.toLowerCase() === curUser) {
                         _this.$store.state.transactionsell.push(t)
                     }
                     cursor.continue()
@@ -106,22 +109,24 @@ let tx_db = {
             }
         }
     },
-    write:function(params) {
+    write:function(params, cb) {
         let store = tx_db.db.transaction(tx_db.db_store_name, "readwrite").objectStore(tx_db.db_store_name)
         let request = store.put(params)
         request.onerror = function(err){
             console.log(err)
         }
+        request.onsuccess = function() {
+            cb()
+        }
     },
-    read:function (key) {
+    read:function (key, cb) {
         let store = tx_db.db.transaction(tx_db.db_store_name, "readwrite").objectStore(tx_db.db_store_name)
         let request = store.get(key)
         request.onerror = function (err) {
             console.log(err)
         }
         request.onsuccess = function (event) {
-            console.log("Node: indexedDB get result.",event.target.result)
-            return event.target.result
+            cb(event.target.result)
         }
     }
 }
@@ -143,20 +148,33 @@ let acc_db = {
             c.onsuccess = function(event) {
                 let cursor = event.target.result
                 if (cursor) {
-                    _this.$store.state.accounts.push({address: cursor.value.address})
+                    _this.$store.state.accounts.push({
+                        address: cursor.value.address,
+                        fromBlock: cursor.value.fromBlock
+                    })
                     cursor.continue()
                 }
             }
         }
     },
-    write:function(addr) {
+    write:function(params) {
         let store = acc_db.db.transaction(acc_db.db_store_name, "readwrite").objectStore(acc_db.db_store_name)
-        let request = store.put(addr)
+        let request = store.put(params)
         request.onerror = function(err){
             console.log(err)
         }
     },
-    // prepare a single remove function, for delete a account, maybe I can put a
+    read: function(addr, cb) {
+        let store = acc_db.db.transaction(acc_db.db_store_name, "readwrite").objectStore(acc_db.db_store_name)
+        let request = store.get(addr)
+        request.onerror = function(err) {
+            console.log(err)
+        }
+        request.onsuccess = function (event) {
+            cb(event.target.result)
+        }
+    },
+    // prepare a single remove function, for delete a account, maybe I can give out a button for user?
     remove:function (key) {
         let store = acc_db.db.transaction(acc_db.db_store_name, "readwrite").objectStore(acc_db.db_store_name)
         let request = store.delete(key)

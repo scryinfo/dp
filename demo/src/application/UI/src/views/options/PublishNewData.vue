@@ -17,7 +17,6 @@
 </template>
 
 <script>
-import {dl_db} from "../../DBoptions"
 export default {
     name: "PublishNewData",
     data () {
@@ -27,8 +26,8 @@ export default {
                     Title: "",
                     Keys: "",
                     Description: "",
-                    metaDataExtension: "",
-                    proofDataExtensions: []
+                    MetaDataExtension: "",
+                    ProofDataExtensions: []
                 },
                 Price: 0,
                 SupportVerify: false
@@ -50,12 +49,12 @@ export default {
                 confirmButtonText: "Submit",
                 cancelButtonText: "Cancel"
             }).then( (pwd) => {
-                // unnecessary login.verify?
-                this.count = this.$refs.selectedProofs.$refs.input.files.length + 1
+                this.count = this.$refs.selectedProofs.$refs.input.files.length
                 this.send.price = this.pubData.Price
                 this.send.supportVerify = this.pubData.SupportVerify
                 this.send.password = pwd.value
-                this.setIDs()
+                this.setDataID()
+                this.setProofIDs()
             }).catch((err) => {
                 this.$message({
                     type: "info",
@@ -63,16 +62,11 @@ export default {
                 })
             })
         },
-        setIDs: function() {
-            let ipfsAPI = require("ipfs-http-client")
-            let ipfs = ipfsAPI({host: 'localhost', port: '5001', protocol: 'http'})
-            this.setDataID(ipfs, this)
-            this.setProofIDs(ipfs, this)
-            this.setDetailsID(ipfs, this)
-        },
-        setDataID: function (ipfs, _this) {
+        setDataID: function () {
+            let _this = this
+            let ipfs = require("ipfs-http-client")({host: 'localhost', port: '5001', protocol: 'http'})
             let data = this.$refs.selectedData.$refs.input.files[0]
-            this.pubData.details.metaDataExtension = data.name.split(".").pop()
+            this.pubData.details.MetaDataExtension = data.name.split(".").pop()
             let reader = new FileReader()
             reader.readAsArrayBuffer(data)
             reader.onload = function (evt) {
@@ -81,15 +75,21 @@ export default {
                     _this.count--
                 }).catch(function (err) {
                     console.log("Node: add.metaData.failed. ", err)
-                    alert("Add meta data failed. ", err)
+                    _this.$alert(err, "Error: Add meta data failed. ", {
+                        confirmButtonText: "I've got it.",
+                        showClose: false,
+                        type: "error"
+                    })
                 })
             }
         },
-        setProofIDs: function (ipfs, _this) {
-            _this.send.proofDataIDs = []
+        setProofIDs: function () {
+            this.send.proofDataIDs = []
+            let _this = this
+            let ipfs = require("ipfs-http-client")({host: 'localhost', port: '5001', protocol: 'http'})
             let proofs = this.$refs.selectedProofs.$refs.input.files
             for (let i=0;i<proofs.length;i++) {
-                this.pubData.details.proofDataExtensions.push( proofs[i].name.split(".").pop() )
+                this.pubData.details.ProofDataExtensions.push( proofs[i].name.split(".").pop() )
                 let reader = new FileReader()
                 reader.readAsArrayBuffer(proofs[i])
                 reader.onload = function (evt) {
@@ -98,19 +98,29 @@ export default {
                         _this.count--
                     }).catch(function (err) {
                         console.log("Node: add.proofsData.failed. ", err)
-                        alert("Add proofs data failed. ", err)
+                        _this.$alert(err, "Error: Add proofs data failed. ", {
+                            confirmButtonText: "I've got it.",
+                            showClose: false,
+                            type: "error"
+                        })
                     })
                 }
             }
             return true
         },
-        setDetailsID: function (ipfs, _this) {
+        setDetailsID: function () {
+            let _this = this
+            let ipfs = require("ipfs-http-client")({host: 'localhost', port: '5001', protocol: 'http'})
             ipfs.add(Buffer.from(JSON.stringify(this.pubData.details), "utf-8")).then(function (result) {
                 _this.send.detailsID = result[0].hash
                 _this.count--
             }).catch(function (err) {
                 console.log("Node: add.detailsData.failed. ", err)
-                alert("Add details data failed. ", err)
+                _this.$alert(err, "Error: Add details data failed. ", {
+                    confirmButtonText: "I've got it.",
+                    showClose: false,
+                    type: "error"
+                })
             })
             return true
         },
@@ -118,23 +128,16 @@ export default {
             let _this = this
             astilectron.sendMessage({Name:"publish",Payload: this.send}, function (message) {
                 if (message.name !== "error") {
-                    dl_db.write({
-                        Title: _this.pubData.details.Title,
-                        Keys: _this.pubData.details.Keys,
-                        Description: _this.pubData.details.Description,
-                        Price: _this.pubData.Price,
-                        Seller: _this.$store.state.account,
-                        SupportVerify: _this.pubData.SupportVerify,
-                        MetaDataExtension: _this.pubData.details.metaDataExtension,
-                        ProofDataExtensions: _this.pubData.details.proofDataExtensions,
-                        PublishID: message.payload
-                    })
-                    dl_db.init(_this)
+                    // dl_db.write here, seller will see his publish before contract emit event.
                     console.log("Publish new data success.", message)
                     // reset datas.
                 }else {
-                    console.log("Node: publish.newData failed. ", message)
-                    alert("Publish data failed: ", message.payload)
+                    console.log("Node: publish.newData failed. ", message.payload)
+                    _this.$alert(message.payload, "Error: Publish data failed: ", {
+                        confirmButtonText: "I've got it.",
+                        showClose: false,
+                        type: "error"
+                    })
                 }
             })
         }
@@ -142,6 +145,9 @@ export default {
     watch: {
         count: function () {
             if (this.count === -1) {
+                this.setDetailsID()
+            }
+            if (this.count === -2) {
                 this.pub()
                 this.count = 0
             }

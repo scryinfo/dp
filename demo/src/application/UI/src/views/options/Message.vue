@@ -22,4 +22,7 @@ export default {
     width: 20%;
     color: #99a9bf;
 }
+.pagination {
+    text-align: center;
+}
 </style>

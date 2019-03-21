@@ -7,7 +7,8 @@
             <el-button size="mini" type="primary" @click="confirmPwd">Confirm</el-button>
         </el-col>
 
-        <el-table :data="this.$store.state.transactionbuy" highlight-current-row border height=400 @selection-change="currentChange">
+        <el-table :data="this.$store.state.transactionbuy.slice((curPage-1)*pageSize, curPage*pageSize)"
+                  highlight-current-row border height=368 @current-change="currentChange">
             <el-table-column type="expand">
                 <el-form slot-scope="props" label-position="left" class="tx-table-expand">
                     <el-form-item label="TransactionID"><span>{{ props.row.TransactionID }}</span></el-form-item>
@@ -25,6 +26,9 @@
             <el-table-column prop="Title" label="Title" show-overflow-tooltip></el-table-column>
             <el-table-column prop="State" label="State" show-overflow-tooltip></el-table-column>
         </el-table>
+        <el-pagination class="pagination" @current-change="setCurPage" @size-change="setPageSize" :total="total"
+                       layout="sizes, total, prev, pager, next, jumper" :page-sizes="[5, 6]" :page-size="pageSize"
+        ></el-pagination>
     </section>
 </template>
 
@@ -33,10 +37,19 @@ export default {
     name: "TransactionBuy",
     data () {
         return {
-            selectedTx: {}  // {tID: "", Buyer: "", MetaDataIDEncWithBuyer: "", MetaDataExtension: ""}
+            selectedTx: {},  // {tID: "", Buyer: "", MetaDataIDEncWithBuyer: "", MetaDataExtension: ""}
+            curPage: 1,
+            pageSize: 6,
+            total: 0
         }
     },
     methods: {
+        setCurPage: function (curPageReturn) {
+            this.curPage = curPageReturn
+        },
+        setPageSize: function (newPageSize) {
+            this.pageSize = newPageSize
+        },
         currentChange: function (curRow) {
             this.selectedTx = {
                 TransactionID: curRow.TransactionID,
@@ -62,12 +75,16 @@ export default {
         purchase:function (pwd) {
             let _this = this
             // not support buy a group of data one time, give the first id for instead.
-            astilectron.sendMessage({ Name:"purchase",Payload:{password: pwd, tID: this.selectedTx.TransactionID}}, function (message) {
+            astilectron.sendMessage({ Name:"purchase",Payload:{password: pwd, tID: this.selectedTx}}, function (message) {
                 if (message.name !== "error") {
                     console.log("Purchase data success.", message)
                 }else {
-                    console.log("Node: purchase failed.", message)
-                    alert("Purchase data failed.")
+                    console.log("Node: purchase failed.", message.payload)
+                    _this.$alert(message.payload, "Error: Purchase data failed: ", {
+                        confirmButtonText: "I've got it.",
+                        showClose: false,
+                        type: "error"
+                    })
                 }
             })
         },
@@ -103,14 +120,23 @@ export default {
             })
         },
         decrypt:function (pwd) {
+            let _this = this
             // not support decrypt a group of data one time, give the first id for instead.
             astilectron.sendMessage({ Name:"decrypt",Payload:{password: pwd, tID: this.selectedTx}}, function (message) {
                     if (message.name !== "error") {
-                        alert("Meta data: ", message.payload)
-                        console.log("Decrypt data success.")
+                        _this.$alert(message.payload, "Meta data: ", {
+                            confirmButtonText: "Close",
+                            showClose: false,
+                            type: "info"
+                        })
+                        console.log("Decrypt data success.", message)
                     }else {
-                        console.log("Node: decrypt failed.", message)
-                        alert("Decrypt data failed.")
+                        console.log("Node: decrypt failed.", message.payload)
+                        _this.$alert(message.payload, "Error: Decrypt data failed: ", {
+                            confirmButtonText: "I've got it.",
+                            showClose: false,
+                            type: "error"
+                        })
                     }
                 })
         },
@@ -128,17 +154,36 @@ export default {
             })
         },
         confirm:function (pwd, judge) {
+            let _this = this
             // not support buy a group of data one time, give the first id for instead.
-            astilectron.sendMessage({ Name:"confirm",Payload:{password: pwd, tID: this.selectedTx.TransactionID, startArbitrate: judge}},
+            astilectron.sendMessage({ Name:"confirm",Payload:{password: pwd, tID: this.selectedTx, startArbitrate: judge}},
                 function (message) {
                 if (message.name !== "error") {
                     console.log("Confirm data success.", message)
                 }else {
-                    console.log("Node: confirm failed.", message)
-                    alert("Confirm data failed.")
+                    console.log("Node: confirm failed.", message.payload)
+                    _this.$alert(message.payload, "Error: Confirm data failed: ", {
+                        confirmButtonText: "I've got it.",
+                        showClose: false,
+                        type: "error"
+                    })
                 }
             })
         }
+    },
+    computed: {
+        listenTxBRefresh() {
+            return this.$store.state.transactionbuy
+        }
+    },
+    watch: {
+        listenTxBRefresh: function () {
+            this.curPage = 1
+            this.total = this.$store.state.transactionbuy.length
+        }
+    },
+    created () {
+        this.total = this.$store.state.transactionbuy.length
     }
 }
 </script>

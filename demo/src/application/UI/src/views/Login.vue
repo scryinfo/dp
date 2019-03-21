@@ -4,7 +4,7 @@
             <el-col :span="24"><div class="top">My Astilectron demo</div></el-col>
             <el-col :span="8">
                 <div class="left">
-                    <div class="left-explain">select account:</div>
+                    <div class="left-explain">Select Account:</div>
                     <el-select class="left-account" v-model="account" placeholder="select account"
                         clearable allow-create filterable>
                         <el-option v-for="acc in this.$store.state.accounts" :key="acc.address"
@@ -73,7 +73,11 @@ export default {
                     _this.$router.push({ name: "home", params: {acc: _this.account}})
                 } else {
                     console.log("Node: login.verify failed. ", message)
-                    alert("account or password is wrong.", message.payload)
+                    _this.$alert(message.payload, "Error: account or password is wrong.", {
+                        confirmButtonText: "I've got it.",
+                        showClose: false,
+                        type: "error"
+                    })
                 }
             })
         },
@@ -85,7 +89,11 @@ export default {
                     _this.showControl1 = false;_this.showControl2 = true
                 }else {
                     console.log("Node: create.newAcc failed. ", message)
-                    alert("create new account failed.", message.payload)
+                    _this.$alert(message.payload, "Error: create new account failed.", {
+                        confirmButtonText: "I've got it.",
+                        showClose: false,
+                        type: "error"
+                    })
                 }
             })
         },
@@ -96,11 +104,18 @@ export default {
             astilectron.sendMessage({Name: "save.keystore", Payload: {account: this.$store.state.account,
                     password: pwd}}, function (message) {
                 if (message.name !== "error") {
-                    acc_db.write({ address: _this.account })
+                    acc_db.write({
+                        address: _this.account,
+                        fromBlock: 0
+                    })
                     _this.$router.push({ name: "home", params: {acc: _this.account}})
                 } else {
                     console.log("Node: save.keystore failed. ", message)
-                    alert("save account information failed.", message.payload)
+                    _this.$alert(message.payload, "Error: save account information failed.", {
+                        confirmButtonText: "I've got it.",
+                        showClose: false,
+                        type: "error"
+                    })
                 }
             })
         }

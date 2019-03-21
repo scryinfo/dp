@@ -89,6 +89,11 @@
         },
         {
           "indexed": false,
+          "name": "state",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
           "name": "users",
           "type": "address[]"
         }
@@ -148,6 +153,11 @@
         },
         {
           "indexed": false,
+          "name": "state",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
           "name": "users",
           "type": "address[]"
         }
@@ -180,6 +190,11 @@
         },
         {
           "indexed": false,
+          "name": "state",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
           "name": "users",
           "type": "address[]"
         }
@@ -207,6 +222,11 @@
         },
         {
           "indexed": false,
+          "name": "state",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
           "name": "users",
           "type": "address[]"
         }
@@ -226,6 +246,11 @@
           "indexed": false,
           "name": "transactionId",
           "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "state",
+          "type": "uint8"
         },
         {
           "indexed": false,
@@ -270,6 +295,11 @@
           "indexed": false,
           "name": "transactionId",
           "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "state",
+          "type": "uint8"
         },
         {
           "indexed": false,
@@ -514,6 +544,20 @@
       "constant": false,
       "inputs": [
         {
+          "name": "bonus",
+          "type": "uint256"
+        }
+      ],
+      "name": "setVerifierBonus",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
           "name": "seqNo",
           "type": "string"
         },
@@ -531,15 +575,6 @@
         }
       ],
       "name": "creditsToVerifier",
-      "outputs": [],
-      "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "constant": false,
-      "inputs": [],
-      "name": "clearVerifiers",
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",

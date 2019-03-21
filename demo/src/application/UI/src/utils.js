@@ -1,4 +1,4 @@
-import {dl_db, tx_db} from "./DBoptions.js"
+import {dl_db, tx_db, acc_db} from "./DBoptions.js"
 let utils = {
     listen: function (_this) {
         astilectron.onMessage(function(message) {
@@ -12,9 +12,14 @@ let utils = {
                         position: "top-left"
                     })
                     break
-                case "initDL": dl_db.init(_this)
+                case "initDL":
+                    dl_db.init(_this)
+                    console.log("Node: show datalist .", _this.$store.state.datalist)
                     break
-                case "initTx":tx_db.init(_this)
+                case "initTx":
+                    tx_db.init(_this)
+                    console.log("Node: show transactionbuy .", _this.$store.state.transactionbuy)
+                    console.log("Node: show transactionsell .", _this.$store.state.transactionsell)
                     break
                 case "onPublish":
                     console.log("Node: onPublish.callback. ", message.payload)
@@ -33,8 +38,13 @@ let utils = {
                         MetaDataExtension: message.payload.MetaDataExtension,
                         ProofDataExtensions: message.payload.ProofDataExtensions,
                         PublishID: message.payload.PublishID
+                    }, function () {
+                        dl_db.init(_this)
                     })
-                    dl_db.init(_this)
+                    acc_db.write({
+                        address: _this.$store.state.account,
+                        fromBlock: message.payload.Block
+                    })
                     break
                 case "onApprove":
                     console.log("Node: onApprove.callback. ", message.payload)
@@ -42,6 +52,10 @@ let utils = {
                         title: "onApprove.callback: ",
                         message: message.payload,
                         position: "top-left"
+                    })
+                    acc_db.write({
+                        address: _this.$store.state.account,
+                        fromBlock: message.payload.Block
                     })
                     break
                 case "onTransactionCreate":
@@ -51,27 +65,33 @@ let utils = {
                         message: message.payload,
                         position: "top-left"
                     })
-                    let dataDetails = dl_db.read(message.payload.PublishId)
-                    tx_db.write({
-                        Title: dataDetails.Title,
-                        Price: dataDetails.Price,
-                        Keys: dataDetails.Keys,
-                        Description: dataDetails.Description,
-                        Buyer: _this.$store.state.account,
-                        Seller: dataDetails.Seller,
-                        State: message.payload.TxState,
-                        SupportVerify: dataDetails.SupportVerify,
-                        MetaDataExtension: dataDetails.MetaDataExtension,
-                        ProofDataExtensions: dataDetails.ProofDataExtensions,
-                        MetaDataIDEncWithSeller: "",          // the two encrypt ID will initialize later,
-                        MetaDataIDEncWithBuyer: "",           // use (tx_db.read + tx_db.write) methods.
-                        Verifier1Response: "Score, Comment",  // here three items will use a new update function,
-                        Verifier2Response: "Score, Comment",  // but both vote and arbitrate are not finished,
-                        ArbitrateResult: false,               // so just still it and wait for function implement.
-                        PublishID: dataDetails.PublishID,
-                        TransactionID: message.payload.TransactionID
+                    dl_db.read(message.payload.PublishID, function (dataDetails) {
+                        tx_db.write({
+                            Title: dataDetails.Title,
+                            Price: dataDetails.Price,
+                            Keys: dataDetails.Keys,
+                            Description: dataDetails.Description,
+                            Buyer: message.payload.Buyer,
+                            Seller: dataDetails.Seller,
+                            State: message.payload.TxState,
+                            SupportVerify: dataDetails.SupportVerify,
+                            MetaDataExtension: dataDetails.MetaDataExtension,
+                            ProofDataExtensions: dataDetails.ProofDataExtensions,
+                            MetaDataIDEncWithSeller: "",          // the two encrypt IDs will initialize later,
+                            MetaDataIDEncWithBuyer: "",           // use (tx_db.read + tx_db.write) methods.
+                            Verifier1Response: "Score, Comment",  // here three items will use a new method,
+                            Verifier2Response: "Score, Comment",  // but both vote and arbitrate are not finished,
+                            ArbitrateResult: false,               // so just still it and wait for function implement.
+                            PublishID: dataDetails.PublishID,
+                            TransactionID: message.payload.TransactionID    // keyPath
+                        }, function () {
+                            tx_db.init(_this)
+                        })
                     })
-                    tx_db.init(_this)
+                    acc_db.write({
+                        address: _this.$store.state.account,
+                        fromBlock: message.payload.Block
+                    })
                     break
                 case "onPurchase":
                     console.log("Node: onPurchase.callback. ", message.payload)
@@ -80,27 +100,33 @@ let utils = {
                         message: message.payload,
                         position: "top-left"
                     })
-                    let txDetailsOnPurchase = tx_db.read(message.payload.TransactionID)
-                    tx_db.write({
-                        Title: txDetailsOnPurchase.Title,
-                        Price: txDetailsOnPurchase.Price,
-                        Keys: txDetailsOnPurchase.Keys,
-                        Description: txDetailsOnPurchase.Description,
-                        Buyer: txDetailsOnPurchase.Buyer,
-                        Seller: txDetailsOnPurchase.Seller,
-                        State: message.payload.TxState, // -
-                        SupportVerify: txDetailsOnPurchase.SupportVerify,
-                        MetaDataExtension: txDetailsOnPurchase.MetaDataExtension,
-                        ProofDataExtensions: txDetailsOnPurchase.ProofDataExtensions,
-                        MetaDataIDEncWithSeller: message.payload.MetaDataIdEncWithSeller, // -
-                        MetaDataIDEncWithBuyer: txDetailsOnPurchase.MetaDataIDEncWithBuyer,
-                        Verifier1Response: txDetailsOnPurchase.Verifier1Response,
-                        Verifier2Response: txDetailsOnPurchase.Verifier2Response,
-                        ArbitrateResult: txDetailsOnPurchase.ArbitrateResult,
-                        PublishID: txDetailsOnPurchase.PublishID,
-                        TransactionID: txDetailsOnPurchase.TransactionID
+                    tx_db.read(message.payload.TransactionID, function (txDetailsOnPurchase) {
+                        tx_db.write({
+                            Title: txDetailsOnPurchase.Title,
+                            Price: txDetailsOnPurchase.Price,
+                            Keys: txDetailsOnPurchase.Keys,
+                            Description: txDetailsOnPurchase.Description,
+                            Buyer: txDetailsOnPurchase.Buyer,
+                            Seller: txDetailsOnPurchase.Seller,
+                            State: message.payload.TxState, // -
+                            SupportVerify: txDetailsOnPurchase.SupportVerify,
+                            MetaDataExtension: txDetailsOnPurchase.MetaDataExtension,
+                            ProofDataExtensions: txDetailsOnPurchase.ProofDataExtensions,
+                            MetaDataIDEncWithSeller: message.payload.MetaDataIdEncWithSeller, // -
+                            MetaDataIDEncWithBuyer: txDetailsOnPurchase.MetaDataIDEncWithBuyer,
+                            Verifier1Response: txDetailsOnPurchase.Verifier1Response,
+                            Verifier2Response: txDetailsOnPurchase.Verifier2Response,
+                            ArbitrateResult: txDetailsOnPurchase.ArbitrateResult,
+                            PublishID: txDetailsOnPurchase.PublishID,
+                            TransactionID: txDetailsOnPurchase.TransactionID
+                        },function () {
+                            tx_db.init(_this)
+                        })
                     })
-                    tx_db.init(_this)
+                    acc_db.write({
+                        address: _this.$store.state.account,
+                        fromBlock: message.payload.Block
+                    })
                     break
                 case "onReadyForDownload":
                     console.log("Node: onReadyForDownload.callback. ", message.payload)
@@ -109,27 +135,33 @@ let utils = {
                         message: message.payload,
                         position: "top-left"
                     })
-                    let txDetailsOnRFD = tx_db.read(message.payload.TransactionID)
-                    tx_db.write({
-                        Title: txDetailsOnRFD.Title,
-                        Price: txDetailsOnRFD.Price,
-                        Keys: txDetailsOnRFD.Keys,
-                        Description: txDetailsOnRFD.Description,
-                        Buyer: txDetailsOnRFD.Buyer,
-                        Seller: txDetailsOnRFD.Seller,
-                        State: message.payload.TxState, // -
-                        SupportVerify: txDetailsOnRFD.SupportVerify,
-                        MetaDataExtension: txDetailsOnRFD.MetaDataExtension,
-                        ProofDataExtensions: txDetailsOnRFD.ProofDataExtensions,
-                        MetaDataIDEncWithSeller: txDetailsOnRFD.MetaDataIDEncWithSeller,
-                        MetaDataIDEncWithBuyer: message.payload.MetaDataIdEncWithBuyer, // -
-                        Verifier1Response: txDetailsOnRFD.Verifier1Response,
-                        Verifier2Response: txDetailsOnRFD.Verifier2Response,
-                        ArbitrateResult: txDetailsOnRFD.ArbitrateResult,
-                        PublishID: txDetailsOnRFD.PublishID,
-                        TransactionID: txDetailsOnRFD.TransactionID
+                    tx_db.read(message.payload.TransactionID, function (txDetailsOnRFD) {
+                        tx_db.write({
+                            Title: txDetailsOnRFD.Title,
+                            Price: txDetailsOnRFD.Price,
+                            Keys: txDetailsOnRFD.Keys,
+                            Description: txDetailsOnRFD.Description,
+                            Buyer: txDetailsOnRFD.Buyer,
+                            Seller: txDetailsOnRFD.Seller,
+                            State: message.payload.TxState, // -
+                            SupportVerify: txDetailsOnRFD.SupportVerify,
+                            MetaDataExtension: txDetailsOnRFD.MetaDataExtension,
+                            ProofDataExtensions: txDetailsOnRFD.ProofDataExtensions,
+                            MetaDataIDEncWithSeller: txDetailsOnRFD.MetaDataIDEncWithSeller,
+                            MetaDataIDEncWithBuyer: message.payload.MetaDataIdEncWithBuyer, // -
+                            Verifier1Response: txDetailsOnRFD.Verifier1Response,
+                            Verifier2Response: txDetailsOnRFD.Verifier2Response,
+                            ArbitrateResult: txDetailsOnRFD.ArbitrateResult,
+                            PublishID: txDetailsOnRFD.PublishID,
+                            TransactionID: txDetailsOnRFD.TransactionID
+                        }, function () {
+                            tx_db.init(_this)
+                        })
                     })
-                    tx_db.init(_this)
+                    acc_db.write({
+                        address: _this.$store.state.account,
+                        fromBlock: message.payload.Block
+                    })
                     break
                 case "onClose":
                     console.log("Node: onClose.callback. ", message.payload)
@@ -137,6 +169,33 @@ let utils = {
                         title: "onClose.callback: ",
                         message: message.payload,
                         position: "top-left"
+                    })
+                    tx_db.read(message.payload.TransactionID, function (txDetailsOnC) {
+                        tx_db.write({
+                            Title: txDetailsOnC.Title,
+                            Price: txDetailsOnC.Price,
+                            Keys: txDetailsOnC.Keys,
+                            Description: txDetailsOnC.Description,
+                            Buyer: txDetailsOnC.Buyer,
+                            Seller: txDetailsOnC.Seller,
+                            State: message.payload.TxState, // -
+                            SupportVerify: txDetailsOnC.SupportVerify,
+                            MetaDataExtension: txDetailsOnC.MetaDataExtension,
+                            ProofDataExtensions: txDetailsOnC.ProofDataExtensions,
+                            MetaDataIDEncWithSeller: txDetailsOnC.MetaDataIDEncWithSeller,
+                            MetaDataIDEncWithBuyer: txDetailsOnC.MetaDataIDEncWithBuyer,
+                            Verifier1Response: txDetailsOnC.Verifier1Response,
+                            Verifier2Response: txDetailsOnC.Verifier2Response,
+                            ArbitrateResult: txDetailsOnC.ArbitrateResult,
+                            PublishID: txDetailsOnC.PublishID,
+                            TransactionID: txDetailsOnC.TransactionID
+                        }, function () {
+                            tx_db.init(_this)
+                        })
+                    })
+                    acc_db.write({
+                        address: _this.$store.state.account,
+                        fromBlock: message.payload.Block
                     })
                     break
             }
