@@ -8,7 +8,7 @@
                         <span>{{acc}}</span>
                         <el-dropdown-menu slot="dropdown">
                             <el-dropdown-item @click.native="message">Messages</el-dropdown-item>
-                            <el-dropdown-item divided @click.native="logout">Logout</el-dropdown-item>
+                            <el-dropdown-item divided @click.native="logoutMsg">Logout</el-dropdown-item>
                         </el-dropdown-menu>
                     </el-dropdown>
                 </el-col>
@@ -48,18 +48,33 @@ export default {
         message: function () {
             this.$router.push("/msg")
         },
-        logout: function () {
+        logoutMsg: function () {
             this.$confirm("Are you sure to logout?", "Tips:", {
                 confirmButtonText: "Yes",
                 cancelButtonText: "No",
                 type: "warning"
             }).then(() => {
-                this.$router.push("/")
+                this.logout()
             }).catch(() => {
                 this.$message({
                     type:"info",
                     message:"keep login.  ^_^ "
                 })
+            })
+        },
+        logout: function () {
+            let _this = this
+            astilectron.sendMessage({ Name:"logout", Payload: ""}, function (message) {
+                if (message.name !== "error") {
+                    _this.$router.push("/")
+                }else {
+                    console.log("Node: logout failed.", message.payload)
+                    _this.$alert(message.payload, "Error: logout failed.", {
+                        confirmButtonText: "I've got it.",
+                        showClose: false,
+                        type: "error"
+                    })
+                }
             })
         }
     },
@@ -69,21 +84,19 @@ export default {
         let _this = this
         dl_db.init(this)
         tx_db.init(this)
-        document.addEventListener("astilectron-ready", function() {
-            utils.listen(_this)
-            acc_db.read(_this.acc, function (acc) {
-                astilectron.sendMessage({ Name:"sdk.init", Payload: { fromBlock: acc.fromBlock } }, function (message) {
-                    if (message.name !== "error") {
-                        console.log("SDK init success.", message)
-                    }else {
-                        console.log("Node: sdk init failed.", message.payload)
-                        _this.$alert(message.payload, "Error: sdk init failed.", {
-                            confirmButtonText: "I've got it.",
-                            showClose: false,
-                            type: "error"
-                        })
-                    }
-                })
+        utils.listen(this)
+        acc_db.read(this.$route.params.acc, function (accinstance) {
+            astilectron.sendMessage({ Name:"sdk.init", Payload: { fromBlock: accinstance.fromBlock } }, function (message) {
+                if (message.name !== "error") {
+                    console.log("SDK init success.", message)
+                }else {
+                    console.log("Node: sdk init failed.", message.payload)
+                    _this.$alert(message.payload, "Error: sdk init failed.", {
+                        confirmButtonText: "I've got it.",
+                        showClose: false,
+                        type: "error"
+                    })
+                }
             })
         })
     }

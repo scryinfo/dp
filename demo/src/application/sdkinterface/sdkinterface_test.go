@@ -15,7 +15,11 @@ var (
 )
 
 func TestInitialize(t *testing.T) {
-    err := Initialize()
+    err := Initialize(uint64(0))
+    if err != nil {
+        t.Fail()
+    }
+    err = InitLogAndServices()
     if err != nil {
         t.Fail()
     }
@@ -24,7 +28,8 @@ func TestInitialize(t *testing.T) {
 //notice: deployer_keyjson and deployer_password \
 //need to be changed to yours before testing
 func TestTransferTokenFromDeployer(t *testing.T) {
-    Initialize()
+    Initialize(uint64(0))
+    InitLogAndServices()
     CreateUserWithLogin("111111")
     err := TransferTokenFromDeployer(big.NewInt(400))
     if err != nil {
@@ -33,7 +38,8 @@ func TestTransferTokenFromDeployer(t *testing.T) {
 }
 
 func TestUserLogin(t *testing.T) {
-    Initialize()
+    Initialize(uint64(0))
+    InitLogAndServices()
     CreateUserWithLogin("111111")
     login, err := UserLogin(curUser.Account.Address, "111111")
     if err != nil {
@@ -47,19 +53,21 @@ func TestUserLogin(t *testing.T) {
 
 
 func TestPublishData(t *testing.T) {
-    Initialize()
+    Initialize(uint64(0))
+    InitLogAndServices()
     CreateUserWithLogin("111111")
 
     data := definition.PubDataIDs{
-        //MetaData: "i am a solid man",
-        //ProofData: proofData,
-        //DespData: "evil data",
-        //Price: 10000,
-        //Seller: "seller",
-        //Password: "111111",
+        MetaDataID: "QmRJtRpzGyXYRhKo6JDLT2dVzDoQwKntaiFPB3A2wqaKbm",
+        ProofDataIDs: []string{"QmRJtRpzGyXYRhKo6JDLT2dVzDoQwKntaiFPB3A2wqaKbm"},
+        DetailsID: "QmRJtRpzGyXYRhKo6JDLT2dVzDoQwKntaiFPB3A2wqaKbm",
+        Price: float64(1000),
+        SupportVerify: false,
+        Password: "111111",
     }
 
-    _, err := PublishData(&data, OnPublish)
+    SubScribeEvents([]string{"DataPublish"}, OnPublish)
+    _, err := PublishData(&data)
     if err != nil {
         t.Fail()
     }
@@ -79,10 +87,11 @@ func OnPublish(event events.Event) bool {
 func TestApproveTransferForBuying(t *testing.T) {
     password := "111111"
 
-    Initialize()
+    Initialize(uint64(0))
+    InitLogAndServices()
     CreateUserWithLogin(password)
 
-    ApproveTransferForBuying(password, OnApprove)
+    ApproveTransferForBuying(password)
 
     time.Sleep(10000000000)
 
@@ -99,7 +108,8 @@ func OnApprove(event events.Event) bool {
 func TestCreateTransaction(t *testing.T) {
     password := "111111"
 
-    Initialize()
+    Initialize(uint64(0))
+    InitLogAndServices()
 
     //seller
     CreateUserWithLogin(password)
@@ -112,14 +122,14 @@ func TestCreateTransaction(t *testing.T) {
         Password: "13245",
     }
 
-    publishId, err := PublishData(&data, OnPublish)
+    publishId, err := PublishData(&data)
 
     //buyer
     CreateUserWithLogin(password)
     TransferTokenFromDeployer(big.NewInt(1600))
-    ApproveTransferForBuying(password, OnApprove)
+    ApproveTransferForBuying(password)
 
-    err = CreateTransaction(publishId, password, OnTxCreate)
+    err = CreateTransaction(publishId, password)
     if err != nil {
         t.Fail()
     }

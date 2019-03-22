@@ -12,14 +12,19 @@ let utils = {
                         position: "top-left"
                     })
                     break
+                case "resetChain":
+                    dl_db.reset()
+                    tx_db.reset()
+                    acc_db.reset()
+                    console.log("Reset command received. ")
+                    break
                 case "initDL":
                     dl_db.init(_this)
-                    console.log("Node: show datalist .", _this.$store.state.datalist)
+                    console.log("dl_db init.")
                     break
                 case "initTx":
                     tx_db.init(_this)
-                    console.log("Node: show transactionbuy .", _this.$store.state.transactionbuy)
-                    console.log("Node: show transactionsell .", _this.$store.state.transactionsell)
+                    console.log("tx_db init.")
                     break
                 case "onPublish":
                     console.log("Node: onPublish.callback. ", message.payload)
@@ -33,7 +38,7 @@ let utils = {
                         Price: parseInt(message.payload.Price),
                         Keys: message.payload.Keys,
                         Description: message.payload.Description,
-                        Seller: _this.$store.state.account,
+                        Seller: message.payload.Seller,
                         SupportVerify: message.payload.SupportVerify,
                         MetaDataExtension: message.payload.MetaDataExtension,
                         ProofDataExtensions: message.payload.ProofDataExtensions,
@@ -43,7 +48,7 @@ let utils = {
                     })
                     acc_db.write({
                         address: _this.$store.state.account,
-                        fromBlock: message.payload.Block
+                        fromBlock: message.payload.Block + 1
                     })
                     break
                 case "onApprove":
@@ -55,7 +60,7 @@ let utils = {
                     })
                     acc_db.write({
                         address: _this.$store.state.account,
-                        fromBlock: message.payload.Block
+                        fromBlock: message.payload.Block + 1
                     })
                     break
                 case "onTransactionCreate":
@@ -71,9 +76,9 @@ let utils = {
                             Price: dataDetails.Price,
                             Keys: dataDetails.Keys,
                             Description: dataDetails.Description,
-                            Buyer: message.payload.Buyer,
+                            Buyer: message.payload.Buyer, // -
                             Seller: dataDetails.Seller,
-                            State: message.payload.TxState,
+                            State: message.payload.TxState, // -
                             SupportVerify: dataDetails.SupportVerify,
                             MetaDataExtension: dataDetails.MetaDataExtension,
                             ProofDataExtensions: dataDetails.ProofDataExtensions,
@@ -90,7 +95,7 @@ let utils = {
                     })
                     acc_db.write({
                         address: _this.$store.state.account,
-                        fromBlock: message.payload.Block
+                        fromBlock: message.payload.Block + 1
                     })
                     break
                 case "onPurchase":
@@ -118,14 +123,14 @@ let utils = {
                             Verifier2Response: txDetailsOnPurchase.Verifier2Response,
                             ArbitrateResult: txDetailsOnPurchase.ArbitrateResult,
                             PublishID: txDetailsOnPurchase.PublishID,
-                            TransactionID: txDetailsOnPurchase.TransactionID
+                            TransactionID: txDetailsOnPurchase.TransactionID // keyPath
                         },function () {
                             tx_db.init(_this)
                         })
                     })
                     acc_db.write({
                         address: _this.$store.state.account,
-                        fromBlock: message.payload.Block
+                        fromBlock: message.payload.Block + 1
                     })
                     break
                 case "onReadyForDownload":
@@ -160,7 +165,7 @@ let utils = {
                     })
                     acc_db.write({
                         address: _this.$store.state.account,
-                        fromBlock: message.payload.Block
+                        fromBlock: message.payload.Block + 1
                     })
                     break
                 case "onClose":
@@ -195,7 +200,7 @@ let utils = {
                     })
                     acc_db.write({
                         address: _this.$store.state.account,
-                        fromBlock: message.payload.Block
+                        fromBlock: message.payload.Block + 1
                     })
                     break
             }

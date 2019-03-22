@@ -20,6 +20,10 @@ func GetAMInstance() *AccountManager {
 	return accountManager
 }
 
+func ResetAMInstance() {
+	accountManager.accounts = nil
+}
+
 type Account struct {
 	Address string
 }
@@ -120,11 +124,10 @@ func (am AccountManager) Encrypt(plainText []byte, address string, password stri
 	return out.Data, nil
 }
 
-func (am AccountManager) ReEncrypt(cipherText []byte, address1 string,
-	address2 string, password string) ([]byte, error) {
+func (am AccountManager) ReEncrypt(cipherText []byte, address1 string, address2 string, password string) ([]byte, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			rlog.Error("failed to reencrypt, error:", err)
+			rlog.Error("failed to re-encrypt, error:", err)
 		}
 	}()
 

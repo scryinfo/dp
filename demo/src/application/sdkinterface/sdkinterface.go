@@ -26,13 +26,14 @@ const (
 )
 
 var (
-	curUser  *scryclient.ScryClient = nil
-	deployer *scryclient.ScryClient = nil
-	scryInfo *settings.ScryInfo     = nil
-	err      error                  = nil
+	curUser    *scryclient.ScryClient = nil
+	deployer   *scryclient.ScryClient = nil
+	scryInfo   *settings.ScryInfo     = nil
+	scryInfoAS *settings.ScryInfoAS   = nil
+	err        error                  = nil
 )
 
-func Initialize() error {
+func Initialize(fromBlock uint64) error {
 	// load definition
 	scryInfo, err = settings.LoadSettings()
 	if err != nil {
@@ -49,12 +50,34 @@ func Initialize() error {
 		scryInfo.Chain.Contracts.TokenEvents)
 
 	err = sdk.Init(scryInfo.Chain.Ethereum.EthNode,
-		scryInfo.Services.Keystore,
 		contracts,
-		0,
-		scryInfo.Services.Ipfs)
+		fromBlock)
 	if err != nil {
 		rlog.Error(failedToInitSDK, err)
+		return err
+	}
+
+	return nil
+}
+
+func InitLogAndServices() error {
+	if err = sdk.InitLog(); err != nil {
+		rlog.Error("",err)
+		return err
+	}
+	scryInfoAS, err = settings.LoadServiceSettings()
+	if err != nil {
+		rlog.Error("", err)
+		return err
+	}
+	err = accounts.GetAMInstance().Initialize(scryInfoAS.Services.Keystore)
+	if err != nil {
+		rlog.Error("failed to initialize account service, error:", err)
+		return err
+	}
+	err = ipfsaccess.GetIAInstance().Initialize(scryInfoAS.Services.Ipfs)
+	if err != nil {
+		rlog.Error("failed to initialize ipfs. error: ", err)
 		return err
 	}
 
@@ -148,7 +171,7 @@ func SubScribeEvents(eventName []string, cb ...chainevents.EventCallback) error 
 	}
 	if len(cb) != len(eventName) {
 		rlog.Error("invalid callback function numbers")
-		return errors.New("failed to subscribe event, callback function's quantity invalid")
+		return errors.New("failed to subscribe event, callback function's quantity wrong")
 	}
 
 	for i := 0; i < len(eventName); i++ {
@@ -243,7 +266,7 @@ func Buy(txId string, password string) error {
 	return nil
 }
 
-func SubmitMetaDataIdEncWithBuyer(txId string, password, buyer, seller string, metaDataIDEncSeller []byte) error {
+func SubmitMetaDataIdEncWithBuyer(txId string, password, seller, buyer string, metaDataIDEncSeller []byte) error {
 	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
 		Password: password, Value: big.NewInt(0), Pending: false}
 
@@ -277,7 +300,7 @@ func BuyerDecryptAndGetMetaDataFromIPFS(password string, metaDataIdEncWithBuyer 
 		return "", err
 	}
 	oldFileName := IPFSOutDir + "/" + metaDataID
-	newFileName := oldFileName + "." + extension
+	newFileName := oldFileName + extension
 	if err = os.Rename(oldFileName, newFileName); err != nil {
 		rlog.Error("Node: rename meta data failed. ", err)
 		return "", err

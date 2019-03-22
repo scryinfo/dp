@@ -16,22 +16,13 @@ const (
 	StartEngineFailed                  = "failed to start engine"
 	InitConTractInterfaceWrapperFailed = "failed to initialize contract interface"
 	LoadPathFailed                     = "failed to load log path"
-	InitSDKFailed                      = "failed to initialize sdk"
 )
 
 func Init(ethNodeAddr string,
-	asServiceAddr string,
 	contracts []chainevents.ContractInfo,
-	fromBlock uint64,
-	ipfsNodeAddr string) error {
+	fromBlock uint64) error {
 
-	err := initLog()
-	if err != nil {
-		fmt.Println(InitSDKFailed, err)
-		return err
-	}
-
-	conn, err := core.StartEngine(ethNodeAddr, asServiceAddr, contracts, fromBlock, ipfsNodeAddr)
+	conn, err := core.StartEngine(ethNodeAddr, contracts, fromBlock)
 	if err != nil {
 		rlog.Error(StartEngineFailed, err)
 		return errors.New(StartEngineFailed)
@@ -48,7 +39,7 @@ func Init(ethNodeAddr string,
 	return nil
 }
 
-func initLog() error {
+func InitLog() error {
 	ph, err := settings.LoadLogPath()
 	if err != nil {
 		fmt.Println(LoadPathFailed, err)

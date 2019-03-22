@@ -7,6 +7,7 @@ import (
 	"github.com/scryinfo/iscap/demo/src/application/definition"
 	"github.com/scryinfo/iscap/demo/src/application/sdkinterface"
 	"github.com/scryinfo/iscap/demo/src/sdk/scryclient"
+	"github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
 	"math/big"
 )
 
@@ -54,10 +55,7 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err = json.Unmarshal(m.Payload, &sid); err != nil {
 			break
 		}
-		//if err = sdkinterface.Initialize(); err != nil {
-		//	break
-		//}
-		if err = sdkinterface.TransferTokenFromDeployer(big.NewInt(10000000)); err != nil {   // test
+		if err = sdkinterface.Initialize(uint64(sid.FromBlock)); err != nil {
 			break
 		}
 		if err = sdkinterface.SubScribeEvents(
@@ -65,6 +63,13 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 			onPublish, onApprove, onTransactionCreate, onPurchase, onReadyForDownload, onClose); err != nil {
 			break
 		}
+		if err = sdkinterface.TransferTokenFromDeployer(big.NewInt(10000000)); err != nil {   // test
+			break
+		}
+		payload = true
+		return payload, nil
+	case "logout":
+		accounts.ResetAMInstance()
 		payload = true
 		return payload, nil
 	case "publish":
@@ -106,8 +111,8 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err = json.Unmarshal(m.Payload, &re); err != nil {
 			break
 		}
-		if err = sdkinterface.SubmitMetaDataIdEncWithBuyer(re.SelectedTx.TransactionID, re.Password, re.SelectedTx.Buyer,
-			re.SelectedTx.Seller, re.SelectedTx.MetaDataIDEncWithSeller); err != nil {
+		if err = sdkinterface.SubmitMetaDataIdEncWithBuyer(re.SelectedTx.TransactionID, re.Password, re.SelectedTx.Seller,
+			re.SelectedTx.Buyer, re.SelectedTx.MetaDataIDEncWithSeller); err != nil {
 			break
 		}
 		payload = true
