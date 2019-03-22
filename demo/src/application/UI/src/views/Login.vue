@@ -106,7 +106,7 @@ export default {
                 if (message.name !== "error") {
                     acc_db.write({
                         address: _this.account,
-                        fromBlock: 0
+                        fromBlock: 1
                     })
                     _this.$router.push({ name: "home", params: {acc: _this.account}})
                 } else {

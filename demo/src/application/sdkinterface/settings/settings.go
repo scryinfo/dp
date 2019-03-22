@@ -26,3 +26,20 @@ func LoadSettings() (*ScryInfo, error) {
 
     return scryinfo, nil
 }
+
+func LoadServiceSettings() (*ScryInfoAS, error) {
+    rv, err := cf.GetYAMLStructure(SettingLocation, &ScryInfoAS{})
+    if err != nil {
+        rlog.Error("failed to get yaml structure, error:", err)
+        return nil, err
+    }
+
+    scryinfoas, ok := rv.(*ScryInfoAS)
+    if !ok {
+        emsg := "failed to convert stream to yaml structure"
+        rlog.Error(emsg)
+        return nil, errors.New(emsg)
+    }
+
+    return scryinfoas, nil
+}

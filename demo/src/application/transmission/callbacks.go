@@ -19,18 +19,18 @@ const IPFSOutDir = "D:/desktop"
 func onPublish(event events.Event) bool {
 	go func() {
 		var (
-			details definition.DataDetails
+			dd  *definition.DataDetails
 			err error
 		)
-		if details, err = getPubDataDetails(event.Data.Get("despDataId").(string)); err != nil {
+		if dd, err = getPubDataDetails(event.Data.Get("despDataId").(string)); err != nil {
 			rlog.Error("Node: get publish data details failed. ", err)
 		}
-		details.Block = event.BlockNumber
-		details.Price = event.Data.Get("price").(*big.Int).String()
-		details.PublishID = event.Data.Get("publishId").(string)
-		// details.SupportVerify is not implement.
+		dd.Block = event.BlockNumber
+		dd.Price = event.Data.Get("price").(*big.Int).String()
+		dd.PublishID = event.Data.Get("publishId").(string)
 
-		if err := bootstrap.SendMessage(window, "onPublish", details); err != nil {
+		// dd.SupportVerify is not implement.
+		if err := bootstrap.SendMessage(window, "onPublish", &dd); err != nil {
 			rlog.Error("failed to send onPublish event, error:", err)
 		}
 	}()
@@ -39,36 +39,36 @@ func onPublish(event events.Event) bool {
 
 // Get publish data details from details' ipfsID.
 // ipfsGet -> modify file name -> read file -> json.unmarshal -> delete file
-func getPubDataDetails(ipfsID string) (definition.DataDetails, error) {
+func getPubDataDetails(ipfsID string) (*definition.DataDetails, error) {
 	var err error
 	if err = ipfsaccess.GetIAInstance().GetFromIPFS(ipfsID, IPFSOutDir); err != nil {
 		rlog.Error("Node - onPublish.callback: ipfs get failed. ", err.Error())
-		return definition.DataDetails{}, err
+		return nil, err
 	}
 
 	oldFileName := IPFSOutDir + "/" + ipfsID
 	newFileName := oldFileName + ".txt"
 	if err = os.Rename(oldFileName, newFileName); err != nil {
 		rlog.Error("Node - onPublish.callback: rename details file failed. ", err)
-		return definition.DataDetails{}, err
+		return nil, err
 	}
 
 	var details []byte
 	if details, err = ioutil.ReadFile(newFileName); err != nil {
 		rlog.Error("Node - onPublish.callback: read details file failed. ", err)
-		return definition.DataDetails{}, err
+		return nil, err
 	}
 	var detailsData definition.DataDetails = definition.DataDetails{}
 	if err = json.Unmarshal(details, &detailsData); err != nil {
 		rlog.Error("Node - onPublish.callback: json unmarshal details failed. ", err)
-		return definition.DataDetails{}, err
+		return nil, err
 	}
 
 	if err = os.Remove(newFileName); err != nil {
 		rlog.Debug("Node - onPublish.callback: delete details file failed. ", err)
 	}
 
-	return detailsData, nil
+	return &detailsData, nil
 }
 
 func onApprove(event events.Event) bool {

@@ -4,8 +4,6 @@ import (
 	"context"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/scryinfo/iscap/demo/src/sdk/core/chainevents"
-	"github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
-	"github.com/scryinfo/iscap/demo/src/sdk/util/storage/ipfsaccess"
 	rlog "github.com/sirupsen/logrus"
 )
 
@@ -16,10 +14,8 @@ type Connector struct {
 
 //start
 func StartEngine(ethNodeAddr string,
-	asServiceAddr string,
 	contracts []chainevents.ContractInfo,
-	fromBlock uint64,
-	ipfsNodeAddr string) (*ethclient.Client, error) {
+	fromBlock uint64) (*ethclient.Client, error) {
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -27,21 +23,9 @@ func StartEngine(ethNodeAddr string,
 		}
 	}()
 
-	err := ipfsaccess.GetIAInstance().Initialize(ipfsNodeAddr)
-	if err != nil {
-		rlog.Error("failed to initialize ipfs. error: ", err)
-		return nil, err
-	}
-
 	connector, err := newConnector(ethNodeAddr)
 	if err != nil {
 		rlog.Error("failed to initialize connector. error: ", err)
-		return nil, err
-	}
-
-	err = accounts.GetAMInstance().Initialize(asServiceAddr)
-	if err != nil {
-		rlog.Error("failed to initialize account service, error:", err)
 		return nil, err
 	}
 

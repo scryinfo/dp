@@ -327,7 +327,7 @@ contract ScryProtocol {
         //ReadyForDownload event
         address[] memory users = new address[](1);
         users[0] = txItem.buyer;
-        emit ReadyForDownload(seqNo, txId, txItem.metaDataIdEncSeller, txItem.state, users);
+        emit ReadyForDownload(seqNo, txId, txItem.meteDataIdEncBuyer, txItem.state, users);
     }
 
     function confirmDataTruth(string seqNo, uint256 txId, bool truth) external {

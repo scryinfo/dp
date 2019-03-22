@@ -57,6 +57,13 @@ let dl_db = {
         request.onsuccess = function (event) {
             cb(event.target.result)
         }
+    },
+    reset:function() {
+        let store = dl_db.db.transaction(dl_db.db_store_name,"readwrite").objectStore(dl_db.db_store_name)
+        let request = store.clear()
+        request.onerror = function (err) {
+            console.log(err)
+        }
     }
 }
 let tx_db = {
@@ -128,6 +135,13 @@ let tx_db = {
         request.onsuccess = function (event) {
             cb(event.target.result)
         }
+    },
+    reset:function() {
+        let store = tx_db.db.transaction(tx_db.db_store_name,"readwrite").objectStore(tx_db.db_store_name)
+        let request = store.clear()
+        request.onerror = function (err) {
+            console.log(err)
+        }
     }
 }
 let acc_db = {
@@ -180,6 +194,21 @@ let acc_db = {
         let request = store.delete(key)
         request.onerror = function (err) {
             console.log(err)
+        }
+    },
+    // Administrator function: reset acc_db when chain restart.
+    reset:function () {
+        let store = acc_db.db.transaction(acc_db.db_store_name,"readwrite").objectStore(acc_db.db_store_name)
+        let c = store.openCursor()
+        c.onsuccess = function(event) {
+            let cursor = event.target.result
+            if (cursor) {
+                store.put({
+                    address: cursor.value.address,
+                    fromBlock: 1
+                })
+                cursor.continue()
+            }
         }
     }
 }

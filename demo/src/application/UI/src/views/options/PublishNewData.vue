@@ -27,7 +27,8 @@ export default {
                     Keys: "",
                     Description: "",
                     MetaDataExtension: "",
-                    ProofDataExtensions: []
+                    ProofDataExtensions: [],
+                    Seller: ""
                 },
                 Price: 0,
                 SupportVerify: false
@@ -37,7 +38,7 @@ export default {
                 proofDataIDs: [],
                 detailsID: "",
                 price: 0,
-                supportVerify: false,  // this.send.SupportVerify = this.pubData.SupportVerify
+                supportVerify: false,
                 password: ""
             },
             count: 0
@@ -53,6 +54,7 @@ export default {
                 this.send.price = this.pubData.Price
                 this.send.supportVerify = this.pubData.SupportVerify
                 this.send.password = pwd.value
+                this.pubData.details.Seller = this.$store.state.account
                 this.setDataID()
                 this.setProofIDs()
             }).catch((err) => {
@@ -66,7 +68,7 @@ export default {
             let _this = this
             let ipfs = require("ipfs-http-client")({host: 'localhost', port: '5001', protocol: 'http'})
             let data = this.$refs.selectedData.$refs.input.files[0]
-            this.pubData.details.MetaDataExtension = data.name.split(".").pop()
+            this.pubData.details.MetaDataExtension = data.name.slice(data.name.indexOf("."))
             let reader = new FileReader()
             reader.readAsArrayBuffer(data)
             reader.onload = function (evt) {
@@ -89,7 +91,7 @@ export default {
             let ipfs = require("ipfs-http-client")({host: 'localhost', port: '5001', protocol: 'http'})
             let proofs = this.$refs.selectedProofs.$refs.input.files
             for (let i=0;i<proofs.length;i++) {
-                this.pubData.details.ProofDataExtensions.push( proofs[i].name.split(".").pop() )
+                this.pubData.details.ProofDataExtensions.push( proofs[i].name.slice(proofs[i].name.indexOf(".")) )
                 let reader = new FileReader()
                 reader.readAsArrayBuffer(proofs[i])
                 reader.onload = function (evt) {

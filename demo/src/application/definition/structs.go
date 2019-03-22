@@ -34,6 +34,7 @@ type DataDetails struct {
 	Description         string   `json:"Description"`
 	MetaDataExtension   string   `json:"MetaDataExtension"`
 	ProofDataExtensions []string `json:"ProofDataExtensions"`
+	Seller              string   `json:"Seller"`
 	Price               string
 	PublishID           string
 	SupportVerify       bool // not implement.
