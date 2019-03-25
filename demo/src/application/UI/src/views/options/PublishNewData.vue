@@ -130,7 +130,7 @@ export default {
             let _this = this
             astilectron.sendMessage({Name:"publish",Payload: this.send}, function (message) {
                 if (message.name !== "error") {
-                    // dl_db.write here, seller will see his publish before contract emit event.
+                    // optimize?: dl_db.write here, seller will see his publish before contract emit event.
                     console.log("Publish new data success.", message)
                     // reset datas.
                 }else {

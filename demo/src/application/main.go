@@ -5,7 +5,7 @@ import (
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/pkg/errors"
 	"github.com/scryinfo/iscap/demo/src/application/sdkinterface/settings"
-	"github.com/scryinfo/iscap/demo/src/application/transmission"
+	t "github.com/scryinfo/iscap/demo/src/application/transmission"
 	"github.com/scryinfo/iscap/demo/src/sdk"
 	"github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
 	"github.com/scryinfo/iscap/demo/src/sdk/util/storage/ipfsaccess"
@@ -13,12 +13,6 @@ import (
 	"time"
 )
 
-// Constants
-const (
-	ShortMessage               = "You have new short-message, remember to checkout it."
-)
-
-// Vars
 var (
 	AppName    string
 	w          *astilectron.Window
@@ -30,16 +24,13 @@ func init() {
 	if err = sdk.InitLog(); err != nil {
 		rlog.Error("",err)
 	}
-	scryInfoAS, err = settings.LoadServiceSettings()
-	if err != nil {
+	if scryInfoAS, err = settings.LoadServicesSettings(); err != nil {
 		rlog.Error("", err)
 	}
-	err = accounts.GetAMInstance().Initialize(scryInfoAS.Services.Keystore)
-	if err != nil {
+	if err = accounts.GetAMInstance().Initialize(scryInfoAS.Services.Keystore); err != nil {
 		rlog.Error("failed to initialize account service, error:", err)
 	}
-	err = ipfsaccess.GetIAInstance().Initialize(scryInfoAS.Services.Ipfs)
-	if err != nil {
+	if err = ipfsaccess.GetIAInstance().Initialize(scryInfoAS.Services.Ipfs); err != nil {
 		rlog.Error("failed to initialize ipfs. error: ", err)
 	}
 }
@@ -64,15 +55,6 @@ func main() {
 				Label: astilectron.PtrStr("Administrator"),
 				SubMenu: []*astilectron.MenuItemOptions{
 					{
-						Label: astilectron.PtrStr("test send short-message"),
-						OnClick: func(e astilectron.Event) (deleteListener bool) {
-							if err := bootstrap.SendMessage(w, "sendMessage", ShortMessage); err != nil {
-								rlog.Error(errors.Wrap(err, "sending welcome event failed"))
-							}
-							return
-						},
-					},
-					{
 						// for test only, when reset chain anyhow, run this command to reset indexedDB.
 						Label: astilectron.PtrStr("reset chain"),
 						OnClick: func(e astilectron.Event) (deleteListener bool) {
@@ -82,11 +64,6 @@ func main() {
 							return
 						},
 					},
-				},
-			},
-			{
-				Label: astilectron.PtrStr("Initialize"),
-				SubMenu: []*astilectron.MenuItemOptions{
 					{
 						Label: astilectron.PtrStr("init data list"),
 						OnClick: func(e astilectron.Event) (deleteListener bool) {
@@ -110,10 +87,10 @@ func main() {
 		},
 		OnWait: func(_ *astilectron.Astilectron, ws []*astilectron.Window, _ *astilectron.Menu, _ *astilectron.Tray, _ *astilectron.Menu) error {
 			w = ws[0]
-			transmission.SetWindow(w)
+			t.SetWindow(w)
 			go func() {
 				time.Sleep(time.Second)
-				if err := bootstrap.SendMessage(w, "welcome", "Welcome to my go-astilectron demo!"); err != nil {
+				if err := bootstrap.SendMessage(w, "welcome", "Welcome to my go-astilectron demo! "); err != nil {
 					rlog.Error(errors.Wrap(err, "sending welcome event failed"))
 				}
 			}()
@@ -121,7 +98,7 @@ func main() {
 		},
 		Windows: []*bootstrap.Window{{
 			Homepage:       "index.html",
-			MessageHandler: transmission.HandleMessages,
+			MessageHandler: t.HandleMessages,
 			Options: &astilectron.WindowOptions{
 				Center: astilectron.PtrBool(true),
 				Width:  astilectron.PtrInt(1000),
@@ -133,6 +110,6 @@ func main() {
 			},
 		}},
 	}); err != nil {
-		rlog.Fatal(errors.Wrap(err, "running bootstrap failed"))
+		rlog.Fatal(errors.Wrap(err, "Running bootstrap failed. "))
 	}
 }

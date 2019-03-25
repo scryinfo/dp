@@ -1,8 +1,8 @@
 <template>
     <section>
         <el-col :span="24" class="section-item">
+            <el-button size="mini" type="danger" @click="cancelMsg">Cancel</el-button>
             <el-button size="mini" type="primary" @click="purchasePwd">Purchase</el-button>
-            <el-button size="mini" type="primary" @click="cancelMsg">Cancel</el-button>
             <el-button size="mini" type="primary" @click="decryptPwd">Decrypt</el-button>
             <el-button size="mini" type="primary" @click="confirmPwd">Confirm</el-button>
         </el-col>
@@ -74,7 +74,6 @@ export default {
         },
         purchase:function (pwd) {
             let _this = this
-            // not support buy a group of data one time, give the first id for instead.
             astilectron.sendMessage({ Name:"purchase",Payload:{password: pwd, tID: this.selectedTx}}, function (message) {
                 if (message.name !== "error") {
                     console.log("Purchase data success.", message)
@@ -121,41 +120,39 @@ export default {
         },
         decrypt:function (pwd) {
             let _this = this
-            // not support decrypt a group of data one time, give the first id for instead.
             astilectron.sendMessage({ Name:"decrypt",Payload:{password: pwd, tID: this.selectedTx}}, function (message) {
-                    if (message.name !== "error") {
-                        _this.$alert(message.payload, "Meta data: ", {
-                            confirmButtonText: "Close",
-                            showClose: false,
-                            type: "info"
-                        })
-                        console.log("Decrypt data success.", message)
-                    }else {
-                        console.log("Node: decrypt failed.", message.payload)
-                        _this.$alert(message.payload, "Error: Decrypt data failed: ", {
-                            confirmButtonText: "I've got it.",
-                            showClose: false,
-                            type: "error"
-                        })
-                    }
-                })
+                if (message.name !== "error") {
+                    _this.$alert(message.payload, "Meta data: ", {
+                        confirmButtonText: "Close",
+                        showClose: false,
+                        type: "info"
+                    })
+                    console.log("Decrypt data success.", message)
+                }else {
+                    console.log("Node: decrypt failed.", message.payload)
+                    _this.$alert(message.payload, "Error: Decrypt data failed: ", {
+                        confirmButtonText: "I've got it.",
+                        showClose: false,
+                        type: "error"
+                    })
+                }
+            })
         },
         confirmPwd:function () {
             this.$prompt(this.$store.state.account, "Input password and confirm if the meta data is true?", {
-                distinguishCancelAndClose: true,
-                confirmButtonText: "I think it is true.",
-                cancelButtonText: "I think it is fake."
+                distinguishCancelAndClose: true, // not implement
+                confirmButtonText: "True, close transaction. ",
+                cancelButtonText: "Fake, start arbitrate. "
             }).then((pwd) => {
                 // think if it is necessary to add another pop box for user can make sure twice?
                 this.confirm(pwd.value, true)
             }).catch((pwd) => {
-                // arbitrate is not finished, even user think meta data is fake, program will goes still.
+                // arbitrate is not implement, however user confirm the meta data, it will close transaction.
                 this.confirm(pwd.value, true)
             })
         },
         confirm:function (pwd, judge) {
             let _this = this
-            // not support buy a group of data one time, give the first id for instead.
             astilectron.sendMessage({ Name:"confirm",Payload:{password: pwd, tID: this.selectedTx, startArbitrate: judge}},
                 function (message) {
                 if (message.name !== "error") {

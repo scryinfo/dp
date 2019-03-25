@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/pkg/errors"
 	"github.com/scryinfo/iscap/demo/src/sdk/core/chainevents"
 	rlog "github.com/sirupsen/logrus"
 )
@@ -25,8 +26,7 @@ func StartEngine(ethNodeAddr string,
 
 	connector, err := newConnector(ethNodeAddr)
 	if err != nil {
-		rlog.Error("failed to initialize connector. error: ", err)
-		return nil, err
+		return nil, errors.Wrap(err, "Init connector failed. ")
 	}
 
 	chainevents.StartEventProcessing(connector.conn, contracts, fromBlock)
@@ -37,8 +37,7 @@ func StartEngine(ethNodeAddr string,
 func newConnector(ethNodeAddr string) (*Connector, error) {
 	cn, err := ethclient.Dial(ethNodeAddr)
 	if err != nil {
-		rlog.Error("failed to connect to node:" + ethNodeAddr)
-		return nil, err
+		return nil, errors.Wrap(err, "Connect to node: "+ethNodeAddr+" failed. ")
 	}
 
 	return &Connector{

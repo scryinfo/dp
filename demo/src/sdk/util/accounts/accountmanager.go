@@ -36,13 +36,12 @@ type AccountManager struct {
 func (am *AccountManager) Initialize(asNodeAddr string) error {
 	cn, err := grpc.Dial(asNodeAddr, grpc.WithInsecure())
 	if err != nil {
-		rlog.Error("failed to connect to node:" + asNodeAddr)
-		return err
+		return errors.Wrap(err, "Connect to node: "+asNodeAddr+" failed. ")
 	}
 
 	am.client = scryinfo.NewKeyServiceClient(cn)
 	if am.client == nil {
-		return errors.New("failed to create account service client")
+		return errors.New("Create account service client failed, AM instance is nil. ")
 	}
 
 	return nil
@@ -51,18 +50,17 @@ func (am *AccountManager) Initialize(asNodeAddr string) error {
 func (am *AccountManager) CreateAccount(password string) (*Account, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			rlog.Error("failed to create account, error:", err)
+			rlog.Error("Create account failed. ", err)
 		}
 	}()
 
 	if am.client == nil {
-		return nil, errors.New("failed to create account, error: null account service")
+		return nil, errors.New("Create account failed, AM instance is nil. ")
 	}
 
 	addr, _ := am.client.GenerateAddress(context.Background(), &scryinfo.AddressParameter{Password: password})
 	if addr.Status != scryinfo.Status_OK {
-		rlog.Error("failed to create account, error:", addr.Msg)
-		return nil, errors.New("failed to create account, error:" + addr.Msg)
+		return nil, errors.Wrap(errors.New("failed to create account, error:" + addr.Msg), "Generate address failed. ")
 	}
 
 	newAccount := &Account{addr.Address}
@@ -74,16 +72,15 @@ func (am *AccountManager) CreateAccount(password string) (*Account, error) {
 func (am AccountManager) AuthAccount(address string, password string) (bool, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			rlog.Error("failed to authenticate account, error:", err)
+			rlog.Error("Authenticate account failed. ", err)
 		}
 	}()
 
 	if am.client == nil {
-		return false, errors.New("failed to authenticate account, error: null account service")
+		return false, errors.New("Auth account failed, AM instance is nil. ")
 	}
 
-	addr, _ := am.client.VerifyAddress(context.Background(),
-		&scryinfo.AddressParameter{Password: password, Address: address})
+	addr, _ := am.client.VerifyAddress(context.Background(), &scryinfo.AddressParameter{Password: password, Address: address})
 	rv := addr.Status == scryinfo.Status_OK
 
 	return rv, nil
@@ -106,19 +103,18 @@ func (am AccountManager) AccountValid(address string) bool {
 func (am AccountManager) Encrypt(plainText []byte, address string, password string) ([]byte, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			rlog.Error("failed to encrypt, error:", err)
+			rlog.Error("Encrypt meta data ID failed. ", err)
 		}
 	}()
 
 	if am.client == nil {
-		return nil, errors.New("failed to encrypt, error: null account service")
+		return nil, errors.New("Encrypt meta data ID failed, AM instance is nil. ")
 	}
 
 	in := scryinfo.CipherParameter{Message: plainText, Address: address}
 	out, _ := am.client.ContentEncrypt(context.Background(), &in)
 	if out.Status != scryinfo.Status_OK {
-		rlog.Error("failed to encrypt, error:", out.Msg)
-		return nil, errors.New("failed to encrypt, error:" + out.Msg)
+		return nil, errors.Wrap(errors.New("failed to encrypt, error:" + out.Msg), "Encrypt failed. ")
 	}
 
 	return out.Data, nil
@@ -127,52 +123,44 @@ func (am AccountManager) Encrypt(plainText []byte, address string, password stri
 func (am AccountManager) ReEncrypt(cipherText []byte, address1 string, address2 string, password string) ([]byte, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			rlog.Error("failed to re-encrypt, error:", err)
+			rlog.Error("Re-encrypt failed. ", err)
 		}
 	}()
 
 	if am.client == nil {
-		return nil, errors.New("failed to encrypt, error: null account service")
+		return nil, errors.New("Re-encrypt failed, AM instance is nil. ")
 	}
 
 	in := scryinfo.CipherParameter{Message: cipherText, Address: address1, Password: password}
 	out, _ := am.client.ContentDecrypt(context.Background(), &in)
 	if out.Status != scryinfo.Status_OK {
-		rlog.Error("failed to decrypt, error:", out.Msg)
-		return nil, errors.New("failed to encrypt, error:" + out.Msg)
+		return nil, errors.Wrap(errors.New("Decrypt failed. " + out.Msg), "Decrypt in re-encrypt failed. ")
 	}
 
 	in = scryinfo.CipherParameter{Message: out.Data, Address: address2}
 	out, _ = am.client.ContentEncrypt(context.Background(), &in)
 	if out.Status != scryinfo.Status_OK {
-		rlog.Error("failed to encrypt, error:", out.Msg)
-		return nil, errors.New("failed to encrypt, error:" + out.Msg)
+		return nil, errors.Wrap(errors.New("Encrypt failed. " + out.Msg), "Encrypt in re-encrypt failed")
 	}
 
 	return out.Data, nil
 }
 
 func (am AccountManager) Decrypt(cipherText []byte, address string, password string)([]byte, error) {
-
 	defer func() {
 		if err := recover(); err != nil {
-			rlog.Error("failed to decrypt, error:", err)
+			rlog.Error("Decrypt failed. ", err)
 		}
 	}()
 
 	if am.client == nil {
-		return nil, errors.New("failed to decrypt, error: null account service")
+		return nil, errors.New("Decrypt failed, AM instance is nil. ")
 	}
 
-	in := scryinfo.CipherParameter{
-		Message: cipherText,
-		Address: address,
-		Password: password,
-	}
+	in := scryinfo.CipherParameter{Message: cipherText, Address: address, Password: password,}
 	out, _ := am.client.ContentDecrypt(context.Background(), &in)
 	if out.Status != scryinfo.Status_OK {
-		rlog.Error("failed to decrypt, error:", out.Msg)
-		return nil, errors.New("failed to decrypt, error:" + out.Msg)
+		return nil, errors.Wrap(errors.New("Decrypt failed. " + out.Msg), "Decrypt in decrypt failed. ")
 	}
 
 	return out.Data, nil
@@ -181,7 +169,7 @@ func (am AccountManager) Decrypt(cipherText []byte, address string, password str
 func (am AccountManager) SignTransaction(message []byte, address string, password string) ([]byte, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			rlog.Error("failed to encrypt, error:", err)
+			rlog.Error("Import account failed. ", err)
 		}
 	}()
 
@@ -207,19 +195,18 @@ func (am AccountManager) SignTransaction(message []byte, address string, passwor
 func (am AccountManager) ImportAccount(keyJson []byte, oldPassword string, newPassword string) (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
-			rlog.Error("failed to import account, error:", err)
+			rlog.Error("Import account failed. ", err)
 		}
 	}()
 
 	if am.client == nil {
-		return "", errors.New("failed to import account, null account service")
+		return "", errors.New("Import account failed, AM instance is nil. ")
 	}
 
 	in := scryinfo.ImportParameter{ContentPassword: oldPassword, ImportPsd: newPassword, Content: keyJson}
 	out, _ := am.client.ImportKeystore(context.Background(), &in)
 	if out.Status != scryinfo.Status_OK {
-		rlog.Error("failed to import account, error:", out.Msg)
-		return "", errors.New("failed to import account, error:" + out.Msg)
+		return "", errors.Wrap(errors.New("Import failed. " + out.Msg), "Import account failed. ")
 	}
 
 	return out.Address, nil

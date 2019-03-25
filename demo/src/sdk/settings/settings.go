@@ -1,29 +1,25 @@
 package settings
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	ev "github.com/scryinfo/iscap/demo/src/sdk/core/ethereum/events"
 	cf "github.com/scryinfo/iscap/demo/src/sdk/util/configuration"
-	rlog "github.com/sirupsen/logrus"
 )
 
 const (
-	SETTING_LOCATION = "D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/iscap/demo/src/sdk/settings/definition.yaml"
+	SettingLocation = "D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/iscap/demo/src/sdk/settings/definition.yaml"
 )
 
 func SaveLastEvent(event ev.Event) error {
 	rv, err := LoadSettings()
 	if err != nil {
-		rlog.Error("failed to load definition, error:", err)
-		return err
+		return errors.Wrap(err, "Load definition failed. ")
 	}
 
 	rv.Chain.LastEvent = event
 
-	err = cf.SaveChanges(SETTING_LOCATION, rv)
-	if err != nil {
-		rlog.Error("failed to save definition, error:", err)
-		return err
+	if err = cf.SaveChanges(SettingLocation, rv); err != nil {
+		return errors.Wrap(err, "Save definition failed. ")
 	}
 
 	return nil
@@ -32,8 +28,7 @@ func SaveLastEvent(event ev.Event) error {
 func LoadLastEvent() (ev.Event, error) {
 	rv, err := LoadSettings()
 	if err != nil {
-		rlog.Error("failed to load definition, error:", err)
-		return ev.Event{}, err
+		return ev.Event{}, errors.Wrap(err, "Load definition failed. ")
 	}
 
 	return rv.Chain.LastEvent, nil
@@ -43,25 +38,21 @@ func LoadLastEvent() (ev.Event, error) {
 func LoadLogPath() (*Log, error) {
 	rv, err := LoadSettings()
 	if err != nil {
-		rlog.Error("failed to load definition, error:", err)
-		return nil, err
+		return nil, errors.Wrap(err, "Load definition failed. ")
 	}
 
 	return &rv.Log, nil
 }
 
 func LoadSettings() (*scryinfo, error) {
-	rv, err := cf.GetYAMLStructure(SETTING_LOCATION, &scryinfo{})
+	rv, err := cf.GetYAMLStructure(SettingLocation, &scryinfo{})
 	if err != nil {
-		rlog.Error("failed to get yaml structure, error:", err)
-		return nil, err
+		return nil, errors.Wrap(err, "Get YAML structure failed. ")
 	}
 
 	scryinfo, ok := rv.(*scryinfo)
 	if !ok {
-		emsg := "failed to convert stream to yaml structure"
-		rlog.Error(emsg)
-		return nil, errors.New(emsg)
+		return nil, errors.New("Convert data stream to YAML structure failed. ")
 	}
 
 	return scryinfo, nil

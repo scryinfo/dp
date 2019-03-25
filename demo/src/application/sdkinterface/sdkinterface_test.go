@@ -57,7 +57,7 @@ func TestPublishData(t *testing.T) {
     InitLogAndServices()
     CreateUserWithLogin("111111")
 
-    data := definition.PubDataIDs{
+    data := definition.PublishData{
         MetaDataID: "QmRJtRpzGyXYRhKo6JDLT2dVzDoQwKntaiFPB3A2wqaKbm",
         ProofDataIDs: []string{"QmRJtRpzGyXYRhKo6JDLT2dVzDoQwKntaiFPB3A2wqaKbm"},
         DetailsID: "QmRJtRpzGyXYRhKo6JDLT2dVzDoQwKntaiFPB3A2wqaKbm",
@@ -113,7 +113,7 @@ func TestCreateTransaction(t *testing.T) {
 
     //seller
     CreateUserWithLogin(password)
-    data := definition.PubDataIDs{
+    data := definition.PublishData{
         MetaDataID: "QmYwc8HnQk4PN8EKkfqbgiYZJ7hifrKCuxNz1uKpCQuAJJ",
         ProofDataIDs: []string{"QmSWagq8cP4xB72A3c3XVefGqD67T2Rs7PJDTWsB5UYyxC", "QmRuvUaxsbVE8cdtxC5Tqk4BfnZpUw3yfZkGETJ58eW5S8 "},
         DetailsID: "QmQjUxR3hDUZyWDSN3vRVUaxW9GoBhecAQMKAsEeGYpD35",

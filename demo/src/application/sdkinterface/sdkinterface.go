@@ -1,8 +1,8 @@
 package sdkinterface
 
 import (
-	"errors"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/pkg/errors"
 	"github.com/scryinfo/iscap/demo/src/application/definition"
 	"github.com/scryinfo/iscap/demo/src/application/sdkinterface/settings"
 	"github.com/scryinfo/iscap/demo/src/sdk"
@@ -12,7 +12,6 @@ import (
 	cif "github.com/scryinfo/iscap/demo/src/sdk/scryclient/chaininterfacewrapper"
 	"github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
 	"github.com/scryinfo/iscap/demo/src/sdk/util/storage/ipfsaccess"
-	rlog "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"math/big"
 	"os"
@@ -20,65 +19,36 @@ import (
 )
 
 const (
-	failedToInitSDK = "failed to initialize sdk."
 	sep             = "|"
 	IPFSOutDir      = "D:/desktop"
 )
 
 var (
-	curUser    *scryclient.ScryClient = nil
-	deployer   *scryclient.ScryClient = nil
-	scryInfo   *settings.ScryInfo     = nil
-	scryInfoAS *settings.ScryInfoAS   = nil
-	err        error                  = nil
+	curUser    *scryclient.ScryClient
+	deployer   *scryclient.ScryClient
+	scryInfo   *settings.ScryInfo
+	err        error
 )
 
 func Initialize(fromBlock uint64) error {
 	// load definition
-	scryInfo, err = settings.LoadSettings()
-	if err != nil {
-		rlog.Error(failedToInitSDK, err)
-		return err
+	if scryInfo, err = settings.LoadSettings(); err != nil {
+		return errors.Wrap(err, "Load chain settings failed. ")
 	}
 
 	// initialization
-	contracts := getContracts(scryInfo.Chain.Contracts.ProtocolAddr,
+	var contracts []chainevents.ContractInfo
+	if contracts, err = getContracts(scryInfo.Chain.Contracts.ProtocolAddr,
 		scryInfo.Chain.Contracts.TokenAddr,
 		scryInfo.Chain.Contracts.ProtocolAbiPath,
 		scryInfo.Chain.Contracts.TokenAbiPath,
 		scryInfo.Chain.Contracts.ProtocolEvents,
-		scryInfo.Chain.Contracts.TokenEvents)
-
-	err = sdk.Init(scryInfo.Chain.Ethereum.EthNode,
-		contracts,
-		fromBlock)
-	if err != nil {
-		rlog.Error(failedToInitSDK, err)
-		return err
+		scryInfo.Chain.Contracts.TokenEvents); err != nil {
+		return errors.Wrap(err, "Contracts init failed. ")
 	}
 
-	return nil
-}
-
-func InitLogAndServices() error {
-	if err = sdk.InitLog(); err != nil {
-		rlog.Error("",err)
-		return err
-	}
-	scryInfoAS, err = settings.LoadServiceSettings()
-	if err != nil {
-		rlog.Error("", err)
-		return err
-	}
-	err = accounts.GetAMInstance().Initialize(scryInfoAS.Services.Keystore)
-	if err != nil {
-		rlog.Error("failed to initialize account service, error:", err)
-		return err
-	}
-	err = ipfsaccess.GetIAInstance().Initialize(scryInfoAS.Services.Ipfs)
-	if err != nil {
-		rlog.Error("failed to initialize ipfs. error: ", err)
-		return err
+	if err = sdk.Init(scryInfo.Chain.Ethereum.EthNode, contracts, fromBlock); err != nil {
+		return errors.Wrap(err, "SDK init failed. ")
 	}
 
 	return nil
@@ -94,26 +64,26 @@ func InitLogAndServices() error {
 //	return client, nil
 //}
 
-func CreateUserWithLogin(password string) (*scryclient.ScryClient, error) {
-	client, err := scryclient.CreateScryClient(password)
-	if err != nil {
-		return nil, err
+func CreateUserWithLogin(password string) (string, error) {
+	var client *scryclient.ScryClient
+	if client, err = scryclient.CreateScryClient(password); err != nil {
+		return "", errors.Wrap(err, "Create new user failed. ")
 	}
 
 	curUser = client
 
-	return client, nil
+	return client.Account.Address, nil
 }
 
 func UserLogin(address string, password string) (bool, error) {
-	client := scryclient.NewScryClient(address)
-	if client == nil {
-		return false, errors.New("failed to call NewScryClient")
+	var client *scryclient.ScryClient
+	if client = scryclient.NewScryClient(address); client == nil {
+		return false, errors.New("Call NewScryClient failed. ")
 	}
 
-	succ, err := client.Authenticate(password)
-	if err != nil {
-		return false, errors.New("failed to authenticate user")
+	var succ bool
+	if succ, err = client.Authenticate(password); err != nil {
+		return false, errors.Wrap(err, "Authenticate user infomation failed. ")
 	}
 
 	if succ {
@@ -123,11 +93,10 @@ func UserLogin(address string, password string) (bool, error) {
 	return succ, nil
 }
 
-func ImportAccount(keyJson string, oldPassword string, newPassword string) (*scryclient.ScryClient, error) {
-	address, err := accounts.GetAMInstance().ImportAccount([]byte(keyJson), oldPassword, newPassword)
-	if err != nil {
-		rlog.Error("failed to import account. error:", err)
-		return nil, err
+func importAccount(keyJson string, oldPassword string, newPassword string) (*scryclient.ScryClient, error) {
+	var address string
+	if address, err = accounts.GetAMInstance().ImportAccount([]byte(keyJson), oldPassword, newPassword); err != nil {
+		return nil, errors.Wrap(err, "Import account failed. ")
 	}
 
 	client := scryclient.NewScryClient(address)
@@ -137,56 +106,43 @@ func ImportAccount(keyJson string, oldPassword string, newPassword string) (*scr
 func TransferTokenFromDeployer(token *big.Int) error {
 	var err error
 	if deployer == nil {
-		deployer, err = ImportAccount(scryInfo.Chain.Contracts.DeployerKeyJson,
+		deployer, err = importAccount(scryInfo.Chain.Contracts.DeployerKeyJson,
 			scryInfo.Chain.Contracts.DeployerPassword,
 			scryInfo.Chain.Contracts.DeployerPassword)
 		if err != nil {
-			rlog.Error("failed to transfer token, error:", err)
-			return err
+			return errors.Wrap(err, "Deployer init failed. ")
 		}
 	}
 
 	if curUser == nil {
-		rlog.Error("failed to transfer token, null current user")
-		return errors.New("failed to transfer token, null current user")
+		return errors.New("Current user is nil. ")
 	}
 
 	txParam := chainoperations.TransactParams{From: common.HexToAddress(deployer.Account.Address),
-		Password: scryInfo.Chain.Contracts.DeployerPassword,
-		Value:    big.NewInt(0),
-		Pending:  false}
-	err = cif.TransferTokens(&txParam, common.HexToAddress(curUser.Account.Address), token)
-	if err != nil {
-		rlog.Error("failed to transfer token, error:", err)
-		return err
+		Password: scryInfo.Chain.Contracts.DeployerPassword, Value:    big.NewInt(0), Pending:  false}
+	if err = cif.TransferTokens(&txParam, common.HexToAddress(curUser.Account.Address), token); err != nil {
+		return errors.Wrap(err, "Transfer token failed. ")
 	}
 
 	return nil
 }
 
 func SubScribeEvents(eventName []string, cb ...chainevents.EventCallback) error {
-	if cb == nil {
-		rlog.Error("null callback function")
-		return errors.New("failed to subscribe event, callback function is null")
-	}
-	if len(cb) != len(eventName) {
-		rlog.Error("invalid callback function numbers")
-		return errors.New("failed to subscribe event, callback function's quantity wrong")
+	if cb == nil || len(cb) != len(eventName) {
+		return errors.New("Quantity of callback functions is wrong. ")
 	}
 
 	for i := 0; i < len(eventName); i++ {
 		if err = curUser.SubscribeEvent(eventName[i], cb[i]); err != nil {
-			rlog.Error("subscribe ", eventName[i], " event failed. ")
-			return errors.New("failed to subscribe " + eventName[i] + " event" + err.Error())
+			return errors.Wrap(err, "Subscribe event failed. ")
 		}
 	}
 	return nil
 }
 
-func PublishData(data *definition.PubDataIDs) (string, error) {
+func PublishData(data *definition.PublishData) (string, error) {
 	if curUser == nil {
-		rlog.Error("no current user")
-		return "", errors.New("failed to publish data, current user is null")
+		return "", errors.New("Current user is nil. ")
 	}
 
 	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
@@ -202,25 +158,18 @@ func PublishData(data *definition.PubDataIDs) (string, error) {
 }
 
 func ApproveTransferForBuying(password string) error {
-	return approveTransfer(
-		password,
-		common.HexToAddress(scryInfo.Chain.Contracts.ProtocolAddr))
+	return approveTransfer(password, common.HexToAddress(scryInfo.Chain.Contracts.ProtocolAddr))
 }
 
 func approveTransfer(password string, protocolContractAddr common.Address) error {
 	if curUser == nil {
-		rlog.Error("no current user")
-		return errors.New("failed to approve transfer, current user is null")
+		return errors.New("Current user is nil. ")
 	}
 
 	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
 		Password: password, Value: big.NewInt(0), Pending: false}
-	err := cif.ApproveTransfer(&txParam,
-		protocolContractAddr,
-		big.NewInt(1600))
-	if err != nil {
-		rlog.Error("ApproveTransfer:", err)
-		return errors.New("failed to approve transfer, error:" + err.Error())
+	if err = cif.ApproveTransfer(&txParam, protocolContractAddr, big.NewInt(1600)); err != nil {
+		return errors.Wrap(err, "Contract transfer token from buyer failed. ")
 	}
 
 	return nil
@@ -228,16 +177,13 @@ func approveTransfer(password string, protocolContractAddr common.Address) error
 
 func CreateTransaction(publishId string, password string) error {
 	if curUser == nil {
-		rlog.Error("no current user")
-		return errors.New("failed to CreateTransaction, current user is null")
+		return errors.New("Current user is nil. ")
 	}
 
 	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
 		Password: password, Value: big.NewInt(0), Pending: false}
-	err := cif.PrepareToBuy(&txParam, publishId)
-	if err != nil {
-		rlog.Error("failed to CreateTransaction, error:", err)
-		return errors.New("failed to CreateTransaction, error:" + err.Error())
+	if err = cif.PrepareToBuy(&txParam, publishId); err != nil {
+		return errors.Wrap(err, "Transaction create failed. ")
 	}
 
 	return nil
@@ -245,8 +191,7 @@ func CreateTransaction(publishId string, password string) error {
 
 func Buy(txId string, password string) error {
 	if curUser == nil {
-		rlog.Error("no current user")
-		return errors.New("failed to buy, current user is null")
+		return errors.New("Current user is nil. ")
 	}
 
 	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
@@ -254,77 +199,61 @@ func Buy(txId string, password string) error {
 
 	tID, ok := new(big.Int).SetString(txId, 10)
 	if !ok {
-		rlog.Error("failed to set txID to *big.Int. ", txId)
-		return errors.New("failed to set txID to *big.Int")
+		return errors.New("Set to *big.Int failed. ")
 	}
-	err := cif.BuyData(&txParam, tID)
-	if err != nil {
-		rlog.Error("failed to buyData, error:", err)
-		return errors.New("failed to buyData, error:" + err.Error())
+	if err = cif.BuyData(&txParam, tID); err != nil {
+		return errors.Wrap(err, "Buy data failed. ")
 	}
 
 	return nil
 }
 
 func SubmitMetaDataIdEncWithBuyer(txId string, password, seller, buyer string, metaDataIDEncSeller []byte) error {
-	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
-		Password: password, Value: big.NewInt(0), Pending: false}
-
 	var metaDataIdEncWithBuyer []byte
-	var err error
-	metaDataIdEncWithBuyer, err = accounts.GetAMInstance().ReEncrypt([]byte(metaDataIDEncSeller), seller, buyer, password)
-	if err != nil {
-		rlog.Error("failed to reEncrypt meta data ID, error:", err)
-		return errors.New("failed to SubmitMetaDataIdEncWithBuyer, error:" + err.Error())
+	if metaDataIdEncWithBuyer, err = accounts.GetAMInstance().ReEncrypt([]byte(metaDataIDEncSeller), seller, buyer, password);err != nil {
+		return errors.Wrap(err, "Re-encrypt meta data ID failed. ")
 	}
 	tID, ok := new(big.Int).SetString(txId, 10)
 	if !ok {
-		rlog.Error("failed to set txID to *big.Int.")
-		return errors.New("failed to set txID to *big.Int")
+		return errors.New("Set to *big.Int failed. ")
 	}
-	err = cif.SubmitMetaDataIdEncWithBuyer(&txParam, tID, metaDataIdEncWithBuyer)
-	if err != nil {
-		rlog.Error("failed to SubmitMetaDataIdEncWithBuyer, error:", err)
-		return errors.New("failed to SubmitMetaDataIdEncWithBuyer, error:" + err.Error())
+	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
+		Password: password, Value: big.NewInt(0), Pending: false}
+	if err = cif.SubmitMetaDataIdEncWithBuyer(&txParam, tID, metaDataIdEncWithBuyer); err != nil {
+		return errors.Wrap(err, "Submit encrypted ID with buyer failed. ")
 	}
 	return nil
 }
 
 func BuyerDecryptAndGetMetaDataFromIPFS(password string, metaDataIdEncWithBuyer []byte, buyer, extension string) (string, error) {
-	metaDataIDByte, err := accounts.GetAMInstance().Decrypt(metaDataIdEncWithBuyer, buyer, password)
-	if err != nil {
-		return "", err
+	var metaDataIDByte []byte
+	if metaDataIDByte, err = accounts.GetAMInstance().Decrypt(metaDataIdEncWithBuyer, buyer, password); err != nil {
+		return "", errors.Wrap(err, "Decrypt meta data ID encrypted with buyer failed. ")
 	}
-	metaDataID := string(metaDataIDByte)
-	if err := ipfsaccess.GetIAInstance().GetFromIPFS(metaDataID, IPFSOutDir); err != nil {
-		return "", err
+	if err = ipfsaccess.GetIAInstance().GetFromIPFS(string(metaDataIDByte)); err != nil {
+		return "", errors.Wrap(err, "Get meta data from IPFS failed. ")
 	}
-	oldFileName := IPFSOutDir + "/" + metaDataID
+	oldFileName := IPFSOutDir + "/" + string(metaDataIDByte)
 	newFileName := oldFileName + extension
 	if err = os.Rename(oldFileName, newFileName); err != nil {
-		rlog.Error("Node: rename meta data failed. ", err)
-		return "", err
+		return "", errors.Wrap(err, "Add extension to meta data failed. ")
 	}
 	return newFileName, nil
 }
 
 func ConfirmDataTruth(txId string, password string, arbitrate bool) error {
 	if curUser == nil {
-		rlog.Error("no current user")
-		return errors.New("failed to buy, current user is null")
+		return errors.New("Current user is nil. ")
 	}
 
 	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
 		Password: password, Value: big.NewInt(0), Pending: false}
 	tID, ok := new(big.Int).SetString(txId, 10)
 	if !ok {
-		rlog.Error("failed to set txID to *big.Int.")
-		return errors.New("failed to set txID to *big.Int")
+		return errors.New("Set to *big.Int failed. ")
 	}
-	err := cif.ConfirmDataTruth(&txParam, tID, arbitrate)
-	if err != nil {
-		rlog.Error("failed to ConfirmDataTruth, error:", err)
-		return errors.New("failed to ConfirmDataTruth, error:" + err.Error())
+	if err = cif.ConfirmDataTruth(&txParam, tID, arbitrate); err != nil {
+		return errors.Wrap(err, "Confirm data truth failed. ")
 	}
 	return nil
 }
@@ -334,24 +263,34 @@ func getContracts(protocolContractAddr string,
 	protocolAbiPath string,
 	tokenAbiPath string,
 	protocolEvents string,
-	tokenEvents string) []chainevents.ContractInfo {
+	tokenEvents string) ([]chainevents.ContractInfo, error) {
 	pe := strings.Split(protocolEvents, sep)
 	te := strings.Split(tokenEvents, sep)
 
-	contracts := []chainevents.ContractInfo{
-		{protocolContractAddr, getAbiText(protocolAbiPath), pe},
-		{tokenContractAddr, getAbiText(tokenAbiPath), te},
+	var (
+		protocolAbi string
+		tokenAbi string
+	)
+	if protocolAbi, err = getAbiText(protocolAbiPath); err != nil {
+		return nil, errors.Wrap(err, "Read protocol abi file failed. ")
+	}
+	if tokenAbi, err = getAbiText(tokenAbiPath); err != nil {
+		return nil, errors.Wrap(err, "Read token abi file failed. ")
 	}
 
-	return contracts
+	contracts := []chainevents.ContractInfo{
+		{protocolContractAddr, protocolAbi, pe},
+		{tokenContractAddr, tokenAbi, te},
+	}
+
+	return contracts, nil
 }
 
-func getAbiText(fileName string) string {
+func getAbiText(fileName string) (string, error) {
 	abi, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		rlog.Error("failed to read abi text", err)
-		return ""
+		return "", errors.Wrap(err, "Read abi file failed. ")
 	}
 
-	return string(abi)
+	return string(abi), nil
 }

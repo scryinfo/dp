@@ -3,9 +3,7 @@ let utils = {
     listen: function (_this) {
         astilectron.onMessage(function(message) {
             switch (message.name) {
-                case "welcome": console.log(message.payload)
-                    break
-                case "sendMessage":
+                case "welcome":
                     _this.$notify({
                         title: "Notify: ",
                         message: message.payload,
