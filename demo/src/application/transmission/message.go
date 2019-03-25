@@ -6,12 +6,12 @@ import (
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/scryinfo/iscap/demo/src/application/definition"
 	"github.com/scryinfo/iscap/demo/src/application/sdkinterface"
-	"github.com/scryinfo/iscap/demo/src/sdk/scryclient"
 	"github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
+	rlog "github.com/sirupsen/logrus"
 	"math/big"
 )
 
-var window *astilectron.Window    = nil
+var window *astilectron.Window = nil
 
 func SetWindow(w *astilectron.Window) {
 	window = w
@@ -26,32 +26,28 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 	switch m.Name {
 	// when an user jump from login page to home page, he will get 1000,0000 tokens for test.
 	case "login.verify":
-		var ai definition.AccInfo = definition.AccInfo{}
+		var ai definition.AccInfo
 		if err = json.Unmarshal(m.Payload, &ai); err != nil {
 			break
 		}
-		var ok bool
-		if ok, err = sdkinterface.UserLogin(ai.Account, ai.Password); !ok {
+		if payload, err = sdkinterface.UserLogin(ai.Account, ai.Password); !(payload.(bool)) {
 			break
 		}
-		payload = ok
 		return payload, nil
 	case "create.new.account":
-		var pwd definition.AccInfo = definition.AccInfo{}
+		var pwd definition.AccInfo
 		if err = json.Unmarshal(m.Payload, &pwd); err != nil {
 			break
 		}
-		var user *scryclient.ScryClient = nil
-		if user, err = sdkinterface.CreateUserWithLogin(pwd.Password); err != nil {
+		if payload, err = sdkinterface.CreateUserWithLogin(pwd.Password); err != nil {
 			break
 		}
-		payload = user.Account.Address
 		return payload, nil
 	case "save.keystore":
 		payload = true
 		return payload, nil
 	case "sdk.init":
-		var sid definition.SDKInitData = definition.SDKInitData{}
+		var sid definition.SDKInitData
 		if err = json.Unmarshal(m.Payload, &sid); err != nil {
 			break
 		}
@@ -63,17 +59,17 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 			onPublish, onApprove, onTransactionCreate, onPurchase, onReadyForDownload, onClose); err != nil {
 			break
 		}
-		if err = sdkinterface.TransferTokenFromDeployer(big.NewInt(10000000)); err != nil {   // test
+		if err = sdkinterface.TransferTokenFromDeployer(big.NewInt(10000000)); err != nil { // for test
 			break
 		}
 		payload = true
 		return payload, nil
 	case "logout":
-		accounts.ResetAMInstance()
+		accounts.ResetAMInstance() // not implement
 		payload = true
 		return payload, nil
 	case "publish":
-		var pd definition.PubDataIDs = definition.PubDataIDs{}
+		var pd definition.PublishData
 		if err = json.Unmarshal(m.Payload, &pd); err != nil {
 			break
 		}
@@ -83,7 +79,7 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		}
 		return payload, nil
 	case "buy":
-		var bd definition.BuyData = definition.BuyData{}
+		var bd definition.BuyData
 		if err = json.Unmarshal(m.Payload, &bd); err != nil {
 			break
 		}
@@ -97,7 +93,7 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		payload = true
 		return payload, nil
 	case "purchase":
-		var pd definition.PurchaseData = definition.PurchaseData{}
+		var pd definition.PurchaseData
 		if err = json.Unmarshal(m.Payload, &pd); err != nil {
 			break
 		}
@@ -107,7 +103,7 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		payload = true
 		return payload, nil
 	case "reEncrypt":
-		var re definition.ReEncryptData = definition.ReEncryptData{}
+		var re definition.ReEncryptData
 		if err = json.Unmarshal(m.Payload, &re); err != nil {
 			break
 		}
@@ -118,17 +114,17 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		payload = true
 		return payload, nil
 	case "decrypt":
-		var dd definition.DecryptData = definition.DecryptData{}
+		var dd definition.DecryptData
 		if err = json.Unmarshal(m.Payload, &dd); err != nil {
 			break
 		}
 		if payload, err = sdkinterface.BuyerDecryptAndGetMetaDataFromIPFS(dd.Password, dd.SelectedTx.MetaDataIDEncWithBuyer,
 			dd.SelectedTx.Buyer, dd.SelectedTx.MetaDataExtension); err != nil {
-				break
+			break
 		}
 		return payload, nil
 	case "confirm":
-		var cd definition.ConfirmData = definition.ConfirmData{}
+		var cd definition.ConfirmData
 		if err = json.Unmarshal(m.Payload, &cd); err != nil {
 			break
 		}
@@ -139,6 +135,7 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		return payload, nil
 	}
 
+	rlog.Error("Handle message: ", m.Name, " failed. ", err)
 	payload = err.Error()
 	return payload, err
 }

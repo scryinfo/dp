@@ -19,7 +19,7 @@ type SDKInitData struct {
 //	SupportVerify bool     `json:"SupportVerify"`
 //}
 
-type PubDataIDs struct {
+type PublishData struct {
 	MetaDataID    string   `json:"metaDataID"`
 	ProofDataIDs  []string `json:"proofDataIDs"`
 	DetailsID     string   `json:"detailsID"`
@@ -28,7 +28,7 @@ type PubDataIDs struct {
 	Password      string   `json:"password"`
 }
 
-type DataDetails struct {
+type OnPublish struct {
 	Title               string   `json:"Title"`
 	Keys                string   `json:"Keys"`
 	Description         string   `json:"Description"`
@@ -46,11 +46,11 @@ type BuyData struct {
 	PublishID string `json:"pID"`
 }
 
-type ApproveDetails struct {
+type OnApprove struct {
 	Block uint64
 }
 
-type TransactionDetails struct {
+type OnTransactionCreate struct {
 	TransactionID  string
 	PublishID      string
 	ProofFileNames []string
@@ -67,7 +67,7 @@ type SelectedTxPD struct {
 	TransactionID string `json:"TransactionID"`
 }
 
-type PurchaseDetails struct {
+type OnPurchase struct {
 	TransactionID           string
 	MetaDataIdEncWithSeller []byte
 	TxState                 string
@@ -85,7 +85,7 @@ type SelectedTxRED struct {
 	MetaDataIDEncWithSeller []byte `json:"MetaDataIDEncWithSeller"`
 }
 
-type ReEncryptDetails struct {
+type OnReadyForDownload struct {
 	TransactionID          string
 	MetaDataIdEncWithBuyer []byte
 	TxState                string
@@ -111,7 +111,7 @@ type SelectedTxCD struct {
 	TransactionID string `json:"TransactionID"`
 }
 
-type CloseDetails struct {
+type OnClose struct {
 	TransactionID string
 	TxState       string
 	Block         uint64

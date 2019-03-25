@@ -12,6 +12,6 @@ chain:
     deployer_password: 12345
 services:
   ipfs: /ip4/127.0.0.1/tcp/5001
-  keystore: 192.168.1.6:48080
+  keystore: 192.168.1.14:48080
 
 

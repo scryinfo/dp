@@ -1,9 +1,8 @@
 package settings
 
 import (
-    "errors"
+    "github.com/pkg/errors"
     cf "github.com/scryinfo/iscap/demo/src/sdk/util/configuration"
-    rlog "github.com/sirupsen/logrus"
 )
 
 const (
@@ -13,32 +12,26 @@ const (
 func LoadSettings() (*ScryInfo, error) {
     rv, err := cf.GetYAMLStructure(SettingLocation, &ScryInfo{})
     if err != nil {
-        rlog.Error("failed to get yaml structure, error:", err)
-        return nil, err
+        return nil, errors.Wrap(err, "Get YAML structure failed. ")
     }
 
     scryinfo, ok := rv.(*ScryInfo)
     if !ok {
-        emsg := "failed to convert stream to yaml structure"
-        rlog.Error(emsg)
-        return nil, errors.New(emsg)
+        return nil, errors.New("Convert data stream to YAML structure failed. ")
     }
 
     return scryinfo, nil
 }
 
-func LoadServiceSettings() (*ScryInfoAS, error) {
+func LoadServicesSettings() (*ScryInfoAS, error) {
     rv, err := cf.GetYAMLStructure(SettingLocation, &ScryInfoAS{})
     if err != nil {
-        rlog.Error("failed to get yaml structure, error:", err)
-        return nil, err
+        return nil, errors.Wrap(err, "Get YAML structure failed. ")
     }
 
     scryinfoas, ok := rv.(*ScryInfoAS)
     if !ok {
-        emsg := "failed to convert stream to yaml structure"
-        rlog.Error(emsg)
-        return nil, errors.New(emsg)
+        return nil, errors.New("Convert data stream to YAML structure failed. ")
     }
 
     return scryinfoas, nil

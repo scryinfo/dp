@@ -50,7 +50,7 @@ export default {
             showControl1: false,
             showControl2: false,
             buttonControl: true,
-            describe: "",
+            describe: ""
         }
     },
     methods: {

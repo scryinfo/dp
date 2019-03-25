@@ -5,6 +5,7 @@ import (
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/pkg/errors"
 	"github.com/scryinfo/iscap/demo/src/application/definition"
 	"github.com/scryinfo/iscap/demo/src/sdk/core/ethereum/events"
 	"github.com/scryinfo/iscap/demo/src/sdk/util/storage/ipfsaccess"
@@ -15,23 +16,25 @@ import (
 )
 
 const IPFSOutDir = "D:/desktop"
+const EventSendFailed = " event send failed. "
+
+var err error
 
 func onPublish(event events.Event) bool {
 	go func() {
 		var (
-			dd  *definition.DataDetails
-			err error
+			op *definition.OnPublish
 		)
-		if dd, err = getPubDataDetails(event.Data.Get("despDataId").(string)); err != nil {
-			rlog.Error("Node: get publish data details failed. ", err)
+		if op, err = getPubDataDetails(event.Data.Get("despDataId").(string)); err != nil {
+			rlog.Error(errors.Wrap(err, "onPublish: get publish data details failed. "))
 		}
-		dd.Block = event.BlockNumber
-		dd.Price = event.Data.Get("price").(*big.Int).String()
-		dd.PublishID = event.Data.Get("publishId").(string)
+		op.Block = event.BlockNumber
+		op.Price = event.Data.Get("price").(*big.Int).String()
+		op.PublishID = event.Data.Get("publishId").(string)
 
-		// dd.SupportVerify is not implement.
-		if err := bootstrap.SendMessage(window, "onPublish", &dd); err != nil {
-			rlog.Error("failed to send onPublish event, error:", err)
+		// op.SupportVerify is not implement.
+		if err = bootstrap.SendMessage(window, "onPublish", &op); err != nil {
+			rlog.Error(errors.Wrap(err, "onPublish"+EventSendFailed))
 		}
 	}()
 	return true
@@ -39,29 +42,29 @@ func onPublish(event events.Event) bool {
 
 // Get publish data details from details' ipfsID.
 // ipfsGet -> modify file name -> read file -> json.unmarshal -> delete file
-func getPubDataDetails(ipfsID string) (*definition.DataDetails, error) {
-	var err error
-	if err = ipfsaccess.GetIAInstance().GetFromIPFS(ipfsID, IPFSOutDir); err != nil {
-		rlog.Error("Node - onPublish.callback: ipfs get failed. ", err.Error())
-		return nil, err
+func getPubDataDetails(ipfsID string) (*definition.OnPublish, error) {
+	defer func() {
+		if er := recover(); er != nil {
+			rlog.Error(errors.Wrap(er.(error), "onPublish.callback: get publish data details failed. "))
+		}
+	}()
+	if err = ipfsaccess.GetIAInstance().GetFromIPFS(ipfsID); err != nil {
+		return nil, errors.Wrap(err, "Node - onPublish.callback: ipfs get failed. ")
 	}
 
 	oldFileName := IPFSOutDir + "/" + ipfsID
 	newFileName := oldFileName + ".txt"
 	if err = os.Rename(oldFileName, newFileName); err != nil {
-		rlog.Error("Node - onPublish.callback: rename details file failed. ", err)
-		return nil, err
+		return nil, errors.Wrap(err, "Node - onPublish.callback: rename details file failed. ")
 	}
 
 	var details []byte
 	if details, err = ioutil.ReadFile(newFileName); err != nil {
-		rlog.Error("Node - onPublish.callback: read details file failed. ", err)
-		return nil, err
+		return nil, errors.Wrap(err, "Node - onPublish.callback: read details file failed. ")
 	}
-	var detailsData definition.DataDetails = definition.DataDetails{}
+	var detailsData definition.OnPublish
 	if err = json.Unmarshal(details, &detailsData); err != nil {
-		rlog.Error("Node - onPublish.callback: json unmarshal details failed. ", err)
-		return nil, err
+		return nil, errors.Wrap(err, "Node - onPublish.callback: json unmarshal details failed. ")
 	}
 
 	if err = os.Remove(newFileName); err != nil {
@@ -73,11 +76,11 @@ func getPubDataDetails(ipfsID string) (*definition.DataDetails, error) {
 
 func onApprove(event events.Event) bool {
 	go func() {
-		var ad definition.ApproveDetails = definition.ApproveDetails{}
-		ad.Block = event.BlockNumber
-		
-		if err := bootstrap.SendMessage(window, "onApprove", ad); err != nil {
-			rlog.Error("failed to send onApprove event, error:", err)
+		var oa definition.OnApprove
+		oa.Block = event.BlockNumber
+
+		if err = bootstrap.SendMessage(window, "onApprove", oa); err != nil {
+			rlog.Error(errors.Wrap(err, "onApprove"+EventSendFailed))
 		}
 	}()
 	return true
@@ -85,15 +88,19 @@ func onApprove(event events.Event) bool {
 
 func onTransactionCreate(event events.Event) bool {
 	go func() {
-		var td definition.TransactionDetails = definition.TransactionDetails{}
-		td.Block = event.BlockNumber
-		td.ProofFileNames = getProofFiles(event.Data.Get("proofIds").([][32]uint8))
-		td.PublishID = event.Data.Get("publishId").(string)
-		td.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
-		td.Buyer = event.Data.Get("users").([]common.Address)[0].String()
-		td.TxState = setTxState(event.Data.Get("state").(uint8))
+		var (
+			otc definition.OnTransactionCreate
+		)
+		otc.Block = event.BlockNumber
+		if otc.ProofFileNames, err = getAndRenameProofFiles(event.Data.Get("proofIds").([][32]uint8)); err != nil {
+			rlog.Error(errors.Wrap(err, "Node - onTC.callback: get and rename proof files failed. "))
+		}
+		otc.PublishID = event.Data.Get("publishId").(string)
+		otc.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
+		otc.Buyer = event.Data.Get("users").([]common.Address)[0].String()
+		otc.TxState = setTxState(event.Data.Get("state").(uint8))
 
-		if err := bootstrap.SendMessage(window, "onTransactionCreate", td); err != nil {
+		if err = bootstrap.SendMessage(window, "onTransactionCreate", otc); err != nil {
 			rlog.Error("failed to send onTransactionCreate event, error:", err)
 		}
 	}()
@@ -102,23 +109,20 @@ func onTransactionCreate(event events.Event) bool {
 
 // Get proof files from proofIDs.
 // ipfsGet -> modify file name, how can I get extension?
-func getProofFiles(ipfsIDs [][32]byte) []string {
+func getAndRenameProofFiles(ipfsIDs [][32]byte) ([]string, error) {
 	var (
-		err    error
-		proofs []string = make([]string, len(ipfsIDs))
+		proofs = make([]string, len(ipfsIDs))
 	)
 	for i := 0; i < len(ipfsIDs); i++ {
 		var ipfsID string = ipfsBytes32ToHash(ipfsIDs[i])
-		// optimize: user can set IPFS out dir himself.
-		if err = ipfsaccess.GetIAInstance().GetFromIPFS(ipfsID, IPFSOutDir); err != nil {
-			rlog.Error("Node - onTransactionCreate.callback: ipfs get failed. ", err.Error())
-			return nil
+		if err = ipfsaccess.GetIAInstance().GetFromIPFS(ipfsID); err != nil {
+			return nil, errors.Wrap(err, "Node - onTransactionCreate.callback: ipfs get failed. ")
 		}
 		proofs[i] = ipfsID
 		// add extension here.
 	}
 
-	return proofs
+	return proofs, nil
 }
 func ipfsBytes32ToHash(ipfsb [32]byte) string {
 	var byte34 []byte = make([]byte, 34)
@@ -131,14 +135,14 @@ func ipfsBytes32ToHash(ipfsb [32]byte) string {
 
 func onPurchase(event events.Event) bool {
 	go func() {
-		var pd definition.PurchaseDetails = definition.PurchaseDetails{}
-		pd.Block = event.BlockNumber
-		pd.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
-		pd.MetaDataIdEncWithSeller = event.Data.Get("metaDataIdEncSeller").([]byte)
-		pd.TxState = setTxState(event.Data.Get("state").(uint8))
+		var op definition.OnPurchase
+		op.Block = event.BlockNumber
+		op.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
+		op.MetaDataIdEncWithSeller = event.Data.Get("metaDataIdEncSeller").([]byte)
+		op.TxState = setTxState(event.Data.Get("state").(uint8))
 
-		if err := bootstrap.SendMessage(window, "onPurchase", pd); err != nil {
-			rlog.Error("failed to send onPurchase event, error:", err)
+		if err = bootstrap.SendMessage(window, "onPurchase", op); err != nil {
+			rlog.Error(errors.Wrap(err, "onPurchase"+EventSendFailed))
 		}
 	}()
 	return true
@@ -146,14 +150,14 @@ func onPurchase(event events.Event) bool {
 
 func onReadyForDownload(event events.Event) bool {
 	go func() {
-		var rd definition.ReEncryptDetails = definition.ReEncryptDetails{}
-		rd.Block = event.BlockNumber
-		rd.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
-		rd.MetaDataIdEncWithBuyer = event.Data.Get("metaDataIdEncBuyer").([]byte)
-		rd.TxState = setTxState(event.Data.Get("state").(uint8))
+		var orfd definition.OnReadyForDownload
+		orfd.Block = event.BlockNumber
+		orfd.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
+		orfd.MetaDataIdEncWithBuyer = event.Data.Get("metaDataIdEncBuyer").([]byte)
+		orfd.TxState = setTxState(event.Data.Get("state").(uint8))
 
-		if err := bootstrap.SendMessage(window, "onReadyForDownload", rd); err != nil {
-			rlog.Error("failed to send onReadyForDownload event, error:", err)
+		if err = bootstrap.SendMessage(window, "onReadyForDownload", orfd); err != nil {
+			rlog.Error(errors.Wrap(err, "onReadyForDownload"+EventSendFailed))
 		}
 	}()
 	return true
@@ -161,12 +165,12 @@ func onReadyForDownload(event events.Event) bool {
 
 func onClose(event events.Event) bool {
 	go func() {
-		var cd definition.CloseDetails = definition.CloseDetails{}
-		cd.Block = event.BlockNumber
-		cd.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
-		cd.TxState = setTxState(event.Data.Get("state").(uint8))
+		var oc definition.OnClose
+		oc.Block = event.BlockNumber
+		oc.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
+		oc.TxState = setTxState(event.Data.Get("state").(uint8))
 
-		if err := bootstrap.SendMessage(window, "onClose", cd); err != nil {
+		if err = bootstrap.SendMessage(window, "onClose", oc); err != nil {
 			rlog.Error("failed to send onClose event, error:", err)
 		}
 	}()
@@ -177,13 +181,20 @@ func onClose(event events.Event) bool {
 func setTxState(state byte) string {
 	var str string
 	switch state {
-	case 1: str = "Created"
-	case 2: str = "Voted"
-	case 3: str = "Buying"
-	case 4: str = "ReadyForDownload"
-	case 5: str = "Arbitrating"
-	case 6: str = "Payed"
-	case 7: str = "Closed"
+	case 1:
+		str = "Created"
+	case 2:
+		str = "Voted"
+	case 3:
+		str = "Buying"
+	case 4:
+		str = "ReadyForDownload"
+	case 5:
+		str = "Arbitrating"
+	case 6:
+		str = "Payed"
+	case 7:
+		str = "Closed"
 	}
 	return str
 }

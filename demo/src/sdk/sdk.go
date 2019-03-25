@@ -3,6 +3,7 @@ package sdk
 import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
 	"github.com/scryinfo/iscap/demo/src/sdk/core"
 	"github.com/scryinfo/iscap/demo/src/sdk/core/chainevents"
@@ -13,27 +14,21 @@ import (
 )
 
 const (
-	StartEngineFailed                  = "failed to start engine"
-	InitConTractInterfaceWrapperFailed = "failed to initialize contract interface"
 	LoadPathFailed                     = "failed to load log path"
 )
 
-func Init(ethNodeAddr string,
-	contracts []chainevents.ContractInfo,
-	fromBlock uint64) error {
+var err error
 
-	conn, err := core.StartEngine(ethNodeAddr, contracts, fromBlock)
-	if err != nil {
-		rlog.Error(StartEngineFailed, err)
-		return errors.New(StartEngineFailed)
+func Init(ethNodeAddr string, contracts []chainevents.ContractInfo, fromBlock uint64) error {
+	var conn *ethclient.Client
+	if conn, err = core.StartEngine(ethNodeAddr, contracts, fromBlock); err != nil {
+		return errors.Wrap(err, "SDK init failed. ")
 	}
 
-	err = chaininterfacewrapper.Initialize(common.HexToAddress(contracts[0].Address),
-		common.HexToAddress(contracts[1].Address),
-		conn)
-	if err != nil {
-		rlog.Error(InitConTractInterfaceWrapperFailed, err)
-		return errors.New(InitConTractInterfaceWrapperFailed)
+
+	if err = chaininterfacewrapper.Initialize(common.HexToAddress(contracts[0].Address),
+		common.HexToAddress(contracts[1].Address), conn); err != nil {
+		return errors.Wrap(err, "Contract interface init failed. ")
 	}
 
 	return nil
