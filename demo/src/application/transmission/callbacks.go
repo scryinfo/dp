@@ -15,9 +15,10 @@ import (
 	"os"
 )
 
-const IPFSOutDir = "D:/desktop"
-const EventSendFailed = " event send failed. "
-
+const (
+	IPFSOutDir = "D:/desktop"
+	EventSendFailed = " event send failed. "
+)
 var err error
 
 func onPublish(event events.Event) bool {
@@ -90,16 +91,22 @@ func onTransactionCreate(event events.Event) bool {
 	go func() {
 		var (
 			otc definition.OnTransactionCreate
+			extensions []string
 		)
-		otc.Block = event.BlockNumber
-		if otc.ProofFileNames, err = getAndRenameProofFiles(event.Data.Get("proofIds").([][32]uint8)); err != nil {
-			rlog.Error(errors.Wrap(err, "Node - onTC.callback: get and rename proof files failed. "))
-		}
 		otc.PublishID = event.Data.Get("publishId").(string)
+		if err = bootstrap.SendMessage(window, "onTransactionCreatePrepare", otc.PublishID); err != nil {
+			rlog.Error("failed to send onTransactionCreatePrepare event, error:", err)
+		}
+
+		otc.Block = event.BlockNumber
 		otc.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
 		otc.Buyer = event.Data.Get("users").([]common.Address)[0].String()
 		otc.TxState = setTxState(event.Data.Get("state").(uint8))
 
+		extensions = <- channel
+		if otc.ProofFileNames, err = getAndRenameProofFiles(event.Data.Get("proofIds").([][32]uint8), extensions); err != nil {
+			rlog.Error(errors.Wrap(err, "Node - onTC.callback: get and rename proof files failed. "))
+		}
 		if err = bootstrap.SendMessage(window, "onTransactionCreate", otc); err != nil {
 			rlog.Error("failed to send onTransactionCreate event, error:", err)
 		}
@@ -109,23 +116,36 @@ func onTransactionCreate(event events.Event) bool {
 
 // Get proof files from proofIDs.
 // ipfsGet -> modify file name, how can I get extension?
-func getAndRenameProofFiles(ipfsIDs [][32]byte) ([]string, error) {
+func getAndRenameProofFiles(ipfsIDs [][32]byte, extensions []string) ([]string, error) {
+	defer func() {
+		if er := recover(); er != nil {
+			rlog.Error(errors.Wrap(er.(error), "onTransactionCreate.callback: get and rename proof files failed. "))
+		}
+	}()
 	var (
 		proofs = make([]string, len(ipfsIDs))
+		oldFileName, newFileName string
 	)
+	if len(ipfsIDs) != len(extensions) {
+		return nil, errors.New("Invalid IPFS IDs or extensions. ")
+	}
 	for i := 0; i < len(ipfsIDs); i++ {
-		var ipfsID string = ipfsBytes32ToHash(ipfsIDs[i])
+		ipfsID := ipfsBytes32ToHash(ipfsIDs[i])
 		if err = ipfsaccess.GetIAInstance().GetFromIPFS(ipfsID); err != nil {
-			return nil, errors.Wrap(err, "Node - onTransactionCreate.callback: ipfs get failed. ")
+			return nil, errors.Wrap(err, "Node - onTransactionCreate.callback: IPFS get failed. ")
 		}
-		proofs[i] = ipfsID
-		// add extension here.
+		oldFileName = IPFSOutDir + "/" + ipfsID
+		newFileName = oldFileName + extensions[i]
+		if err = os.Rename(oldFileName, newFileName); err != nil {
+			return nil, errors.Wrap(err, "Node - onTransactionCreate.callback: rename proof file failed. ")
+		}
+		proofs[i] = newFileName
 	}
 
 	return proofs, nil
 }
 func ipfsBytes32ToHash(ipfsb [32]byte) string {
-	var byte34 []byte = make([]byte, 34)
+	byte34 := make([]byte, 34)
 	// if ipfs modify encrypt algorithm, byte will change together.
 	copy(byte34[:2], []byte{byte(18), byte(32)})
 	copy(byte34[2:], ipfsb[:])

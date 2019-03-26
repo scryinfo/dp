@@ -11,7 +11,10 @@ import (
 	"math/big"
 )
 
-var window *astilectron.Window = nil
+var (
+	window *astilectron.Window
+	channel chan []string = make(chan []string)
+)
 
 func SetWindow(w *astilectron.Window) {
 	window = w
@@ -90,6 +93,14 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err = sdkinterface.CreateTransaction(bd.PublishID, bd.Password); err != nil {
 			break
 		}
+		payload = true
+		return payload, nil
+	case "prepared":
+		var p definition.Prepared
+		if err = json.Unmarshal(m.Payload, &p); err != nil {
+			break
+		}
+		channel <- p.Extensions
 		payload = true
 		return payload, nil
 	case "purchase":

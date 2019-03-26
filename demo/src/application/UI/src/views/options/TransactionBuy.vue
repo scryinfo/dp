@@ -1,7 +1,7 @@
 <template>
     <section>
         <el-col :span="24" class="section-item">
-            <el-button size="mini" type="danger" @click="cancelMsg">Cancel</el-button>
+            <el-button size="mini" type="danger" @click="cancelMsg" plain>Cancel</el-button>
             <el-button size="mini" type="primary" @click="purchasePwd">Purchase</el-button>
             <el-button size="mini" type="primary" @click="decryptPwd">Decrypt</el-button>
             <el-button size="mini" type="primary" @click="confirmPwd">Confirm</el-button>

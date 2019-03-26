@@ -61,6 +61,11 @@ let utils = {
                         fromBlock: message.payload.Block + 1
                     })
                     break
+                case "onTransactionCreatePrepare":
+                    dl_db.read(message.payload, function (dlInstance) {
+                        astilectron.sendMessage({ Name:"prepared", Payload: {extensions: dlInstance.ProofDataExtensions}})
+                    })
+                    break
                 case "onTransactionCreate":
                     console.log("Node: onTransactionCreate.callback. ", message.payload)
                     _this.$notify({

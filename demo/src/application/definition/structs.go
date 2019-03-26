@@ -59,6 +59,10 @@ type OnTransactionCreate struct {
 	Block          uint64
 }
 
+type Prepared struct {
+	Extensions []string `json:"extensions"`
+}
+
 type PurchaseData struct {
 	Password   string       `json:"password"`
 	SelectedTx SelectedTxPD `json:"tID"`
