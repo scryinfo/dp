@@ -1,6 +1,6 @@
 <template>
     <div>
-        <el-row class="row">
+        <el-row>
             <el-col :span="24"><div class="top">My Astilectron demo</div></el-col>
             <el-col :span="8">
                 <div class="left">
