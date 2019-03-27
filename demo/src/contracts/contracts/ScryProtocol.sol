@@ -128,15 +128,15 @@ contract ScryProtocol {
         return data.used;
     }
 
-    function createTransaction(string seqNo, string publishId) external {
+    function createTransaction(string seqNo, string publishId, bool startVerify) external {
         //published data info
         DataInfoPublished memory data = mapPublishedData[publishId];
         require(data.used, "Publish data does not exist");
-        require((token.balanceOf(msg.sender)) >= data.price, "No enough balance");
         uint256 fee = data.price;
         if (data.supportVerify) {
             fee += verifierBonus * verifierNum;   // should add the tokens which for awarding verifiers and arbitrators.
         }
+        require((token.balanceOf(msg.sender)) >= fee, "No enough balance");
         require(token.transferFrom(msg.sender, address(this), fee), "Failed to transfer token from caller");
 
         //create transaction
@@ -145,7 +145,7 @@ contract ScryProtocol {
 
         address[] memory selectedVerifiers;
         bool[] memory creditGived;
-        if (data.supportVerify) {
+        if (data.supportVerify && startVerify) {
             //choose verifiers randomly
             selectedVerifiers = chooseVerifiers(verifierNum);
             creditGived = new bool[](verifierNum);
@@ -309,8 +309,9 @@ contract ScryProtocol {
 
         txItem.state = TransactionState.Buying;
 
-        address[] memory users = new address[](1);
+        address[] memory users = new address[](2);
         users[0] = txItem.seller;
+        users[1] = txItem.buyer;
         emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, txItem.state , users);
     }
 
@@ -325,8 +326,9 @@ contract ScryProtocol {
         txItem.state = TransactionState.ReadyForDownload;
 
         //ReadyForDownload event
-        address[] memory users = new address[](1);
+        address[] memory users = new address[](2);
         users[0] = txItem.buyer;
+        users[1] = txItem.seller;
         emit ReadyForDownload(seqNo, txId, txItem.meteDataIdEncBuyer, txItem.state, users);
     }
 
@@ -386,6 +388,15 @@ contract ScryProtocol {
         }
     }
 
+    function cancelTransaction(string seqNo, uint256 txId) external {
+        TransactionItem storage txItem = mapTransaction[txId];
+        require(txItem.used, "Transaction does not exist");
+        require(txItem.buyer == msg.sender, "Invalid operator");
+
+        returnTokenToBuyer(txItem);
+        closeTransaction(txItem, seqNo, txId);
+    }
+
     function closeTransaction(TransactionItem storage txItem, string seqNo, uint256 txId) internal {
         txItem.state = TransactionState.Closed;
 
@@ -417,6 +428,15 @@ contract ScryProtocol {
             }
         } else {
             require(false, "Low deposit value for paying to seller");
+        }
+    }
+
+    function returnTokenToBuyer(TransactionItem storage txItem) internal {
+        uint256 remainderToken = txItem.buyerDeposit;
+        txItem.buyerDeposit = 0;
+        if (!token.transfer(txItem.buyer, remainderToken)) {
+            txItem.buyerDeposit = remainderToken;
+            require(false, "Failed to return buyer its remainder token");
         }
     }
 
