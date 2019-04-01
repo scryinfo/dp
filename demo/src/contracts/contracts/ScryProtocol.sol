@@ -62,11 +62,10 @@ contract ScryProtocol {
     mapping (uint256 => bool[]) mapCount;
 
     event RegisterVerifier(string seqNo, address[] users);
-    event DataPublish(string seqNo, string publishId, uint256 price, string despDataId, address[] users);
+    event DataPublish(string seqNo, string publishId, uint256 price, string despDataId, bool supportVerify, address[] users);
     event TransactionCreate(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool supportVerify,
-        TransactionState state, address[] users);
-    event VerifiersChosen(string seqNo, uint256 transactionId, bytes32[] proofIds, address[] users);
-    event Vote(string seqNo, uint256 transactionId, bool judge, string comments, TransactionState state, address[] users);
+        TransactionState state, address[] verifiers, address[] users);
+    event Vote(string seqNo, uint256 transactionId, bool judge, string comments, TransactionState state, uint256 index, address[] users);
     event Buy(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, TransactionState state, address[] users);
     event ReadyForDownload(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, TransactionState state, address[] users);
     event ArbitratingBegin(string seqNo,uint256 transactionId, TransactionState state, address[] users);
@@ -120,7 +119,7 @@ contract ScryProtocol {
 
         mapPublishedData[publishId] = DataInfoPublished(price, metaDataIdEncSeller, proofDataIds, proofDataIds.length, despDataId, msg.sender, supportVerify, true);
 
-        emit DataPublish(seqNo, publishId, price, despDataId, users);
+        emit DataPublish(seqNo, publishId, price, despDataId, supportVerify, users);
     }
 
     function isPublishedDataExisted(string publishId) internal view returns (bool) {
@@ -139,24 +138,32 @@ contract ScryProtocol {
         require((token.balanceOf(msg.sender)) >= fee, "No enough balance");
         require(token.transferFrom(msg.sender, address(this), fee), "Failed to transfer token from caller");
 
+        createTransaction2(seqNo, data, fee, publishId, startVerify);
+    }
+    function createTransaction2(string seqNo, DataInfoPublished data, uint256 fee, string publishId, bool startVerify) internal {
         //create transaction
         uint txId = getTransactionId();
         bytes memory metaDataIdEncBuyer = new bytes(encryptedIdLen);
 
-        address[] memory selectedVerifiers;
+        address[] memory selectedVerifiers = new address[](verifierNum);
         bool[] memory creditGived;
+        uint8 num = 1;
         if (data.supportVerify && startVerify) {
             //choose verifiers randomly
             selectedVerifiers = chooseVerifiers(verifierNum);
             creditGived = new bool[](verifierNum);
-            emit VerifiersChosen(seqNo, txId,data.proofDataIds, selectedVerifiers);
-
+            num += verifierNum;
             selectedArbitrators = chooseArbitrators(arbitratorNum, selectedVerifiers);
         }
 
-        address[] memory users = new address[](1);
+        address[] memory users = new address[](num);
         users[0] = msg.sender;
-        emit TransactionCreate(seqNo, txId, publishId, data.proofDataIds, data.supportVerify, TransactionState.Created, users);
+        if (num > 1) {
+            users[1] = selectedVerifiers[0];
+            users[2] = selectedVerifiers[1];
+        }
+        emit TransactionCreate(seqNo, txId, publishId, data.proofDataIds, data.supportVerify, TransactionState.Created,
+            selectedVerifiers, users);
 
         mapTransaction[txId] = TransactionItem(TransactionState.Created, msg.sender, data.seller, selectedVerifiers, creditGived,
             publishId, metaDataIdEncBuyer, data.metaDataIdEncSeller, fee, verifierBonus, true);
@@ -219,6 +226,7 @@ contract ScryProtocol {
     function vote(string seqNo, uint txId, bool judge, string comments) external {
         TransactionItem storage txItem = mapTransaction[txId];
         require(txItem.used, "Transaction does not exist");
+        require(txItem.state == TransactionState.Created || txItem.state == TransactionState.Voted, "Invalid transaction state");
 
         bool valid;
         uint256 index;
@@ -235,7 +243,7 @@ contract ScryProtocol {
 
         address[] memory users = new address[](1);
         users[0] = txItem.buyer;
-        emit Vote(seqNo, txId, judge, comments, txItem.state, users);
+        emit Vote(seqNo, txId, judge, comments, txItem.state, index, users);
     }
 
     function chooseArbitrators(uint8 num, address[] vs) internal view returns (address[] memory) {
@@ -309,9 +317,8 @@ contract ScryProtocol {
 
         txItem.state = TransactionState.Buying;
 
-        address[] memory users = new address[](2);
-        users[0] = txItem.seller;
-        users[1] = txItem.buyer;
+        address[] memory users = new address[](1);
+        users[0] = address(0x00);
         emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, txItem.state , users);
     }
 
@@ -326,9 +333,8 @@ contract ScryProtocol {
         txItem.state = TransactionState.ReadyForDownload;
 
         //ReadyForDownload event
-        address[] memory users = new address[](2);
-        users[0] = txItem.buyer;
-        users[1] = txItem.seller;
+        address[] memory users = new address[](1);
+        users[0] = address(0x00);
         emit ReadyForDownload(seqNo, txId, txItem.meteDataIdEncBuyer, txItem.state, users);
     }
 
@@ -388,15 +394,6 @@ contract ScryProtocol {
         }
     }
 
-    function cancelTransaction(string seqNo, uint256 txId) external {
-        TransactionItem storage txItem = mapTransaction[txId];
-        require(txItem.used, "Transaction does not exist");
-        require(txItem.buyer == msg.sender, "Invalid operator");
-
-        returnTokenToBuyer(txItem);
-        closeTransaction(txItem, seqNo, txId);
-    }
-
     function closeTransaction(TransactionItem storage txItem, string seqNo, uint256 txId) internal {
         txItem.state = TransactionState.Closed;
 
@@ -428,15 +425,6 @@ contract ScryProtocol {
             }
         } else {
             require(false, "Low deposit value for paying to seller");
-        }
-    }
-
-    function returnTokenToBuyer(TransactionItem storage txItem) internal {
-        uint256 remainderToken = txItem.buyerDeposit;
-        txItem.buyerDeposit = 0;
-        if (!token.transfer(txItem.buyer, remainderToken)) {
-            txItem.buyerDeposit = remainderToken;
-            require(false, "Failed to return buyer its remainder token");
         }
     }
 
@@ -477,7 +465,7 @@ contract ScryProtocol {
         uint256 index;
         (valid, index) = verifierValid(verifier, txItem.verifiers);
         require(valid, "Invalid verifier");
-        require(!txItem.creditGived[index], "The verifier's credit in this transaction has been submited");
+        require(!txItem.creditGived[index], "The verifier's credit in this transaction has been submitted");
 
         verifier.credits = (uint8)((verifier.credits * verifier.creditTimes + credit)/(++verifier.creditTimes));
         txItem.creditGived[index] = true;
