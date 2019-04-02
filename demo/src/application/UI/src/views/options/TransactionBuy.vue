@@ -1,14 +1,15 @@
 <template>
     <section>
         <el-col :span="24" class="section-item">
-            <el-button size="mini" type="danger" @click="cancelMsg" plain>Cancel</el-button>
-            <el-button size="mini" type="primary" @click="purchasePwd">Purchase</el-button>
-            <el-button size="mini" type="primary" @click="decryptPwd">Decrypt</el-button>
-            <el-button size="mini" type="primary" @click="confirmPwd">Confirm</el-button>
+            <el-button size="mini" type="danger" @click="cancelDialog = true">Cancel</el-button>
+            <el-button size="mini" type="primary" @click="purchaseDialog = true">Purchase</el-button>
+            <el-button size="mini" type="primary" @click="decryptDialog = true">Decrypt</el-button>
+            <el-button size="mini" type="primary" @click="confirmDialog = true">Confirm</el-button>
+            <el-button size="mini" type="primary" @click="creditPre">Credit</el-button>
         </el-col>
 
         <el-table :data="this.$store.state.transactionbuy.slice((curPage-1)*pageSize, curPage*pageSize)"
-                  highlight-current-row border height=368 @current-change="currentChange">
+                  highlight-current-row border height=468 @current-change="currentChange">
             <el-table-column type="expand">
                 <el-form slot-scope="props" label-position="left" class="tx-table-expand">
                     <el-form-item label="TransactionID"><span>{{ props.row.TransactionID }}</span></el-form-item>
@@ -29,6 +30,65 @@
         <el-pagination class="pagination" @current-change="setCurPage" @size-change="setPageSize" :total="total"
                        layout="sizes, total, prev, pager, next, jumper" :page-sizes="[5, 6]" :page-size="pageSize"
         ></el-pagination>
+
+        <!-- Dialogs -->
+        <el-dialog :visible.sync="cancelDialog" title="Input password for this account:">
+            <p>{{this.$store.state.account}}</p><el-input v-model="password" show-password clearable></el-input>
+            <div slot="footer">
+                <el-button @click="cancelClickFunc('cancel')">Cancel</el-button>
+                <el-button type="primary" @click="cancelBuying">Submit</el-button>
+            </div>
+        </el-dialog>
+        <el-dialog :visible.sync="purchaseDialog" title="Input password for this account:">
+            <p>{{this.$store.state.account}}</p><el-input v-model="password" show-password clearable></el-input>
+            <div slot="footer">
+                <el-button @click="cancelClickFunc('purchase')">Cancel</el-button>
+                <el-button type="primary" @click="purchase">Submit</el-button>
+            </div>
+        </el-dialog>
+        <el-dialog :visible.sync="decryptDialog" title="Input password for this account:">
+            <p>{{this.$store.state.account}}</p><el-input v-model="password" show-password clearable></el-input>
+            <div slot="footer">
+                <el-button @click="cancelClickFunc('decrypt')">Cancel</el-button>
+                <el-button type="primary" @click="decrypt">Submit</el-button>
+            </div>
+        </el-dialog>
+        <el-dialog :visible.sync="confirmDialog" title="Confirm the mata data: ">
+            <el-dialog :visible.sync="confirmDialog2" title="Input password for this account: ">
+                <p>{{this.$store.state.account}}</p><el-input v-model="password" show-password clearable></el-input>
+                <div slot="footer">
+                    <el-button @click="cancelClickFunc('confirm2')">Cancel</el-button>
+                    <el-button type="primary" @click="confirm">Submit</el-button>
+                </div>
+            </el-dialog>
+            <div>Confirm the meta data: (Arbitrate process will start if you think it is fake.)&nbsp;&nbsp;&nbsp;
+                <el-switch v-model="confirmData" active-text="True" inactive-text="Fake"></el-switch></div>
+            <div slot="footer">
+                <el-button @click="cancelClickFunc('confirm')">Cancel</el-button>
+                <el-button type="primary" @click="confirmDialog2 = true">Input password</el-button>
+            </div>
+        </el-dialog>
+        <el-dialog :visible.sync="creditDialog" title="Credit to verifiers:">
+            <el-dialog :visible.sync="creditDialog2" title="Input password for this account:" append-to-body>
+                <p>{{this.$store.state.account}}</p><el-input v-model="password" show-password clearable></el-input>
+                <div slot="footer">
+                    <el-button @click="cancelClickFunc('credit2')">Cancel</el-button>
+                    <el-button type="primary" @click="credit">Submit</el-button>
+                </div>
+            </el-dialog>
+            <div>Verifier1:
+                <el-slider v-model="verifier1Credit" max="5" v-if="verifier1Revert" show-input></el-slider>
+                <span v-if="!verifier1Revert">Not support verify or verifier not revert.</span>
+            </div>
+            <div>Verifier2:
+                <el-slider v-model="verifier2Credit" max="5" v-if="verifier2Revert" show-input></el-slider>
+                <span v-if="!verifier2Revert">Not support verify or verifier not revert.</span>
+            </div>
+            <div slot="footer">
+                <el-button @click="cancelClickFunc('credit')">Cancel</el-button>
+                <el-button type="primary" @click="creditDialog2 = true">Input password</el-button>
+            </div>
+        </el-dialog>
     </section>
 </template>
 
@@ -37,43 +97,78 @@ export default {
     name: "TransactionBuy",
     data () {
         return {
-            selectedTx: {},  // {tID: "", Buyer: "", MetaDataIDEncWithBuyer: "", MetaDataExtension: ""}
+            selectedTx: {},  // {tID: "", Buyer: "", MetaDataIDEncWithBuyer: "", MetaDataExtension: "", Verifier1: "", Verifier2: ""}
             curPage: 1,
             pageSize: 6,
-            total: 0
+            total: 0,
+            password: "",
+            cancelDialog: false,
+            purchaseDialog: false,
+            decryptDialog: false,
+            confirmDialog: false,
+            confirmDialog2: false,
+            creditDialog: false,
+            creditDialog2: false,
+            verifier1Revert: false,
+            verifier1Credit: 0,
+            verifier2Revert: false,
+            verifier2Credit: 0,
+            confirmData: false
         }
     },
     methods: {
-        setCurPage: function (curPageReturn) {
-            this.curPage = curPageReturn
-        },
-        setPageSize: function (newPageSize) {
-            this.pageSize = newPageSize
-        },
+        setCurPage: function (curPageReturn) {this.curPage = curPageReturn},
+        setPageSize: function (newPageSize) {this.pageSize = newPageSize},
         currentChange: function (curRow) {
             this.selectedTx = {
                 TransactionID: curRow.TransactionID,
                 Buyer: curRow.Buyer,
                 MetaDataIDEncWithBuyer: curRow.MetaDataIDEncWithBuyer,
-                MetaDataExtension: curRow.MetaDataExtension
+                MetaDataExtension: curRow.MetaDataExtension,
+                Verifier1: curRow.Verifier1,
+                Verifier1Response: curRow.Verifier1Response,
+                Verifier2: curRow.Verifier2,
+                Verifier2Response: curRow.Verifier2Response
             }
         },
-        purchasePwd:function () {
-            this.$prompt(this.$store.state.account, "Input password for this account:", {
-                confirmButtonText: "Submit",
-                cancelButtonText: "Cancel"
-            }).then(({ value }) => {
-                // login.verify
-                this.purchase(value)
-            }).catch(() => {
-                this.$message({
-                    type: "info",
-                    message: "Cancel purchase."
-                })
+        cancelClickFunc: function (dialogName) {
+            switch (dialogName) {
+                case "cancel": this.cancelDialog = false; break
+                case "purchase": this.purchaseDialog = false; break
+                case "decrypt": this.decryptDialog = false; break
+                case "confirm": this.cancelDialog = false; break
+                case "confirm2": this.confirmDialog2 = false; break
+                case "credit": this.creditDialog = false; break
+                case "credit2": this.creditDialog2 = false; break
+            }
+            this.$message({
+                type: "info",
+                message: "Cancel " + dialogName + ". "
             })
         },
-        purchase:function (pwd) {
+        cancelBuying: function () {
+            this.cancelDialog = false
             let _this = this
+            let pwd = this.password
+            this.password = ""
+            astilectron.sendMessage({ Name:"cancel",Payload:{password: pwd, tID: this.selectedTx}}, function (message) {
+                if (message.name !== "error") {
+                    console.log("Cancel transaction success.", message)
+                }else {
+                    console.log("Node: cancel transaction failed.", message.payload)
+                    _this.$alert(message.payload, "Error: Cancel transaction failed: ", {
+                        confirmButtonText: "I've got it.",
+                        showClose: false,
+                        type: "error"
+                    })
+                }
+            })
+        },
+        purchase: function () {
+            this.purchaseDialog = false
+            let _this = this
+            let pwd = this.password
+            this.password = ""
             astilectron.sendMessage({ Name:"purchase",Payload:{password: pwd, tID: this.selectedTx}}, function (message) {
                 if (message.name !== "error") {
                     console.log("Purchase data success.", message)
@@ -87,39 +182,11 @@ export default {
                 }
             })
         },
-        cancelMsg:function () {
-            this.$confirm("Make sure to cancel buying and close the transaction?", "Tips:", {
-                confirmButtonText: "Yes",
-                cancelButtonText: "No",
-                type: "warning"
-            }).then(() => {
-                this.cancelBuying()
-            }).catch(() => {
-                this.$message({
-                    type:"info",
-                    message:"Cancel close."
-                })
-            })
-        },
-        cancelBuying:function () {
-            console.log("Node: cancel buying has not implemented.")
-            // cancel buying and close the transaction, sdk is not finish.
-        },
-        decryptPwd:function () {
-            this.$prompt(this.$store.state.account, "Input password for this account:", {
-                confirmButtonText: "Submit",
-                cancelButtonText: "Cancel"
-            }).then(({ value }) => {
-                this.decrypt(value)
-            }).catch(() => {
-                this.$message({
-                    type: "info",
-                    message: "Cancel decrypt."
-                })
-            })
-        },
-        decrypt:function (pwd) {
+        decrypt: function () {
+            this.decryptDialog = false
             let _this = this
+            let pwd = this.password
+            this.password = ""
             astilectron.sendMessage({ Name:"decrypt",Payload:{password: pwd, tID: this.selectedTx}}, function (message) {
                 if (message.name !== "error") {
                     _this.$alert(message.payload, "Meta data: ", {
@@ -138,28 +205,50 @@ export default {
                 }
             })
         },
-        confirmPwd:function () {
-            this.$prompt(this.$store.state.account, "Input password and confirm if the meta data is true?", {
-                distinguishCancelAndClose: true, // not implement
-                confirmButtonText: "True, close transaction. ",
-                cancelButtonText: "Fake, start arbitrate. "
-            }).then((pwd) => {
-                // think if it is necessary to add another pop box for user can make sure twice?
-                this.confirm(pwd.value, true)
-            }).catch((pwd) => {
-                // arbitrate is not implement, however user confirm the meta data, it will close transaction.
-                this.confirm(pwd.value, true)
-            })
-        },
-        confirm:function (pwd, judge) {
+        confirm: function () {
+            this.confirmDialog = false
+            this.confirmDialog2 = false
             let _this = this
-            astilectron.sendMessage({ Name:"confirm",Payload:{password: pwd, tID: this.selectedTx, startArbitrate: judge}},
-                function (message) {
+            let pwd = this.password
+            this.password = ""
+            astilectron.sendMessage({ Name:"confirm",Payload:{password: pwd, tID: this.selectedTx,
+                    confirmData: true // 'this.startArbitrate' should, but arbitrate not implement.
+            }}, function (message) {
                 if (message.name !== "error") {
                     console.log("Confirm data success.", message)
                 }else {
                     console.log("Node: confirm failed.", message.payload)
                     _this.$alert(message.payload, "Error: Confirm data failed: ", {
+                        confirmButtonText: "I've got it.",
+                        showClose: false,
+                        type: "error"
+                    })
+                }
+            })
+        },
+        creditPre: function () {
+            if (this.selectedTx.Verifier1Response !== "") {
+                this.verifier1Revert = true
+            }
+            if (this.selectedTx.Verifier2Response !== "") {
+                this.verifier2Revert = true
+            }
+            this.creditDialog = true
+        },
+        credit: function () {
+            this.creditDialog = false
+            this.creditDialog2 = false
+            let pwd = this.password
+            this.password = ""
+            let _this = this
+            astilectron.sendMessage({ Name:"credit",Payload:{password: pwd, tID: this.selectedTx, credit: {
+                        verifier1Revert: this.verifier1Revert, verifier1Credit: this.verifier1Credit,
+                        verifier2Revert: this.verifier2Revert, verifier2Credit: this.verifier2Credit}}}, function (message) {
+                if (message.name !== "error") {
+                    console.log("Credit data success.", message)
+                }else {
+                    console.log("Node: credit failed.", message.payload)
+                    _this.$alert(message.payload, "Error: Credit data failed: ", {
                         confirmButtonText: "I've got it.",
                         showClose: false,
                         type: "error"

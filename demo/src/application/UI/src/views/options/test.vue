@@ -1,18 +1,27 @@
 <template>
-    <div>
-        <el-button type="primary" size="mini" @click="add">Add</el-button>
-        <el-button type="primary" size="mini" @click="funcTest">Test</el-button>
-        <el-table :data="testData.slice((curPage-1)*pageSize,curPage*pageSize)">
-            <el-table-column label="ID" prop="ID"></el-table-column>>
-            <el-table-column label="Title" prop="Title"></el-table-column>>
-            <el-table-column label="Description" prop="Description"></el-table-column>
-        </el-table>
-        <el-pagination class="ep_css"
-                :total="total" layout="sizes, total, prev, pager, next, jumper" @current-change="ccfunc"
-                :page-sizes="[1, 2]" :page-size="pageSize" @size-change="scfunc"
-        >
-        </el-pagination>
-    </div>
+    <section>
+        <el-button size="mini" type="primary" @click="creditDialog = true">Open dialog</el-button>
+        <el-dialog :visible.sync="creditDialog" title="Credit to verifiers:">
+            <el-dialog :visible.sync="creditDialog2" title="Input password for this account:" append-to-body>
+                <p>1234</p>
+                <div slot="footer">
+                    <el-button @click="creditDialog2 = false">Cancel</el-button>
+                    <el-button type="primary" @click="funcTest">Submit</el-button>
+                </div>
+            </el-dialog>
+            <div>Verifier1:
+                <el-slider v-model="verifier1Credit" max="5" v-if="verifier1Revert" show-input></el-slider>
+                <span v-if="!verifier1Revert">Not support verify or verifier not revert.</span>
+            </div>
+            <div>Verifier2:
+                <el-slider v-model="verifier2Credit" max="5" v-if="verifier2Revert" show-input></el-slider>
+                <span v-if="!verifier2Revert">Not support verify or verifier not revert.</span>
+            </div>
+            <div slot="footer">
+                <el-button size="mini" type="primary" @click="creditDialog2 = true">Open inner dialog</el-button>
+            </div>
+        </el-dialog>
+    </section>
 </template>
 
 <script>
@@ -20,55 +29,23 @@ export default {
     name: "test.vue",
     data () {
         return {
-            testData: [
-                {ID: "1", Title: "title1", Description: "description1"},
-                {ID: "2", Title: "title2", Description: "description2"},
-                {ID: "3", Title: "title3", Description: "description3"},
-                {ID: "4", Title: "title4", Description: "description4"},
-                {ID: "5", Title: "title5", Description: "description5"},
-                {ID: "6", Title: "title6", Description: "description6"},
-                {ID: "7", Title: "title7", Description: "description7"},
-                {ID: "8", Title: "title8", Description: "description8"},
-                {ID: "9", Title: "title9", Description: "description9"}
-            ],
-            curPage: 1,
-            pageSize: 2,
-            total: 0,
-            message: "Here is error details. "
+            creditDialog: false,
+            creditDialog2: false,
+            verifier1Revert: true,
+            verifier1Credit: 3,
+            verifier2Revert: false,
+            verifier2Credit: 3
         }
     },
     methods: {
-        ccfunc: function (curPageReturn) {
-            this.curPage = curPageReturn
-        },
-        scfunc: function (newPageSize) {
-            this.pageSize = newPageSize
-        },
-        add: function () {
-            this.testData.push({ID: "add", Title: "titleAdd", Description: "descriptionAdd"})
-        },
-        funcTest: function () {
-            this.$alert(this.message, "Error: Buy data failed.", {
-                confirmButtonText: "I've got it.",
-                showClose: false,
-                type: "error"
-            })
+        funcTest:function () {
+            console.log(this.verifier1Revert, this.verifier1Credit)
+            console.log(this.verifier2Revert, this.verifier2Credit)
         }
-    },
-    watch: {
-        testData: function () {
-            this.total = this.testData.length
-            this.curPage = 1
-        }
-    },
-    created() {
-        this.total = this.testData.length
     }
 }
 </script>
 
 <style scoped>
-.ep_css {
-    text-align: center;
-}
+
 </style>

@@ -1,17 +1,19 @@
 <template>
     <section>
-        <el-form class="pubForm" :model="pubData" label-position="left" label-width="15%">
+        <el-form class="pubForm" :model="pubData" label-position="left" label-width="25%">
+            <el-form-item label="Password:"><el-input v-model="password" show-password clearable></el-input></el-form-item>
             <el-form-item label="Title:"><el-input v-model="pubData.details.Title" clearable></el-input></el-form-item>
-            <el-form-item label="Price:">
-                <el-input v-model.number="pubData.Price" placeholder="Unit is DDD" clearable></el-input></el-form-item>
-            <el-form-item label="Keys:"><el-input v-model="pubData.details.Keys" type="textarea" clearable :rows=2></el-input></el-form-item>
+            <el-form-item label="Price:"><el-input v-model.number="pubData.Price" clearable></el-input></el-form-item>
+            <el-form-item label="Keys:"><el-input v-model="pubData.details.Keys" clearable></el-input></el-form-item>
             <el-form-item label="Description:">
-                <el-input v-model="pubData.details.Description" type="textarea" :rows=3 clearable></el-input></el-form-item>
+                <el-input v-model="pubData.details.Description" type="textarea" :rows=2 clearable></el-input>
+            </el-form-item>
+            <el-form-item label="Support verify:">
+                <el-switch v-model="SupportVerify" active-text="Yes" inactive-text="No"></el-switch>
+            </el-form-item>
             <el-form-item label="Data:"><el-input ref="selectedData" type="file"></el-input></el-form-item>
             <el-form-item label="Proofs:"><el-input ref="selectedProofs" type="file" multiple></el-input></el-form-item>
-            <el-form-item>
-                <el-button type="primary" @click="pubPwd">Publish</el-button>
-            </el-form-item>
+            <el-form-item><el-button type="primary" @click="pubPrepare">Publish</el-button></el-form-item>
         </el-form>
     </section>
 </template>
@@ -30,39 +32,31 @@ export default {
                     ProofDataExtensions: [],
                     Seller: ""
                 },
-                Price: 0,
-                SupportVerify: false
+                Price: 0
             },
-            send: {
+            SupportVerify: false,
+            IDs: {
                 metaDataID: "",
                 proofDataIDs: [],
                 detailsID: "",
-                price: 0,
-                supportVerify: false,
-                password: ""
             },
+            password: "",
             count: 0
         }
     },
     methods: {
-        pubPwd: function () {
-            this.$prompt(this.$store.state.account, "Input password for this account:", {
-                confirmButtonText: "Submit",
-                cancelButtonText: "Cancel"
-            }).then( (pwd) => {
-                this.count = this.$refs.selectedProofs.$refs.input.files.length
-                this.send.price = this.pubData.Price
-                this.send.supportVerify = this.pubData.SupportVerify
-                this.send.password = pwd.value
-                this.pubData.details.Seller = this.$store.state.account
-                this.setDataID()
-                this.setProofIDs()
-            }).catch((err) => {
-                this.$message({
-                    type: "info",
-                    message: "Cancel publish. " + err
-                })
+        cancelClickFunc: function () {
+            this.pubDialog = false
+            this.$message({
+                type: "info",
+                message: "Cancel publish. "
             })
+        },
+        pubPrepare: function () {
+            this.count = this.$refs.selectedProofs.$refs.input.files.length
+            this.pubData.details.Seller = this.$store.state.account
+            this.setDataID()
+            this.setProofIDs()
         },
         setDataID: function () {
             let _this = this
@@ -73,7 +67,7 @@ export default {
             reader.readAsArrayBuffer(data)
             reader.onload = function (evt) {
                 ipfs.add(Buffer.from(evt.target.result, "utf-8")).then(function (result) {
-                    _this.send.metaDataID = result[0].hash
+                    _this.IDs.metaDataID = result[0].hash
                     _this.count--
                 }).catch(function (err) {
                     console.log("Node: add.metaData.failed. ", err)
@@ -86,7 +80,7 @@ export default {
             }
         },
         setProofIDs: function () {
-            this.send.proofDataIDs = []
+            this.IDs.proofDataIDs = []
             let _this = this
             let ipfs = require("ipfs-http-client")({host: 'localhost', port: '5001', protocol: 'http'})
             let proofs = this.$refs.selectedProofs.$refs.input.files
@@ -96,7 +90,7 @@ export default {
                 reader.readAsArrayBuffer(proofs[i])
                 reader.onload = function (evt) {
                     ipfs.add(Buffer.from(evt.target.result, "utf-8")).then(function (result) {
-                        _this.send.proofDataIDs.push(result[0].hash)
+                        _this.IDs.proofDataIDs.push(result[0].hash)
                         _this.count--
                     }).catch(function (err) {
                         console.log("Node: add.proofsData.failed. ", err)
@@ -114,7 +108,7 @@ export default {
             let _this = this
             let ipfs = require("ipfs-http-client")({host: 'localhost', port: '5001', protocol: 'http'})
             ipfs.add(Buffer.from(JSON.stringify(this.pubData.details), "utf-8")).then(function (result) {
-                _this.send.detailsID = result[0].hash
+                _this.IDs.detailsID = result[0].hash
                 _this.count--
             }).catch(function (err) {
                 console.log("Node: add.detailsData.failed. ", err)
@@ -128,11 +122,13 @@ export default {
         },
         pub: function () {
             let _this = this
-            astilectron.sendMessage({Name:"publish",Payload: this.send}, function (message) {
+            let pwd = this.password
+            this.password = ""
+            astilectron.sendMessage({Name:"publish",Payload: {password: pwd, supportVerify: this.SupportVerify,
+                    price: this.pubData.Price, IDs: this.IDs}}, function (message) {
                 if (message.name !== "error") {
                     // optimize?: dl_db.write here, seller will see his publish before contract emit event.
                     console.log("Publish new data success.", message)
-                    // reset datas.
                 }else {
                     console.log("Node: publish.newData failed. ", message.payload)
                     _this.$alert(message.payload, "Error: Publish data failed: ", {
@@ -160,6 +156,6 @@ export default {
 
 <style>
 .pubForm {
-    padding: 0 20% 0 10%;
+    padding: 0 10% 0 10%;
 }
 </style>

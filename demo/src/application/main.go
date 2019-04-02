@@ -101,8 +101,8 @@ func main() {
 			MessageHandler: t.HandleMessages,
 			Options: &astilectron.WindowOptions{
 				Center: astilectron.PtrBool(true),
-				Width:  astilectron.PtrInt(1000),
-				Height: astilectron.PtrInt(700),
+				Width:  astilectron.PtrInt(1200),
+				Height: astilectron.PtrInt(750),
 				WebPreferences: &astilectron.WebPreferences{
 					NodeIntegration: astilectron.PtrBool(true),
 					WebSecurity:     astilectron.PtrBool(true),

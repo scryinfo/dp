@@ -6,7 +6,7 @@ chain:
     token_contract_addr: 0xc67d1847fb1b00173dcdbc00c7cbe32651537daa
     protocol_contract_abi_path: D:\EnglishRoad\workspace\Go\src\github.com\scryinfo\iscap\demo\src\application\sdkinterface\ScryProtocol.abi
     token_contract_abi_path: D:\EnglishRoad\workspace\Go\src\github.com\scryinfo\iscap\demo\src\application\sdkinterface\ScryToken.abi
-    protocol_contract_events: DataPublish|TransactionCreate|RegisterVerifier|VerifiersChosen|Vote|Buy|ReadyForDownload|TransactionClose
+    protocol_contract_events: DataPublish|TransactionCreate|RegisterVerifier|Vote|Buy|ReadyForDownload|TransactionClose|VerifierDisable
     token_contract_events: Approval
     deployer_keyjson: "{\"version\":3,\"id\":\"d2178973-77c3-43a1-8eae-0c126a249fd2\",\"address\":\"61ad28110ce3911a9aafabba551cdc932a02bd52\",\"crypto\":{\"ciphertext\":\"2956ee94b367d8c758474ee14da86070b3825ba01dcfbb2b2a1427043855a009\",\"cipherparams\":{\"iv\":\"5350131ef1d2bc22790cf3806aba7683\"},\"cipher\":\"aes-128-ctr\",\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"salt\":\"c8733d9edb48ec0f5cb00376f715c802c5e3041cae0c8e1d845f2fc7d4e37f1a\",\"n\":262144,\"r\":8,\"p\":1},\"mac\":\"bdbb6f2dcda1517f9440f3253a2e4a8066a38c27ca4b9f11723656c02c088728\"}}"
     deployer_password: 12345
