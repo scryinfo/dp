@@ -52,30 +52,6 @@ func Publish(txParams *op.TransactParams, price *big.Int, metaDataID []byte, pro
 	//generate publishId
 	publishId := uuid.GenerateUUID()
 
-	//submit meta data
-	//cidMd, err := ipfsaccess.GetIAInstance().SaveToIPFS(metaData)
-	//if err != nil {
-	//	rlog.Error("failed to save meta data to ipfs, error: ", err)
-	//	return "", err
-	//}
-
-	//submit proof data
-	//cidPds := make([][32]byte, proofNum)
-	//for i := 0; i < proofNum; i++ {
-	//	cidPd, err := ipfsaccess.GetIAInstance().SaveToIPFS(proofDatas[i])
-	//
-	//	if err != nil {
-	//		rlog.Error("failed to save proof data to ipfs, error: ", err)
-	//		return "", err
-	//	}
-	//
-	//	cidPds[i], err = ipfsHashToBytes32(cidPd)
-	//	if err != nil {
-	//		rlog.Error("failed to convert ipfs hash to bytes32")
-	//		return "", err
-	//	}
-	//}
-
 	pdIDs := make([][32]byte, proofNum)
 	var err error = nil
 	for i := 0;i < proofNum;i++ {
@@ -85,13 +61,6 @@ func Publish(txParams *op.TransactParams, price *big.Int, metaDataID []byte, pro
 			return "", err
 		}
 	}
-
-	//submit description data
-	//cidDd, err := ipfsaccess.GetIAInstance().SaveToIPFS(descriptionData)
-	//if err != nil {
-	//	rlog.Error("failed to save description data to ipfs, error: ", err)
-	//	return "", err
-	//}
 
 	encMetaId, err := accounts.GetAMInstance().Encrypt(metaDataID, txParams.From.String(), txParams.Password)
 	if err != nil {
@@ -124,14 +93,14 @@ func ipfsHashToBytes32(src string) ([32]byte, error) {
 	return hashArray2, nil
 }
 
-func PrepareToBuy(txParams *op.TransactParams, publishId string) error {
+func PrepareToBuy(txParams *op.TransactParams, publishId string, startVerify bool) error {
 	defer func() {
 		if err := recover(); err != nil {
 			rlog.Error("failed to prepare to buy , error:", err)
 		}
 	}()
 
-	tx, err := scryProtocol.CreateTransaction(op.BuildTransactOpts(txParams), uuid.GenerateUUID(), publishId)
+	tx, err := scryProtocol.CreateTransaction(op.BuildTransactOpts(txParams), uuid.GenerateUUID(), publishId, startVerify)
 	if err == nil {
 		rlog.Debug("CreateTransaction:" + string(tx.Data()))
 	}
@@ -196,7 +165,7 @@ func RegisterAsVerifier(txParams *op.TransactParams) error {
 func CreditsToVerifier(txParams *op.TransactParams, txId *big.Int, to common.Address, credit uint8) error {
 	tx, err := scryProtocol.CreditsToVerifier(op.BuildTransactOpts(txParams), uuid.GenerateUUID(), txId, to, credit)
 	if err == nil {
-		rlog.Debug("RegisterAsVerifier:", string(tx.Data()), " tx hash:", tx.Hash().String())
+		rlog.Debug("CreditsToVerifier:", string(tx.Data()), " tx hash:", tx.Hash().String())
 	}
 
 	return err

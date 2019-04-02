@@ -79,6 +79,7 @@ let tx_db = {
         request.onsuccess = function(event) {
             _this.$store.state.transactionbuy = []
             _this.$store.state.transactionsell = []
+            _this.$store.state.transactionverifier = []
             tx_db.db = event.target.result
             let curUser = _this.$store.state.account.toLowerCase()
             let s = tx_db.db.transaction(tx_db.db_store_name,"readonly").objectStore(tx_db.db_store_name)
@@ -95,10 +96,13 @@ let tx_db = {
                         Seller: cursor.value.Seller,
                         State: cursor.value.State,
                         SupportVerify: cursor.value.SupportVerify,
+                        StartVerify: cursor.value.StartVerify,
                         MetaDataExtension: cursor.value.MetaDataExtension,
                         ProofDataExtensions: cursor.value.ProofDataExtensions,
                         MetaDataIDEncWithSeller: cursor.value.MetaDataIDEncWithSeller,
                         MetaDataIDEncWithBuyer: cursor.value.MetaDataIDEncWithBuyer,
+                        Verifier1: cursor.value.Verifier1,
+                        Verifier2: cursor.value.Verifier2,
                         Verifier1Response: cursor.value.Verifier1Response,
                         Verifier2Response: cursor.value.Verifier2Response,
                         ArbitrateResult: cursor.value.ArbitrateResult,
@@ -110,6 +114,9 @@ let tx_db = {
                     }
                     if (t.Seller.toLowerCase() === curUser) {
                         _this.$store.state.transactionsell.push(t)
+                    }
+                    if (t.Verifier1.toLowerCase() === curUser || t.Verifier2.toLowerCase() === curUser) {
+                        _this.$store.state.transactionverifier.push(t)
                     }
                     cursor.continue()
                 }
@@ -164,7 +171,8 @@ let acc_db = {
                 if (cursor) {
                     _this.$store.state.accounts.push({
                         address: cursor.value.address,
-                        fromBlock: cursor.value.fromBlock
+                        fromBlock: cursor.value.fromBlock,
+                        isVerifier: cursor.value.isVerifier
                     })
                     cursor.continue()
                 }
@@ -205,7 +213,8 @@ let acc_db = {
             if (cursor) {
                 store.put({
                     address: cursor.value.address,
-                    fromBlock: 1
+                    fromBlock: 1,
+                    isVerifier: false
                 })
                 cursor.continue()
             }
