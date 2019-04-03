@@ -5,6 +5,7 @@ import DataList from "./views/options/DataList.vue"
 import TransactionBuy from "./views/options/TransactionBuy.vue"
 import TransactionSell from "./views/options/TransactionSell.vue"
 import PublishNewData from "./views/options/PublishNewData.vue"
+import Verify from "./views/options/Verify.vue"
 import Message from "./views/options/Message.vue"
 import Test from "./views/options/test.vue"  // for test
 
@@ -30,6 +31,7 @@ let routes = [
             {path: "/tb", component: TransactionBuy, name: "Transaction-buy"},
             {path: "/ts", component: TransactionSell, name: "Transaction-sell"},
             {path: "/pd", component: PublishNewData, name: "Publish new data"},
+            {path: "/vf", component: Verify, name: "Verify"},
             {path: "/msg", component: Message, name: "Short Message", hidden: true},
             {path: "/test", component: Test, name: "Test", hidden: true} // for test
         ]

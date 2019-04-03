@@ -56,18 +56,15 @@ contract('ScryProtocol', function (accounts) {
             assert(checkEvent(eventName, result), "failed to watch event " + eventName)
             ste.approve(ptl.address, 1600, {from: buyer})
         }).then(function() {
-            return ptl.createTransaction("seqno3",  "publishId", {from: buyer})
+            return ptl.createTransaction("seqno3",  "publishId", true, {from: buyer})
         }).then(function(result) {
             eventName = "TransactionCreate"
             assert(checkEvent(eventName, result), "failed to watch event " + eventName)
-
-            eventName = "VerifiersChosen"
-            assert(checkEvent(eventName, result), "failed to watch event " + eventName)
-
-            txId = getEventField("VerifiersChosen", result, "transactionId")
-            verifiers = getEventField("VerifiersChosen", result, "users")
+            verifiers = getEventField("TransactionCreate", result, "verifiers")
             chosenVerfiers = verifiers
+            txId = getEventField("TransactionCreate", result, "transactionId")
 
+            console.log("verifiers:", verifiers, ", txId:", txId)
             return verifiers
         }).then(function(result) {
             assert(result.length == 2, "Invalid chosen verifiers")
@@ -111,6 +108,11 @@ contract('ScryProtocol', function (accounts) {
         let nc = new Promise(function() {
             scryToken.deployed().then(function (instance) {
                 ste = instance
+                ste.transfer(seller, 10000000)
+                ste.transfer(buyer, 30000000)
+                ste.transfer(verifier1, 30000000)
+                ste.transfer(verifier2, 30000000)
+                ste.transfer(verifier3, 30000000)
             }).then(function() {
                 scryProtocol.deployed().then(function (instance) {
                     ptl = instance

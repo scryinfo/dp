@@ -1,11 +1,11 @@
 <template>
     <section>
         <el-col :span="24" class="section-item">
-            <el-button size="mini" type="primary" @click="reEncryptPwd" >ReEncrypt</el-button>
+            <el-button size="mini" type="primary" @click="reEncryptDialog = true" >ReEncrypt</el-button>
         </el-col>
 
         <el-table :data="this.$store.state.transactionsell.slice((curPage-1)*pageSize, curPage*pageSize)"
-                  highlight-current-row border height=368 @current-change="currentChange">
+                  highlight-current-row border height=468 @current-change="currentChange">
             <el-table-column type="expand">
                 <el-form slot-scope="props" label-position="left" class="tx-table-expand">
                     <el-form-item label="TransactionID"><span>{{ props.row.TransactionID }}</span></el-form-item>
@@ -26,6 +26,14 @@
         <el-pagination class="pagination" @current-change="setCurPage" @size-change="setPageSize" :total="total"
                        layout="sizes, total, prev, pager, next, jumper" :page-sizes="[5, 6]" :page-size="pageSize"
         ></el-pagination>
+
+        <el-dialog :visible.sync="reEncryptDialog" title="Input password for this account:">
+            <p>{{this.$store.state.account}}</p><el-input v-model="password" show-password clearable></el-input>
+            <div slot="footer">
+                <el-button @click="cancelClickFunc">Cancel</el-button>
+                <el-button type="primary" @click="reEncrypt">Submit</el-button>
+            </div>
+        </el-dialog>
     </section>
 </template>
 
@@ -37,16 +45,14 @@ export default {
             selectedTx: {},  // {tID: "", Buyer: "", Seller: "", MetaDataIDEncWithSeller: "", pID: ""}
             curPage: 1,
             pageSize: 6,
-            total: 0
+            total: 0,
+            password: "",
+            reEncryptDialog: false
         }
     },
     methods: {
-        setCurPage: function (curPageReturn) {
-            this.curPage = curPageReturn
-        },
-        setPageSize: function (newPageSize) {
-            this.pageSize = newPageSize
-        },
+        setCurPage: function (curPageReturn) {this.curPage = curPageReturn},
+        setPageSize: function (newPageSize) {this.pageSize = newPageSize},
         currentChange: function (curRow) {
             this.selectedTx = {
                 TransactionID: curRow.TransactionID,
@@ -56,22 +62,18 @@ export default {
                 MetaDataIDEncWithSeller: curRow.MetaDataIDEncWithSeller // transmission between go and js buy not show out to user.
             }
         },
-        reEncryptPwd:function () {
-            this.$prompt(this.$store.state.account, "Input password for this account:", {
-                confirmButtonText: "Submit",
-                cancelButtonText: "Cancel"
-            }).then(({ value }) => {
-                this.reEncrypt(value)
-            }).catch(() => {
-                this.$message({
-                    type: "info",
-                    message: "Cancel reEncrypt."
-                })
+        cancelClickFunc: function () {
+            this.reEncryptDialog = false
+            this.$message({
+                type: "info",
+                message: "Cancel re-encrypt. "
             })
         },
-        reEncrypt:function (pwd) {
+        reEncrypt:function () {
+            this.reEncryptDialog = false
             let _this = this
-            // not support buy a group of data one time, give the first id for instead.
+            let pwd = this.password
+            this.password = ""
             astilectron.sendMessage({ Name:"reEncrypt",Payload:{password: pwd, tID: this.selectedTx}}, function (message) {
                 if (message.name !== "error") {
                     console.log("ReEncrypt data success.", message)

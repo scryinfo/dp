@@ -13,7 +13,7 @@ import (
 
 var (
 	window *astilectron.Window
-	channel chan []string = make(chan []string)
+	channel chan []string = make(chan []string, 3)
 )
 
 func SetWindow(w *astilectron.Window) {
@@ -22,8 +22,8 @@ func SetWindow(w *astilectron.Window) {
 
 func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, error) {
 	var (
-		payload interface{} = nil
-		err     error       = nil
+		payload interface{}
+		err     error
 	)
 
 	switch m.Name {
@@ -57,9 +57,10 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err = sdkinterface.Initialize(uint64(sid.FromBlock)); err != nil {
 			break
 		}
-		if err = sdkinterface.SubScribeEvents(
-			[]string{"DataPublish", "Approval", "TransactionCreate", "Buy", "ReadyForDownload", "TransactionClose"},
-			onPublish, onApprove, onTransactionCreate, onPurchase, onReadyForDownload, onClose); err != nil {
+		if err = sdkinterface.SubScribeEvents([]string{"DataPublish", "Approval", "TransactionCreate", "Buy",
+			"ReadyForDownload", "TransactionClose", "RegisterVerifier", "Vote", "VerifierDisable"},
+			onPublish, onApprove, onTransactionCreate, onPurchase, onReadyForDownload, onClose, onRegisterAsVerifier, onVote,
+			onVerifierDisable); err != nil {
 			break
 		}
 		if err = sdkinterface.TransferTokenFromDeployer(big.NewInt(10000000)); err != nil { // for test
@@ -90,12 +91,12 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err = sdkinterface.ApproveTransferForBuying(bd.Password); err != nil {
 			break
 		}
-		if err = sdkinterface.CreateTransaction(bd.PublishID, bd.Password); err != nil {
+		if err = sdkinterface.CreateTransaction(bd.SelectedData.PublishID, bd.Password, bd.StartVerify); err != nil {
 			break
 		}
 		payload = true
 		return payload, nil
-	case "prepared":
+	case "extensions":
 		var p definition.Prepared
 		if err = json.Unmarshal(m.Payload, &p); err != nil {
 			break
@@ -124,6 +125,16 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		}
 		payload = true
 		return payload, nil
+	case "cancel":
+		var pd definition.PurchaseData
+		if err = json.Unmarshal(m.Payload, &pd); err != nil {
+			break
+		}
+		if err = sdkinterface.CancelTransaction(pd.SelectedTx.TransactionID, pd.Password); err != nil { // sdkinterface not implement.
+			break
+		}
+		payload = true
+		return payload, nil
 	case "decrypt":
 		var dd definition.DecryptData
 		if err = json.Unmarshal(m.Payload, &dd); err != nil {
@@ -139,7 +150,41 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err = json.Unmarshal(m.Payload, &cd); err != nil {
 			break
 		}
-		if err = sdkinterface.ConfirmDataTruth(cd.SelectedTx.TransactionID, cd.Password, cd.Arbitrate); err != nil {
+		if err = sdkinterface.ConfirmDataTruth(cd.SelectedTx.TransactionID, cd.Password, cd.Truth); err != nil {
+			break
+		}
+		payload = true
+		return payload, nil
+	case "register":
+		var rvd definition.RegisterVerifierData
+		if err = json.Unmarshal(m.Payload, &rvd); err != nil {
+			break
+		}
+		if err = sdkinterface.ApproveTransferForRegisterAsVerifier(rvd.Password); err != nil {
+			break
+		}
+		if err = sdkinterface.RegisterAsVerifier(rvd.Password); err != nil {
+			break
+		}
+		payload = true
+		return payload, nil
+	case "verify":
+		var vd definition.VerifyData
+		if err = json.Unmarshal(m.Payload, &vd); err != nil {
+			break
+		}
+		if err = sdkinterface.Vote(vd.Password, vd.TransactionID, vd.Verify.Suggestion, vd.Verify.Comment); err != nil {
+			break
+		}
+		payload = true
+		return payload, nil
+	case "credit":
+		var cd definition.CreditData
+		if err = json.Unmarshal(m.Payload, &cd); err != nil {
+			break
+		}
+		rlog.Info("Node: in credit msg from js. ", string(m.Payload), " ", cd)
+		if err = sdkinterface.CreditToVerifiers(&cd); err != nil {
 			break
 		}
 		payload = true

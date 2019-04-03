@@ -32,8 +32,8 @@ func onPublish(event events.Event) bool {
 		op.Block = event.BlockNumber
 		op.Price = event.Data.Get("price").(*big.Int).String()
 		op.PublishID = event.Data.Get("publishId").(string)
+		op.SupportVerify = event.Data.Get("supportVerify").(bool)
 
-		// op.SupportVerify is not implement.
 		if err = bootstrap.SendMessage(window, "onPublish", &op); err != nil {
 			rlog.Error(errors.Wrap(err, "onPublish"+EventSendFailed))
 		}
@@ -94,13 +94,16 @@ func onTransactionCreate(event events.Event) bool {
 			extensions []string
 		)
 		otc.PublishID = event.Data.Get("publishId").(string)
-		if err = bootstrap.SendMessage(window, "onTransactionCreatePrepare", otc.PublishID); err != nil {
-			rlog.Error("failed to send onTransactionCreatePrepare event, error:", err)
+		if err = bootstrap.SendMessage(window, "onProofFilesExtensions", otc.PublishID); err != nil {
+			rlog.Error(errors.Wrap(err, "onProofFilesExtensions"+EventSendFailed))
 		}
 
 		otc.Block = event.BlockNumber
 		otc.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
 		otc.Buyer = event.Data.Get("users").([]common.Address)[0].String()
+		otc.StartVerify = event.Data.Get("startVerify").(bool)
+		otc.Verifier1 = event.Data.Get("verifiers").([]common.Address)[0].String()
+		otc.Verifier2 = event.Data.Get("verifiers").([]common.Address)[1].String()
 		otc.TxState = setTxState(event.Data.Get("state").(uint8))
 
 		extensions = <- channel
@@ -108,7 +111,7 @@ func onTransactionCreate(event events.Event) bool {
 			rlog.Error(errors.Wrap(err, "Node - onTC.callback: get and rename proof files failed. "))
 		}
 		if err = bootstrap.SendMessage(window, "onTransactionCreate", otc); err != nil {
-			rlog.Error("failed to send onTransactionCreate event, error:", err)
+			rlog.Error(errors.Wrap(err, "onTransactionCreate"+EventSendFailed))
 		}
 	}()
 	return true
@@ -191,7 +194,56 @@ func onClose(event events.Event) bool {
 		oc.TxState = setTxState(event.Data.Get("state").(uint8))
 
 		if err = bootstrap.SendMessage(window, "onClose", oc); err != nil {
-			rlog.Error("failed to send onClose event, error:", err)
+			rlog.Error(errors.Wrap(err, "onClose"+EventSendFailed))
+		}
+	}()
+
+	return true
+}
+
+func onRegisterAsVerifier(event events.Event) bool {
+	go func() {
+		var orav definition.OnRegisterAsVerifier
+		orav.Block = event.BlockNumber
+
+		if err = bootstrap.SendMessage(window, "onRegisterVerifier", orav); err != nil {
+			rlog.Error(errors.Wrap(err, "onRegisterVerifier"+EventSendFailed))
+		}
+	}()
+
+	return true
+}
+
+func onVote(event events.Event) bool {
+	go func() {
+		var (
+			ov definition.OnVote
+			judge bool
+			comment string
+		)
+		ov.Block = event.BlockNumber
+		ov.VerifierIndex = event.Data.Get("index").(*big.Int).String()
+		judge = event.Data.Get("judge").(bool)
+		comment = event.Data.Get("comments").(string)
+		ov.VerifierResponse = setJudge(judge) + ", " + comment
+		ov.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
+		ov.TxState = setTxState(event.Data.Get("state").(uint8))
+
+		if err = bootstrap.SendMessage(window, "onVote", ov); err != nil {
+			rlog.Error(errors.Wrap(err, "onVote"+EventSendFailed))
+		}
+	}()
+
+	return true
+}
+
+func onVerifierDisable(event events.Event) bool {
+	go func() {
+		var ovd definition.OnVerifierDisable
+		ovd.Block = event.BlockNumber
+
+		if err = bootstrap.SendMessage(window, "onVerifierDisable", ovd); err != nil {
+			rlog.Error(errors.Wrap(err, "onVerifierDisable"+EventSendFailed))
 		}
 	}()
 
@@ -215,6 +267,14 @@ func setTxState(state byte) string {
 		str = "Payed"
 	case 7:
 		str = "Closed"
+	}
+	return str
+}
+
+func setJudge(judge bool) string {
+	var str string = "Not suggest to buy"
+	if judge {
+		str = "Suggest to buy"
 	}
 	return str
 }

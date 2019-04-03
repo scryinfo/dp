@@ -10,7 +10,7 @@ import (
 const (
     BROADCAST_TO_USERS = "0x00"
     TARGET_USERS       = "users"
-    TARGET_OWNER       = "_owner"
+    TARGET_OWNER       = "owner"
     APP_SEQ_NO             = "seqNo"
     TOKEN_EVT_APPROVAL = "Approval"
 )

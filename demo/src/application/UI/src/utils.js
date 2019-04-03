@@ -40,13 +40,16 @@ let utils = {
                         SupportVerify: message.payload.SupportVerify,
                         MetaDataExtension: message.payload.MetaDataExtension,
                         ProofDataExtensions: message.payload.ProofDataExtensions,
-                        PublishID: message.payload.PublishID
+                        PublishID: message.payload.PublishID    // keyPath
                     }, function () {
                         dl_db.init(_this)
                     })
-                    acc_db.write({
-                        address: _this.$store.state.account,
-                        fromBlock: message.payload.Block + 1
+                    acc_db.read(_this.$store.state.account, function (accInstance) {
+                        acc_db.write({
+                            address: accInstance.address,
+                            fromBlock: message.payload.Block + 1,
+                            isVerifier: accInstance.isVerifier
+                        })
                     })
                     break
                 case "onApprove":
@@ -56,14 +59,17 @@ let utils = {
                         message: message.payload,
                         position: "top-left"
                     })
-                    acc_db.write({
-                        address: _this.$store.state.account,
-                        fromBlock: message.payload.Block + 1
+                    acc_db.read(_this.$store.state.account, function (accInstance) {
+                        acc_db.write({
+                            address: accInstance.address,
+                            fromBlock: message.payload.Block + 1,
+                            isVerifier: accInstance.isVerifier
+                        })
                     })
                     break
-                case "onTransactionCreatePrepare":
+                case "onProofFilesExtensions":
                     dl_db.read(message.payload, function (dlInstance) {
-                        astilectron.sendMessage({ Name:"prepared", Payload: {extensions: dlInstance.ProofDataExtensions}})
+                        astilectron.sendMessage({ Name:"extensions", Payload: {extensions: dlInstance.ProofDataExtensions}})
                     })
                     break
                 case "onTransactionCreate":
@@ -83,22 +89,28 @@ let utils = {
                             Seller: dataDetails.Seller,
                             State: message.payload.TxState, // -
                             SupportVerify: dataDetails.SupportVerify,
+                            StartVerify: message.payload.StartVerify, // -
                             MetaDataExtension: dataDetails.MetaDataExtension,
                             ProofDataExtensions: dataDetails.ProofDataExtensions,
-                            MetaDataIDEncWithSeller: "",          // the two encrypt IDs will initialize later,
-                            MetaDataIDEncWithBuyer: "",           // use (tx_db.read + tx_db.write) methods.
-                            Verifier1Response: "Score, Comment",  // here three items will use a new method,
-                            Verifier2Response: "Score, Comment",  // but both vote and arbitrate are not finished,
-                            ArbitrateResult: false,               // so just still it and wait for function implement.
+                            MetaDataIDEncWithSeller: "",
+                            MetaDataIDEncWithBuyer: "",
+                            Verifier1: message.payload.Verifier1,   // -
+                            Verifier2: message.payload.Verifier2,   // -
+                            Verifier1Response: "",
+                            Verifier2Response: "",
+                            ArbitrateResult: false,
                             PublishID: dataDetails.PublishID,
                             TransactionID: message.payload.TransactionID    // keyPath
                         }, function () {
                             tx_db.init(_this)
                         })
                     })
-                    acc_db.write({
-                        address: _this.$store.state.account,
-                        fromBlock: message.payload.Block + 1
+                    acc_db.read(_this.$store.state.account, function (accInstance) {
+                        acc_db.write({
+                            address: accInstance.address,
+                            fromBlock: message.payload.Block + 1,
+                            isVerifier: accInstance.isVerifier
+                        })
                     })
                     break
                 case "onPurchase":
@@ -118,10 +130,13 @@ let utils = {
                             Seller: txDetailsOnPurchase.Seller,
                             State: message.payload.TxState, // -
                             SupportVerify: txDetailsOnPurchase.SupportVerify,
+                            StartVerify: txDetailsOnPurchase.StartVerify,
                             MetaDataExtension: txDetailsOnPurchase.MetaDataExtension,
                             ProofDataExtensions: txDetailsOnPurchase.ProofDataExtensions,
                             MetaDataIDEncWithSeller: message.payload.MetaDataIdEncWithSeller, // -
                             MetaDataIDEncWithBuyer: txDetailsOnPurchase.MetaDataIDEncWithBuyer,
+                            Verifier1: txDetailsOnPurchase.Verifier1,
+                            Verifier2: txDetailsOnPurchase.Verifier2,
                             Verifier1Response: txDetailsOnPurchase.Verifier1Response,
                             Verifier2Response: txDetailsOnPurchase.Verifier2Response,
                             ArbitrateResult: txDetailsOnPurchase.ArbitrateResult,
@@ -131,9 +146,12 @@ let utils = {
                             tx_db.init(_this)
                         })
                     })
-                    acc_db.write({
-                        address: _this.$store.state.account,
-                        fromBlock: message.payload.Block + 1
+                    acc_db.read(_this.$store.state.account, function (accInstance) {
+                        acc_db.write({
+                            address: accInstance.address,
+                            fromBlock: message.payload.Block + 1,
+                            isVerifier: accInstance.isVerifier
+                        })
                     })
                     break
                 case "onReadyForDownload":
@@ -153,10 +171,13 @@ let utils = {
                             Seller: txDetailsOnRFD.Seller,
                             State: message.payload.TxState, // -
                             SupportVerify: txDetailsOnRFD.SupportVerify,
+                            StartVerify: txDetailsOnRFD.StartVerify,
                             MetaDataExtension: txDetailsOnRFD.MetaDataExtension,
                             ProofDataExtensions: txDetailsOnRFD.ProofDataExtensions,
                             MetaDataIDEncWithSeller: txDetailsOnRFD.MetaDataIDEncWithSeller,
                             MetaDataIDEncWithBuyer: message.payload.MetaDataIdEncWithBuyer, // -
+                            Verifier1: txDetailsOnRFD.Verifier1,
+                            Verifier2: txDetailsOnRFD.Verifier2,
                             Verifier1Response: txDetailsOnRFD.Verifier1Response,
                             Verifier2Response: txDetailsOnRFD.Verifier2Response,
                             ArbitrateResult: txDetailsOnRFD.ArbitrateResult,
@@ -166,9 +187,12 @@ let utils = {
                             tx_db.init(_this)
                         })
                     })
-                    acc_db.write({
-                        address: _this.$store.state.account,
-                        fromBlock: message.payload.Block + 1
+                    acc_db.read(_this.$store.state.account, function (accInstance) {
+                        acc_db.write({
+                            address: accInstance.address,
+                            fromBlock: message.payload.Block + 1,
+                            isVerifier: accInstance.isVerifier
+                        })
                     })
                     break
                 case "onClose":
@@ -188,10 +212,13 @@ let utils = {
                             Seller: txDetailsOnC.Seller,
                             State: message.payload.TxState, // -
                             SupportVerify: txDetailsOnC.SupportVerify,
+                            StartVerify: txDetailsOnC.StartVerify,
                             MetaDataExtension: txDetailsOnC.MetaDataExtension,
                             ProofDataExtensions: txDetailsOnC.ProofDataExtensions,
                             MetaDataIDEncWithSeller: txDetailsOnC.MetaDataIDEncWithSeller,
                             MetaDataIDEncWithBuyer: txDetailsOnC.MetaDataIDEncWithBuyer,
+                            Verifier1: txDetailsOnC.Verifier1,
+                            Verifier2: txDetailsOnC.Verifier2,
                             Verifier1Response: txDetailsOnC.Verifier1Response,
                             Verifier2Response: txDetailsOnC.Verifier2Response,
                             ArbitrateResult: txDetailsOnC.ArbitrateResult,
@@ -201,9 +228,96 @@ let utils = {
                             tx_db.init(_this)
                         })
                     })
-                    acc_db.write({
-                        address: _this.$store.state.account,
-                        fromBlock: message.payload.Block + 1
+                    acc_db.read(_this.$store.state.account, function (accInstance) {
+                        acc_db.write({
+                            address: accInstance.address,
+                            fromBlock: message.payload.Block + 1,
+                            isVerifier: accInstance.isVerifier
+                        })
+                    })
+                    break
+                case "onRegisterVerifier":
+                    console.log("Node: onRegisterVerifier.callback. ", message.payload)
+                    acc_db.read(_this.$store.state.account, function (accInstance) {
+                        acc_db.write({
+                            address: accInstance.address,
+                            fromBlock: message.payload.Block + 1,
+                            isVerifier: true
+                        })
+                    })
+                    break
+                case "onVote":
+                    console.log("Node: onVote.callback. ", message.payload)
+                    tx_db.read(message.payload.TransactionID, function (txDetailsOnV) {
+                        if (message.payload.VerifierIndex === "0") {
+                            tx_db.write({
+                                Title: txDetailsOnV.Title,
+                                Price: txDetailsOnV.Price,
+                                Keys: txDetailsOnV.Keys,
+                                Description: txDetailsOnV.Description,
+                                Buyer: txDetailsOnV.Buyer,
+                                Seller: txDetailsOnV.Seller,
+                                State: message.payload.TxState, // -
+                                SupportVerify: txDetailsOnV.SupportVerify,
+                                StartVerify: txDetailsOnV.StartVerify,
+                                MetaDataExtension: txDetailsOnV.MetaDataExtension,
+                                ProofDataExtensions: txDetailsOnV.ProofDataExtensions,
+                                MetaDataIDEncWithSeller: txDetailsOnV.MetaDataIDEncWithSeller,
+                                MetaDataIDEncWithBuyer: txDetailsOnV.MetaDataIDEncWithBuyer,
+                                Verifier1: txDetailsOnV.Verifier1,
+                                Verifier2: txDetailsOnV.Verifier2,
+                                Verifier1Response: message.payload.VerifierResponse, // -
+                                Verifier2Response: txDetailsOnV.Verifier2Response,
+                                ArbitrateResult: txDetailsOnV.ArbitrateResult,
+                                PublishID: txDetailsOnV.PublishID,
+                                TransactionID: txDetailsOnV.TransactionID
+                            }, function () {
+                                tx_db.init(_this)
+                            })
+                        }
+                        if (message.payload.VerifierIndex === "1") {
+                            tx_db.write({
+                                Title: txDetailsOnV.Title,
+                                Price: txDetailsOnV.Price,
+                                Keys: txDetailsOnV.Keys,
+                                Description: txDetailsOnV.Description,
+                                Buyer: txDetailsOnV.Buyer,
+                                Seller: txDetailsOnV.Seller,
+                                State: message.payload.TxState, // -
+                                SupportVerify: txDetailsOnV.SupportVerify,
+                                StartVerify: txDetailsOnV.StartVerify,
+                                MetaDataExtension: txDetailsOnV.MetaDataExtension,
+                                ProofDataExtensions: txDetailsOnV.ProofDataExtensions,
+                                MetaDataIDEncWithSeller: txDetailsOnV.MetaDataIDEncWithSeller,
+                                MetaDataIDEncWithBuyer: txDetailsOnV.MetaDataIDEncWithBuyer,
+                                Verifier1: txDetailsOnV.Verifier1,
+                                Verifier2: txDetailsOnV.Verifier2,
+                                Verifier1Response: txDetailsOnV.Verifier1Response,
+                                Verifier2Response: message.payload.VerifierResponse, // -
+                                ArbitrateResult: txDetailsOnV.ArbitrateResult,
+                                PublishID: txDetailsOnV.PublishID,
+                                TransactionID: txDetailsOnV.TransactionID
+                            }, function () {
+                                tx_db.init(_this)
+                            })
+                        }
+                    })
+                    acc_db.read(_this.$store.state.account, function (accInstance) {
+                        acc_db.write({
+                            address: accInstance.address,
+                            fromBlock: message.payload.Block + 1,
+                            isVerifier: accInstance.isVerifier
+                        })
+                    })
+                    break
+                case "onVerifierDisable":
+                    console.log("Node: onVerifierDisable.callback. ", message.payload)
+                    acc_db.read(_this.$store.state.account, function (accInstance) {
+                        acc_db.write({
+                            address: accInstance.address,
+                            fromBlock: message.payload.Block + 1,
+                            isVerifier: false
+                        })
                     })
                     break
             }

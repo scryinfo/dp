@@ -1,6 +1,7 @@
 package sdkinterface
 
 import (
+	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/scryinfo/iscap/demo/src/application/definition"
@@ -9,6 +10,7 @@ import (
 	"github.com/scryinfo/iscap/demo/src/sdk/core/chainevents"
 	"github.com/scryinfo/iscap/demo/src/sdk/core/chainoperations"
 	"github.com/scryinfo/iscap/demo/src/sdk/scryclient"
+	rlog "github.com/sirupsen/logrus"
 	cif "github.com/scryinfo/iscap/demo/src/sdk/scryclient/chaininterfacewrapper"
 	"github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
 	"github.com/scryinfo/iscap/demo/src/sdk/util/storage/ipfsaccess"
@@ -150,39 +152,43 @@ func PublishData(data *definition.PublishData) (string, error) {
 
 	return cif.Publish(&txParam,
 		big.NewInt(int64(data.Price)),
-		[]byte(data.MetaDataID),
-		data.ProofDataIDs,
-		len(data.ProofDataIDs),
-		data.DetailsID,
+		[]byte(data.IDs.MetaDataID),
+		data.IDs.ProofDataIDs,
+		len(data.IDs.ProofDataIDs),
+		data.IDs.DetailsID,
 		data.SupportVerify)
 }
 
-func ApproveTransferForBuying(password string) error {
-	return approveTransfer(password, common.HexToAddress(scryInfo.Chain.Contracts.ProtocolAddr))
+func ApproveTransferForRegisterAsVerifier(password string) error {
+	return approveTransfer(password, common.HexToAddress(scryInfo.Chain.Contracts.ProtocolAddr), big.NewInt(10000))
 }
 
-func approveTransfer(password string, protocolContractAddr common.Address) error {
+func ApproveTransferForBuying(password string) error {
+	return approveTransfer(password, common.HexToAddress(scryInfo.Chain.Contracts.ProtocolAddr), big.NewInt(1600))
+}
+
+func approveTransfer(password string, protocolContractAddr common.Address, token *big.Int) error {
 	if curUser == nil {
 		return errors.New("Current user is nil. ")
 	}
 
 	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
 		Password: password, Value: big.NewInt(0), Pending: false}
-	if err = cif.ApproveTransfer(&txParam, protocolContractAddr, big.NewInt(1600)); err != nil {
+	if err = cif.ApproveTransfer(&txParam, protocolContractAddr, token); err != nil {
 		return errors.Wrap(err, "Contract transfer token from buyer failed. ")
 	}
 
 	return nil
 }
 
-func CreateTransaction(publishId string, password string) error {
+func CreateTransaction(publishId string, password string, startVerify bool) error {
 	if curUser == nil {
 		return errors.New("Current user is nil. ")
 	}
 
 	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
 		Password: password, Value: big.NewInt(0), Pending: false}
-	if err = cif.PrepareToBuy(&txParam, publishId); err != nil {
+	if err = cif.PrepareToBuy(&txParam, publishId, startVerify); err != nil {
 		return errors.Wrap(err, "Transaction create failed. ")
 	}
 
@@ -225,6 +231,18 @@ func SubmitMetaDataIdEncWithBuyer(txId string, password, seller, buyer string, m
 	return nil
 }
 
+func CancelTransaction(txId, password string) error {
+	tID, ok := new(big.Int).SetString(txId, 10)
+	if !ok {
+		return errors.New("Set to *big.Int failed. ")
+	}
+	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
+		Password: password, Value: big.NewInt(0), Pending: false}
+	// call cif function after compile contract.
+	fmt.Println(tID, txParam)
+	return nil
+}
+
 func BuyerDecryptAndGetMetaDataFromIPFS(password string, metaDataIdEncWithBuyer []byte, buyer, extension string) (string, error) {
 	var metaDataIDByte []byte
 	if metaDataIDByte, err = accounts.GetAMInstance().Decrypt(metaDataIdEncWithBuyer, buyer, password); err != nil {
@@ -241,7 +259,7 @@ func BuyerDecryptAndGetMetaDataFromIPFS(password string, metaDataIdEncWithBuyer 
 	return newFileName, nil
 }
 
-func ConfirmDataTruth(txId string, password string, arbitrate bool) error {
+func ConfirmDataTruth(txId string, password string, truth bool) error {
 	if curUser == nil {
 		return errors.New("Current user is nil. ")
 	}
@@ -252,9 +270,67 @@ func ConfirmDataTruth(txId string, password string, arbitrate bool) error {
 	if !ok {
 		return errors.New("Set to *big.Int failed. ")
 	}
-	if err = cif.ConfirmDataTruth(&txParam, tID, arbitrate); err != nil {
+	if err = cif.ConfirmDataTruth(&txParam, tID, truth); err != nil {
 		return errors.Wrap(err, "Confirm data truth failed. ")
 	}
+	return nil
+}
+
+func RegisterAsVerifier(password string) error {
+	if curUser == nil {
+		return errors.New("Current user is nil. ")
+	}
+
+	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
+		Password: password, Value: big.NewInt(0), Pending: false}
+	if err = cif.RegisterAsVerifier(&txParam); err != nil {
+		return errors.Wrap(err, "Register as verifier failed. ")
+	}
+	return nil
+}
+
+func Vote(password, txId string, judge bool, comment string) error {
+	if curUser == nil {
+		return errors.New("Current user is nil. ")
+	}
+	tID, ok := new(big.Int).SetString(txId, 10)
+	if !ok {
+		return errors.New("Set to *big.Int failed. ")
+	}
+	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
+		Password: password, Value: big.NewInt(0), Pending: false}
+	if err = cif.Vote(&txParam, tID, judge, comment); err != nil {
+		return errors.Wrap(err, "Vote failed. ")
+	}
+	return nil
+}
+
+func CreditToVerifiers(creditData *definition.CreditData) error {
+	if curUser == nil {
+		return errors.New("Current user is nil. ")
+	}
+	tID, ok := new(big.Int).SetString(creditData.SelectedTxCrD.TransactionID, 10)
+	if !ok {
+		return errors.New("Set to *big.Int failed. ")
+	}
+	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
+		Password: creditData.Password, Value: big.NewInt(0), Pending: false}
+
+	if creditData.Credit.Verifier1Revert {
+		verifier := common.HexToAddress(creditData.SelectedTxCrD.Verifier1)
+		credit := uint8(creditData.Credit.Verifier1Credit)
+		if err = cif.CreditsToVerifier(&txParam, tID, verifier, credit); err != nil {
+			return errors.Wrap(err, "Credit failed. ")
+		}
+	}
+	if creditData.Credit.Verifier2Revert {
+		verifier := common.HexToAddress(creditData.SelectedTxCrD.Verifier2)
+		credit := uint8(creditData.Credit.Verifier2Credit)
+		if err = cif.CreditsToVerifier(&txParam, tID, verifier, credit); err != nil {
+			return errors.Wrap(err, "Credit failed. ")
+		}
+	}
+
 	return nil
 }
 
