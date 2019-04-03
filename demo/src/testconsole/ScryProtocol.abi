@@ -52,6 +52,11 @@
         },
         {
           "indexed": false,
+          "name": "supportVerify",
+          "type": "bool"
+        },
+        {
+          "indexed": false,
           "name": "users",
           "type": "address[]"
         }
@@ -94,30 +99,8 @@
         },
         {
           "indexed": false,
-          "name": "users",
+          "name": "verifiers",
           "type": "address[]"
-        }
-      ],
-      "name": "TransactionCreate",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "name": "seqNo",
-          "type": "string"
-        },
-        {
-          "indexed": false,
-          "name": "transactionId",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "name": "proofIds",
-          "type": "bytes32[]"
         },
         {
           "indexed": false,
@@ -125,7 +108,7 @@
           "type": "address[]"
         }
       ],
-      "name": "VerifiersChosen",
+      "name": "TransactionCreate",
       "type": "event"
     },
     {
@@ -155,6 +138,11 @@
           "indexed": false,
           "name": "state",
           "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "name": "index",
+          "type": "uint256"
         },
         {
           "indexed": false,
@@ -394,6 +382,10 @@
         {
           "name": "publishId",
           "type": "string"
+        },
+        {
+          "name": "startVerify",
+          "type": "bool"
         }
       ],
       "name": "createTransaction",

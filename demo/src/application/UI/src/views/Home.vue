@@ -119,14 +119,14 @@ export default {
 .aside {
     background-color: lightgrey;
     padding-top: 60px;
-    height: 440px;
+    height: 540px;
 }
 .el-menu-item {
     background-color: lightgrey;
 }
 .section {
     padding: 10px 10%;
-    height: 480px;
+    height: 580px;
 }
 .el-form-item {
     width: 100%;

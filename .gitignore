@@ -40,3 +40,7 @@ Thumbs.db
 #####################
 .DS_Store
 .idea
+
+# Other
+####################
+.gitignore

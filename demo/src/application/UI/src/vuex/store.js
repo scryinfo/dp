@@ -12,19 +12,22 @@ let state = {
     //  primary key: PublishID.
 
     transactionbuy: [],
-    // {Title: "", Price: 0, Keys: "", Description: "", Buyer: "", Seller: "", State: "", SupportVerify: false,
-    //     MetaDataExtension: "", ProofDataExtensions: [], MetaDataIDEncWithSeller: [], MetaDataIDEncWithBuyer: [],
-    //     Verifier1Response: "", Verifier2Response: "", ArbitrateResult: false, pID: "", tID: "",}
+    // {Title: "", Price: 0, Keys: "", Description: "", Buyer: "", Seller: "", State: "", SupportVerify: false, StartVerify: false,
+    //     MetaDataExtension: "", ProofDataExtensions: [], MetaDataIDEncWithSeller: [], MetaDataIDEncWithBuyer: [], ArbitrateResult: false,
+    //     Verifier1: "", Verifier2: "", Verifier1Response: "", Verifier2Response: "", pID: "", tID: ""}
     //
-    // transaction's data dictionary = [datalist] + {Buyer, State, MetaDataIDEncWithSeller, MetaDataIDEncWithBuyer,
-    //     Verifier1Response, Verifier2Response, ArbitrateResult, tID} = 9 + 8 = 17
+    // transaction's data dictionary = [datalist] + {Buyer, State, StartVerify, MetaDataIDEncWithSeller, MetaDataIDEncWithBuyer,
+    //     Verifier1, Verifier2, Verifier1Response, Verifier2Response, ArbitrateResult, tID} = 9 + 11 = 20
     //  primary key: TransactionID.
 
     transactionsell: [],
-    // the same as transactionbuy, the two arrays use the same database.
+    // the same as transactionbuy, three arrays use the same database.
+    
+    transactionverifier: [],
+    // the same as transactionbuy, three arrays use the same database.
     
     accounts: [],
-    // {address: "", fromBlock: 0(uint64)}
+    // {address: "", fromBlock: 0(uint64), isVerifier: false}
     //  primary key: address.
 
     account: ""

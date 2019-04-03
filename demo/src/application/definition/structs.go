@@ -20,12 +20,15 @@ type SDKInitData struct {
 //}
 
 type PublishData struct {
-	MetaDataID    string   `json:"metaDataID"`
-	ProofDataIDs  []string `json:"proofDataIDs"`
-	DetailsID     string   `json:"detailsID"`
-	Price         float64  `json:"price"`
-	SupportVerify bool     `json:"supportVerify"`
-	Password      string   `json:"password"`
+	Price         float64 `json:"price"`
+	SupportVerify bool    `json:"supportVerify"`
+	Password      string  `json:"password"`
+	IDs           IDs     `json:"IDs"`
+}
+type IDs struct {
+	MetaDataID   string   `json:"metaDataID"`
+	ProofDataIDs []string `json:"proofDataIDs"`
+	DetailsID    string   `json:"detailsID"`
 }
 
 type OnPublish struct {
@@ -37,13 +40,17 @@ type OnPublish struct {
 	Seller              string   `json:"Seller"`
 	Price               string
 	PublishID           string
-	SupportVerify       bool // not implement.
+	SupportVerify       bool
 	Block               uint64
 }
 
 type BuyData struct {
-	Password  string `json:"password"`
-	PublishID string `json:"pID"`
+	Password     string       `json:"password"`
+	StartVerify  bool         `json:"startVerify"`
+	SelectedData SelectedData `json:"pID"`
+}
+type SelectedData struct {
+	PublishID string `json:"PublishID"`
 }
 
 type OnApprove struct {
@@ -55,6 +62,9 @@ type OnTransactionCreate struct {
 	PublishID      string
 	ProofFileNames []string
 	Buyer          string
+	StartVerify    bool
+	Verifier1      string
+	Verifier2      string
 	TxState        string
 	Block          uint64
 }
@@ -109,7 +119,7 @@ type SelectedTxDD struct {
 type ConfirmData struct {
 	Password   string       `json:"password"`
 	SelectedTx SelectedTxCD `json:"tID"`
-	Arbitrate  bool         `json:"startArbitrate"`
+	Truth  bool         `json:"confirmData"`
 }
 type SelectedTxCD struct {
 	TransactionID string `json:"TransactionID"`
@@ -119,4 +129,57 @@ type OnClose struct {
 	TransactionID string
 	TxState       string
 	Block         uint64
+}
+
+type RegisterVerifierData struct {
+	Password string `json:"password"`
+}
+type OnRegisterAsVerifier struct {
+	Block uint64
+}
+
+type OnVerifiersChosen struct {
+	TransactionID  string
+	PublishID      string
+	ProofFileNames []string
+	Block          uint64
+}
+
+type VerifyData struct {
+	Password      string `json:"password"`
+	TransactionID string `json:"tID"`
+	Verify        Verify `json:"verify"`
+}
+type Verify struct {
+	Suggestion bool   `json:"suggestion"`
+	Comment    string `json:"comment"`
+}
+
+type OnVote struct {
+	TransactionID    string
+	VerifierResponse string
+	VerifierIndex    string
+	TxState          string
+	Block            uint64
+}
+
+type CreditData struct {
+	Password      string        `json:"password"`
+	SelectedTxCrD SelectedTxCrD `json:"tID"`
+	Credit        Credit        `json:"credit"`
+}
+type SelectedTxCrD struct {
+	TransactionID string `json:"TransactionID"`
+	Verifier1     string `json:"Verifier1"`
+	Verifier2     string `json:"Verifier2"`
+}
+type Credit struct {
+	Verifier1Revert bool    `json:"verifier1Revert"`
+	Verifier1Credit float64 `json:"verifier1Credit"`
+	Verifier2Revert bool    `json:"verifier2Revert"`
+	Verifier2Credit float64 `json:"verifier2Credit"`
+}
+
+type OnVerifierDisable struct {
+	Block uint64
 }

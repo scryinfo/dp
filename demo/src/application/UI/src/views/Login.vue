@@ -85,6 +85,11 @@ export default {
             let _this = this
             astilectron.sendMessage({Name: "create.new.account", Payload: {password: this.password}}, function (message) {
                 if (message.name !== "error") {
+                    acc_db.write({
+                        address: _this.account,
+                        fromBlock: 1,
+                        isVerifier: false
+                    })
                     _this.account = message.payload
                     _this.showControl1 = false;_this.showControl2 = true
                 }else {
@@ -104,10 +109,6 @@ export default {
             astilectron.sendMessage({Name: "save.keystore", Payload: {account: this.$store.state.account,
                     password: pwd}}, function (message) {
                 if (message.name !== "error") {
-                    acc_db.write({
-                        address: _this.account,
-                        fromBlock: 1
-                    })
                     _this.$router.push({ name: "home", params: {acc: _this.account}})
                 } else {
                     console.log("Node: save.keystore failed. ", message)
@@ -144,7 +145,7 @@ export default {
 }
 .left {
     background-color: lightgray;
-    height: 500px;
+    height: 600px;
 }
 .left-explain {
     text-align: left;
