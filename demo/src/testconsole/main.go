@@ -36,7 +36,14 @@ var (
 
 func main() {
 	//note: asServiceAddr is the host of key management service which is outside
-	err := sdk.Init("http://127.0.0.1:7545/", "192.168.1.6:48080", getContracts(), 0, "/ip4/127.0.0.1/tcp/5001")
+	err := sdk.Init(
+	    "http://127.0.0.1:7545/",
+	    "192.168.1.6:48080",
+        protocolContractAddr,
+        tokenContractAddr,
+	    "/ip4/127.0.0.1/tcp/5001",
+	    "./log/sdk.log",
+	    "testconsole")
 	if err != nil {
 		fmt.Println("failed to initialize sdk, error:", err)
 		return
