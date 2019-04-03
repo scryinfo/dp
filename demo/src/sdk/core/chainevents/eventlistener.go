@@ -1,11 +1,15 @@
 package chainevents
 
 import (
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/scryinfo/iscap/demo/src/sdk/core/ethereum/events"
-	rlog "github.com/sirupsen/logrus"
-	"time"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/ethclient"
+    "github.com/scryinfo/iscap/demo/src/sdk/core/ethereum/events"
+    rlog "github.com/sirupsen/logrus"
+    "time"
+)
+
+var (
+    builder *events.Builder = nil
 )
 
 type ContractInfo struct {
@@ -32,7 +36,7 @@ func ListenEvent(conn *ethclient.Client, contracts []ContractInfo,
 		return false
 	}
 
-	builder := events.NewScanBuilder()
+	builder = events.NewScanBuilder()
 	for _, v := range contracts {
 		builder.SetContract(common.HexToAddress(v.Address), v.Abi, v.Events...)
 	}
@@ -52,4 +56,12 @@ func ListenEvent(conn *ethclient.Client, contracts []ContractInfo,
 	recp.WaitChan()
 
 	return rv
+}
+
+func SetFromBlock(from uint64)  {
+    if builder != nil {
+        builder.SetFrom(from)
+    } else {
+      rlog.Warn("Failed to set from block because of nil builder.")
+    }
 }

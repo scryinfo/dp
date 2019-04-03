@@ -5,7 +5,9 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
 	"github.com/scryinfo/iscap/demo/src/sdk/core/chainevents"
-	rlog "github.com/sirupsen/logrus"
+    "github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
+    "github.com/scryinfo/iscap/demo/src/sdk/util/storage/ipfsaccess"
+    rlog "github.com/sirupsen/logrus"
 )
 
 type Connector struct {
@@ -15,23 +17,41 @@ type Connector struct {
 
 //start
 func StartEngine(ethNodeAddr string,
-	contracts []chainevents.ContractInfo,
-	fromBlock uint64) (*ethclient.Client, error) {
+    asServiceAddr string,
+    contracts []chainevents.ContractInfo,
+    ipfsNodeAddr string) (*ethclient.Client, error) {
 
-	defer func() {
-		if err := recover(); err != nil {
-			rlog.Error("failed to initialize start engine, error:", err)
-		}
-	}()
+    defer func() {
+        if err := recover(); err != nil {
+            rlog.Error("failed to initialize start engine, error:", err)
+        }
+    }()
 
-	connector, err := newConnector(ethNodeAddr)
-	if err != nil {
-		return nil, errors.Wrap(err, "Init connector failed. ")
-	}
+    err := ipfsaccess.GetIAInstance().Initialize(ipfsNodeAddr)
+    if err != nil {
+        rlog.Error("failed to initialize ipfs. error: ", err)
+        return nil, err
+    }
 
-	chainevents.StartEventProcessing(connector.conn, contracts, fromBlock)
+    connector, err := newConnector(ethNodeAddr)
+    if err != nil {
+        rlog.Error("failed to initialize connector. error: ", err)
+        return nil, err
+    }
 
-	return connector.conn, nil
+    err = accounts.GetAMInstance().Initialize(asServiceAddr)
+    if err != nil {
+        rlog.Error("failed to initialize account service, error:", err)
+        return nil, err
+    }
+
+    chainevents.StartEventProcessing(connector.conn, contracts)
+
+    return connector.conn, nil
+}
+
+func StartScan(fromBlock uint64) {
+    chainevents.SetFromBlock(fromBlock)
 }
 
 func newConnector(ethNodeAddr string) (*Connector, error) {

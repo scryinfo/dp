@@ -8,7 +8,8 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	op "github.com/scryinfo/iscap/demo/src/sdk/core/chainoperations"
 	"github.com/scryinfo/iscap/demo/src/sdk/interface/contractinterface"
-	"github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
+    "github.com/scryinfo/iscap/demo/src/sdk/settings"
+    "github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
 	"github.com/scryinfo/iscap/demo/src/sdk/util/uuid"
 	rlog "github.com/sirupsen/logrus"
 	"math/big"
@@ -100,7 +101,7 @@ func Publish(txParams *op.TransactParams, price *big.Int, metaDataID []byte, pro
 	}
 
 	//upload meta_data_id_enc_seller and other cids to contracts
-	tx, err := scryProtocol.PublishDataInfo(op.BuildTransactOpts(txParams), uuid.GenerateUUID(), publishId, price,
+	tx, err := scryProtocol.PublishDataInfo(op.BuildTransactOpts(txParams), getAppSeqNo(), publishId, price,
 		encMetaId, pdIDs, detailsID, supportVerify)
 	if err != nil {
 		rlog.Error("failed to publish data information, error: ", err)
@@ -124,6 +125,17 @@ func ipfsHashToBytes32(src string) ([32]byte, error) {
 	return hashArray2, nil
 }
 
+func Bytes32ToIpfsHash(value [32]byte) (string, error) {
+    byteArray := [34]byte {18, 32}
+    copy(byteArray[2:], value[:])
+    if len(byteArray) != 34 {
+        return "", errors.New("invalid bytes32 value")
+    }
+
+    hash := base58.Encode(byteArray[:])
+    return hash, nil
+}
+
 func PrepareToBuy(txParams *op.TransactParams, publishId string) error {
 	defer func() {
 		if err := recover(); err != nil {
@@ -131,7 +143,7 @@ func PrepareToBuy(txParams *op.TransactParams, publishId string) error {
 		}
 	}()
 
-	tx, err := scryProtocol.CreateTransaction(op.BuildTransactOpts(txParams), uuid.GenerateUUID(), publishId)
+	tx, err := scryProtocol.CreateTransaction(op.BuildTransactOpts(txParams), getAppSeqNo(), publishId)
 	if err == nil {
 		rlog.Debug("CreateTransaction:" + string(tx.Data()))
 	}
@@ -140,7 +152,7 @@ func PrepareToBuy(txParams *op.TransactParams, publishId string) error {
 }
 
 func BuyData(txParams *op.TransactParams, txId *big.Int) error {
-	tx, err := scryProtocol.BuyData(op.BuildTransactOpts(txParams), uuid.GenerateUUID(), txId)
+	tx, err := scryProtocol.BuyData(op.BuildTransactOpts(txParams), getAppSeqNo(), txId)
 	if err == nil {
 		rlog.Debug("BuyData:", tx.Data(), " tx hash:", tx.Hash().String())
 	}
@@ -149,7 +161,7 @@ func BuyData(txParams *op.TransactParams, txId *big.Int) error {
 }
 
 func SubmitMetaDataIdEncWithBuyer(txParams *op.TransactParams, txId *big.Int, encyptedMetaDataId []byte) error {
-	tx, err := scryProtocol.SubmitMetaDataIdEncWithBuyer(op.BuildTransactOpts(txParams), uuid.GenerateUUID(), txId, encyptedMetaDataId)
+	tx, err := scryProtocol.SubmitMetaDataIdEncWithBuyer(op.BuildTransactOpts(txParams), getAppSeqNo(), txId, encyptedMetaDataId)
 	if err == nil {
 		rlog.Debug("SubmitMetaDataIdEncWithBuyer:", string(tx.Data()), " tx hash:", tx.Hash().String())
 	}
@@ -158,7 +170,7 @@ func SubmitMetaDataIdEncWithBuyer(txParams *op.TransactParams, txId *big.Int, en
 }
 
 func ConfirmDataTruth(txParams *op.TransactParams, txId *big.Int, truth bool) error {
-	tx, err := scryProtocol.ConfirmDataTruth(op.BuildTransactOpts(txParams), uuid.GenerateUUID(), txId, truth)
+	tx, err := scryProtocol.ConfirmDataTruth(op.BuildTransactOpts(txParams), getAppSeqNo(), txId, truth)
 	if err == nil {
 		rlog.Debug("ConfirmDataTruth:", string(tx.Data()), " tx hash:", tx.Hash().String())
 	}
@@ -176,7 +188,7 @@ func ApproveTransfer(txParams *op.TransactParams, spender common.Address, value 
 }
 
 func Vote(txParams *op.TransactParams, txId *big.Int, judge bool, comments string) error {
-	tx, err := scryProtocol.Vote(op.BuildTransactOpts(txParams), uuid.GenerateUUID(), txId, judge, comments)
+	tx, err := scryProtocol.Vote(op.BuildTransactOpts(txParams), getAppSeqNo(), txId, judge, comments)
 	if err == nil {
 		rlog.Debug("Vote:", string(tx.Data()), " tx hash:", tx.Hash().String())
 	}
@@ -194,7 +206,7 @@ func RegisterAsVerifier(txParams *op.TransactParams) error {
 }
 
 func CreditsToVerifier(txParams *op.TransactParams, txId *big.Int, to common.Address, credit uint8) error {
-	tx, err := scryProtocol.CreditsToVerifier(op.BuildTransactOpts(txParams), uuid.GenerateUUID(), txId, to, credit)
+	tx, err := scryProtocol.CreditsToVerifier(op.BuildTransactOpts(txParams), getAppSeqNo(), txId, to, credit)
 	if err == nil {
 		rlog.Debug("RegisterAsVerifier:", string(tx.Data()), " tx hash:", tx.Hash().String())
 	}
@@ -225,4 +237,8 @@ func TransferEth(from common.Address,
 
 func GetEthBalance(owner common.Address) (*big.Int, error) {
 	return op.GetEthBalance(owner, conn)
+}
+
+func getAppSeqNo() string {
+    return settings.GetAppId()
 }

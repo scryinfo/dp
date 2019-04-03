@@ -13,26 +13,34 @@ var (
 	externalEventRepo  = NewEventRepository()
 	dataChannel        = make(chan events.Event, maxChannelEventNum)
 	errorChannel       = make(chan error, 1)
-	settingPath        = "../../definition/definition.yaml"
 )
 
-func StartEventProcessing(conn *ethclient.Client,
-                            contracts []ContractInfo,
-                            fromBlock uint64) {
+func StartEventProcessing(
+        conn *ethclient.Client,
+        contracts []ContractInfo,
+    ) {
 	rlog.Info("start event processing...")
 
 	go ExecuteEvents(dataChannel, externalEventRepo)
-	go ListenEvent(conn, contracts, fromBlock, 60, dataChannel, errorChannel)
+	go ListenEvent(conn, contracts, 0, 60, dataChannel, errorChannel)
 
 	rlog.Info("finished event processing.")
 }
 
-func SubscribeExternal(clientAddr common.Address, eventName string, eventCallback EventCallback) error {
+func SubscribeExternal(
+        clientAddr common.Address,
+        eventName string,
+        eventCallback EventCallback,
+    ) error {
 	return subscribe(clientAddr, eventName, eventCallback, externalEventRepo)
 }
 
-func subscribe(clientAddr common.Address, eventName string,
-	eventCallback EventCallback, eventRepo *EventRepository) error {
+func subscribe(
+        clientAddr common.Address,
+        eventName string,
+        eventCallback EventCallback,
+        eventRepo *EventRepository,
+    ) error {
 	if eventCallback == nil || eventName == "" {
 		return errors.New("couldn't subscribe event because of null eventCallback or empty event name")
 	}
