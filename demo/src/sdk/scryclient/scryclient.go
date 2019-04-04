@@ -37,6 +37,10 @@ func (client ScryClient) SubscribeEvent(eventName string, callback chainevents.E
 	return chainevents.SubscribeExternal(common.HexToAddress(client.Account.Address), eventName, callback)
 }
 
+func (client ScryClient) UnSubscribeEvent(eventName string) error {
+    return chainevents.UnSubscribeExternal(common.HexToAddress(client.Account.Address), eventName)
+}
+
 func (client ScryClient) Authenticate(password string) (bool, error) {
 	return accounts.GetAMInstance().AuthAccount(client.Account.Address, password)
 }

@@ -55,3 +55,33 @@ func subscribe(
 
 	return nil
 }
+
+func UnSubscribeExternal(
+    clientAddr common.Address,
+    eventName string,
+) error {
+    return unsubscribe(clientAddr, eventName, externalEventRepo)
+}
+
+func unsubscribe(
+        clientAddr common.Address,
+        eventName string,
+        eventRepo *EventRepository,
+    ) error {
+    if eventName == "" {
+        return errors.New("couldn't unsubscribe event because of empty event name")
+    }
+
+    subscribeInfoMap := eventRepo.mapEventSubscribe[eventName]
+    if subscribeInfoMap == nil || subscribeInfoMap[clientAddr] == nil {
+        return errors.New("couldn't find corresponding event to unsubscribe:" + eventName)
+    }
+
+    delete(subscribeInfoMap, clientAddr)
+    if len(subscribeInfoMap) == 0 {
+        subscribeInfoMap = nil
+        delete(eventRepo.mapEventSubscribe, eventName)
+    }
+
+    return nil
+}
