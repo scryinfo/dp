@@ -1,17 +1,15 @@
 package main
 
 import (
-	"fmt"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/scryinfo/iscap/demo/src/sdk"
-	"github.com/scryinfo/iscap/demo/src/sdk/core/chainevents"
-	"github.com/scryinfo/iscap/demo/src/sdk/core/chainoperations"
-	"github.com/scryinfo/iscap/demo/src/sdk/core/ethereum/events"
-	"github.com/scryinfo/iscap/demo/src/sdk/scryclient"
-	cif "github.com/scryinfo/iscap/demo/src/sdk/scryclient/chaininterfacewrapper"
-	"github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
-	"io/ioutil"
-	"math/big"
+    "fmt"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/scryinfo/iscap/demo/src/sdk"
+    "github.com/scryinfo/iscap/demo/src/sdk/core/chainoperations"
+    "github.com/scryinfo/iscap/demo/src/sdk/core/ethereum/events"
+    "github.com/scryinfo/iscap/demo/src/sdk/scryclient"
+    cif "github.com/scryinfo/iscap/demo/src/sdk/scryclient/chaininterfacewrapper"
+    "github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
+    "math/big"
     "os"
     "time"
 )
@@ -21,8 +19,8 @@ var (
 	txId                    *big.Int = big.NewInt(0)
 	metaDataIdEncWithSeller []byte
 	metaDataIdEncWithBuyer  []byte
-	protocolContractAddr                           = "0xbda8acd1e64e6db0fe2a2997a3918c63d373eda1"
-	tokenContractAddr                              = "0x60e077a663e8a68186ca21ce95f2b9c076a86886"
+	protocolContractAddr                           = "0x3c4d26e916d79fc3fc925027a79612012462f691"
+	tokenContractAddr                              = "0x5c29f42d640ee25f080cdc648641e8e358459ddc"
 	clientPassword                                 = "888888"
     suAddress                                      = "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8"
     suPassword                                     = "111111"
@@ -55,9 +53,9 @@ func main() {
 
 	testAccounts()
 
-	testTxWithoutVerify()
+	//testTxWithoutVerify()
 
-	//testTxWithVerify()
+	testTxWithVerify()
 
 	time.Sleep(100000000000000)
 }
@@ -119,28 +117,9 @@ func testTxWithVerify() {
 
 	time.Sleep(sleepTime)
 
+    startVerify = true
+
 	SellerPublishData(true)
-
-	time.Sleep(sleepTime)
-
-	BuyerApproveTransfer()
-
-	time.Sleep(sleepTime)
-
-	Buy(txId)
-
-	time.Sleep(sleepTime)
-
-	SubmitMetaDataIdEncWithBuyer(txId)
-
-	time.Sleep(sleepTime)
-
-	ConfirmDataTruth(txId)
-
-	time.Sleep(sleepTime)
-
-	fmt.Println("Testing end")
-
 }
 
 
@@ -270,9 +249,13 @@ func BuyerApproveTransfer() {
 
 func PrepareToBuy(publishId string, startVerify bool) {
 	buyer.SubscribeEvent("TransactionCreate", onTransactionCreate)
-	verifier1.SubscribeEvent("VerifiersChosen", onVerifier1Chosen)
-	verifier2.SubscribeEvent("VerifiersChosen", onVerifier2Chosen)
-	verifier3.SubscribeEvent("VerifiersChosen", onVerifier3Chosen)
+
+    if startVerify {
+        verifier1.SubscribeEvent("TransactionCreate", onVerifier1Chosen)
+        verifier2.SubscribeEvent("TransactionCreate", onVerifier2Chosen)
+        verifier3.SubscribeEvent("TransactionCreate", onVerifier3Chosen)
+    }
+
 
 	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword,
 		big.NewInt(0), false}
@@ -356,38 +339,13 @@ func onApprovalVerifierTransfer(event events.Event) bool {
 	return true
 }
 
-func getContracts() []chainevents.ContractInfo {
-	protocolEvents := []string{"DataPublish", "TransactionCreate", "RegisterVerifier", "VerifiersChosen", "Vote", "Buy", "ReadyForDownload", "TransactionClose"}
-	tokenEvents := []string{"Approval"}
-
-	var fileDir = "D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/iscap/demo/src/testconsole/"
-	contracts := []chainevents.ContractInfo{
-		{protocolContractAddr, getAbiText(fileDir+"ScryProtocol.abi"), protocolEvents},
-		{tokenContractAddr, getAbiText(fileDir+"ScryToken.abi"), tokenEvents},
-	}
-
-	return contracts
-}
-
-func getAbiText(fileName string) string {
-	abi, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		fmt.Println("failed to read abi text", err)
-		return ""
-	}
-
-	return string(abi)
-}
-
-func getPublicAddress(keyJson string) string {
-	publicAddress := chainoperations.DecodeKeystoreAddress([]byte(keyJson))
-	return publicAddress
-}
 
 func onTransactionCreate(event events.Event) bool {
 	fmt.Println("onTransactionCreated:", event)
 	txId = event.Data.Get("transactionId").(*big.Int)
-    Buy(txId)
+    if !startVerify {
+        Buy(txId)
+    }
 
 	return true
 }
@@ -434,6 +392,8 @@ func OnRegisterVerifier(event events.Event) bool {
 
 func onVote(event events.Event) bool {
 	fmt.Println("onVote: ", event)
+
+	Buy(txId)
 
 	return true
 }

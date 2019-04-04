@@ -48,7 +48,7 @@ func BuildTransactOpts(txParams *TransactParams) *bind.TransactOpts {
 		},
 		Value:    txParams.Value,
 		GasPrice: big.NewInt(0),
-		GasLimit: 0,
+		GasLimit: 3000000,
 		Context:  context.Background(),
 	}
 

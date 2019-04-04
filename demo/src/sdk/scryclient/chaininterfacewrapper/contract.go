@@ -166,7 +166,7 @@ func Vote(txParams *op.TransactParams, txId *big.Int, judge bool, comments strin
 }
 
 func RegisterAsVerifier(txParams *op.TransactParams) error {
-	tx, err := scryProtocol.RegisterAsVerifier(op.BuildTransactOpts(txParams), uuid.GenerateUUID())
+	tx, err := scryProtocol.RegisterAsVerifier(op.BuildTransactOpts(txParams), getAppSeqNo())
 	if err == nil {
 		rlog.Debug("RegisterAsVerifier:", string(tx.Data()), " tx hash:", tx.Hash().String())
 	}
