@@ -6,4 +6,4 @@ personal.unlockAccount(coinbase, "111111", 1000000)
 
 //start mining
 miner.setEtherbase(coinbase)
-miner.start(16)
+miner.start(2)
