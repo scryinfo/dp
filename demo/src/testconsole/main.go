@@ -10,7 +10,6 @@ import (
     cif "github.com/scryinfo/iscap/demo/src/sdk/scryclient/chaininterfacewrapper"
     "github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
     "math/big"
-    "os"
     "time"
 )
 
@@ -32,6 +31,7 @@ var (
 	arbitrator              *scryclient.ScryClient = nil
 	sleepTime               time.Duration          = 20000000000
 	startVerify             bool                   = false
+	startTestFromBlock      bool                   = false
 )
 
 func main() {
@@ -53,9 +53,16 @@ func main() {
 
 	testAccounts()
 
+
+
 	//testTxWithoutVerify()
 
 	testTxWithVerify()
+
+
+
+
+
 
 	time.Sleep(100000000000000)
 }
@@ -93,6 +100,11 @@ func testTxWithoutVerify() {
 func testTxWithVerify() {
 	fmt.Println("Start testing tx with verification...Note: please restart the test chain before running this case")
 
+    startVerify = true
+    startTestFromBlock = false
+
+    subscribeAllEvents()
+
 	VerifierApproveTransfer(verifier1)
 
 	time.Sleep(sleepTime)
@@ -117,11 +129,68 @@ func testTxWithVerify() {
 
 	time.Sleep(sleepTime)
 
-    startVerify = true
-
 	SellerPublishData(true)
 }
 
+func testFromBlock() {
+    startTestFromBlock = true
+    seller.SubscribeEvent("DataPublish", onPublish)
+    sdk.StartScan(1)
+}
+
+func subscribeAllEvents()  {
+    seller.SubscribeEvent("DataPublish", onPublish)
+    seller.SubscribeEvent("Buy", onPurchase)
+
+    verifier1.SubscribeEvent("Approval", onApprovalVerifierTransfer)
+    verifier1.SubscribeEvent("RegisterVerifier", OnRegisterVerifier)
+
+    verifier2.SubscribeEvent("Approval", onApprovalVerifierTransfer)
+    verifier2.SubscribeEvent("RegisterVerifier", OnRegisterVerifier)
+
+    verifier3.SubscribeEvent("Approval", onApprovalVerifierTransfer)
+    verifier3.SubscribeEvent("RegisterVerifier", OnRegisterVerifier)
+
+    if startVerify {
+        verifier1.SubscribeEvent("TransactionCreate", onVerifier1Chosen)
+        verifier2.SubscribeEvent("TransactionCreate", onVerifier2Chosen)
+        verifier3.SubscribeEvent("TransactionCreate", onVerifier3Chosen)
+    }
+
+    buyer.SubscribeEvent("Vote", onVote)
+    buyer.SubscribeEvent("Approval", onApprovalBuyerTransfer)
+    buyer.SubscribeEvent("TransactionCreate", onTransactionCreate)
+    buyer.SubscribeEvent("ReadyForDownload", onReadyForDownload)
+    buyer.SubscribeEvent("TransactionClose", onClose)
+    buyer.SubscribeEvent("VerifierDisable", onVerifierDisable)
+}
+
+func unsubscribeAllEvents() {
+    seller.UnSubscribeEvent("DataPublish")
+    seller.UnSubscribeEvent("Buy")
+
+    verifier1.UnSubscribeEvent("Approval")
+    verifier1.UnSubscribeEvent("RegisterVerifier")
+
+    verifier2.UnSubscribeEvent("Approval")
+    verifier2.UnSubscribeEvent("RegisterVerifier")
+
+    verifier3.UnSubscribeEvent("Approval")
+    verifier3.UnSubscribeEvent("RegisterVerifier")
+
+    if startVerify {
+        verifier1.UnSubscribeEvent("TransactionCreate")
+        verifier2.UnSubscribeEvent("TransactionCreate")
+        verifier3.UnSubscribeEvent("TransactionCreate")
+    }
+
+    buyer.UnSubscribeEvent("Vote")
+    buyer.UnSubscribeEvent("Approval")
+    buyer.UnSubscribeEvent("TransactionCreate")
+    buyer.UnSubscribeEvent("ReadyForDownload")
+    buyer.UnSubscribeEvent("TransactionClose")
+    buyer.UnSubscribeEvent("VerifierDisable")
+}
 
 func initClients() {
 	var err error
@@ -186,8 +255,6 @@ func CreateClientWithToken(token *big.Int, eth *big.Int) (*scryclient.ScryClient
 
 
 func SellerPublishData(supportVerify bool) {
-	seller.SubscribeEvent("DataPublish", onPublish)
-
 	//publish data
 	metaData := []byte("QmcHXkMXwgvZP56tsUJNtcfedojHkqrDsgkC4fbsBM1zre")
 	proofData := []string{"QmNrTHX545s7hGfbEVrJuCiMqKVwUWJ4cPwXrAPv3GW5pm", "Qmb7csVP7wGco16XHVNqqRXUE7vQMjuA24QRypnZdkeQMD"}
@@ -198,8 +265,6 @@ func SellerPublishData(supportVerify bool) {
 }
 
 func VerifierApproveTransfer(verifier *scryclient.ScryClient) {
-	verifier.SubscribeEvent("Approval", onApprovalVerifierTransfer)
-
 	txParam := chainoperations.TransactParams{common.HexToAddress(verifier.Account.Address), clientPassword, big.NewInt(0), false}
 	err := cif.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(10000))
 	if err != nil {
@@ -208,8 +273,6 @@ func VerifierApproveTransfer(verifier *scryclient.ScryClient) {
 }
 
 func RegisterAsVerifier(verifier *scryclient.ScryClient) {
-	verifier.SubscribeEvent("RegisterVerifier", OnRegisterVerifier)
-
 	txParam := chainoperations.TransactParams{common.HexToAddress(verifier.Account.Address), clientPassword, big.NewInt(0), false}
 	err := cif.RegisterAsVerifier(&txParam)
 	if err != nil {
@@ -218,8 +281,6 @@ func RegisterAsVerifier(verifier *scryclient.ScryClient) {
 }
 
 func Vote(verifier *scryclient.ScryClient) {
-	buyer.SubscribeEvent("Vote", onVote)
-
 	txParam := chainoperations.TransactParams{common.HexToAddress(verifier.Account.Address), clientPassword, big.NewInt(0), false}
 	err := cif.Vote(&txParam, txId, true, "This could be real from "+verifier.Account.Address)
 	if err != nil {
@@ -228,8 +289,6 @@ func Vote(verifier *scryclient.ScryClient) {
 }
 
 func CreditsToVerifier(to common.Address) {
-	buyer.SubscribeEvent("VerifierDisable", onVerifierDisable)
-
 	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword, big.NewInt(0), false}
 	err := cif.CreditsToVerifier(&txParam, txId, to, 5)
 	if err != nil {
@@ -238,8 +297,6 @@ func CreditsToVerifier(to common.Address) {
 }
 
 func BuyerApproveTransfer() {
-	buyer.SubscribeEvent("Approval", onApprovalBuyerTransfer)
-
 	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword, big.NewInt(0), false}
 	err := cif.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(1600))
 	if err != nil {
@@ -248,15 +305,6 @@ func BuyerApproveTransfer() {
 }
 
 func PrepareToBuy(publishId string, startVerify bool) {
-	buyer.SubscribeEvent("TransactionCreate", onTransactionCreate)
-
-    if startVerify {
-        verifier1.SubscribeEvent("TransactionCreate", onVerifier1Chosen)
-        verifier2.SubscribeEvent("TransactionCreate", onVerifier2Chosen)
-        verifier3.SubscribeEvent("TransactionCreate", onVerifier3Chosen)
-    }
-
-
 	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword,
 		big.NewInt(0), false}
 	err := cif.PrepareToBuy(&txParam, publishId, startVerify)
@@ -266,8 +314,6 @@ func PrepareToBuy(publishId string, startVerify bool) {
 }
 
 func Buy(txId *big.Int) {
-	seller.SubscribeEvent("Buy", onPurchase)
-
 	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword, big.NewInt(0), false}
 	err := cif.BuyData(&txParam, txId)
 	if err != nil {
@@ -276,8 +322,6 @@ func Buy(txId *big.Int) {
 }
 
 func SubmitMetaDataIdEncWithBuyer(txId *big.Int) {
-	buyer.SubscribeEvent("ReadyForDownload", onReadyForDownload)
-
 	txParam := chainoperations.TransactParams{common.HexToAddress(seller.Account.Address), clientPassword, big.NewInt(0), false}
 	err := cif.SubmitMetaDataIdEncWithBuyer(&txParam, txId, metaDataIdEncWithBuyer)
 	if err != nil {
@@ -286,8 +330,6 @@ func SubmitMetaDataIdEncWithBuyer(txId *big.Int) {
 }
 
 func ConfirmDataTruth(txId *big.Int) {
-	buyer.SubscribeEvent("TransactionClose", onClose)
-
 	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address),
         clientPassword, big.NewInt(0), false}
 	err := cif.ConfirmDataTruth(&txParam, txId, true)
@@ -320,8 +362,13 @@ func onReadyForDownload(event events.Event) bool {
 func onClose(event events.Event) bool {
 	fmt.Println("onClose:", event)
 
-    fmt.Println("Testing end")
-	os.Exit(0)
+    fmt.Println("Testing Tx end")
+
+    unsubscribeAllEvents()
+
+    fmt.Println("Start testing from block")
+
+    testFromBlock()
 
 	return true
 }
@@ -379,7 +426,9 @@ func onPublish(event events.Event) bool {
 
 	publishId = event.Data.Get("publishId").(string)
 
-    BuyerApproveTransfer()
+    if !startTestFromBlock {
+        BuyerApproveTransfer()
+    }
 
 	return true
 }
