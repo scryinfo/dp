@@ -5,7 +5,7 @@
         </el-col>
 
         <el-table :data="this.$store.state.datalist.slice((curPage-1)*pageSize, curPage*pageSize)"
-                  highlight-current-row border height=468 @current-change="currentChange">
+                  highlight-current-row border :height=height @current-change="currentChange">
             <el-table-column prop="Title" label="标题" show-overflow-tooltip></el-table-column>
             <el-table-column prop="Price" label="价格" show-overflow-tooltip></el-table-column>
             <el-table-column prop="Keys" label="标签" show-overflow-tooltip></el-table-column>
@@ -48,6 +48,7 @@ export default {
             pageSize: 6,
             total: 0,
             password: "",
+            height: window.innerHeight - 170,
             buyDialog: false,
             buyDialog2: false,
             startVerify: false

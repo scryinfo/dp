@@ -41,7 +41,7 @@ export default {
     name: "Home",
     data () {
         return {
-            acc: ""
+            acc: "",
         }
     },
     methods: {
@@ -77,6 +77,9 @@ export default {
                 }
             })
         }
+    },
+    watch: {
+
     },
     created() {
         this.acc = this.$route.params.acc
@@ -119,14 +122,14 @@ export default {
 .aside {
     background-color: lightgrey;
     padding-top: 60px;
-    height: 540px;
+    height: calc(100vh - 110px);
 }
 .el-menu-item {
     background-color: lightgrey;
 }
 .section {
     padding: 10px 10%;
-    height: 580px;
+    height: calc(100vh - 70px);
 }
 .el-form-item {
     width: 100%;

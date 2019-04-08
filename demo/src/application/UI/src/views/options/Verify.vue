@@ -17,7 +17,7 @@
             <el-col :span="24" class="section-item">
                 <el-button size="mini" type="primary" @click="VoteDialog = true">验证</el-button></el-col>
             <el-table :data="this.$store.state.transactionverifier.slice((curPage-1)*pageSize, curPage*pageSize)"
-                      highlight-current-row border height=468 @current-change="currentChange">
+                      highlight-current-row border :height=height @current-change="currentChange">
                 <el-table-column prop="Title" label="标题" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="Price" label="价格" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="Keys" label="标签" show-overflow-tooltip></el-table-column>
@@ -62,6 +62,7 @@ export default {
             VoteDialog2: false,
             selectedTx: "",     // txID: ""
             password: "",
+            height: window.innerHeight - 170,
             verify: {
                 suggestion: false,
                 comment: ""

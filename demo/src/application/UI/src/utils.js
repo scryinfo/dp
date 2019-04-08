@@ -301,7 +301,7 @@ let utils = {
                     utils.voteMutex = true
                     if (utils.voteWait > 0) {
                         utils.voteWait--
-                        utils.vote(utils.voteParams.shift())
+                        utils.vote(_this, utils.voteParams.shift())
                     }
                 })
             }
@@ -332,7 +332,7 @@ let utils = {
                     utils.voteMutex = true
                     if (utils.voteWait > 0) {
                         utils.voteWait--
-                        utils.vote(utils.voteParams.shift())
+                        utils.vote(_this, utils.voteParams.shift())
                     }
                 })
             }
