@@ -101,7 +101,10 @@ func onTransactionCreate(event events.Event) bool {
 		otc.Block = event.BlockNumber
 		otc.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
 		otc.Buyer = event.Data.Get("users").([]common.Address)[0].String()
-		otc.StartVerify = event.Data.Get("startVerify").(bool)
+
+		otc.StartVerify = event.Data.Get("supportVerify").(bool)
+		// "startVerify" should, but contract not modify, just write "supportVerify" to match it.
+		
 		otc.Verifier1 = event.Data.Get("verifiers").([]common.Address)[0].String()
 		otc.Verifier2 = event.Data.Get("verifiers").([]common.Address)[1].String()
 		otc.TxState = setTxState(event.Data.Get("state").(uint8))

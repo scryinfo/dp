@@ -1,37 +1,32 @@
 <template>
     <section>
         <el-col :span="24" class="section-item">
-            <el-button size="mini" type="primary" @click="reEncryptDialog = true" >ReEncrypt</el-button>
+            <el-button size="mini" type="primary" @click="reEncryptDialog = true" >再加密数据</el-button>
         </el-col>
 
         <el-table :data="this.$store.state.transactionsell.slice((curPage-1)*pageSize, curPage*pageSize)"
                   highlight-current-row border height=468 @current-change="currentChange">
             <el-table-column type="expand">
                 <el-form slot-scope="props" label-position="left" class="tx-table-expand">
-                    <el-form-item label="TransactionID"><span>{{ props.row.TransactionID }}</span></el-form-item>
-                    <el-form-item label="Title"><span>{{ props.row.Title }}</span></el-form-item>
-                    <el-form-item label="Price"><span>{{ props.row.Price }}</span></el-form-item>
-                    <el-form-item label="State"><span>{{ props.row.State }}</span></el-form-item>
-                    <el-form-item label="Buyer"><span>{{ props.row.Buyer }}</span></el-form-item>
-                    <el-form-item label="Seller"><span>{{ props.row.Seller }}</span></el-form-item>
-                    <el-form-item label="Verifier1Response"><span>{{ props.row.Verifier1Response }}</span></el-form-item>
-                    <el-form-item label="Verifier2Response"><span>{{ props.row.Verifier2Response }}</span></el-form-item>
-                    <el-form-item label="ArbitrateResult"><span>{{ props.row.ArbitrateResult }}</span></el-form-item>
+                    <el-form-item label="标题"><span>{{ props.row.Title }}</span></el-form-item>
+                    <el-form-item label="价格"><span>{{ props.row.Price }}</span></el-form-item>
+                    <el-form-item label="标签"><span>{{ props.row.Keys }}</span></el-form-item>
+                    <el-form-item label="描述"><span>{{ props.row.Description }}</span></el-form-item>
+                    <el-form-item label="状态"><span>{{ props.row.State }}</span></el-form-item>
                 </el-form>
             </el-table-column>
-            <el-table-column prop="TransactionID" label="TransactionID" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="Title" label="Title" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="State" label="State" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="Title" label="标题" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="State" label="状态" show-overflow-tooltip></el-table-column>
         </el-table>
         <el-pagination class="pagination" @current-change="setCurPage" @size-change="setPageSize" :total="total"
                        layout="sizes, total, prev, pager, next, jumper" :page-sizes="[5, 6]" :page-size="pageSize"
         ></el-pagination>
 
-        <el-dialog :visible.sync="reEncryptDialog" title="Input password for this account:">
+        <el-dialog :visible.sync="reEncryptDialog" title="输入密码：">
             <p>{{this.$store.state.account}}</p><el-input v-model="password" show-password clearable></el-input>
             <div slot="footer">
-                <el-button @click="cancelClickFunc">Cancel</el-button>
-                <el-button type="primary" @click="reEncrypt">Submit</el-button>
+                <el-button @click="cancelClickFunc">取消</el-button>
+                <el-button type="primary" @click="reEncrypt">确认</el-button>
             </div>
         </el-dialog>
     </section>
@@ -66,7 +61,7 @@ export default {
             this.reEncryptDialog = false
             this.$message({
                 type: "info",
-                message: "Cancel re-encrypt. "
+                message: "取消再加密数据"
             })
         },
         reEncrypt:function () {
@@ -76,11 +71,11 @@ export default {
             this.password = ""
             astilectron.sendMessage({ Name:"reEncrypt",Payload:{password: pwd, tID: this.selectedTx}}, function (message) {
                 if (message.name !== "error") {
-                    console.log("ReEncrypt data success.", message)
+                    console.log("再加密数据成功", message)
                 }else {
-                    console.log("Node: reEncrypt failed.", message.payload)
-                    _this.$alert(message.payload, "Error: ReEncrypt data failed: ", {
-                        confirmButtonText: "I've got it.",
+                    console.log("再加密数据失败：", message.payload)
+                    _this.$alert(message.payload, "再加密数据失败！", {
+                        confirmButtonText: "关闭",
                         showClose: false,
                         type: "error"
                     })

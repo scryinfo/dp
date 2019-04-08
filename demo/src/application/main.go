@@ -4,35 +4,34 @@ import (
 	"github.com/asticode/go-astilectron"
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/pkg/errors"
+	"github.com/scryinfo/iscap/demo/src/application/sdkinterface"
 	"github.com/scryinfo/iscap/demo/src/application/sdkinterface/settings"
 	t "github.com/scryinfo/iscap/demo/src/application/transmission"
 	"github.com/scryinfo/iscap/demo/src/sdk"
-	"github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
-	"github.com/scryinfo/iscap/demo/src/sdk/util/storage/ipfsaccess"
 	rlog "github.com/sirupsen/logrus"
 	"time"
 )
 
+const logpath = "D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/iscap/demo/src/log/scry_sdk.log"
+
 var (
-	AppName    string
-	w          *astilectron.Window
-	scryInfoAS *settings.ScryInfoAS   = nil
-	err error = nil
+	AppName  string
+	w        *astilectron.Window
+	scryInfo *settings.ScryInfo
+	err      error = nil
 )
 
 func init() {
-	if err = sdk.InitLog(); err != nil {
-		rlog.Error("",err)
-	}
-	if scryInfoAS, err = settings.LoadServicesSettings(); err != nil {
-		rlog.Error("", err)
-	}
-	if err = accounts.GetAMInstance().Initialize(scryInfoAS.Services.Keystore); err != nil {
-		rlog.Error("failed to initialize account service, error:", err)
-	}
-	if err = ipfsaccess.GetIAInstance().Initialize(scryInfoAS.Services.Ipfs); err != nil {
-		rlog.Error("failed to initialize ipfs. error: ", err)
-	}
+	scryInfo, err = settings.LoadSettings()
+	err = sdk.Init(scryInfo.Chain.Ethereum.EthNode,
+		scryInfo.Services.Keystore,
+		scryInfo.Chain.Contracts.ProtocolAddr,
+		scryInfo.Chain.Contracts.TokenAddr,
+		scryInfo.Services.Ipfs,
+		logpath,
+		"AppID",
+		)
+	sdkinterface.SetScryInfo(scryInfo)
 }
 
 func main() {
@@ -89,8 +88,14 @@ func main() {
 			w = ws[0]
 			t.SetWindow(w)
 			go func() {
+				var payload interface{}
 				time.Sleep(time.Second)
-				if err := bootstrap.SendMessage(w, "welcome", "Welcome to my go-astilectron demo! "); err != nil {
+				if err != nil {
+					payload = errors.Wrap(err, "App init failed. ")
+				} else {
+					payload = "Welcome to my go-astilectron demo! "
+				}
+				if err := bootstrap.SendMessage(w, "welcome", payload); err != nil {
 					rlog.Error(errors.Wrap(err, "sending welcome event failed"))
 				}
 			}()

@@ -1,7 +1,7 @@
 package settings
 
 import (
-    "github.com/scryinfo/iscap_demo/src/sdk/util/uuid"
+    "github.com/scryinfo/iscap/demo/src/sdk/util/uuid"
     "os"
 )
 

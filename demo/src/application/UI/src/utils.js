@@ -1,5 +1,8 @@
 import {dl_db, tx_db, acc_db} from "./DBoptions.js"
 let utils = {
+    voteMutex: true,
+    voteWait: 0,
+    voteParams: [],
     listen: function (_this) {
         astilectron.onMessage(function(message) {
             switch (message.name) {
@@ -14,20 +17,20 @@ let utils = {
                     dl_db.reset()
                     tx_db.reset()
                     acc_db.reset()
-                    console.log("Reset command received. ")
+                    console.log("重置完成")
                     break
                 case "initDL":
                     dl_db.init(_this)
-                    console.log("dl_db init.")
+                    console.log("数据列表初始化完成")
                     break
                 case "initTx":
                     tx_db.init(_this)
-                    console.log("tx_db init.")
+                    console.log("交易列表初始化完成")
                     break
                 case "onPublish":
-                    console.log("Node: onPublish.callback. ", message.payload)
+                    console.log("发布事件回调：", message.payload)
                     _this.$notify({
-                        title: "onPublish.callback: ",
+                        title: "发布事件回调：",
                         message: message.payload,
                         position: "top-left"
                     })
@@ -47,22 +50,22 @@ let utils = {
                     acc_db.read(_this.$store.state.account, function (accInstance) {
                         acc_db.write({
                             address: accInstance.address,
-                            fromBlock: message.payload.Block + 1,
+                            fromBlock: Math.max(accInstance.fromBlock, message.payload.Block + 1),
                             isVerifier: accInstance.isVerifier
                         })
                     })
                     break
                 case "onApprove":
-                    console.log("Node: onApprove.callback. ", message.payload)
+                    console.log("允许合约转账事件回调：", message.payload)
                     _this.$notify({
-                        title: "onApprove.callback: ",
+                        title: "允许合约转账事件回调：",
                         message: message.payload,
                         position: "top-left"
                     })
                     acc_db.read(_this.$store.state.account, function (accInstance) {
                         acc_db.write({
                             address: accInstance.address,
-                            fromBlock: message.payload.Block + 1,
+                            fromBlock: Math.max(accInstance.fromBlock, message.payload.Block + 1),
                             isVerifier: accInstance.isVerifier
                         })
                     })
@@ -73,9 +76,9 @@ let utils = {
                     })
                     break
                 case "onTransactionCreate":
-                    console.log("Node: onTransactionCreate.callback. ", message.payload)
+                    console.log("创建交易事件回调：", message.payload)
                     _this.$notify({
-                        title: "onTransactionCreate.callback: ",
+                        title: "创建交易事件回调：",
                         message: message.payload,
                         position: "top-left"
                     })
@@ -108,15 +111,15 @@ let utils = {
                     acc_db.read(_this.$store.state.account, function (accInstance) {
                         acc_db.write({
                             address: accInstance.address,
-                            fromBlock: message.payload.Block + 1,
+                            fromBlock: Math.max(accInstance.fromBlock, message.payload.Block + 1),
                             isVerifier: accInstance.isVerifier
                         })
                     })
                     break
                 case "onPurchase":
-                    console.log("Node: onPurchase.callback. ", message.payload)
+                    console.log("购买数据事件回调：", message.payload)
                     _this.$notify({
-                        title: "onPurchase.callback: ",
+                        title: "购买数据事件回调：",
                         message: message.payload,
                         position: "top-left"
                     })
@@ -149,15 +152,15 @@ let utils = {
                     acc_db.read(_this.$store.state.account, function (accInstance) {
                         acc_db.write({
                             address: accInstance.address,
-                            fromBlock: message.payload.Block + 1,
+                            fromBlock: Math.max(accInstance.fromBlock, message.payload.Block + 1),
                             isVerifier: accInstance.isVerifier
                         })
                     })
                     break
                 case "onReadyForDownload":
-                    console.log("Node: onReadyForDownload.callback. ", message.payload)
+                    console.log("再加密数据事件回调：", message.payload)
                     _this.$notify({
-                        title: "onReadyForDownload.callback: ",
+                        title: "再加密数据事件回调：",
                         message: message.payload,
                         position: "top-left"
                     })
@@ -190,15 +193,15 @@ let utils = {
                     acc_db.read(_this.$store.state.account, function (accInstance) {
                         acc_db.write({
                             address: accInstance.address,
-                            fromBlock: message.payload.Block + 1,
+                            fromBlock: Math.max(accInstance.fromBlock, message.payload.Block + 1),
                             isVerifier: accInstance.isVerifier
                         })
                     })
                     break
                 case "onClose":
-                    console.log("Node: onClose.callback. ", message.payload)
+                    console.log("交易关闭事件回调：", message.payload)
                     _this.$notify({
-                        title: "onClose.callback: ",
+                        title: "交易关闭事件回调：",
                         message: message.payload,
                         position: "top-left"
                     })
@@ -231,96 +234,115 @@ let utils = {
                     acc_db.read(_this.$store.state.account, function (accInstance) {
                         acc_db.write({
                             address: accInstance.address,
-                            fromBlock: message.payload.Block + 1,
+                            fromBlock: Math.max(accInstance.fromBlock, message.payload.Block + 1),
                             isVerifier: accInstance.isVerifier
                         })
                     })
                     break
                 case "onRegisterVerifier":
-                    console.log("Node: onRegisterVerifier.callback. ", message.payload)
+                    console.log("注册成为验证者事件回调：", message.payload)
                     acc_db.read(_this.$store.state.account, function (accInstance) {
                         acc_db.write({
                             address: accInstance.address,
-                            fromBlock: message.payload.Block + 1,
+                            fromBlock: Math.max(accInstance.fromBlock, message.payload.Block + 1),
                             isVerifier: true
                         })
                     })
                     break
                 case "onVote":
-                    console.log("Node: onVote.callback. ", message.payload)
-                    tx_db.read(message.payload.TransactionID, function (txDetailsOnV) {
-                        if (message.payload.VerifierIndex === "0") {
-                            tx_db.write({
-                                Title: txDetailsOnV.Title,
-                                Price: txDetailsOnV.Price,
-                                Keys: txDetailsOnV.Keys,
-                                Description: txDetailsOnV.Description,
-                                Buyer: txDetailsOnV.Buyer,
-                                Seller: txDetailsOnV.Seller,
-                                State: message.payload.TxState, // -
-                                SupportVerify: txDetailsOnV.SupportVerify,
-                                StartVerify: txDetailsOnV.StartVerify,
-                                MetaDataExtension: txDetailsOnV.MetaDataExtension,
-                                ProofDataExtensions: txDetailsOnV.ProofDataExtensions,
-                                MetaDataIDEncWithSeller: txDetailsOnV.MetaDataIDEncWithSeller,
-                                MetaDataIDEncWithBuyer: txDetailsOnV.MetaDataIDEncWithBuyer,
-                                Verifier1: txDetailsOnV.Verifier1,
-                                Verifier2: txDetailsOnV.Verifier2,
-                                Verifier1Response: message.payload.VerifierResponse, // -
-                                Verifier2Response: txDetailsOnV.Verifier2Response,
-                                ArbitrateResult: txDetailsOnV.ArbitrateResult,
-                                PublishID: txDetailsOnV.PublishID,
-                                TransactionID: txDetailsOnV.TransactionID
-                            }, function () {
-                                tx_db.init(_this)
-                            })
-                        }
-                        if (message.payload.VerifierIndex === "1") {
-                            tx_db.write({
-                                Title: txDetailsOnV.Title,
-                                Price: txDetailsOnV.Price,
-                                Keys: txDetailsOnV.Keys,
-                                Description: txDetailsOnV.Description,
-                                Buyer: txDetailsOnV.Buyer,
-                                Seller: txDetailsOnV.Seller,
-                                State: message.payload.TxState, // -
-                                SupportVerify: txDetailsOnV.SupportVerify,
-                                StartVerify: txDetailsOnV.StartVerify,
-                                MetaDataExtension: txDetailsOnV.MetaDataExtension,
-                                ProofDataExtensions: txDetailsOnV.ProofDataExtensions,
-                                MetaDataIDEncWithSeller: txDetailsOnV.MetaDataIDEncWithSeller,
-                                MetaDataIDEncWithBuyer: txDetailsOnV.MetaDataIDEncWithBuyer,
-                                Verifier1: txDetailsOnV.Verifier1,
-                                Verifier2: txDetailsOnV.Verifier2,
-                                Verifier1Response: txDetailsOnV.Verifier1Response,
-                                Verifier2Response: message.payload.VerifierResponse, // -
-                                ArbitrateResult: txDetailsOnV.ArbitrateResult,
-                                PublishID: txDetailsOnV.PublishID,
-                                TransactionID: txDetailsOnV.TransactionID
-                            }, function () {
-                                tx_db.init(_this)
-                            })
-                        }
-                    })
-                    acc_db.read(_this.$store.state.account, function (accInstance) {
-                        acc_db.write({
-                            address: accInstance.address,
-                            fromBlock: message.payload.Block + 1,
-                            isVerifier: accInstance.isVerifier
-                        })
-                    })
+                    if (utils.voteMutex === true) {
+                        utils.voteMutex = false
+                        utils.vote(_this, message)
+                    } else {
+                        utils.voteWait++
+                        utils.voteParams.push(message)
+                    }
                     break
                 case "onVerifierDisable":
-                    console.log("Node: onVerifierDisable.callback. ", message.payload)
+                    console.log("取消验证者验证资格事件回调：", message.payload)
                     acc_db.read(_this.$store.state.account, function (accInstance) {
                         acc_db.write({
                             address: accInstance.address,
-                            fromBlock: message.payload.Block + 1,
+                            fromBlock: Math.max(accInstance.fromBlock, message.payload.Block + 1),
                             isVerifier: false
                         })
                     })
                     break
             }
+        })
+    },
+    vote: function (_this, message) {
+        console.log("验证者验证事件回调：", message.payload)
+        tx_db.read(message.payload.TransactionID, function (txDetailsOnV) {
+            if (message.payload.VerifierIndex === "0") {
+                tx_db.write({
+                    Title: txDetailsOnV.Title,
+                    Price: txDetailsOnV.Price,
+                    Keys: txDetailsOnV.Keys,
+                    Description: txDetailsOnV.Description,
+                    Buyer: txDetailsOnV.Buyer,
+                    Seller: txDetailsOnV.Seller,
+                    State: message.payload.TxState, // -
+                    SupportVerify: txDetailsOnV.SupportVerify,
+                    StartVerify: txDetailsOnV.StartVerify,
+                    MetaDataExtension: txDetailsOnV.MetaDataExtension,
+                    ProofDataExtensions: txDetailsOnV.ProofDataExtensions,
+                    MetaDataIDEncWithSeller: txDetailsOnV.MetaDataIDEncWithSeller,
+                    MetaDataIDEncWithBuyer: txDetailsOnV.MetaDataIDEncWithBuyer,
+                    Verifier1: txDetailsOnV.Verifier1,
+                    Verifier2: txDetailsOnV.Verifier2,
+                    Verifier1Response: message.payload.VerifierResponse, // -
+                    Verifier2Response: txDetailsOnV.Verifier2Response,
+                    ArbitrateResult: txDetailsOnV.ArbitrateResult,
+                    PublishID: txDetailsOnV.PublishID,
+                    TransactionID: txDetailsOnV.TransactionID
+                }, function () {
+                    tx_db.init(_this)
+                    utils.voteMutex = true
+                    if (utils.voteWait > 0) {
+                        utils.voteWait--
+                        utils.vote(utils.voteParams.shift())
+                    }
+                })
+            }
+            if (message.payload.VerifierIndex === "1") {
+                tx_db.write({
+                    Title: txDetailsOnV.Title,
+                    Price: txDetailsOnV.Price,
+                    Keys: txDetailsOnV.Keys,
+                    Description: txDetailsOnV.Description,
+                    Buyer: txDetailsOnV.Buyer,
+                    Seller: txDetailsOnV.Seller,
+                    State: message.payload.TxState, // -
+                    SupportVerify: txDetailsOnV.SupportVerify,
+                    StartVerify: txDetailsOnV.StartVerify,
+                    MetaDataExtension: txDetailsOnV.MetaDataExtension,
+                    ProofDataExtensions: txDetailsOnV.ProofDataExtensions,
+                    MetaDataIDEncWithSeller: txDetailsOnV.MetaDataIDEncWithSeller,
+                    MetaDataIDEncWithBuyer: txDetailsOnV.MetaDataIDEncWithBuyer,
+                    Verifier1: txDetailsOnV.Verifier1,
+                    Verifier2: txDetailsOnV.Verifier2,
+                    Verifier1Response: txDetailsOnV.Verifier1Response,
+                    Verifier2Response: message.payload.VerifierResponse, // -
+                    ArbitrateResult: txDetailsOnV.ArbitrateResult,
+                    PublishID: txDetailsOnV.PublishID,
+                    TransactionID: txDetailsOnV.TransactionID
+                }, function () {
+                    tx_db.init(_this)
+                    utils.voteMutex = true
+                    if (utils.voteWait > 0) {
+                        utils.voteWait--
+                        utils.vote(utils.voteParams.shift())
+                    }
+                })
+            }
+        })
+        acc_db.read(_this.$store.state.account, function (accInstance) {
+            acc_db.write({
+                address: accInstance.address,
+                fromBlock: Math.max(accInstance.fromBlock, message.payload.Block + 1),
+                isVerifier: accInstance.isVerifier
+            })
         })
     }
 }

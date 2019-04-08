@@ -66,7 +66,7 @@ func TestPublishData(t *testing.T) {
         Password: "111111",
     }
 
-    SubScribeEvents([]string{"DataPublish"}, OnPublish)
+    SubscribeEvents([]string{"DataPublish"}, OnPublish)
     _, err := PublishData(&data)
     if err != nil {
         t.Fail()

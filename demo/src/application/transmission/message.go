@@ -6,14 +6,15 @@ import (
 	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/scryinfo/iscap/demo/src/application/definition"
 	"github.com/scryinfo/iscap/demo/src/application/sdkinterface"
-	"github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
 	rlog "github.com/sirupsen/logrus"
 	"math/big"
 )
 
 var (
 	window *astilectron.Window
-	channel chan []string = make(chan []string, 3)
+	channel = make(chan []string, 3)
+	eventName = []string{"DataPublish", "Approval", "TransactionCreate", "Buy", "ReadyForDownload", "TransactionClose",
+		"RegisterVerifier", "Vote", "VerifierDisable"}
 )
 
 func SetWindow(w *astilectron.Window) {
@@ -46,30 +47,25 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 			break
 		}
 		return payload, nil
-	case "save.keystore":
-		payload = true
-		return payload, nil
 	case "sdk.init":
 		var sid definition.SDKInitData
 		if err = json.Unmarshal(m.Payload, &sid); err != nil {
 			break
 		}
-		if err = sdkinterface.Initialize(uint64(sid.FromBlock)); err != nil {
+		if err = sdkinterface.SubscribeEvents(eventName, onPublish, onApprove, onTransactionCreate, onPurchase,
+			onReadyForDownload, onClose, onRegisterAsVerifier, onVote, onVerifierDisable); err != nil {
 			break
 		}
-		if err = sdkinterface.SubScribeEvents([]string{"DataPublish", "Approval", "TransactionCreate", "Buy",
-			"ReadyForDownload", "TransactionClose", "RegisterVerifier", "Vote", "VerifierDisable"},
-			onPublish, onApprove, onTransactionCreate, onPurchase, onReadyForDownload, onClose, onRegisterAsVerifier, onVote,
-			onVerifierDisable); err != nil {
-			break
-		}
-		if err = sdkinterface.TransferTokenFromDeployer(big.NewInt(10000000)); err != nil { // for test
+		sdkinterface.SetFromBlock(uint64(sid.FromBlock))
+		if err = sdkinterface.TransferTokenFromDeployer(big.NewInt(1000000)); err != nil { // for test
 			break
 		}
 		payload = true
 		return payload, nil
 	case "logout":
-		accounts.ResetAMInstance() // not implement
+		if err = sdkinterface.UnsubscribeEvents(eventName); err != nil {
+			break
+		}
 		payload = true
 		return payload, nil
 	case "publish":

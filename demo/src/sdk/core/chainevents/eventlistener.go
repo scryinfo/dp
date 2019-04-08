@@ -18,8 +18,7 @@ type ContractInfo struct {
 	Events     []string
 }
 
-func ListenEvent(conn *ethclient.Client, contracts []ContractInfo,
-	fromBlock uint64, interval time.Duration,
+func ListenEvent(conn *ethclient.Client, contracts []ContractInfo, fromBlock uint64, interval time.Duration,
 	dataChannel chan events.Event, errorChannel chan error) bool {
 	rv := true
 	rlog.Info("start listening events...")

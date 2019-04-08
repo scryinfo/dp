@@ -6,7 +6,7 @@ let dl_db = {
 
         let request = indexedDB.open(this.db_name,this.db_version)
         request.onerror = function(event) {
-            alert("open failed with error code: " + event.target.errorCode)
+            alert("打开数据库失败，错误代码：" + event.target.errorCode)
         }
         request.onupgradeneeded = function(event) {
             this.db = event.target.result
@@ -74,7 +74,7 @@ let tx_db = {
 
         let request = indexedDB.open(this.db_name,this.db_version)
         request.onerror = function(event) {
-            alert("open failed with error code: " + event.target.errorCode)
+            alert("打开数据库失败，错误代码：" + event.target.errorCode)
         }
         request.onsuccess = function(event) {
             _this.$store.state.transactionbuy = []
@@ -159,10 +159,10 @@ let acc_db = {
 
         let request = indexedDB.open(this.db_name,this.db_version)
         request.onerror = function(event) {
-            alert("open failed with error code: " + event.target.errorCode)
+            alert("打开数据库失败，错误代码：" + event.target.errorCode)
         }
         request.onsuccess = function(event) {
-            _this.$store.state.accounts = [{ address: "" }]
+            _this.$store.state.accounts = [{ address: "", fromBlock: 0, isVerifier:false}]
             acc_db.db = event.target.result
             let s = acc_db.db.transaction(acc_db.db_store_name,"readonly").objectStore(acc_db.db_store_name)
             let c = s.openCursor()
