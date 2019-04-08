@@ -26,7 +26,7 @@
                 </div>
                 <div class="right" id="show_new" v-if="showControl2">
                     你的新账户已创建完成： &nbsp;{{account}}<br/>
-                    如果需要在其他设备使用，请注意保存。<br/><hr/><br/>
+                    如果需要在其他设备使用，请注意保存。<br/><br/><hr/><br/>
                     确定使用该账户登录吗？
                     <div class="right-pwd">
                         <el-button class="right-button" @click="hide">取消</el-button>
@@ -132,7 +132,7 @@ export default {
 }
 .left {
     background-color: lightgray;
-    height: 600px;
+    height: calc(100vh - 50px);
 }
 .left-explain {
     text-align: left;
@@ -148,8 +148,8 @@ export default {
     margin: 5px 17%;
 }
 .right {
-    height: 300px;
     padding: 100px 20%;
+    height: calc(100vh - 250px);
 }
 .right-show {
     width: 100%;

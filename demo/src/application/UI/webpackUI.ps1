@@ -1,3 +1,4 @@
+echo "|-> * ------------------------------"
 cd $PSScriptRoot
 Remove-Item ".\resources\app\*" -Recurse
 

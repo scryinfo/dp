@@ -9,7 +9,7 @@
         </el-col>
 
         <el-table :data="this.$store.state.transactionbuy.slice((curPage-1)*pageSize, curPage*pageSize)"
-                  highlight-current-row border height=468 @current-change="currentChange">
+                  highlight-current-row border :height=height @current-change="currentChange">
             <el-table-column type="expand">
                 <el-form slot-scope="props" label-position="left" class="tx-table-expand">
                     <el-form-item label="标题"><span>{{ props.row.Title }}</span></el-form-item>
@@ -102,6 +102,7 @@ export default {
             pageSize: 6,
             total: 0,
             password: "",
+            height: window.innerHeight - 170,
             cancelDialog: false,
             purchaseDialog: false,
             decryptDialog: false,
@@ -132,12 +133,12 @@ export default {
             }
         },
         cancelClickFunc: function (dialogName) {
-            var str = ""
+            let str = ""
             switch (dialogName) {
                 case "cancel": this.cancelDialog = false; str = "取消交易"; break
                 case "purchase": this.purchaseDialog = false; str = "购买数据"; break
                 case "decrypt": this.decryptDialog = false; str = "解密数据"; break
-                case "confirm": this.cancelDialog = false; str = "确认数据"; break
+                case "confirm": this.confirmDialog = false; str = "确认数据"; break
                 case "confirm2": this.confirmDialog2 = false; str = "确认数据"; break
                 case "credit": this.creditDialog = false; str = "评价验证者"; break
                 case "credit2": this.creditDialog2 = false; str = "评价验证者"; break
@@ -207,8 +208,8 @@ export default {
             })
         },
         confirm: function () {
-            this.confirmDialog = false
             this.confirmDialog2 = false
+            this.confirmDialog = false
             let _this = this
             let pwd = this.password
             this.password = ""
@@ -237,8 +238,8 @@ export default {
             this.creditDialog = true
         },
         credit: function () {
-            this.creditDialog = false
             this.creditDialog2 = false
+            this.creditDialog = false
             let pwd = this.password
             this.password = ""
             let _this = this

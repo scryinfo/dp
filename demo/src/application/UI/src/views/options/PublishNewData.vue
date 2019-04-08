@@ -1,6 +1,6 @@
 <template>
     <section>
-        <el-form class="pubForm" :model="pubData" label-position="left" label-width="25%">
+        <el-form class="pubForm" :model="pubData" label-position="left" label-width="25%" :style-height="height">
             <el-form-item label="输入密码:"><el-input v-model="password" show-password clearable></el-input></el-form-item>
             <el-form-item label="标题:"><el-input v-model="pubData.details.Title" clearable></el-input></el-form-item>
             <el-form-item label="价格:"><el-input v-model.number="pubData.Price" clearable></el-input></el-form-item>
@@ -23,6 +23,7 @@ export default {
     name: "PublishNewData",
     data () {
         return {
+            height: window.innerHeight - 20,
             pubData: {
                 details: {
                     Title: "",
@@ -149,6 +150,9 @@ export default {
                 this.pub()
                 this.count = 0
             }
+        },
+        height: function () {
+            this.height = window.innerHeight - 20
         }
     }
 }
@@ -157,5 +161,6 @@ export default {
 <style>
 .pubForm {
     padding: 0 10% 0 10%;
+    height: calc(100vh - 70px);
 }
 </style>

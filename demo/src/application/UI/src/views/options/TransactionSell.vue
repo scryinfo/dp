@@ -5,7 +5,7 @@
         </el-col>
 
         <el-table :data="this.$store.state.transactionsell.slice((curPage-1)*pageSize, curPage*pageSize)"
-                  highlight-current-row border height=468 @current-change="currentChange">
+                  highlight-current-row border :height=height @current-change="currentChange">
             <el-table-column type="expand">
                 <el-form slot-scope="props" label-position="left" class="tx-table-expand">
                     <el-form-item label="标题"><span>{{ props.row.Title }}</span></el-form-item>
@@ -42,6 +42,7 @@ export default {
             pageSize: 6,
             total: 0,
             password: "",
+            height: window.innerHeight - 170,
             reEncryptDialog: false
         }
     },
