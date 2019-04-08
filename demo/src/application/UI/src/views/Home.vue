@@ -2,13 +2,13 @@
     <div>
         <el-row>
             <el-col :span="24" class="top">
-                <el-col :span="18">My Astilectron demo</el-col>
+                <el-col :span="18">一个不会起名字的人写的应用 ￣へ￣</el-col>
                 <el-col :span="6">
                     <el-dropdown class="top-dropdown" trigger="click">
                         <span>{{acc}}</span>
                         <el-dropdown-menu slot="dropdown">
-                            <el-dropdown-item @click.native="message">Messages</el-dropdown-item>
-                            <el-dropdown-item divided @click.native="logoutMsg">Logout</el-dropdown-item>
+                            <el-dropdown-item @click.native="message">通知</el-dropdown-item>
+                            <el-dropdown-item divided @click.native="logoutMsg">退出登录</el-dropdown-item>
                         </el-dropdown-menu>
                     </el-dropdown>
                 </el-col>
@@ -49,16 +49,16 @@ export default {
             this.$router.push("/msg")
         },
         logoutMsg: function () {
-            this.$confirm("Are you sure to logout?", "Tips:", {
-                confirmButtonText: "Yes",
-                cancelButtonText: "No",
+            this.$confirm("确定退出登录吗？", "提示：", {
+                confirmButtonText: "确认",
+                cancelButtonText: "取消",
                 type: "warning"
             }).then(() => {
                 this.logout()
             }).catch(() => {
                 this.$message({
                     type:"info",
-                    message:"keep login.  ^_^ "
+                    message:"取消退出登录"
                 })
             })
         },
@@ -68,9 +68,9 @@ export default {
                 if (message.name !== "error") {
                     _this.$router.push("/")
                 }else {
-                    console.log("Node: logout failed.", message.payload)
-                    _this.$alert(message.payload, "Error: logout failed.", {
-                        confirmButtonText: "I've got it.",
+                    console.log("退出登录失败：", message.payload)
+                    _this.$alert(message.payload, "退出登录失败！", {
+                        confirmButtonText: "关闭",
                         showClose: false,
                         type: "error"
                     })
@@ -88,11 +88,11 @@ export default {
         acc_db.read(this.$route.params.acc, function (accinstance) {
             astilectron.sendMessage({ Name:"sdk.init", Payload: { fromBlock: accinstance.fromBlock } }, function (message) {
                 if (message.name !== "error") {
-                    console.log("SDK init success.", message)
+                    console.log("设置初始区块成功", message)
                 }else {
-                    console.log("Node: sdk init failed.", message.payload)
-                    _this.$alert(message.payload, "Error: sdk init failed.", {
-                        confirmButtonText: "I've got it.",
+                    console.log("设置初始区块失败：", message.payload)
+                    _this.$alert(message.payload, "设置初始区块失败！", {
+                        confirmButtonText: "关闭",
                         showClose: false,
                         type: "error"
                     })

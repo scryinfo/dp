@@ -27,11 +27,11 @@ let routes = [
         component: Home,
         name: "home",
         children: [
-            {path: "/dl", component: DataList, name: "Data list"},
-            {path: "/tb", component: TransactionBuy, name: "Transaction-buy"},
-            {path: "/ts", component: TransactionSell, name: "Transaction-sell"},
-            {path: "/pd", component: PublishNewData, name: "Publish new data"},
-            {path: "/vf", component: Verify, name: "Verify"},
+            {path: "/dl", component: DataList, name: "数据列表"},
+            {path: "/tb", component: TransactionBuy, name: "我购买的数据"},
+            {path: "/ts", component: TransactionSell, name: "我出售的数据"},
+            {path: "/vf", component: Verify, name: "我验证的数据"},
+            {path: "/pd", component: PublishNewData, name: "发布新数据"},
             {path: "/msg", component: Message, name: "Short Message", hidden: true},
             {path: "/test", component: Test, name: "Test", hidden: true} // for test
         ]

@@ -1,36 +1,36 @@
 <template>
     <div>
         <el-row>
-            <el-col :span="24"><div class="top">My Astilectron demo</div></el-col>
+            <el-col :span="24"><div class="top">一个不会起名字的人写的应用 ￣へ￣</div></el-col>
             <el-col :span="8">
                 <div class="left">
-                    <div class="left-explain">Select Account:</div>
-                    <el-select class="left-account" v-model="account" placeholder="select account"
+                    <div class="left-explain">选择账户：</div>
+                    <el-select class="left-account" v-model="account" placeholder="账户"
                         clearable allow-create filterable>
                         <el-option v-for="acc in this.$store.state.accounts" :key="acc.address"
                                    :value="acc.address" :label="acc.address"></el-option>
                     </el-select>
-                    <el-button class="left-button" @click="right('Login')">Login</el-button>
-                    <el-button class="left-button" @click="right('New')">Create New Account</el-button>
+                    <el-button class="left-button" @click="right('登录')">登录</el-button>
+                    <el-button class="left-button" @click="right('新建')">创建新用户</el-button>
                 </div>
             </el-col>
             <el-col :span="16">
                 <div class="right" id="show" v-if="showControl1">
                     <div class="right-show">{{describe}}
-                        <el-input class="right-pwd" v-model="password" placeholder="password"
+                        <el-input class="right-pwd" v-model="password" placeholder="密码"
                                   clearable show-password></el-input>
                     </div>
-                    <el-button class="right-button" @click="hide">Back</el-button>
-                    <el-button class="right-button" @click="submit_login" v-if="buttonControl">Submit</el-button>
-                    <el-button class="right-button" @click="submit_new" v-if="!buttonControl">Submit</el-button>
+                    <el-button class="right-button" @click="hide">返回</el-button>
+                    <el-button class="right-button" @click="submit_login" v-if="buttonControl">确认</el-button>
+                    <el-button class="right-button" @click="submit_new" v-if="!buttonControl">确认</el-button>
                 </div>
                 <div class="right" id="show_new" v-if="showControl2">
-                    Your account is created : &nbsp;{{account}}<br/>
-                    account information will saves at local :&nbsp;&nbsp;&nbsp;indexDB<br/>
-                    please remember it.<br/><hr/><br/>Do you want login with this account?
+                    你的新账户已创建完成： &nbsp;{{account}}<br/>
+                    如果需要在其他设备使用，请注意保存。<br/><hr/><br/>
+                    确定使用该账户登录吗？
                     <div class="right-pwd">
-                        <el-button class="right-button" @click="hide">No</el-button>
-                        <el-button class="right-button" @click="submit_keystore">Yes</el-button>
+                        <el-button class="right-button" @click="hide">取消</el-button>
+                        <el-button class="right-button" @click="submit_keystore">确认</el-button>
                     </div>
                 </div>
             </el-col>
@@ -57,8 +57,8 @@ export default {
         right: function (description) {
             this.showControl1 = true;this.showControl2 = false
             switch (description) {
-                case "Login": this.buttonControl = true;break
-                case "New": this.buttonControl = false;break
+                case "登录": this.buttonControl = true;break
+                case "新建": this.buttonControl = false;break
             }
             this.describe = description + ":"
         },
@@ -72,9 +72,9 @@ export default {
                 if (message.name !== "error") {
                     _this.$router.push({ name: "home", params: {acc: _this.account}})
                 } else {
-                    console.log("Node: login.verify failed. ", message)
-                    _this.$alert(message.payload, "Error: account or password is wrong.", {
-                        confirmButtonText: "I've got it.",
+                    console.log("登录验证失败：", message)
+                    _this.$alert(message.payload, "用户名或密码错误！", {
+                        confirmButtonText: "关闭",
                         showClose: false,
                         type: "error"
                     })
@@ -93,9 +93,9 @@ export default {
                     _this.account = message.payload
                     _this.showControl1 = false;_this.showControl2 = true
                 }else {
-                    console.log("Node: create.newAcc failed. ", message)
-                    _this.$alert(message.payload, "Error: create new account failed.", {
-                        confirmButtonText: "I've got it.",
+                    console.log("创建新账户失败：", message)
+                    _this.$alert(message.payload, "创建新账户失败！", {
+                        confirmButtonText: "关闭",
                         showClose: false,
                         type: "error"
                     })
@@ -105,20 +105,7 @@ export default {
         submit_keystore: function () {
             let pwd = this.password
             this.password = ""
-            let _this = this
-            astilectron.sendMessage({Name: "save.keystore", Payload: {account: this.$store.state.account,
-                    password: pwd}}, function (message) {
-                if (message.name !== "error") {
-                    _this.$router.push({ name: "home", params: {acc: _this.account}})
-                } else {
-                    console.log("Node: save.keystore failed. ", message)
-                    _this.$alert(message.payload, "Error: save account information failed.", {
-                        confirmButtonText: "I've got it.",
-                        showClose: false,
-                        type: "error"
-                    })
-                }
-            })
+            this.$router.push({ name: "home", params: {acc: _this.account}})
         }
     },
     created() {

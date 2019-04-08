@@ -1,18 +1,18 @@
 <template>
     <section>
         <el-form class="pubForm" :model="pubData" label-position="left" label-width="25%">
-            <el-form-item label="Password:"><el-input v-model="password" show-password clearable></el-input></el-form-item>
-            <el-form-item label="Title:"><el-input v-model="pubData.details.Title" clearable></el-input></el-form-item>
-            <el-form-item label="Price:"><el-input v-model.number="pubData.Price" clearable></el-input></el-form-item>
-            <el-form-item label="Keys:"><el-input v-model="pubData.details.Keys" clearable></el-input></el-form-item>
-            <el-form-item label="Description:">
+            <el-form-item label="输入密码:"><el-input v-model="password" show-password clearable></el-input></el-form-item>
+            <el-form-item label="标题:"><el-input v-model="pubData.details.Title" clearable></el-input></el-form-item>
+            <el-form-item label="价格:"><el-input v-model.number="pubData.Price" clearable></el-input></el-form-item>
+            <el-form-item label="标签:"><el-input v-model="pubData.details.Keys" clearable></el-input></el-form-item>
+            <el-form-item label="描述:">
                 <el-input v-model="pubData.details.Description" type="textarea" :rows=2 clearable></el-input>
             </el-form-item>
-            <el-form-item label="Support verify:">
-                <el-switch v-model="SupportVerify" active-text="Yes" inactive-text="No"></el-switch>
+            <el-form-item label="是否支持验证：">
+                <el-switch v-model="SupportVerify" active-text="是" inactive-text="否"></el-switch>
             </el-form-item>
-            <el-form-item label="Data:"><el-input ref="selectedData" type="file"></el-input></el-form-item>
-            <el-form-item label="Proofs:"><el-input ref="selectedProofs" type="file" multiple></el-input></el-form-item>
+            <el-form-item label="数据:"><el-input ref="selectedData" type="file"></el-input></el-form-item>
+            <el-form-item label="证明:"><el-input ref="selectedProofs" type="file" multiple></el-input></el-form-item>
             <el-form-item><el-button type="primary" @click="pubPrepare">Publish</el-button></el-form-item>
         </el-form>
     </section>
@@ -49,7 +49,7 @@ export default {
             this.pubDialog = false
             this.$message({
                 type: "info",
-                message: "Cancel publish. "
+                message: "取消发布新数据"
             })
         },
         pubPrepare: function () {
@@ -70,9 +70,9 @@ export default {
                     _this.IDs.metaDataID = result[0].hash
                     _this.count--
                 }).catch(function (err) {
-                    console.log("Node: add.metaData.failed. ", err)
-                    _this.$alert(err, "Error: Add meta data failed. ", {
-                        confirmButtonText: "I've got it.",
+                    console.log("IPFS上传失败：", err)
+                    _this.$alert(err, "IPFS上传失败！", {
+                        confirmButtonText: "关闭",
                         showClose: false,
                         type: "error"
                     })
@@ -93,9 +93,9 @@ export default {
                         _this.IDs.proofDataIDs.push(result[0].hash)
                         _this.count--
                     }).catch(function (err) {
-                        console.log("Node: add.proofsData.failed. ", err)
-                        _this.$alert(err, "Error: Add proofs data failed. ", {
-                            confirmButtonText: "I've got it.",
+                        console.log("IPFS上传失败：", err)
+                        _this.$alert(err, "IPFS上传失败！", {
+                            confirmButtonText: "关闭",
                             showClose: false,
                             type: "error"
                         })
@@ -111,9 +111,9 @@ export default {
                 _this.IDs.detailsID = result[0].hash
                 _this.count--
             }).catch(function (err) {
-                console.log("Node: add.detailsData.failed. ", err)
-                _this.$alert(err, "Error: Add details data failed. ", {
-                    confirmButtonText: "I've got it.",
+                console.log("IPFS上传失败：", err)
+                _this.$alert(err, "IPFS上传失败！", {
+                    confirmButtonText: "关闭",
                     showClose: false,
                     type: "error"
                 })
@@ -128,11 +128,11 @@ export default {
                     price: this.pubData.Price, IDs: this.IDs}}, function (message) {
                 if (message.name !== "error") {
                     // optimize?: dl_db.write here, seller will see his publish before contract emit event.
-                    console.log("Publish new data success.", message)
+                    console.log("发布新数据成功")
                 }else {
-                    console.log("Node: publish.newData failed. ", message.payload)
-                    _this.$alert(message.payload, "Error: Publish data failed: ", {
-                        confirmButtonText: "I've got it.",
+                    console.log("发布新数据失败：", message.payload)
+                    _this.$alert(message.payload, "发布新数据失败！", {
+                        confirmButtonText: "关闭",
                         showClose: false,
                         type: "error"
                     })

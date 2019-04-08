@@ -1,7 +1,7 @@
 <template>
     <section>
         <el-col :span="24" class="section-item">
-            Here will show all messages, should I save it in database?
+            通知信箱，还没想好怎么做，暂时用这个页面为其他home子页面添加样式控制吧。
         </el-col>
     </section>
 </template>

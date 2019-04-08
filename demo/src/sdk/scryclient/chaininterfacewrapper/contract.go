@@ -16,14 +16,12 @@ import (
 )
 
 var (
-	conn         *ethclient.Client               = nil
-	scryProtocol *contractinterface.ScryProtocol = nil
-	scryToken    *contractinterface.ScryToken    = nil
+	conn         *ethclient.Client
+	scryProtocol *contractinterface.ScryProtocol
+	scryToken    *contractinterface.ScryToken
 )
 
-func Initialize(protocolContractAddress common.Address,
-	tokenContractAddress common.Address,
-	clientConn *ethclient.Client) error {
+func Initialize(protocolContractAddress common.Address, tokenContractAddress common.Address, clientConn *ethclient.Client) error {
 	var err error = nil
 
 	scryProtocol, err = contractinterface.NewScryProtocol(protocolContractAddress, clientConn)

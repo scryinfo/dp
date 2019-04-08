@@ -1,38 +1,38 @@
 <template>
     <section>
         <el-col :span="24" class="section-item">
-            <el-button size="mini" type="primary" @click="buyDialog = true">Buy</el-button>
+            <el-button size="mini" type="primary" @click="buyDialog = true">预购买</el-button>
         </el-col>
 
         <el-table :data="this.$store.state.datalist.slice((curPage-1)*pageSize, curPage*pageSize)"
                   highlight-current-row border height=468 @current-change="currentChange">
-            <el-table-column prop="Title" label="Title" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="Price" label="Price" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="Keys" label="Keys" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="Description" label="Description" show-overflow-tooltip></el-table-column>
-            <el-table-column prop="SupportVerify" label="SupportVerify" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="Title" label="标题" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="Price" label="价格" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="Keys" label="标签" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="Description" label="描述" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="Seller" label="卖家" show-overflow-tooltip></el-table-column>
         </el-table>
         <el-pagination class="pagination" @current-change="setCurPage" @size-change="setPageSize" :total="total"
             layout="sizes, total, prev, pager, next, jumper" :page-sizes="[5, 6]" :page-size="pageSize"
         ></el-pagination>
 
-        <el-dialog :visible.sync="buyDialog" title="Select if you want to start verify process? ">
-            <el-dialog :visible.sync="buyDialog2" title="Input password for this account:" append-to-body>
+        <el-dialog :visible.sync="buyDialog" title="是否启动验证流程？">
+            <el-dialog :visible.sync="buyDialog2" title="输入密码：" append-to-body>
                 <p>{{this.$store.state.account}}</p><el-input v-model="password" show-password clearable></el-input>
                 <div slot="footer">
-                    <el-button @click="cancelClickFunc('buy2')">Cancel</el-button>
-                    <el-button type="primary" @click="buy">Submit</el-button>
+                    <el-button @click="cancelClickFunc('buy2')">取消</el-button>
+                    <el-button type="primary" @click="buy">确认</el-button>
                 </div>
             </el-dialog>
             <div v-if="selectedData.SupportVerify">
-                <div>Start verify:&nbsp;&nbsp;&nbsp;<el-switch v-model="startVerify" active-text="Verify" inactive-text="Not verify"></el-switch></div>
+                <div>是否启动验证流程：&nbsp;&nbsp;&nbsp;<el-switch v-model="startVerify" active-text="是" inactive-text="否"></el-switch></div>
             </div>
             <div v-if="!selectedData.SupportVerify">
-                <p>Seller not support verifiy.<br/>Click "Input password" to buy data without verify or click cancel to cancel.</p>
+                <p>卖家不支持验证。<br/>点击“输入密码”按钮直接购买数据</p>
             </div>
             <div slot="footer">
-                <el-button @click="cancelClickFunc('buy')">Cancel</el-button>
-                <el-button type="primary" @click="buyDialog2 = true">Input password</el-button>
+                <el-button @click="cancelClickFunc('buy')">取消</el-button>
+                <el-button type="primary" @click="buyDialog2 = true">输入密码</el-button>
             </div>
         </el-dialog>
     </section>
@@ -69,7 +69,7 @@ export default {
             }
             this.$message({
                 type: "info",
-                message: "Cancel " + dialogName + ". "
+                message: "取消预购买"
             })
         },
         buy: function () {
@@ -82,11 +82,11 @@ export default {
             this.startVerify = false
             astilectron.sendMessage({ Name:"buy",Payload:{password: pwd, startVerify: sv, pID: this.selectedData}}, function (message) {
                 if (message.name !== "error") {
-                    console.log("Buy data success.", message)
+                    console.log("预购买成功")
                 }else {
-                    console.log("Node: buy failed.", message.payload)
-                    _this.$alert(message.payload, "Error: Buy data failed.", {
-                        confirmButtonText: "I've got it.",
+                    console.log("预购买失败：", message.payload)
+                    _this.$alert(message.payload, "预购买失败！", {
+                        confirmButtonText: "关闭",
                         showClose: false,
                         type: "error"
                     })
