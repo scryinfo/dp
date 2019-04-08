@@ -112,3 +112,7 @@ func initLog() error {
 
 	return nil
 }
+
+func StartScan(fromBlock uint64) {
+    core.StartScan(fromBlock)
+}
