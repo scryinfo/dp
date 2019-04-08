@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/scryinfo/iscap/demo/src/application/definition"
 	"github.com/scryinfo/iscap/demo/src/application/sdkinterface/settings"
-	"github.com/scryinfo/iscap/demo/src/sdk/core"
+	"github.com/scryinfo/iscap/demo/src/sdk"
 	"github.com/scryinfo/iscap/demo/src/sdk/core/chainevents"
 	"github.com/scryinfo/iscap/demo/src/sdk/core/chainoperations"
 	"github.com/scryinfo/iscap/demo/src/sdk/scryclient"
@@ -31,7 +31,7 @@ func SetScryInfo(si *settings.ScryInfo) {
 }
 
 func SetFromBlock(fromBlock uint64) {
-	core.StartScan(fromBlock)
+	sdk.StartScan(fromBlock)
 }
 
 func CreateUserWithLogin(password string) (string, error) {
