@@ -27,6 +27,7 @@ contract ScryProtocol {
         bytes metaDataIdEncSeller;
         uint256 buyerDeposit;
         uint256 verifierBonus;
+        bool needVerify;
         bool used;
     }
 
@@ -132,15 +133,16 @@ contract ScryProtocol {
         DataInfoPublished memory data = mapPublishedData[publishId];
         require(data.used, "Publish data does not exist");
         uint256 fee = data.price;
-        if (data.supportVerify) {
+        bool needVerify = data.supportVerify && startVerify;
+        if (needVerify) {
             fee += verifierBonus * verifierNum;   // should add the tokens which for awarding verifiers and arbitrators.
         }
         require((token.balanceOf(msg.sender)) >= fee, "No enough balance");
         require(token.transferFrom(msg.sender, address(this), fee), "Failed to transfer token from caller");
 
-        createTransaction2(seqNo, data, fee, publishId, startVerify);
+        createTransaction2(seqNo, data, fee, publishId, needVerify);
     }
-    function createTransaction2(string seqNo, DataInfoPublished data, uint256 fee, string publishId, bool startVerify) internal {
+    function createTransaction2(string seqNo, DataInfoPublished data, uint256 fee, string publishId, bool needVerify) internal {
         //create transaction
         uint txId = getTransactionId();
         bytes memory metaDataIdEncBuyer = new bytes(encryptedIdLen);
@@ -148,7 +150,7 @@ contract ScryProtocol {
         address[] memory selectedVerifiers = new address[](verifierNum);
         bool[] memory creditGived;
         uint8 num = 1;
-        if (data.supportVerify && startVerify) {
+        if (needVerify) {
             //choose verifiers randomly
             selectedVerifiers = chooseVerifiers(verifierNum);
             creditGived = new bool[](verifierNum);
@@ -166,7 +168,7 @@ contract ScryProtocol {
             selectedVerifiers, users);
 
         mapTransaction[txId] = TransactionItem(TransactionState.Created, msg.sender, data.seller, selectedVerifiers, creditGived,
-            publishId, metaDataIdEncBuyer, data.metaDataIdEncSeller, fee, verifierBonus, true);
+            publishId, metaDataIdEncBuyer, data.metaDataIdEncSeller, fee, verifierBonus, needVerify, true);
     }
 
     function chooseVerifiers(uint8 num) internal view returns (address[] memory) {
@@ -309,11 +311,9 @@ contract ScryProtocol {
         DataInfoPublished memory data = mapPublishedData[txItem.publishId];
         require(data.used, "Publish data does not exist");
 
-        if(!data.supportVerify) {
-            require(txItem.state == TransactionState.Created, "Invalid transaction state");
-        } else {
-            require(txItem.state == TransactionState.Voted, "Invalid transaction state");
-        }
+        //buyer can decide to buy even though no verifier response
+        require(txItem.state == TransactionState.Created
+           || txItem.state == TransactionState.Voted, "Invalid transaction state");
 
         txItem.state = TransactionState.Buying;
 
@@ -348,7 +348,7 @@ contract ScryProtocol {
         require(data.used, "Publish data does not exist");
 
         require(txItem.state == TransactionState.ReadyForDownload, "Invalid transaction state");
-        if (!data.supportVerify) {
+        if (!txItem.needVerify) {
             if(truth) {
                 payToSeller(txItem, data);
             }
@@ -459,7 +459,7 @@ contract ScryProtocol {
 
         DataInfoPublished storage data = mapPublishedData[txItem.publishId];
         require(data.used, "Publish data does not exist");
-        require(data.supportVerify, "The transaction do not support verification");
+        require(txItem.needVerify, "The transaction do not support verification");
 
         bool valid;
         uint256 index;
