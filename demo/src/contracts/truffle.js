@@ -21,8 +21,9 @@ module.exports = {
 		  port: '7545',
 		  network_id: '*'
 	  },
+
 	  gethtest: {
-		  host: '127.0.0.1',
+		  host: '192.168.1.14',
 		  port: '8545',
 		  network_id: '*'
 	  }
