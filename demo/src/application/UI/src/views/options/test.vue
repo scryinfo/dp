@@ -1,4 +1,5 @@
 <template>
+    <!-- test some function before use -->
     <section>
         <el-col :span="24" class="section-item">
             <el-button size="mini" type="primary" @click="buyDialog = true">预购买</el-button>

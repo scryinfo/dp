@@ -4,7 +4,7 @@
             <el-button size="mini" type="danger" @click="cancelDialog = true">取消交易</el-button>
             <el-button size="mini" type="primary" @click="purchaseDialog = true">购买数据</el-button>
             <el-button size="mini" type="primary" @click="decryptDialog = true">解密数据</el-button>
-            <el-button size="mini" type="primary" @click="confirmDialog = true">确认数据</el-button>
+            <el-button size="mini" type="primary" @click="confirmPre">确认数据</el-button>
             <el-button size="mini" type="primary" @click="creditPre">评价验证者</el-button>
         </el-col>
 
@@ -31,7 +31,7 @@
                        layout="sizes, total, prev, pager, next, jumper" :page-sizes="[5, 6]" :page-size="pageSize"
         ></el-pagination>
 
-        <!-- Dialogs -->
+        <!-- dialogs -->
         <el-dialog :visible.sync="cancelDialog" title="输入密码：">
             <p>{{this.$store.state.account}}</p><el-input v-model="password" show-password clearable></el-input>
             <div slot="footer">
@@ -61,7 +61,9 @@
                     <el-button type="primary" @click="confirm">确认</el-button>
                 </div>
             </el-dialog>
-            <div>判断原始数据真实性，如果你认为原始数据是假的，我们将为你启动仲裁流程：&nbsp;&nbsp;&nbsp;
+            <div>
+                <p v-if="supportVerify">判断原始数据真实性，如果你认为原始数据是假的，我们将为你启动仲裁流程：&nbsp;</p>
+                <p v-if="!supportVerify">判断原始数据真实性，点击“输入密码”按钮完成交易。&nbsp;</p>
                 <el-switch v-model="confirmData" active-text="真" inactive-text="假"></el-switch></div>
             <div slot="footer">
                 <el-button @click="cancelClickFunc('confirm')">取消</el-button>
@@ -97,7 +99,8 @@ export default {
     name: "TransactionBuy",
     data () {
         return {
-            selectedTx: {},  // {tID: "", Buyer: "", MetaDataIDEncWithBuyer: "", MetaDataExtension: "", Verifier1: "", Verifier2: ""}
+            selectedTx: {},  // {tID: "", User: "", MetaDataIDEncrypt: "", MetaDataExtension: "", Verifier1: "",
+                             // Verifier2: "", Verifier1Response: "", Verifier2Response: "", SupportVerify: false}
             curPage: 1,
             pageSize: 6,
             total: 0,
@@ -106,15 +109,16 @@ export default {
             cancelDialog: false,
             purchaseDialog: false,
             decryptDialog: false,
+            supportVerify: false,
             confirmDialog: false,
             confirmDialog2: false,
+            confirmData: false,
             creditDialog: false,
             creditDialog2: false,
             verifier1Revert: false,
             verifier1Credit: 0,
             verifier2Revert: false,
-            verifier2Credit: 0,
-            confirmData: false
+            verifier2Credit: 0
         }
     },
     methods: {
@@ -123,9 +127,10 @@ export default {
         currentChange: function (curRow) {
             this.selectedTx = {
                 TransactionID: curRow.TransactionID,
-                Buyer: curRow.Buyer,
-                MetaDataIDEncWithBuyer: curRow.MetaDataIDEncWithBuyer,
+                User: curRow.Buyer,
+                MetaDataIDEncrypt: curRow.MetaDataIDEncWithBuyer,
                 MetaDataExtension: curRow.MetaDataExtension,
+                SupportVerify: curRow.SupportVerify,
                 Verifier1: curRow.Verifier1,
                 Verifier1Response: curRow.Verifier1Response,
                 Verifier2: curRow.Verifier2,
@@ -207,6 +212,12 @@ export default {
                 }
             })
         },
+        confirmPre: function () {
+            if (this.selectedTx.SupportVerify) {
+                this.supportVerify = true
+            }
+            this.confirmDialog = true
+        },
         confirm: function () {
             this.confirmDialog2 = false
             this.confirmDialog = false
@@ -214,9 +225,9 @@ export default {
             let pwd = this.password
             this.password = ""
             astilectron.sendMessage({ Name:"confirm",Payload:{password: pwd, tID: this.selectedTx,
-                    confirmData: true // 'this.startArbitrate' should, but arbitrate not implement.
-            }}, function (message) {
+                    confirmData: this.confirmData}}, function (message) {
                 if (message.name !== "error") {
+                    _this.supportVerify = false
                     console.log("确认数据成功", message)
                 }else {
                     console.log("确认数据失败：", message.payload)
@@ -247,6 +258,8 @@ export default {
                         verifier1Revert: this.verifier1Revert, verifier1Credit: this.verifier1Credit,
                         verifier2Revert: this.verifier2Revert, verifier2Credit: this.verifier2Credit}}}, function (message) {
                 if (message.name !== "error") {
+                    _this.verifier1Revert = false
+                    _this.verifier2Revert = false
                     console.log("评价验证者成功")
                 }else {
                     console.log("评价验证者失败：", message.payload)

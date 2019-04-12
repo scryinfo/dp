@@ -62,13 +62,6 @@ let utils = {
                         message: message.payload,
                         position: "top-left"
                     })
-                    acc_db.read(_this.$store.state.account, function (accInstance) {
-                        acc_db.write({
-                            address: accInstance.address,
-                            fromBlock: Math.max(accInstance.fromBlock, message.payload.Block + 1),
-                            isVerifier: accInstance.isVerifier
-                        })
-                    })
                     break
                 case "onProofFilesExtensions":
                     dl_db.read(message.payload, function (dlInstance) {
@@ -97,6 +90,7 @@ let utils = {
                             ProofDataExtensions: dataDetails.ProofDataExtensions,
                             MetaDataIDEncWithSeller: "",
                             MetaDataIDEncWithBuyer: "",
+                            MetaDataIDEncWithArbitrator: "",
                             Verifier1: message.payload.Verifier1,   // -
                             Verifier2: message.payload.Verifier2,   // -
                             Verifier1Response: "",
@@ -138,6 +132,7 @@ let utils = {
                             ProofDataExtensions: txDetailsOnPurchase.ProofDataExtensions,
                             MetaDataIDEncWithSeller: message.payload.MetaDataIdEncWithSeller, // -
                             MetaDataIDEncWithBuyer: txDetailsOnPurchase.MetaDataIDEncWithBuyer,
+                            MetaDataIDEncWithArbitrator: txDetailsOnPurchase.MetaDataIDEncWithArbitrator,
                             Verifier1: txDetailsOnPurchase.Verifier1,
                             Verifier2: txDetailsOnPurchase.Verifier2,
                             Verifier1Response: txDetailsOnPurchase.Verifier1Response,
@@ -179,6 +174,7 @@ let utils = {
                             ProofDataExtensions: txDetailsOnRFD.ProofDataExtensions,
                             MetaDataIDEncWithSeller: txDetailsOnRFD.MetaDataIDEncWithSeller,
                             MetaDataIDEncWithBuyer: message.payload.MetaDataIdEncWithBuyer, // -
+                            MetaDataIDEncWithArbitrator: message.payload.MetaDataIDEncWithArbitrators, // - 
                             Verifier1: txDetailsOnRFD.Verifier1,
                             Verifier2: txDetailsOnRFD.Verifier2,
                             Verifier1Response: txDetailsOnRFD.Verifier1Response,
@@ -220,6 +216,7 @@ let utils = {
                             ProofDataExtensions: txDetailsOnC.ProofDataExtensions,
                             MetaDataIDEncWithSeller: txDetailsOnC.MetaDataIDEncWithSeller,
                             MetaDataIDEncWithBuyer: txDetailsOnC.MetaDataIDEncWithBuyer,
+                            MetaDataIDEncWithArbitrator: txDetailsOnC.MetaDataIDEncWithArbitrator,
                             Verifier1: txDetailsOnC.Verifier1,
                             Verifier2: txDetailsOnC.Verifier2,
                             Verifier1Response: txDetailsOnC.Verifier1Response,
@@ -241,6 +238,11 @@ let utils = {
                     break
                 case "onRegisterVerifier":
                     console.log("注册成为验证者事件回调：", message.payload)
+                    _this.$notify({
+                        title: "注册成为验证者事件回调：",
+                        message: message.payload,
+                        position: "top-left"
+                    })
                     acc_db.read(_this.$store.state.account, function (accInstance) {
                         acc_db.write({
                             address: accInstance.address,
@@ -260,6 +262,11 @@ let utils = {
                     break
                 case "onVerifierDisable":
                     console.log("取消验证者验证资格事件回调：", message.payload)
+                    _this.$notify({
+                        title: "取消验证者验证资格事件回调：",
+                        message: message.payload,
+                        position: "top-left"
+                    })
                     acc_db.read(_this.$store.state.account, function (accInstance) {
                         acc_db.write({
                             address: accInstance.address,
@@ -273,6 +280,11 @@ let utils = {
     },
     vote: function (_this, message) {
         console.log("验证者验证事件回调：", message.payload)
+        _this.$notify({
+            title: "验证者验证事件回调：",
+            message: message.payload,
+            position: "top-left"
+        })
         tx_db.read(message.payload.TransactionID, function (txDetailsOnV) {
             if (message.payload.VerifierIndex === "0") {
                 tx_db.write({
@@ -289,6 +301,7 @@ let utils = {
                     ProofDataExtensions: txDetailsOnV.ProofDataExtensions,
                     MetaDataIDEncWithSeller: txDetailsOnV.MetaDataIDEncWithSeller,
                     MetaDataIDEncWithBuyer: txDetailsOnV.MetaDataIDEncWithBuyer,
+                    MetaDataIDEncWithArbitrator: txDetailsOnV.MetaDataIDEncWithArbitrator,
                     Verifier1: txDetailsOnV.Verifier1,
                     Verifier2: txDetailsOnV.Verifier2,
                     Verifier1Response: message.payload.VerifierResponse, // -
@@ -320,6 +333,7 @@ let utils = {
                     ProofDataExtensions: txDetailsOnV.ProofDataExtensions,
                     MetaDataIDEncWithSeller: txDetailsOnV.MetaDataIDEncWithSeller,
                     MetaDataIDEncWithBuyer: txDetailsOnV.MetaDataIDEncWithBuyer,
+                    MetaDataIDEncWithArbitrator:txDetailsOnV.MetaDataIDEncWithArbitrator,
                     Verifier1: txDetailsOnV.Verifier1,
                     Verifier2: txDetailsOnV.Verifier2,
                     Verifier1Response: txDetailsOnV.Verifier1Response,

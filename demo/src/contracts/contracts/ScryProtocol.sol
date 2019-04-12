@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import "./ScryToken.sol";
 
 contract ScryProtocol {
-    enum TransactionState {Begin, Created, Voted, Buying, ReadyForDownload, Arbitrating, Payed, Closed}
+    enum TransactionState {Begin, Created, Voted, Buying, ReadyForDownload, Closed}
 
     struct DataInfoPublished {
         uint256 price;
@@ -46,8 +46,6 @@ contract ScryProtocol {
     uint8 creditLow = 0;
     uint8 creditHigh = 5;
     uint8 creditThreshold = 2;
-    uint8 arbitratorNum = 1;        
-    uint8 arbitrateCredit = 0;      
 
     struct VoteResult {
         bool judge;
@@ -56,21 +54,17 @@ contract ScryProtocol {
     }
 
     Verifier[] verifiers;
-    address[] selectedArbitrators;
     mapping (string => DataInfoPublished) mapPublishedData;
     mapping (uint256 => TransactionItem) mapTransaction;
     mapping (uint256 => mapping(address => VoteResult)) mapVote;
-    mapping (uint256 => bool[]) mapCount;
 
     event RegisterVerifier(string seqNo, address[] users);
     event DataPublish(string seqNo, string publishId, uint256 price, string despDataId, bool supportVerify, address[] users);
-    event TransactionCreate(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool supportVerify,
+    event TransactionCreate(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool needVerify,
         TransactionState state, address[] verifiers, address[] users);
     event Vote(string seqNo, uint256 transactionId, bool judge, string comments, TransactionState state, uint256 index, address[] users);
-    event Buy(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, TransactionState state, address[] users);
+    event Buy(string seqNo, uint256 transactionId, bytes metaDataIdEncSeller, TransactionState state, address[] users);
     event ReadyForDownload(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, TransactionState state, address[] users);
-    event ArbitratingBegin(string seqNo,uint256 transactionId, TransactionState state, address[] users);
-    event Payed(string seqNo,uint256 txId,TransactionState state);
     event TransactionClose(string seqNo, uint256 transactionId, TransactionState state, address[] users);
     event VerifierDisable(string seqNo, address verifier, address[] users);
 
@@ -145,7 +139,7 @@ contract ScryProtocol {
     function createTransaction2(string seqNo, DataInfoPublished data, uint256 fee, string publishId, bool needVerify) internal {
         //create transaction
         uint txId = getTransactionId();
-        bytes memory metaDataIdEncBuyer = new bytes(encryptedIdLen);
+        bytes memory metaDataIdEncryptedPlaceholder = new bytes(encryptedIdLen);
 
         address[] memory selectedVerifiers = new address[](verifierNum);
         bool[] memory creditGived;
@@ -155,20 +149,19 @@ contract ScryProtocol {
             selectedVerifiers = chooseVerifiers(verifierNum);
             creditGived = new bool[](verifierNum);
             num += verifierNum;
-            selectedArbitrators = chooseArbitrators(arbitratorNum, selectedVerifiers);
         }
 
         address[] memory users = new address[](num);
         users[0] = msg.sender;
         if (num > 1) {
-            users[1] = selectedVerifiers[0];
-            users[2] = selectedVerifiers[1];
+            for (uint8 i = 0; i < verifierNum; i++) {
+                users[i+1] = selectedVerifiers[i];
+            }
         }
-        emit TransactionCreate(seqNo, txId, publishId, data.proofDataIds, data.supportVerify, TransactionState.Created,
-            selectedVerifiers, users);
+        emit TransactionCreate(seqNo, txId, publishId, data.proofDataIds, needVerify, TransactionState.Created, selectedVerifiers, users);
 
         mapTransaction[txId] = TransactionItem(TransactionState.Created, msg.sender, data.seller, selectedVerifiers, creditGived,
-            publishId, metaDataIdEncBuyer, data.metaDataIdEncSeller, fee, verifierBonus, needVerify, true);
+            publishId, metaDataIdEncryptedPlaceholder, data.metaDataIdEncSeller, fee, verifierBonus, needVerify, true);
     }
 
     function chooseVerifiers(uint8 num) internal view returns (address[] memory) {
@@ -236,70 +229,17 @@ contract ScryProtocol {
         (valid, index) = verifierValid(verifier, txItem.verifiers);
         require(valid, "Invalid verifier");
 
+        if (!mapVote[txId][msg.sender].used) {
+            payToVerifier(txItem, verifier.addr);
+        }
         mapVote[txId][msg.sender] = VoteResult(judge, comments, true);
 
         txItem.state = TransactionState.Voted;
         txItem.creditGived[index] = false;
 
-        payToVerifier(txItem, verifier.addr);
-
         address[] memory users = new address[](1);
         users[0] = txItem.buyer;
         emit Vote(seqNo, txId, judge, comments, txItem.state, index, users);
-    }
-
-    function chooseArbitrators(uint8 num, address[] vs) internal view returns (address[] memory) {
-        uint256[] memory shortlistIndex = new uint256[](verifiers.length - verifierNum);
-        address[] memory chosenArbitrators = new address[](num);
-        uint256 count;
-
-        for (uint256 i = 0;i < verifiers.length;i++) {
-            Verifier memory a = verifiers[i];
-            if (arbitratorValid(a,vs)) {
-                shortlistIndex[count] = i;
-                count++;
-            }
-        }
-        require(count >= num, "No enough arbitrators");
-
-        address[] memory shortlist = new address[](count);
-        while (count > 0) {
-            count--;
-            shortlist[count] = verifiers[shortlistIndex[count]].addr;
-        }
-
-        for (i = 0;i < num;i++) {
-            uint index = getRandomNumber(shortlist.length) % shortlist.length;
-            address ad = shortlist[index];
-            while (arbitratorExist(ad,chosenArbitrators)) {
-                ad = shortlist[(++index) % shortlist.length];
-            }
-            chosenArbitrators[i] = ad;
-        }
-
-        return chosenArbitrators;
-    }
-
-    function arbitratorValid(Verifier a, address[] vs) internal view returns (bool) {
-        bool notVerifier = true;
-        for (uint8 i = 0;i < vs.length;i++) {
-            if (a.addr == vs[i]) {
-                notVerifier = false;
-                break;
-            }
-        }
-        return notVerifier && a.enable && (a.credits >= arbitrateCredit);
-    }
-
-    function arbitratorExist(address ad, address[] addrs) internal pure returns (bool) {
-        bool exist = false;
-        for (uint8 i = 0;i < addrs.length;i++) {
-            if (ad == addrs[i]) {
-                exist = true;
-                break;
-            }
-        }
-        return exist;
     }
 
     function buyData(string seqNo, uint256 txId) external {
@@ -319,7 +259,7 @@ contract ScryProtocol {
 
         address[] memory users = new address[](1);
         users[0] = address(0x00);
-        emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, txItem.state , users);
+        emit Buy(seqNo, txId, txItem.metaDataIdEncSeller, txItem.state , users);
     }
 
     function submitMetaDataIdEncWithBuyer(string seqNo, uint256 txId, bytes encryptedMetaDataId) external {
@@ -359,38 +299,9 @@ contract ScryProtocol {
                 payToSeller(txItem, data);
                 closeTransaction(txItem, seqNo, txId);
             } else {
-                txItem.state = TransactionState.Arbitrating;
-                emit ArbitratingBegin(seqNo, txId, txItem.state, selectedArbitrators);
+                // arbitrate.
+                closeTransaction(txItem, seqNo, txId);
             }
-
-        }
-    }
-
-    function arbitrate(string seqNo,uint txId,bool judge) external {
-        TransactionItem storage txItem = mapTransaction[txId];
-        require(txItem.used, "Transaction does not exist");
-
-        require(arbitratorExist(msg.sender, selectedArbitrators), "Invalid arbitrator");
-
-        mapCount[txId].push(judge);
-        if (mapCount[txId].length == arbitratorNum) {
-            // reward arbitrators,transfer tokens to selectedArbitrators.
-            uint8 truth;
-            for (uint256 i = 0;i < arbitratorNum;i++) {
-                if (mapCount[txId][i]) {
-                    truth++;
-                }
-            }
-            delete mapCount[txId];
-            if (!(truth >= (arbitratorNum+1)/2)) {
-                // return tokens to buyer.
-            }else {
-                DataInfoPublished storage data = mapPublishedData[txItem.publishId];
-                payToSeller(txItem, data);
-            }
-
-            txItem.state = TransactionState.Payed;
-            emit Payed(seqNo, txId, txItem.state);
         }
     }
 

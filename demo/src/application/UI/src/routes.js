@@ -6,6 +6,7 @@ import TransactionBuy from "./views/options/TransactionBuy.vue"
 import TransactionSell from "./views/options/TransactionSell.vue"
 import PublishNewData from "./views/options/PublishNewData.vue"
 import Verify from "./views/options/Verify.vue"
+import Arbitrate from "./views/options/Arbitrate.vue"
 import Message from "./views/options/Message.vue"
 import Test from "./views/options/test.vue"  // for test
 
@@ -30,8 +31,9 @@ let routes = [
             {path: "/dl", component: DataList, name: "数据列表"},
             {path: "/tb", component: TransactionBuy, name: "我购买的数据"},
             {path: "/ts", component: TransactionSell, name: "我出售的数据"},
-            {path: "/vf", component: Verify, name: "我验证的数据"},
             {path: "/pd", component: PublishNewData, name: "发布新数据"},
+            {path: "/vf", component: Verify, name: "我验证的数据"},
+            {path: "/at", component: Arbitrate, name: "我仲裁的数据", hidden: true},
             {path: "/msg", component: Message, name: "Short Message", hidden: true},
             {path: "/test", component: Test, name: "Test", hidden: true} // for test
         ]

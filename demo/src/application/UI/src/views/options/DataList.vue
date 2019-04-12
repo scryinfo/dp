@@ -16,6 +16,7 @@
             layout="sizes, total, prev, pager, next, jumper" :page-sizes="[5, 6]" :page-size="pageSize"
         ></el-pagination>
 
+        <!-- dialogs -->
         <el-dialog :visible.sync="buyDialog" title="是否启动验证流程？">
             <el-dialog :visible.sync="buyDialog2" title="输入密码：" append-to-body>
                 <p>{{this.$store.state.account}}</p><el-input v-model="password" show-password clearable></el-input>

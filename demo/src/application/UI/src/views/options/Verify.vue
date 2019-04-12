@@ -15,7 +15,7 @@
         </div>
         <div v-if="showControl">
             <el-col :span="24" class="section-item">
-                <el-button size="mini" type="primary" @click="VoteDialog = true">验证</el-button></el-col>
+                <el-button size="mini" type="primary" @click="VoteDialog = true">验证数据</el-button></el-col>
             <el-table :data="this.$store.state.transactionverifier.slice((curPage-1)*pageSize, curPage*pageSize)"
                       highlight-current-row border :height=height @current-change="currentChange">
                 <el-table-column prop="Title" label="标题" show-overflow-tooltip></el-table-column>
@@ -28,7 +28,8 @@
                            layout="sizes, total, prev, pager, next, jumper" :page-sizes="[5, 6]" :page-size="pageSize"
             ></el-pagination>
 
-            <el-dialog :visible.sync="VoteDialog" title="验证结果：">
+            <!-- dialogs -->
+            <el-dialog :visible.sync="VoteDialog" title="验证数据：">
                 <el-dialog :visible.sync="VoteDialog2" title="输入密码：" append-to-body>
                     <p>{{this.$store.state.account}}</p><el-input v-model="password" show-password clearable></el-input>
                     <div slot="footer">
@@ -77,11 +78,11 @@ export default {
         setPageSize: function (newPageSize) {this.pageSize = newPageSize},
         currentChange: function (curRow) {this.selectedTx = curRow.TransactionID},
         cancelClickFunc: function (dialogName) {
-            var str = ""
+            let str = ""
             switch (dialogName) {
                 case "register": this.RegisterDialog = false; str = "注册成为验证者"; break
-                case "vote": this.VoteDialog = false; str = "验证"; break
-                case "vote2": this.VoteDialog2 = false; str = "验证"; break
+                case "vote": this.VoteDialog = false; str = "验证数据"; break
+                case "vote2": this.VoteDialog2 = false; str = "验证数据"; break
             }
             this.$message({
                 type: "info",
