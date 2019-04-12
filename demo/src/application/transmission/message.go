@@ -179,7 +179,6 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err = json.Unmarshal(m.Payload, &cd); err != nil {
 			break
 		}
-		rlog.Info("Node: in credit msg from js. ", string(m.Payload), " ", cd)
 		if err = sdkinterface.CreditToVerifiers(&cd); err != nil {
 			break
 		}

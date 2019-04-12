@@ -121,7 +121,16 @@ func PrepareToBuy(txParams *op.TransactParams, publishId string, startVerify boo
 func BuyData(txParams *op.TransactParams, txId *big.Int) error {
 	tx, err := scryProtocol.BuyData(op.BuildTransactOpts(txParams), getAppSeqNo(), txId)
 	if err == nil {
-		rlog.Debug("BuyData:", tx.Data(), " tx hash:", tx.Hash().String())
+		rlog.Debug("BuyData:", string(tx.Data()), " tx hash:", tx.Hash().String())
+	}
+
+	return err
+}
+
+func CancelTransaction(txParams *op.TransactParams, txId *big.Int) error {
+	tx, err := scryProtocol.CancelTransaction(op.BuildTransactOpts(txParams), getAppSeqNo(), txId)
+	if err == nil {
+		rlog.Debug("CancelTransaction", string(tx.Data()), " tx hash:", tx.Hash().String())
 	}
 
 	return err

@@ -1,7 +1,6 @@
 package sdkinterface
 
 import (
-	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/scryinfo/iscap/demo/src/application/definition"
@@ -215,8 +214,9 @@ func CancelTransaction(txId, password string) error {
 	}
 	txParam := chainoperations.TransactParams{From: common.HexToAddress(curUser.Account.Address),
 		Password: password, Value: big.NewInt(0), Pending: false}
-	// call cif function after compile contract.
-	fmt.Println(tID, txParam)
+	if err = cif.CancelTransaction(&txParam, tID); err != nil {
+		return errors.Wrap(err, "Cancel transaction failed. ")
+	}
 	return nil
 }
 
