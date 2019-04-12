@@ -100,19 +100,12 @@ func onTransactionCreate(event events.Event) bool {
 		}
 
 		otc.Block = event.BlockNumber
-		rlog.Info("Node1. ")
 		otc.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
-		rlog.Info("Node2. ")
 		otc.Buyer = event.Data.Get("users").([]common.Address)[0].String()
-		rlog.Info("Node3. ")
 		otc.StartVerify = event.Data.Get("needVerify").(bool)
-		rlog.Info("Node4. ")
 		otc.Verifier1 = event.Data.Get("verifiers").([]common.Address)[0].String()
-		rlog.Info("Node5. ")
 		otc.Verifier2 = event.Data.Get("verifiers").([]common.Address)[1].String()
-		rlog.Info("Node6. ")
 		otc.TxState = setTxState(event.Data.Get("state").(uint8))
-		rlog.Info("Node7. ")
 
 		extensions = <-channel
 		if otc.ProofFileNames, err = getAndRenameProofFiles(event.Data.Get("proofIds").([][32]uint8), extensions); err != nil {
@@ -270,11 +263,9 @@ func setTxState(state byte) string {
 	case 4:
 		str = "ReadyForDownload"
 	case 5:
-		str = "Arbitrating"
-	case 6:
-		str = "Payed"
-	case 7:
 		str = "Closed"
+	default:
+		str = "Unknow TxState!"
 	}
 	return str
 }

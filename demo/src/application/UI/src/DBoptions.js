@@ -213,7 +213,7 @@ let acc_db = {
             if (cursor) {
                 store.put({
                     address: cursor.value.address,
-                    fromBlock: 1,
+                    fromBlock: 18000,
                     isVerifier: false
                 })
                 cursor.continue()

@@ -54,7 +54,7 @@
             </div>
         </el-dialog>
         <el-dialog :visible.sync="confirmDialog" title="判断原始数据真实性：">
-            <el-dialog :visible.sync="confirmDialog2" title="输入密码：">
+            <el-dialog :visible.sync="confirmDialog2" title="输入密码：" append-to-body>
                 <p>{{this.$store.state.account}}</p><el-input v-model="password" show-password clearable></el-input>
                 <div slot="footer">
                     <el-button @click="cancelClickFunc('confirm2')">取消</el-button>

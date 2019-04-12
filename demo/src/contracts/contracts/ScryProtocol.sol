@@ -252,14 +252,25 @@ contract ScryProtocol {
         require(data.used, "Publish data does not exist");
 
         //buyer can decide to buy even though no verifier response
-        require(txItem.state == TransactionState.Created
-           || txItem.state == TransactionState.Voted, "Invalid transaction state");
+        require(txItem.state == TransactionState.Created || txItem.state == TransactionState.Voted, "Invalid transaction state");
 
         txItem.state = TransactionState.Buying;
 
         address[] memory users = new address[](1);
         users[0] = address(0x00);
         emit Buy(seqNo, txId, txItem.metaDataIdEncSeller, txItem.state , users);
+    }
+
+    function cancelTransaction(string seqNo, uint256 txId) external {
+        TransactionItem storage txItem = mapTransaction[txId];
+        require(txItem.used, "Transaction does not exist");
+        require(txItem.buyer == msg.sender, "Invalid cancel operator");
+
+        require(txItem.state == TransactionState.Created || txItem.state == TransactionState.Voted ||
+        txItem.state == TransactionState.Buying, "Invalid transaction state");
+
+        revertToBuyer(txItem);
+        closeTransaction(txItem, seqNo, txId);
     }
 
     function submitMetaDataIdEncWithBuyer(string seqNo, uint256 txId, bytes encryptedMetaDataId) external {
@@ -336,6 +347,15 @@ contract ScryProtocol {
             }
         } else {
             require(false, "Low deposit value for paying to seller");
+        }
+    }
+
+    function revertToBuyer(TransactionItem storage txItem) internal {
+        uint256 deposit = txItem.buyerDeposit;
+        txItem.buyerDeposit = 0;
+        if (!token.transfer(txItem.buyer, deposit)) {
+            txItem.buyerDeposit = deposit;
+            require(false, "Failed to revert to buyer his token");
         }
     }
 

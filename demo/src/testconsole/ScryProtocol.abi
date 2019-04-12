@@ -394,6 +394,24 @@
         {
           "name": "txId",
           "type": "uint256"
+        }
+      ],
+      "name": "cancelTransaction",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "seqNo",
+          "type": "string"
+        },
+        {
+          "name": "txId",
+          "type": "uint256"
         },
         {
           "name": "encryptedMetaDataId",
