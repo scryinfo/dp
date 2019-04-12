@@ -96,7 +96,7 @@ contract ScryProtocol {
             require(token.transferFrom(msg.sender, address(this), verifierDepositToken), "Failed to transfer token from caller");
         }
 
-        verifiers[verifiers.length++] = Verifier(msg.sender, verifierDepositToken, creditHigh, 0, true);
+        verifiers[verifiers.length++] = Verifier(msg.sender, verifierDepositToken, 0, 0, true);
         validVerifierCount++;
 
         address[] memory users = new address[](1);
@@ -378,9 +378,12 @@ contract ScryProtocol {
         require(valid, "Invalid verifier");
         require(!txItem.creditGived[index], "The verifier's credit in this transaction has been submitted");
 
-        verifier.credits = (uint8)((verifier.credits * verifier.creditTimes + credit)/(++verifier.creditTimes));
+        verifier.credits = (uint8)((verifier.credits * verifier.creditTimes + credit)/(verifier.creditTimes+1));
+        verifier.creditTimes++;
         txItem.creditGived[index] = true;
 
+        address[] memory users = new address[](1);
+        users[0] = address(0x00);
         //disable verifier and forfeiture deposit while credit <= creditThreshold
         if (verifier.credits <= creditThreshold) {
             verifier.enable = false;
@@ -388,8 +391,6 @@ contract ScryProtocol {
             validVerifierCount--;
             require(validVerifierCount >= 1, "Invalid verifier count");
 
-            address[] memory users = new address[](1);
-            users[0] = address(0x00);
             emit VerifierDisable(seqNo, verifier.addr, users);
         }
     }
