@@ -2,6 +2,8 @@
     <div>
         <el-row>
             <el-col :span="24"><div class="top">一个不会起名字的人写的应用 ￣へ￣</div></el-col>
+        </el-row>
+        <el-row>
             <el-col :span="8">
                 <div class="left">
                     <div class="left-explain">选择账户：</div>
@@ -86,7 +88,7 @@ export default {
             astilectron.sendMessage({Name: "create.new.account", Payload: {password: this.password}}, function (message) {
                 if (message.name !== "error") {
                     acc_db.write({
-                        address: _this.account,
+                        address: message.payload,
                         fromBlock: 1,
                         isVerifier: false
                     })

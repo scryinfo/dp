@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	window *astilectron.Window
-	channel = make(chan []string, 3)
+	window    *astilectron.Window
+	channel   = make(chan []string, 3)
 	eventName = []string{"DataPublish", "Approval", "TransactionCreate", "Buy", "ReadyForDownload", "TransactionClose",
 		"RegisterVerifier", "Vote", "VerifierDisable"}
 )
@@ -52,8 +52,8 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err = json.Unmarshal(m.Payload, &sid); err != nil {
 			break
 		}
-		if err = sdkinterface.SubscribeEvents(eventName, onPublish, onApprove, onTransactionCreate, onPurchase,
-			onReadyForDownload, onClose, onRegisterAsVerifier, onVote, onVerifierDisable); err != nil {
+		if err = sdkinterface.SubscribeEvents(eventName, onPublish, onApprove, onTransactionCreate, onPurchase, onReadyForDownload,
+			onClose, onRegisterAsVerifier, onVote, onVerifierDisable); err != nil {
 			break
 		}
 		sdkinterface.SetFromBlock(uint64(sid.FromBlock))
@@ -136,8 +136,8 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 		if err = json.Unmarshal(m.Payload, &dd); err != nil {
 			break
 		}
-		if payload, err = sdkinterface.BuyerDecryptAndGetMetaDataFromIPFS(dd.Password, dd.SelectedTx.MetaDataIDEncWithBuyer,
-			dd.SelectedTx.Buyer, dd.SelectedTx.MetaDataExtension); err != nil {
+		if payload, err = sdkinterface.DecryptAndGetMetaDataFromIPFS(dd.Password, dd.SelectedTx.MetaDataIDEncrypt,
+			dd.SelectedTx.User, dd.SelectedTx.MetaDataExtension); err != nil {
 			break
 		}
 		return payload, nil

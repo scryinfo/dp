@@ -111,15 +111,15 @@ type DecryptData struct {
 	SelectedTx SelectedTxDD `json:"tID"`
 }
 type SelectedTxDD struct {
-	MetaDataIDEncWithBuyer []byte `json:"MetaDataIDEncWithBuyer"`
-	MetaDataExtension      string `json:"MetaDataExtension"`
-	Buyer                  string `json:"Buyer"`
+	MetaDataIDEncrypt []byte `json:"MetaDataIDEncrypt"`
+	MetaDataExtension string `json:"MetaDataExtension"`
+	User              string `json:"User"`
 }
 
 type ConfirmData struct {
 	Password   string       `json:"password"`
 	SelectedTx SelectedTxCD `json:"tID"`
-	Truth  bool         `json:"confirmData"`
+	Truth      bool         `json:"confirmData"`
 }
 type SelectedTxCD struct {
 	TransactionID string `json:"TransactionID"`

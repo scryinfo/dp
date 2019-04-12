@@ -16,9 +16,10 @@ import (
 )
 
 const (
-	IPFSOutDir = "D:/desktop"
+	IPFSOutDir      = "D:/desktop"
 	EventSendFailed = " event send failed. "
 )
+
 var err error
 
 func onPublish(event events.Event) bool {
@@ -90,7 +91,7 @@ func onApprove(event events.Event) bool {
 func onTransactionCreate(event events.Event) bool {
 	go func() {
 		var (
-			otc definition.OnTransactionCreate
+			otc        definition.OnTransactionCreate
 			extensions []string
 		)
 		otc.PublishID = event.Data.Get("publishId").(string)
@@ -99,17 +100,21 @@ func onTransactionCreate(event events.Event) bool {
 		}
 
 		otc.Block = event.BlockNumber
+		rlog.Info("Node1. ")
 		otc.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
+		rlog.Info("Node2. ")
 		otc.Buyer = event.Data.Get("users").([]common.Address)[0].String()
-
-		otc.StartVerify = event.Data.Get("supportVerify").(bool)
-		// "startVerify" should, but contract not modify, just write "supportVerify" to match it.
-
+		rlog.Info("Node3. ")
+		otc.StartVerify = event.Data.Get("needVerify").(bool)
+		rlog.Info("Node4. ")
 		otc.Verifier1 = event.Data.Get("verifiers").([]common.Address)[0].String()
+		rlog.Info("Node5. ")
 		otc.Verifier2 = event.Data.Get("verifiers").([]common.Address)[1].String()
+		rlog.Info("Node6. ")
 		otc.TxState = setTxState(event.Data.Get("state").(uint8))
+		rlog.Info("Node7. ")
 
-		extensions = <- channel
+		extensions = <-channel
 		if otc.ProofFileNames, err = getAndRenameProofFiles(event.Data.Get("proofIds").([][32]uint8), extensions); err != nil {
 			rlog.Error(errors.Wrap(err, "Node - onTC.callback: get and rename proof files failed. "))
 		}
@@ -129,7 +134,7 @@ func getAndRenameProofFiles(ipfsIDs [][32]byte, extensions []string) ([]string, 
 		}
 	}()
 	var (
-		proofs = make([]string, len(ipfsIDs))
+		proofs                   = make([]string, len(ipfsIDs))
 		oldFileName, newFileName string
 	)
 	if len(ipfsIDs) != len(extensions) {
@@ -220,8 +225,8 @@ func onRegisterAsVerifier(event events.Event) bool {
 func onVote(event events.Event) bool {
 	go func() {
 		var (
-			ov definition.OnVote
-			judge bool
+			ov      definition.OnVote
+			judge   bool
 			comment string
 		)
 		ov.Block = event.BlockNumber
@@ -275,7 +280,7 @@ func setTxState(state byte) string {
 }
 
 func setJudge(judge bool) string {
-	var str string = "Not suggest to buy"
+	var str = "Not suggest to buy"
 	if judge {
 		str = "Suggest to buy"
 	}

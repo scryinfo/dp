@@ -5,7 +5,7 @@
         "eip155Block": 0,
         "eip158Block": 0,
         "ByzantiumBlock": 0
-    },
+  },
   "alloc": {
     "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8": {"balance": "100000000000000000000000"}
   },

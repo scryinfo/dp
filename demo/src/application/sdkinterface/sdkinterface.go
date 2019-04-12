@@ -192,9 +192,10 @@ func Buy(txId string, password string) error {
 
 func SubmitMetaDataIdEncWithBuyer(txId string, password, seller, buyer string, metaDataIDEncSeller []byte) error {
 	var metaDataIdEncWithBuyer []byte
-	if metaDataIdEncWithBuyer, err = accounts.GetAMInstance().ReEncrypt([]byte(metaDataIDEncSeller), seller, buyer, password); err != nil {
+	if metaDataIdEncWithBuyer, err = accounts.GetAMInstance().ReEncrypt(metaDataIDEncSeller, seller, buyer, password); err != nil {
 		return errors.Wrap(err, "Re-encrypt meta data ID failed. ")
 	}
+
 	tID, ok := new(big.Int).SetString(txId, 10)
 	if !ok {
 		return errors.New("Set to *big.Int failed. ")
@@ -219,7 +220,7 @@ func CancelTransaction(txId, password string) error {
 	return nil
 }
 
-func BuyerDecryptAndGetMetaDataFromIPFS(password string, metaDataIdEncWithBuyer []byte, buyer, extension string) (string, error) {
+func DecryptAndGetMetaDataFromIPFS(password string, metaDataIdEncWithBuyer []byte, buyer, extension string) (string, error) {
 	var metaDataIDByte []byte
 	if metaDataIDByte, err = accounts.GetAMInstance().Decrypt(metaDataIdEncWithBuyer, buyer, password); err != nil {
 		return "", errors.Wrap(err, "Decrypt meta data ID encrypted with buyer failed. ")

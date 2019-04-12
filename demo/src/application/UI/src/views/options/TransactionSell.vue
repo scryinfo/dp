@@ -22,6 +22,7 @@
                        layout="sizes, total, prev, pager, next, jumper" :page-sizes="[5, 6]" :page-size="pageSize"
         ></el-pagination>
 
+        <!-- dialogs -->
         <el-dialog :visible.sync="reEncryptDialog" title="输入密码：">
             <p>{{this.$store.state.account}}</p><el-input v-model="password" show-password clearable></el-input>
             <div slot="footer">
