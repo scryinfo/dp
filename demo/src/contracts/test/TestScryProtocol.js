@@ -58,12 +58,12 @@ contract('ScryProtocol', async accounts => {
         r = await ptl.submitMetaDataIdEncWithBuyer("seqNo6", txId, "0", {from: seller})
         assert(checkEvent("ReadyForDownload", r), "failed to watch event ReadyForDownload")
 
-        r = await ptl.confirmDataTruth("seqNO7", txId, false, {from: buyer})
-        assert(checkEvent("ArbitratingBegin", r), "failed to watch event ArbitratingBegin")
+        r = await ptl.confirmDataTruth("seqNO7", txId, true, {from: buyer})
+        assert(checkEvent("TransactionClose", r), "failed to watch event TransactionClose")
 
-        arbitrators = getEventField("ArbitratingBegin", r, "users");
-        r = await ptl.arbitrate("seqNO8", txId, true, {from: arbitrators[0]})
-        assert(checkEvent("Payed", r), "failed to watch event Payed")
+        to = verifiers[0]
+        r = await ptl.creditsToVerifier("seqNO8", txId, to, 1, {from: buyer})
+        assert(checkEvent("VerifierDisable", r), "failed to watch event VerifierDisable")
     })
 
     function InitContracts() {
