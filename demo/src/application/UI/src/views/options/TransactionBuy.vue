@@ -20,7 +20,6 @@
                     <el-form-item label="状态"><span>{{ props.row.State }}</span></el-form-item>
                     <el-form-item label="验证者回复1"><span>{{ props.row.Verifier1Response }}</span></el-form-item>
                     <el-form-item label="验证者回复2"><span>{{ props.row.Verifier2Response }}</span></el-form-item>
-                    <el-form-item label="仲裁结果"><span>{{ props.row.ArbitrateResult }}</span></el-form-item>
                 </el-form>
             </el-table-column>
             <el-table-column prop="Title" label="标题" show-overflow-tooltip></el-table-column>
@@ -99,8 +98,8 @@ export default {
     name: "TransactionBuy",
     data () {
         return {
-            selectedTx: {},  // {tID: "", User: "", MetaDataIDEncrypt: "", MetaDataExtension: "", Verifier1: "",
-                             // Verifier2: "", Verifier1Response: "", Verifier2Response: "", SupportVerify: false}
+            selectedTx: {},  // {tID: "", User: "", MetaDataIDEncrypt: "", MetaDataExtension: "",
+                             //  Verifier1Response: "", Verifier2Response: "", SupportVerify: false}
             curPage: 1,
             pageSize: 6,
             total: 0,
@@ -131,9 +130,7 @@ export default {
                 MetaDataIDEncrypt: curRow.MetaDataIDEncWithBuyer,
                 MetaDataExtension: curRow.MetaDataExtension,
                 SupportVerify: curRow.SupportVerify,
-                Verifier1: curRow.Verifier1,
                 Verifier1Response: curRow.Verifier1Response,
-                Verifier2: curRow.Verifier2,
                 Verifier2Response: curRow.Verifier2Response
             }
         },

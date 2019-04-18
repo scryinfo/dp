@@ -13,7 +13,7 @@ import (
 var (
 	window    *astilectron.Window
 	channel   = make(chan []string, 3)
-	eventName = []string{"DataPublish", "Approval", "TransactionCreate", "Buy", "ReadyForDownload", "TransactionClose",
+	eventName = []string{"DataPublish", "Approval", "VerifiersChosen", "TransactionCreate", "Buy", "ReadyForDownload", "TransactionClose",
 		"RegisterVerifier", "Vote", "VerifierDisable"}
 )
 
@@ -47,12 +47,12 @@ func HandleMessages(_ *astilectron.Window, m bootstrap.MessageIn) (interface{}, 
 			break
 		}
 		return payload, nil
-	case "sdk.init":
+	case "block.set":
 		var sid definition.SDKInitData
 		if err = json.Unmarshal(m.Payload, &sid); err != nil {
 			break
 		}
-		if err = sdkinterface.SubscribeEvents(eventName, onPublish, onApprove, onTransactionCreate, onPurchase, onReadyForDownload,
+		if err = sdkinterface.SubscribeEvents(eventName, onPublish, onApprove, onVerifiersChosen, onTransactionCreate, onPurchase, onReadyForDownload,
 			onClose, onRegisterAsVerifier, onVote, onVerifierDisable); err != nil {
 			break
 		}

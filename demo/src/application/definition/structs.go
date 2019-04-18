@@ -57,14 +57,20 @@ type OnApprove struct {
 	Block uint64
 }
 
+type OnVerifiersChosen struct {
+	TransactionID  string
+	PublishID      string
+	ProofFileNames []string
+	TxState        string
+	Block          uint64
+}
+
 type OnTransactionCreate struct {
 	TransactionID  string
 	PublishID      string
 	ProofFileNames []string
 	Buyer          string
 	StartVerify    bool
-	Verifier1      string
-	Verifier2      string
 	TxState        string
 	Block          uint64
 }
@@ -83,8 +89,10 @@ type SelectedTxPD struct {
 
 type OnPurchase struct {
 	TransactionID           string
+	PublishID               string
 	MetaDataIdEncWithSeller []byte
 	TxState                 string
+	UserIndex               string
 	Block                   uint64
 }
 
@@ -102,6 +110,7 @@ type SelectedTxRED struct {
 type OnReadyForDownload struct {
 	TransactionID          string
 	MetaDataIdEncWithBuyer []byte
+	UserIndex              string
 	TxState                string
 	Block                  uint64
 }
@@ -127,6 +136,7 @@ type SelectedTxCD struct {
 
 type OnClose struct {
 	TransactionID string
+	UserIndex     string
 	TxState       string
 	Block         uint64
 }
@@ -136,13 +146,6 @@ type RegisterVerifierData struct {
 }
 type OnRegisterAsVerifier struct {
 	Block uint64
-}
-
-type OnVerifiersChosen struct {
-	TransactionID  string
-	PublishID      string
-	ProofFileNames []string
-	Block          uint64
 }
 
 type VerifyData struct {
@@ -165,13 +168,8 @@ type OnVote struct {
 
 type CreditData struct {
 	Password      string        `json:"password"`
-	SelectedTxCrD SelectedTxCrD `json:"tID"`
+	TransactionID string `json:"tID"`
 	Credit        Credit        `json:"credit"`
-}
-type SelectedTxCrD struct {
-	TransactionID string `json:"TransactionID"`
-	Verifier1     string `json:"Verifier1"`
-	Verifier2     string `json:"Verifier2"`
 }
 type Credit struct {
 	Verifier1Revert bool    `json:"verifier1Revert"`

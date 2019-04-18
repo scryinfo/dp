@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"math/big"
 	"os"
+	"strconv"
 )
 
 const (
@@ -78,11 +79,32 @@ func getPubDataDetails(ipfsID string) (*definition.OnPublish, error) {
 
 func onApprove(event events.Event) bool {
 	go func() {
-		var oa definition.OnApprove
-		oa.Block = event.BlockNumber
+		// -
+	}()
+	return true
+}
 
-		if err = bootstrap.SendMessage(window, "onApprove", oa); err != nil {
-			rlog.Error(errors.Wrap(err, "onApprove"+EventSendFailed))
+func onVerifiersChosen(event events.Event) bool {
+	go func() {
+		var (
+			ovc definition.OnVerifiersChosen
+			extensions []string
+		)
+		ovc.PublishID = event.Data.Get("publishId").(string)
+		if err = bootstrap.SendMessage(window, "onProofFilesExtensions", ovc.PublishID); err != nil {
+			rlog.Error(errors.Wrap(err, "onProofFilesExtensions"+EventSendFailed))
+		}
+
+		ovc.Block = event.BlockNumber
+		ovc.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
+		ovc.TxState = setTxState(event.Data.Get("state").(uint8))
+
+		extensions = <-channel
+		if ovc.ProofFileNames, err = getAndRenameProofFiles(event.Data.Get("proofIds").([][32]uint8), extensions); err != nil {
+			rlog.Error(errors.Wrap(err, "Node - onVC.callback: get and rename proof files failed. "))
+		}
+		if err = bootstrap.SendMessage(window, "onVerifiersChosen", ovc); err != nil {
+			rlog.Error(errors.Wrap(err, "onVerifiersChosen"+EventSendFailed))
 		}
 	}()
 	return true
@@ -103,8 +125,6 @@ func onTransactionCreate(event events.Event) bool {
 		otc.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
 		otc.Buyer = event.Data.Get("users").([]common.Address)[0].String()
 		otc.StartVerify = event.Data.Get("needVerify").(bool)
-		otc.Verifier1 = event.Data.Get("verifiers").([]common.Address)[0].String()
-		otc.Verifier2 = event.Data.Get("verifiers").([]common.Address)[1].String()
 		otc.TxState = setTxState(event.Data.Get("state").(uint8))
 
 		extensions = <-channel
@@ -123,7 +143,7 @@ func onTransactionCreate(event events.Event) bool {
 func getAndRenameProofFiles(ipfsIDs [][32]byte, extensions []string) ([]string, error) {
 	defer func() {
 		if er := recover(); er != nil {
-			rlog.Error(errors.Wrap(er.(error), "onTransactionCreate.callback: get and rename proof files failed. "))
+			rlog.Error(errors.Wrap(er.(error), "in callback: get and rename proof files failed. "))
 		}
 	}()
 	var (
@@ -136,12 +156,12 @@ func getAndRenameProofFiles(ipfsIDs [][32]byte, extensions []string) ([]string, 
 	for i := 0; i < len(ipfsIDs); i++ {
 		ipfsID := ipfsBytes32ToHash(ipfsIDs[i])
 		if err = ipfsaccess.GetIAInstance().GetFromIPFS(ipfsID); err != nil {
-			return nil, errors.Wrap(err, "Node - onTransactionCreate.callback: IPFS get failed. ")
+			return nil, errors.Wrap(err, "Node - callback: IPFS get failed. ")
 		}
 		oldFileName = IPFSOutDir + "/" + ipfsID
 		newFileName = oldFileName + extensions[i]
 		if err = os.Rename(oldFileName, newFileName); err != nil {
-			return nil, errors.Wrap(err, "Node - onTransactionCreate.callback: rename proof file failed. ")
+			return nil, errors.Wrap(err, "Node - callback: rename proof file failed. ")
 		}
 		proofs[i] = newFileName
 	}
@@ -163,6 +183,8 @@ func onPurchase(event events.Event) bool {
 		op.Block = event.BlockNumber
 		op.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
 		op.MetaDataIdEncWithSeller = event.Data.Get("metaDataIdEncSeller").([]byte)
+		op.PublishID = event.Data.Get("publishId").(string)
+		op.UserIndex = strconv.Itoa(int(event.Data.Get("index").(uint8)))
 		op.TxState = setTxState(event.Data.Get("state").(uint8))
 
 		if err = bootstrap.SendMessage(window, "onPurchase", op); err != nil {
@@ -178,6 +200,7 @@ func onReadyForDownload(event events.Event) bool {
 		orfd.Block = event.BlockNumber
 		orfd.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
 		orfd.MetaDataIdEncWithBuyer = event.Data.Get("metaDataIdEncBuyer").([]byte)
+		orfd.UserIndex = strconv.Itoa(int(event.Data.Get("index").(uint8)))
 		orfd.TxState = setTxState(event.Data.Get("state").(uint8))
 
 		if err = bootstrap.SendMessage(window, "onReadyForDownload", orfd); err != nil {
@@ -192,6 +215,7 @@ func onClose(event events.Event) bool {
 		var oc definition.OnClose
 		oc.Block = event.BlockNumber
 		oc.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
+		oc.UserIndex = strconv.Itoa(int(event.Data.Get("index").(uint8)))
 		oc.TxState = setTxState(event.Data.Get("state").(uint8))
 
 		if err = bootstrap.SendMessage(window, "onClose", oc); err != nil {
@@ -223,7 +247,7 @@ func onVote(event events.Event) bool {
 			comment string
 		)
 		ov.Block = event.BlockNumber
-		ov.VerifierIndex = event.Data.Get("index").(*big.Int).String()
+		ov.VerifierIndex = strconv.Itoa(int(event.Data.Get("index").(uint8)))
 		judge = event.Data.Get("judge").(bool)
 		comment = event.Data.Get("comments").(string)
 		ov.VerifierResponse = setJudge(judge) + ", " + comment

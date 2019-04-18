@@ -109,6 +109,43 @@ const (
         },
         {
           "indexed": false,
+          "name": "state",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "name": "users",
+          "type": "address[]"
+        }
+      ],
+      "name": "VerifiersChosen",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "seqNo",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "name": "transactionId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "publishId",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "name": "proofIds",
+          "type": "bytes32[]"
+        },
+        {
+          "indexed": false,
           "name": "needVerify",
           "type": "bool"
         },
@@ -116,11 +153,6 @@ const (
           "indexed": false,
           "name": "state",
           "type": "uint8"
-        },
-        {
-          "indexed": false,
-          "name": "verifiers",
-          "type": "address[]"
         },
         {
           "indexed": false,
@@ -162,7 +194,7 @@ const (
         {
           "indexed": false,
           "name": "index",
-          "type": "uint256"
+          "type": "uint8"
         },
         {
           "indexed": false,
@@ -188,12 +220,22 @@ const (
         },
         {
           "indexed": false,
+          "name": "publishId",
+          "type": "string"
+        },
+        {
+          "indexed": false,
           "name": "metaDataIdEncSeller",
           "type": "bytes"
         },
         {
           "indexed": false,
           "name": "state",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "name": "index",
           "type": "uint8"
         },
         {
@@ -230,6 +272,11 @@ const (
         },
         {
           "indexed": false,
+          "name": "index",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
           "name": "users",
           "type": "address[]"
         }
@@ -253,6 +300,11 @@ const (
         {
           "indexed": false,
           "name": "state",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "name": "index",
           "type": "uint8"
         },
         {
@@ -590,7 +642,7 @@ func getContracts(
 		"DataPublish",
 		"TransactionCreate",
 		"RegisterVerifier",
-		//"VerifiersChosen", // -
+		"VerifiersChosen",
 		"Vote",
 		"Buy",
 		"ReadyForDownload",

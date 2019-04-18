@@ -29,7 +29,7 @@ func init() {
 		scryInfo.Chain.Contracts.TokenAddr,
 		scryInfo.Services.Ipfs,
 		logpath,
-		"AppID",
+		"App demo",
 		)
 	sdkinterface.SetScryInfo(scryInfo)
 }
@@ -93,7 +93,7 @@ func main() {
 				if err != nil {
 					payload = errors.Wrap(err, "App init failed. ")
 				} else {
-					payload = "Welcome to my go-astilectron demo! "
+					payload = "Welcome to my go-astilectron demo, and we will prepare accounts list for you. "
 				}
 				if err := bootstrap.SendMessage(w, "welcome", payload); err != nil {
 					rlog.Error(errors.Wrap(err, "sending welcome event failed"))

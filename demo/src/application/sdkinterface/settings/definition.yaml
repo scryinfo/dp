@@ -1,13 +1,11 @@
 chain:
   ethereum:
-    node: http://192.168.1.14:8545/
+    node: http://127.0.0.1:7545/
   contracts:
-    token_contract_addr: 0x29add246c4174abc1e9ba161b038c59f86c403bb
-    protocol_contract_addr: 0xfc123851d91cbd3538a9c5b796ea5267f3c71869
-    deployer_keyjson: "{\"address\":\"d280b60c38bc8db9d309fa5a540ffec499f0a3e8\",\"crypto\":{\"cipher\":\"aes-128-ctr\",\"ciphertext\":\"b7a5a983b24b48c082d906bf77a1cb4de90adc436a6ba850f87f19ed4ba77405\",\"cipherparams\":{\"iv\":\"e61d04363b64aef1366c80aa296cb5d2\"},\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":262144,\"p\":1,\"r\":8,\"salt\":\"87824b4fab8c8c9079f6dff4f8fe5cc77e671f0cf8b383c46f74ca08ae983805\"},\"mac\":\"b9153df03aee940f26aaff356dc21b5122ba1e27354b8e1114b4c09e574f533e\"},\"id\":\"0a3b39f1-474a-479e-ae2f-2a2ced02a2c9\",\"version\":3}"
+    token_contract_addr: 0xc67d1847fb1b00173dcdbc00c7cbe32651537daa
+    protocol_contract_addr: 0xbb7bae05bdbc0ed9e514ce18122fc6b4cbcca346
+    deployer_keyjson: "{\"version\":3,\"id\":\"e315aa5f-6202-4cea-aeab-88793c2414ab\",\"address\":\"61ad28110ce3911a9aafabba551cdc932a02bd52\",\"crypto\":{\"ciphertext\":\"92bf7244f050a4e84eac4cf5e9f1bc364d72abcf1b08f6e428490b6565404e8a\",\"cipherparams\":{\"iv\":\"f8ead2d0bcd99e53409da9dc78de7ef5\"},\"cipher\":\"aes-128-ctr\",\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"salt\":\"3772d92a3f6f04dca15a2994e9a6bc7b912f2d4c1ddbf8074f4e592e0fb33913\",\"n\":262144,\"r\":8,\"p\":1},\"mac\":\"7144a1868bcc8821a793349ea2ccf7bfbfeb611a154c6badffc27ed9f4b70d89\"}}"
     deployer_password: 111111
 services:
   ipfs: /ip4/127.0.0.1/tcp/5001
   keystore: 192.168.1.14:48080
-
-

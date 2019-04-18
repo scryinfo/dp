@@ -286,7 +286,7 @@ func CreditToVerifiers(creditData *definition.CreditData) error {
 	if curUser == nil {
 		return errors.New("Current user is nil. ")
 	}
-	tID, ok := new(big.Int).SetString(creditData.SelectedTxCrD.TransactionID, 10)
+	tID, ok := new(big.Int).SetString(creditData.TransactionID, 10)
 	if !ok {
 		return errors.New("Set to *big.Int failed. ")
 	}
@@ -294,16 +294,14 @@ func CreditToVerifiers(creditData *definition.CreditData) error {
 		Password: creditData.Password, Value: big.NewInt(0), Pending: false}
 
 	if creditData.Credit.Verifier1Revert {
-		verifier := common.HexToAddress(creditData.SelectedTxCrD.Verifier1)
 		credit := uint8(creditData.Credit.Verifier1Credit)
-		if err = cif.CreditsToVerifier(&txParam, tID, verifier, credit); err != nil {
+		if err = cif.CreditsToVerifier(&txParam, tID, 0, credit); err != nil {
 			return errors.Wrap(err, "Credit failed. ")
 		}
 	}
 	if creditData.Credit.Verifier2Revert {
-		verifier := common.HexToAddress(creditData.SelectedTxCrD.Verifier2)
 		credit := uint8(creditData.Credit.Verifier2Credit)
-		if err = cif.CreditsToVerifier(&txParam, tID, verifier, credit); err != nil {
+		if err = cif.CreditsToVerifier(&txParam, tID, 1, credit); err != nil {
 			return errors.Wrap(err, "Credit failed. ")
 		}
 	}

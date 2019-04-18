@@ -8,8 +8,8 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	op "github.com/scryinfo/iscap/demo/src/sdk/core/chainoperations"
 	"github.com/scryinfo/iscap/demo/src/sdk/interface/contractinterface"
-    "github.com/scryinfo/iscap/demo/src/sdk/settings"
-    "github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
+	"github.com/scryinfo/iscap/demo/src/sdk/settings"
+	"github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
 	"github.com/scryinfo/iscap/demo/src/sdk/util/uuid"
 	rlog "github.com/sirupsen/logrus"
 	"math/big"
@@ -112,7 +112,7 @@ func PrepareToBuy(txParams *op.TransactParams, publishId string, startVerify boo
 
 	tx, err := scryProtocol.CreateTransaction(op.BuildTransactOpts(txParams), getAppSeqNo(), publishId, startVerify)
 	if err == nil {
-		rlog.Debug("CreateTransaction:" + string(tx.Data()))
+		rlog.Debug("CreateTransaction:" + string(tx.Data()), " tx hash:", tx.Hash().String())
 	}
 
 	return err
@@ -181,8 +181,8 @@ func RegisterAsVerifier(txParams *op.TransactParams) error {
 	return err
 }
 
-func CreditsToVerifier(txParams *op.TransactParams, txId *big.Int, to common.Address, credit uint8) error {
-	tx, err := scryProtocol.CreditsToVerifier(op.BuildTransactOpts(txParams), getAppSeqNo(), txId, to, credit)
+func CreditsToVerifier(txParams *op.TransactParams, txId *big.Int, index uint8, credit uint8) error {
+	tx, err := scryProtocol.CreditsToVerifier(op.BuildTransactOpts(txParams), getAppSeqNo(), txId, index, credit)
 	if err == nil {
 		rlog.Debug("CreditsToVerifier:", string(tx.Data()), " tx hash:", tx.Hash().String())
 	}

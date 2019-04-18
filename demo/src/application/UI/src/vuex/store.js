@@ -13,11 +13,11 @@ let state = {
 
     transactionbuy: [],
     // {Title: "", Price: 0, Keys: "", Description: "", Buyer: "", Seller: "", State: "", SupportVerify: false, StartVerify: false,
-    //     MetaDataExtension: "", ProofDataExtensions: [], MetaDataIDEncWithSeller: "", MetaDataIDEncWithBuyer: "", MetaDataIDEncWithArbitrator: "", 
-    //     ArbitrateResult: false, Verifier1: "", Verifier2: "", Verifier1Response: "", Verifier2Response: "", pID: "", tID: ""}
+    //     MetaDataExtension: "", ProofDataExtensions: [], MetaDataIDEncWithSeller: "", MetaDataIDEncWithBuyer: "",
+    //     Verifier1Response: "", Verifier2Response: "", pID: "", tID: ""}
     //
     // transaction's data dictionary = [datalist] + {Buyer, State, StartVerify, MetaDataIDEncWithSeller, MetaDataIDEncWithBuyer,
-    //     MetaDataIDEncWithArbitrator, Verifier1, Verifier2, Verifier1Response, Verifier2Response, ArbitrateResult, tID} = 9 + 12 = 21
+    //     Verifier1Response, Verifier2Response, tID} = 9 + 8 = 17
     //  primary key: TransactionID.
 
     transactionsell: [],
