@@ -2,7 +2,7 @@
     <div>
         <el-row>
             <el-col :span="24" class="top">
-                <el-col :span="18">一个不会起名字的人写的应用 ￣へ￣</el-col>
+                <el-col :span="18">App demo</el-col>
                 <el-col :span="6">
                     <el-dropdown class="top-dropdown" trigger="click">
                         <span>{{acc}}</span>
@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import {dl_db, tx_db, acc_db} from "../DBoptions.js"
+import {db_init, acc_db} from "../DBoptions.js"
 import {utils} from "../utils.js"
 export default {
     name: "Home",
@@ -64,8 +64,10 @@ export default {
         },
         logout: function () {
             let _this = this
+            db_init.userDBClose()
             astilectron.sendMessage({ Name:"logout", Payload: ""}, function (message) {
                 if (message.name !== "error") {
+                    acc_db.init(_this)
                     _this.$router.push("/")
                 }else {
                     console.log("退出登录失败：", message.payload)
@@ -78,20 +80,18 @@ export default {
             })
         }
     },
-    watch: {
-
-    },
     created() {
         this.acc = this.$route.params.acc
         this.$store.state.account = this.$route.params.acc
         let _this = this
-        dl_db.init(this)
-        tx_db.init(this)
+        db_init.utilsDBInit()
+        db_init.userDBInit(this.$route.params.acc)
         utils.listen(this)
         acc_db.read(this.$route.params.acc, function (accinstance) {
-            astilectron.sendMessage({ Name:"sdk.init", Payload: { fromBlock: accinstance.fromBlock } }, function (message) {
+            astilectron.sendMessage({ Name:"block.set", Payload: { fromBlock: accinstance.fromBlock } }, function (message) {
                 if (message.name !== "error") {
                     console.log("设置初始区块成功", message)
+                    db_init.txDBsDataUpdate(_this)
                 }else {
                     console.log("设置初始区块失败：", message.payload)
                     _this.$alert(message.payload, "设置初始区块失败！", {
@@ -99,6 +99,8 @@ export default {
                         showClose: false,
                         type: "error"
                     })
+                    acc_db.init(_this)
+                    _this.$router.push("/")
                 }
             })
         })

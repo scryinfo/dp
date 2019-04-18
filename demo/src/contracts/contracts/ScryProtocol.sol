@@ -60,12 +60,12 @@ contract ScryProtocol {
 
     event RegisterVerifier(string seqNo, address[] users);
     event DataPublish(string seqNo, string publishId, uint256 price, string despDataId, bool supportVerify, address[] users);
-    event TransactionCreate(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool needVerify,
-        TransactionState state, address[] verifiers, address[] users);
-    event Vote(string seqNo, uint256 transactionId, bool judge, string comments, TransactionState state, uint256 index, address[] users);
-    event Buy(string seqNo, uint256 transactionId, bytes metaDataIdEncSeller, TransactionState state, address[] users);
-    event ReadyForDownload(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, TransactionState state, address[] users);
-    event TransactionClose(string seqNo, uint256 transactionId, TransactionState state, address[] users);
+    event VerifiersChosen(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, TransactionState state, address[] users);
+    event TransactionCreate(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool needVerify, TransactionState state, address[] users);
+    event Vote(string seqNo, uint256 transactionId, bool judge, string comments, TransactionState state, uint8 index, address[] users);
+    event Buy(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, TransactionState state, uint8 index, address[] users);
+    event ReadyForDownload(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, TransactionState state, uint8 index, address[] users);
+    event TransactionClose(string seqNo, uint256 transactionId, TransactionState state, uint8 index, address[] users);
     event VerifierDisable(string seqNo, address verifier, address[] users);
 
     uint256 transactionSeq = 0;
@@ -129,7 +129,7 @@ contract ScryProtocol {
         uint256 fee = data.price;
         bool needVerify = data.supportVerify && startVerify;
         if (needVerify) {
-            fee += verifierBonus * verifierNum;   // should add the tokens which for awarding verifiers and arbitrators.
+            fee += verifierBonus * verifierNum;
         }
         require((token.balanceOf(msg.sender)) >= fee, "No enough balance");
         require(token.transferFrom(msg.sender, address(this), fee), "Failed to transfer token from caller");
@@ -143,22 +143,19 @@ contract ScryProtocol {
 
         address[] memory selectedVerifiers = new address[](verifierNum);
         bool[] memory creditGived;
-        uint8 num = 1;
+        address[] memory users = new address[](1);
         if (needVerify) {
             //choose verifiers randomly
             selectedVerifiers = chooseVerifiers(verifierNum);
             creditGived = new bool[](verifierNum);
-            num += verifierNum;
-        }
-
-        address[] memory users = new address[](num);
-        users[0] = msg.sender;
-        if (num > 1) {
             for (uint8 i = 0; i < verifierNum; i++) {
-                users[i+1] = selectedVerifiers[i];
+                users[0] = selectedVerifiers[i];
+                emit VerifiersChosen(seqNo, txId, publishId, data.proofDataIds, TransactionState.Created, users);
             }
         }
-        emit TransactionCreate(seqNo, txId, publishId, data.proofDataIds, needVerify, TransactionState.Created, selectedVerifiers, users);
+
+        users[0] = msg.sender;
+        emit TransactionCreate(seqNo, txId, publishId, data.proofDataIds, needVerify, TransactionState.Created, users);
 
         mapTransaction[txId] = TransactionItem(TransactionState.Created, msg.sender, data.seller, selectedVerifiers, creditGived,
             publishId, metaDataIdEncryptedPlaceholder, data.metaDataIdEncSeller, fee, verifierBonus, needVerify, true);
@@ -185,9 +182,9 @@ contract ScryProtocol {
         return chosenVerifiers;
     }
 
-    function verifierValid(Verifier v, address[] arr) pure internal returns (bool, uint256) {
+    function verifierValid(Verifier v, address[] arr) pure internal returns (bool, uint8) {
         bool exist;
-        uint256 index;
+        uint8 index;
 
         (exist, index) = getVerifierIndex(v.addr, arr);
         return (v.enable && exist, index);
@@ -200,8 +197,8 @@ contract ScryProtocol {
         return exist;
     }
 
-    function getVerifierIndex(address verifier, address[] arrayVerifier) pure internal returns (bool, uint256) {
-        for (uint256 i = 0; i < arrayVerifier.length; i++) {
+    function getVerifierIndex(address verifier, address[] arrayVerifier) pure internal returns (bool, uint8) {
+        for (uint8 i = 0; i < arrayVerifier.length; i++) {
             if (arrayVerifier[i] == verifier) {
                 return (true, i);
             }
@@ -224,7 +221,7 @@ contract ScryProtocol {
         require(txItem.state == TransactionState.Created || txItem.state == TransactionState.Voted, "Invalid transaction state");
 
         bool valid;
-        uint256 index;
+        uint8 index;
         Verifier storage verifier = getVerifier(msg.sender);
         (valid, index) = verifierValid(verifier, txItem.verifiers);
         require(valid, "Invalid verifier");
@@ -239,7 +236,7 @@ contract ScryProtocol {
 
         address[] memory users = new address[](1);
         users[0] = txItem.buyer;
-        emit Vote(seqNo, txId, judge, comments, txItem.state, index, users);
+        emit Vote(seqNo, txId, judge, comments, txItem.state, index+1, users);
     }
 
     function buyData(string seqNo, uint256 txId) external {
@@ -257,8 +254,10 @@ contract ScryProtocol {
         txItem.state = TransactionState.Buying;
 
         address[] memory users = new address[](1);
-        users[0] = address(0x00);
-        emit Buy(seqNo, txId, txItem.metaDataIdEncSeller, txItem.state , users);
+        users[0] = txItem.seller;
+        emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, txItem.state, 0, users);
+        users[0] = msg.sender;
+        emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, txItem.state, 1, users);
     }
 
     function cancelTransaction(string seqNo, uint256 txId) external {
@@ -285,8 +284,10 @@ contract ScryProtocol {
 
         //ReadyForDownload event
         address[] memory users = new address[](1);
-        users[0] = address(0x00);
-        emit ReadyForDownload(seqNo, txId, txItem.meteDataIdEncBuyer, txItem.state, users);
+        users[0] = txItem.seller;
+        emit ReadyForDownload(seqNo, txId, txItem.meteDataIdEncBuyer, txItem.state, 0, users);
+        users[0] = msg.sender;
+        emit ReadyForDownload(seqNo, txId, txItem.meteDataIdEncBuyer, txItem.state, 1, users);
     }
 
     function confirmDataTruth(string seqNo, uint256 txId, bool truth) external {
@@ -320,8 +321,10 @@ contract ScryProtocol {
         txItem.state = TransactionState.Closed;
 
         address[] memory users = new address[](1);
-        users[0] = address(0x00);
-        emit TransactionClose(seqNo, txId, txItem.state, users);
+        users[0] = txItem.seller;
+        emit TransactionClose(seqNo, txId, txItem.state, 0, users);
+        users[0] = txItem.buyer;
+        emit TransactionClose(seqNo, txId, txItem.state, 1, users);
     }
 
     function payToVerifier(TransactionItem storage txItem, address verifier) internal {
@@ -375,17 +378,16 @@ contract ScryProtocol {
         require(owner == msg.sender, "The value only can be set by owner");
 
         verifierBonus = bonus;
-    }    
+    }
 
-    function creditsToVerifier(string seqNo, uint256 txId, address to, uint8 credit) external {
+    function creditsToVerifier(string seqNo, uint256 txId, uint8 verifierIndex, uint8 credit) external {
         //validate
-        require(to != 0x00, "Verifier address is zero");
         require(credit >= creditLow && credit <= creditHigh, "Valid credit scope is 0 <= credit <= 5");
 
         TransactionItem storage txItem = mapTransaction[txId];
         require(txItem.used, "Transaction does not exist");
 
-        Verifier storage verifier = getVerifier(to);
+        Verifier storage verifier = getVerifier(txItem.verifiers[verifierIndex]);
         require(verifier.addr != 0x00, "Verifier does not exist");
 
         DataInfoPublished storage data = mapPublishedData[txItem.publishId];

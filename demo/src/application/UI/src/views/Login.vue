@@ -1,7 +1,7 @@
 <template>
     <div>
         <el-row>
-            <el-col :span="24"><div class="top">一个不会起名字的人写的应用 ￣へ￣</div></el-col>
+            <el-col :span="24"><div class="top">App demo</div></el-col>
         </el-row>
         <el-row>
             <el-col :span="8">
@@ -27,7 +27,8 @@
                     <el-button class="right-button" @click="submit_new" v-if="!buttonControl">确认</el-button>
                 </div>
                 <div class="right" id="show_new" v-if="showControl2">
-                    你的新账户已创建完成： &nbsp;{{account}}<br/>
+                    你的新账户已创建完成： <br/>
+                    {{account}}<br/>
                     如果需要在其他设备使用，请注意保存。<br/><br/><hr/><br/>
                     确定使用该账户登录吗？
                     <div class="right-pwd">
@@ -41,7 +42,7 @@
 </template>
 
 <script>
-import {dl_db, tx_db, acc_db} from "../DBoptions.js"
+import {db_init, acc_db} from "../DBoptions.js"
 import {utils} from "../utils.js"
 export default {
     name: "Login",
@@ -105,17 +106,14 @@ export default {
             })
         },
         submit_keystore: function () {
-            let pwd = this.password
             this.password = ""
-            this.$router.push({ name: "home", params: {acc: _this.account}})
+            this.$router.push({ name: "home", params: {acc: this.account}})
         }
     },
     created() {
         this.password = "";this.describe = "";this.account = ""
         let _this = this
-        dl_db.init(this)
-        tx_db.init(this)
-        acc_db.init(this)
+        db_init.utilsDBInit()
         document.addEventListener("astilectron-ready", function() {
             utils.listen(_this)
         })
