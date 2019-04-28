@@ -94,11 +94,6 @@
         },
         {
           "indexed": false,
-          "name": "index",
-          "type": "uint8"
-        },
-        {
-          "indexed": false,
           "name": "users",
           "type": "address[]"
         }
@@ -217,6 +212,11 @@
           "indexed": false,
           "name": "state",
           "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "name": "buyer",
+          "type": "address"
         },
         {
           "indexed": false,
@@ -557,8 +557,8 @@
           "type": "uint256"
         },
         {
-          "name": "to",
-          "type": "address"
+          "name": "verifierIndex",
+          "type": "uint8"
         },
         {
           "name": "credit",

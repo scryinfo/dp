@@ -1,8 +1,7 @@
-package transmission
+package WSConnect
 
 import (
 	"encoding/json"
-	"github.com/asticode/go-astilectron-bootstrap"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
@@ -21,13 +20,9 @@ const (
 	EventSendFailed = " event send failed. "
 )
 
-var err error
-
 func onPublish(event events.Event) bool {
 	go func() {
-		var (
-			op *definition.OnPublish
-		)
+		var op definition.OnPublish
 		if op, err = getPubDataDetails(event.Data.Get("despDataId").(string)); err != nil {
 			rlog.Error(errors.Wrap(err, "onPublish: get publish data details failed. "))
 		}
@@ -36,48 +31,50 @@ func onPublish(event events.Event) bool {
 		op.PublishID = event.Data.Get("publishId").(string)
 		op.SupportVerify = event.Data.Get("supportVerify").(bool)
 
-		if err = bootstrap.SendMessage(window, "onPublish", &op); err != nil {
+		if err = sendMessage("onPublish", op); err != nil {
 			rlog.Error(errors.Wrap(err, "onPublish"+EventSendFailed))
 		}
 	}()
 	return true
 }
 
-// Get publish data details from details' ipfsID.
-// ipfsGet -> modify file name -> read file -> json.unmarshal -> delete file
-func getPubDataDetails(ipfsID string) (*definition.OnPublish, error) {
+func getPubDataDetails(ipfsID string) (definition.OnPublish, error) {
 	defer func() {
 		if er := recover(); er != nil {
 			rlog.Error(errors.Wrap(er.(error), "onPublish.callback: get publish data details failed. "))
 		}
 	}()
-	if err = ipfsaccess.GetIAInstance().GetFromIPFS(ipfsID); err != nil {
-		return nil, errors.Wrap(err, "Node - onPublish.callback: ipfs get failed. ")
-	}
 
-	oldFileName := IPFSOutDir + "/" + ipfsID
-	newFileName := oldFileName + ".txt"
-	if err = os.Rename(oldFileName, newFileName); err != nil {
-		return nil, errors.Wrap(err, "Node - onPublish.callback: rename details file failed. ")
-	}
-
-	var details []byte
-	if details, err = ioutil.ReadFile(newFileName); err != nil {
-		return nil, errors.Wrap(err, "Node - onPublish.callback: read details file failed. ")
-	}
 	var detailsData definition.OnPublish
-	if err = json.Unmarshal(details, &detailsData); err != nil {
-		return nil, errors.Wrap(err, "Node - onPublish.callback: json unmarshal details failed. ")
+	for {
+		if err = ipfsaccess.GetIAInstance().GetFromIPFS(ipfsID); err != nil {
+			break
+		}
+
+		oldFileName := IPFSOutDir + "/" + ipfsID
+		newFileName := oldFileName + ".txt"
+		if err = os.Rename(oldFileName, newFileName); err != nil {
+			break
+		}
+
+		var details []byte
+		if details, err = ioutil.ReadFile(newFileName); err != nil {
+			break
+		}
+		if err = json.Unmarshal(details, &detailsData); err != nil {
+			break
+		}
+
+		if err = os.Remove(newFileName); err != nil {
+			rlog.Debug("Node - onPublish.callback: delete details file failed. ", err)
+		}
+		break
 	}
 
-	if err = os.Remove(newFileName); err != nil {
-		rlog.Debug("Node - onPublish.callback: delete details file failed. ", err)
-	}
-
-	return &detailsData, nil
+	return detailsData, err
 }
 
-func onApprove(event events.Event) bool {
+func onApprove(_ events.Event) bool {
 	go func() {
 		// -
 	}()
@@ -91,7 +88,7 @@ func onVerifiersChosen(event events.Event) bool {
 			extensions []string
 		)
 		ovc.PublishID = event.Data.Get("publishId").(string)
-		if err = bootstrap.SendMessage(window, "onProofFilesExtensions", ovc.PublishID); err != nil {
+		if err = sendMessage("onProofFilesExtensions", ovc.PublishID); err != nil {
 			rlog.Error(errors.Wrap(err, "onProofFilesExtensions"+EventSendFailed))
 		}
 
@@ -103,7 +100,7 @@ func onVerifiersChosen(event events.Event) bool {
 		if ovc.ProofFileNames, err = getAndRenameProofFiles(event.Data.Get("proofIds").([][32]uint8), extensions); err != nil {
 			rlog.Error(errors.Wrap(err, "Node - onVC.callback: get and rename proof files failed. "))
 		}
-		if err = bootstrap.SendMessage(window, "onVerifiersChosen", ovc); err != nil {
+		if err = sendMessage("onVerifiersChosen", ovc); err != nil {
 			rlog.Error(errors.Wrap(err, "onVerifiersChosen"+EventSendFailed))
 		}
 	}()
@@ -117,7 +114,7 @@ func onTransactionCreate(event events.Event) bool {
 			extensions []string
 		)
 		otc.PublishID = event.Data.Get("publishId").(string)
-		if err = bootstrap.SendMessage(window, "onProofFilesExtensions", otc.PublishID); err != nil {
+		if err = sendMessage("onProofFilesExtensions", otc.PublishID); err != nil {
 			rlog.Error(errors.Wrap(err, "onProofFilesExtensions"+EventSendFailed))
 		}
 
@@ -131,7 +128,7 @@ func onTransactionCreate(event events.Event) bool {
 		if otc.ProofFileNames, err = getAndRenameProofFiles(event.Data.Get("proofIds").([][32]uint8), extensions); err != nil {
 			rlog.Error(errors.Wrap(err, "Node - onTC.callback: get and rename proof files failed. "))
 		}
-		if err = bootstrap.SendMessage(window, "onTransactionCreate", otc); err != nil {
+		if err = sendMessage("onTransactionCreate", otc); err != nil {
 			rlog.Error(errors.Wrap(err, "onTransactionCreate"+EventSendFailed))
 		}
 	}()
@@ -170,7 +167,7 @@ func getAndRenameProofFiles(ipfsIDs [][32]byte, extensions []string) ([]string, 
 }
 func ipfsBytes32ToHash(ipfsb [32]byte) string {
 	byte34 := make([]byte, 34)
-	// if ipfs modify encrypt algorithm, byte will change together.
+	// if ipfs change encrypt algorithm, byte will change together.
 	copy(byte34[:2], []byte{byte(18), byte(32)})
 	copy(byte34[2:], ipfsb[:])
 
@@ -187,7 +184,10 @@ func onPurchase(event events.Event) bool {
 		op.UserIndex = strconv.Itoa(int(event.Data.Get("index").(uint8)))
 		op.TxState = setTxState(event.Data.Get("state").(uint8))
 
-		if err = bootstrap.SendMessage(window, "onPurchase", op); err != nil {
+		// temp
+		op.Buyer = event.Data.Get("buyer").(common.Address).String()
+
+		if err = sendMessage("onPurchase", op); err != nil {
 			rlog.Error(errors.Wrap(err, "onPurchase"+EventSendFailed))
 		}
 	}()
@@ -203,7 +203,7 @@ func onReadyForDownload(event events.Event) bool {
 		orfd.UserIndex = strconv.Itoa(int(event.Data.Get("index").(uint8)))
 		orfd.TxState = setTxState(event.Data.Get("state").(uint8))
 
-		if err = bootstrap.SendMessage(window, "onReadyForDownload", orfd); err != nil {
+		if err = sendMessage("onReadyForDownload", orfd); err != nil {
 			rlog.Error(errors.Wrap(err, "onReadyForDownload"+EventSendFailed))
 		}
 	}()
@@ -218,7 +218,7 @@ func onClose(event events.Event) bool {
 		oc.UserIndex = strconv.Itoa(int(event.Data.Get("index").(uint8)))
 		oc.TxState = setTxState(event.Data.Get("state").(uint8))
 
-		if err = bootstrap.SendMessage(window, "onClose", oc); err != nil {
+		if err = sendMessage("onClose", oc); err != nil {
 			rlog.Error(errors.Wrap(err, "onClose"+EventSendFailed))
 		}
 	}()
@@ -231,7 +231,7 @@ func onRegisterAsVerifier(event events.Event) bool {
 		var orav definition.OnRegisterAsVerifier
 		orav.Block = event.BlockNumber
 
-		if err = bootstrap.SendMessage(window, "onRegisterVerifier", orav); err != nil {
+		if err = sendMessage("onRegisterVerifier", orav); err != nil {
 			rlog.Error(errors.Wrap(err, "onRegisterVerifier"+EventSendFailed))
 		}
 	}()
@@ -254,7 +254,7 @@ func onVote(event events.Event) bool {
 		ov.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
 		ov.TxState = setTxState(event.Data.Get("state").(uint8))
 
-		if err = bootstrap.SendMessage(window, "onVote", ov); err != nil {
+		if err = sendMessage("onVote", ov); err != nil {
 			rlog.Error(errors.Wrap(err, "onVote"+EventSendFailed))
 		}
 	}()
@@ -267,7 +267,7 @@ func onVerifierDisable(event events.Event) bool {
 		var ovd definition.OnVerifierDisable
 		ovd.Block = event.BlockNumber
 
-		if err = bootstrap.SendMessage(window, "onVerifierDisable", ovd); err != nil {
+		if err = sendMessage("onVerifierDisable", ovd); err != nil {
 			rlog.Error(errors.Wrap(err, "onVerifierDisable"+EventSendFailed))
 		}
 	}()

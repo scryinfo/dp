@@ -286,7 +286,7 @@ func CreditToVerifiers(creditData *definition.CreditData) error {
 	if curUser == nil {
 		return errors.New("Current user is nil. ")
 	}
-	tID, ok := new(big.Int).SetString(creditData.TransactionID, 10)
+	tID, ok := new(big.Int).SetString(creditData.SelectedTx.TransactionID, 10)
 	if !ok {
 		return errors.New("Set to *big.Int failed. ")
 	}

@@ -1,7 +1,7 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import Vue  from 'vue';
+import Vuex from 'vuex';
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 
 let state = {
     // show data dictionary below each item.
@@ -31,10 +31,10 @@ let state = {
     //  primary key: address.
 
     account: ""
-}
+};
 
 let Store = new Vuex.Store({
     state
-})
+});
 
-export default Store
+export default Store;

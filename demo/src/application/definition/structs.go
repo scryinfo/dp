@@ -1,5 +1,19 @@
 package definition
 
+import "encoding/json"
+
+type MessageIn struct {
+	Name    string          `json:"Name"`
+	Payload json.RawMessage `json:"Payload"`
+}
+
+type MessageOut struct {
+	Name    string      `json:"Name"`
+	Payload interface{} `json:"Payload,omitempty"`
+}
+
+type PresetFunc = func(*MessageIn) (interface{}, error)
+
 type AccInfo struct {
 	Account  string `json:"account"`
 	Password string `json:"password"`
@@ -8,16 +22,6 @@ type AccInfo struct {
 type SDKInitData struct {
 	FromBlock float64 `json:"fromBlock"`
 }
-
-//type PubData struct {
-//	MetaData      string   `json:"Data"`
-//	ProofData     []string `json:"Proofs"`
-//	DespData      string   `json:"Description"`
-//	Price         float64  `json:"Price"`
-//	Seller        string   `json:"Owner"`
-//	Password      string   `json:"Password"`
-//	SupportVerify bool     `json:"SupportVerify"`
-//}
 
 type PublishData struct {
 	Price         float64 `json:"price"`
@@ -93,6 +97,7 @@ type OnPurchase struct {
 	MetaDataIdEncWithSeller []byte
 	TxState                 string
 	UserIndex               string
+	Buyer                   string // temp
 	Block                   uint64
 }
 
@@ -167,9 +172,12 @@ type OnVote struct {
 }
 
 type CreditData struct {
-	Password      string        `json:"password"`
-	TransactionID string `json:"tID"`
-	Credit        Credit        `json:"credit"`
+	Password   string        `json:"password"`
+	SelectedTx SelectedTxCrD `json:"tID"`
+	Credit     Credit        `json:"credit"`
+}
+type SelectedTxCrD struct {
+	TransactionID string `json:"TransactionID"`
 }
 type Credit struct {
 	Verifier1Revert bool    `json:"verifier1Revert"`

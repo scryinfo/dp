@@ -19,6 +19,7 @@
 </template>
 
 <script>
+import {utils} from "../../utils";
 export default {
     name: "PublishNewData",
     data () {
@@ -47,112 +48,107 @@ export default {
     },
     methods: {
         cancelClickFunc: function () {
-            this.pubDialog = false
+            this.pubDialog = false;
             this.$message({
                 type: "info",
                 message: "取消发布新数据"
-            })
+            });
         },
         pubPrepare: function () {
-            this.count = this.$refs.selectedProofs.$refs.input.files.length
-            this.pubData.details.Seller = this.$store.state.account
-            this.setDataID()
-            this.setProofIDs()
+            this.count = this.$refs.selectedProofs.$refs.input.files.length;
+            this.pubData.details.Seller = this.$store.state.account;
+            this.setDataID();
+            this.setProofIDs();
         },
         setDataID: function () {
-            let _this = this
-            let ipfs = require("ipfs-http-client")({host: 'localhost', port: '5001', protocol: 'http'})
-            let data = this.$refs.selectedData.$refs.input.files[0]
-            this.pubData.details.MetaDataExtension = data.name.slice(data.name.indexOf("."))
-            let reader = new FileReader()
-            reader.readAsArrayBuffer(data)
+            this.IDs.metaDataID = "";
+            let _this = this;
+            let data = this.$refs.selectedData.$refs.input.files[0];
+            this.pubData.details.MetaDataExtension = data.name.slice(data.name.indexOf("."));
+            let reader = new FileReader();
+            reader.readAsArrayBuffer(data);
             reader.onload = function (evt) {
-                ipfs.add(Buffer.from(evt.target.result, "utf-8")).then(function (result) {
-                    _this.IDs.metaDataID = result[0].hash
-                    _this.count--
+                utils.ipfs.add(Buffer.from(evt.target.result, "utf-8")).then(function (result) {
+                    _this.IDs.metaDataID = result[0].hash;
+                    _this.count--;
                 }).catch(function (err) {
-                    console.log("IPFS上传失败：", err)
+                    console.log("IPFS上传失败：", err);
                     _this.$alert(err, "IPFS上传失败！", {
                         confirmButtonText: "关闭",
                         showClose: false,
                         type: "error"
-                    })
-                })
+                    });
+                });
             }
         },
         setProofIDs: function () {
-            this.IDs.proofDataIDs = []
-            let _this = this
-            let ipfs = require("ipfs-http-client")({host: 'localhost', port: '5001', protocol: 'http'})
-            let proofs = this.$refs.selectedProofs.$refs.input.files
+            this.IDs.proofDataIDs = [];
+            let _this = this;
+            let proofs = this.$refs.selectedProofs.$refs.input.files;
             for (let i=0;i<proofs.length;i++) {
-                this.pubData.details.ProofDataExtensions.push( proofs[i].name.slice(proofs[i].name.indexOf(".")) )
-                let reader = new FileReader()
-                reader.readAsArrayBuffer(proofs[i])
+                this.pubData.details.ProofDataExtensions.push( proofs[i].name.slice(proofs[i].name.indexOf(".")) );
+                let reader = new FileReader();
+                reader.readAsArrayBuffer(proofs[i]);
                 reader.onload = function (evt) {
-                    ipfs.add(Buffer.from(evt.target.result, "utf-8")).then(function (result) {
-                        _this.IDs.proofDataIDs.push(result[0].hash)
-                        _this.count--
+                    utils.ipfs.add(Buffer.from(evt.target.result, "utf-8")).then(function (result) {
+                        _this.IDs.proofDataIDs.push(result[0].hash);
+                        _this.count--;
                     }).catch(function (err) {
-                        console.log("IPFS上传失败：", err)
+                        console.log("IPFS上传失败：", err);
                         _this.$alert(err, "IPFS上传失败！", {
                             confirmButtonText: "关闭",
                             showClose: false,
                             type: "error"
-                        })
-                    })
+                        });
+                    });
                 }
             }
-            return true
         },
         setDetailsID: function () {
-            let _this = this
-            let ipfs = require("ipfs-http-client")({host: 'localhost', port: '5001', protocol: 'http'})
-            ipfs.add(Buffer.from(JSON.stringify(this.pubData.details), "utf-8")).then(function (result) {
-                _this.IDs.detailsID = result[0].hash
-                _this.count--
+            let _this = this;
+            utils.ipfs.add(Buffer.from(JSON.stringify(this.pubData.details), "utf-8")).then(function (result) {
+                _this.IDs.detailsID = result[0].hash;
+                _this.count--;
             }).catch(function (err) {
-                console.log("IPFS上传失败：", err)
+                console.log("IPFS上传失败：", err);
                 _this.$alert(err, "IPFS上传失败！", {
                     confirmButtonText: "关闭",
                     showClose: false,
                     type: "error"
-                })
-            })
-            return true
+                });
+            });
         },
         pub: function () {
-            let _this = this
-            let pwd = this.password
-            this.password = ""
-            astilectron.sendMessage({Name:"publish",Payload: {password: pwd, supportVerify: this.SupportVerify,
-                    price: this.pubData.Price, IDs: this.IDs}}, function (message) {
-                if (message.name !== "error") {
-                    // optimize?: dl_db.write here, seller will see his publish before contract emit event.
-                    console.log("发布新数据成功")
-                }else {
-                    console.log("发布新数据失败：", message.payload)
-                    _this.$alert(message.payload, "发布新数据失败！", {
-                        confirmButtonText: "关闭",
-                        showClose: false,
-                        type: "error"
-                    })
-                }
-            })
+            let pwd = this.password;
+            this.password = "";
+            utils.send({Name:"publish", Payload: {password: pwd, supportVerify: this.SupportVerify,
+                    price: this.pubData.Price, IDs: this.IDs}});
+            utils.addCallbackFunc("publish.callback", function (payload, _this) {
+                // optimize?: dl_db.write here, seller will see his publish before contract emit event.
+                console.log("发布新数据成功");
+            });
+            utils.addCallbackFunc("publish.callback.error", function (payload, _this) {
+                console.log("发布新数据失败：", payload);
+                _this.$alert(payload, "发布新数据失败！", {
+                    confirmButtonText: "关闭",
+                    showClose: false,
+                    type: "error"
+                });
+            });
         }
     },
     watch: {
         count: function () {
             if (this.count === -1) {
-                this.setDetailsID()
+                this.setDetailsID();
             }
             if (this.count === -2) {
-                this.pub()
-                this.count = 0
+                this.pub();
+                this.count = 0;
             }
         },
         height: function () {
-            this.height = window.innerHeight - 20
+            this.height = window.innerHeight - 20;
         }
     }
 }

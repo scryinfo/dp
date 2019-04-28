@@ -53,6 +53,7 @@
 
 <script>
 import {acc_db} from "../../DBoptions";
+import {utils} from "../../utils";
 export default {
     name: "Verify.vue",
     data () {
@@ -74,80 +75,78 @@ export default {
         }
     },
     methods: {
-        setCurPage: function (curPageReturn) {this.curPage = curPageReturn},
-        setPageSize: function (newPageSize) {this.pageSize = newPageSize},
-        currentChange: function (curRow) {this.selectedTx = curRow.TransactionID},
+        setCurPage: function (curPageReturn) {this.curPage = curPageReturn;},
+        setPageSize: function (newPageSize) {this.pageSize = newPageSize;},
+        currentChange: function (curRow) {this.selectedTx = curRow.TransactionID;},
         cancelClickFunc: function (dialogName) {
-            let str = ""
+            let str = "";
             switch (dialogName) {
-                case "register": this.RegisterDialog = false; str = "注册成为验证者"; break
-                case "vote": this.VoteDialog = false; str = "验证数据"; break
-                case "vote2": this.VoteDialog2 = false; str = "验证数据"; break
+                case "register": this.RegisterDialog = false; str = "注册成为验证者"; break;
+                case "vote": this.VoteDialog = false; str = "验证数据"; break;
+                case "vote2": this.VoteDialog2 = false; str = "验证数据"; break;
             }
             this.$message({
                 type: "info",
                 message: "取消" + str
-            })
+            });
         },
         refresh: function () {
-            let _this = this
+            let _this = this;
             acc_db.read(this.$store.state.account, function (accInstance) {
-                _this.showControl = accInstance.isVerifier
-            })
+                _this.showControl = accInstance.isVerifier;
+            });
         },
         Register: function () {
-            this.RegisterDialog = false
-            let _this = this
-            let pwd = this.password
-            this.password = ""
-            astilectron.sendMessage({ Name:"register",Payload:{password: pwd}}, function (message) {
-                if (message.name !== "error") {
-                    console.log("注册成为验证者成功")
-                }else {
-                    console.log("注册成为验证者失败：", message.payload)
-                    _this.$alert(message.payload, "注册成为验证者失败！", {
-                        confirmButtonText: "关闭",
-                        showClose: false,
-                        type: "error"
-                    })
-                }
-            })
+            this.RegisterDialog = false;
+            let pwd = this.password;
+            this.password = "";
+            utils.send({Name:"register", Payload:{password: pwd}});
+            utils.addCallbackFunc("register.callback", function (payload, _this) {
+                console.log("注册成为验证者成功");
+            });
+            utils.addCallbackFunc("register.callback.error", function (payload, _this) {
+                console.log("注册成为验证者失败：", payload);
+                _this.$alert(payload, "注册成为验证者失败！", {
+                    confirmButtonText: "关闭",
+                    showClose: false,
+                    type: "error"
+                });
+            });
         },
         Vote: function () {
-            this.VoteDialog = false
-            this.VoteDialog2 = false
-            let _this = this
-            let pwd = this.password
-            this.password = ""
-            astilectron.sendMessage({ Name:"verify",Payload:{password: pwd, tID: this.selectedTx, verify: this.verify}}, function (message) {
-                if (message.name !== "error") {
-                    _this.verify = {suggestion: false, comment: ""}
-                    console.log("验证成功", message)
-                }else {
-                    console.log("验证失败：", message.payload)
-                    _this.$alert(message.payload, "验证失败！", {
-                        confirmButtonText: "关闭",
-                        showClose: false,
-                        type: "error"
-                    })
-                }
-            })
+            this.VoteDialog = false;
+            this.VoteDialog2 = false;
+            let pwd = this.password;
+            this.password = "";
+            utils.send({Name:"verify", Payload:{password: pwd, tID: this.selectedTx, verify: this.verify}});
+            utils.addCallbackFunc("verify.callback", function (payload, _this) {
+                _this.verify = {suggestion: false, comment: ""};
+                console.log("验证成功", payload);
+            });
+            utils.addCallbackFunc("verify.callback.error", function (payload, _this) {
+                console.log("验证失败：", payload);
+                _this.$alert(payload, "验证失败！", {
+                    confirmButtonText: "关闭",
+                    showClose: false,
+                    type: "error"
+                });
+            });
         }
     },
     computed: {
         listenTxVRefresh() {
-            return this.$store.state.transactionverifier
+            return this.$store.state.transactionverifier;
         }
     },
     watch: {
         listenTxVRefresh: function () {
-            this.curPage = 1
-            this.total = this.$store.state.transactionverifier.length
+            this.curPage = 1;
+            this.total = this.$store.state.transactionverifier.length;
         }
     },
     created () {
-        this.total = this.$store.state.transactionverifier.length
-        this.refresh()
+        this.total = this.$store.state.transactionverifier.length;
+        this.refresh();
     }
 }
 </script>

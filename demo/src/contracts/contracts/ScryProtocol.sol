@@ -63,7 +63,7 @@ contract ScryProtocol {
     event VerifiersChosen(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, TransactionState state, address[] users);
     event TransactionCreate(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool needVerify, TransactionState state, address[] users);
     event Vote(string seqNo, uint256 transactionId, bool judge, string comments, TransactionState state, uint8 index, address[] users);
-    event Buy(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, TransactionState state, uint8 index, address[] users);
+    event Buy(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, TransactionState state, address buyer, uint8 index, address[] users);
     event ReadyForDownload(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, TransactionState state, uint8 index, address[] users);
     event TransactionClose(string seqNo, uint256 transactionId, TransactionState state, uint8 index, address[] users);
     event VerifierDisable(string seqNo, address verifier, address[] users);
@@ -255,9 +255,9 @@ contract ScryProtocol {
 
         address[] memory users = new address[](1);
         users[0] = txItem.seller;
-        emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, txItem.state, 0, users);
+        emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, txItem.state, txItem.buyer, 0, users);
         users[0] = msg.sender;
-        emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, txItem.state, 1, users);
+        emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, txItem.state, txItem.buyer, 1, users);
     }
 
     function cancelTransaction(string seqNo, uint256 txId) external {
@@ -271,6 +271,15 @@ contract ScryProtocol {
         revertToBuyer(txItem);
         closeTransaction(txItem, seqNo, txId);
     }
+
+//    function getBuyer(string seqNo, address seller, uint256 txId) external returns (address) {
+//        TransactionItem storage txItem = mapTransaction[txId];
+//        require(txItem.used, "Transaction does not exist");
+//        require(msg.sender == txItem.seller, "Invalid caller");
+//        require(txItem.state == TransactionState.Buying, "Invalid transaction state");
+//
+//        return txItem.buyer;
+//    }
 
     function submitMetaDataIdEncWithBuyer(string seqNo, uint256 txId, bytes encryptedMetaDataId) external {
         //validate
@@ -286,7 +295,7 @@ contract ScryProtocol {
         address[] memory users = new address[](1);
         users[0] = txItem.seller;
         emit ReadyForDownload(seqNo, txId, txItem.meteDataIdEncBuyer, txItem.state, 0, users);
-        users[0] = msg.sender;
+        users[0] = txItem.buyer;
         emit ReadyForDownload(seqNo, txId, txItem.meteDataIdEncBuyer, txItem.state, 1, users);
     }
 

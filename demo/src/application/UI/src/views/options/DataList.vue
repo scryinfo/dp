@@ -40,6 +40,7 @@
 </template>
 
 <script>
+import {utils} from "../../utils";
 export default {
     name: "DataList",
     data () {
@@ -56,59 +57,58 @@ export default {
         }
     },
     methods: {
-        setCurPage: function (curPageReturn) {this.curPage = curPageReturn},
-        setPageSize: function (newPageSize) {this.pageSize = newPageSize},
+        setCurPage: function (curPageReturn) {this.curPage = curPageReturn;},
+        setPageSize: function (newPageSize) {this.pageSize = newPageSize;},
         currentChange: function (curRow) {
             this.selectedData = {
                 PublishID: curRow.PublishID,
                 SupportVerify: curRow.SupportVerify
-            }
+            };
         },
         cancelClickFunc: function (dialogName) {
             switch (dialogName) {
-            case "buy": this.buyDialog = false; break
-            case "buy2": this.buyDialog2 = false; break
+            case "buy": this.buyDialog = false; break;
+            case "buy2": this.buyDialog2 = false; break;
             }
             this.$message({
                 type: "info",
                 message: "取消预购买"
-            })
+            });
         },
         buy: function () {
-            this.buyDialog = false
-            this.buyDialog2 = false
-            let _this = this
-            let pwd = this.password
-            this.password = ""
-            let sv = this.startVerify
-            this.startVerify = false
-            astilectron.sendMessage({ Name:"buy",Payload:{password: pwd, startVerify: sv, pID: this.selectedData}}, function (message) {
-                if (message.name !== "error") {
-                    console.log("预购买成功")
-                }else {
-                    console.log("预购买失败：", message.payload)
-                    _this.$alert(message.payload, "预购买失败！", {
-                        confirmButtonText: "关闭",
-                        showClose: false,
-                        type: "error"
-                    })
-                }
-            })
+            this.buyDialog = false;
+            this.buyDialog2 = false;
+            let pwd = this.password;
+            this.password = "";
+            let sv = this.startVerify;
+            this.startVerify = false;
+            utils.send({Name:"buy",Payload:{password: pwd, startVerify: sv, pID: this.selectedData}});
+            utils.addCallbackFunc("buy.callback", function (payload, _this) {
+                console.log("预购买成功");
+            });
+            utils.addCallbackFunc("buy.callback.error", function (payload, _this) {
+                console.log("预购买失败：", payload);
+                _this.$alert(payload, "预购买失败！", {
+                    confirmButtonText: "关闭",
+                    showClose: false,
+                    type: "error"
+                });
+            });
         }
     },
     computed: {
         listenDLRefresh() {
-            return this.$store.state.datalist
+            return this.$store.state.datalist;
         }
     },
     watch: {
         listenDLRefresh: function () {
-            this.curPage = 1
-            this.total = this.$store.state.datalist.length
+            this.curPage = 1;
+            this.total = this.$store.state.datalist.length;
         }
     },
     created () {
-        this.total = this.$store.state.datalist.length
+        this.total = this.$store.state.datalist.length;
     }
 }
 </script>
