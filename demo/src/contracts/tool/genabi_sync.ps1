@@ -1,5 +1,4 @@
-$WorkPath = $PSScriptRoot
-cd $WorkPath
+cd $PSScriptRoot
 cd ..
 pwd
 echo "|-> * Please compile contract and copy 'abi' in scryprotocol.json to scryprotocol.abi first! "
@@ -15,7 +14,6 @@ Start-Sleep -Milliseconds 3000
 echo "|-> * Copy go files: "
 Copy-Item ".\*.go" "..\sdk\interface\contractinterface"
 Copy-Item ".\build\contracts\*.abi" "..\testconsole"
-Copy-Item ".\build\contracts\*.abi" "..\application\sdkinterface"
 echo "|-> * finish. "
 echo "|-> * End. "
-Start-Sleep -Milliseconds 20000
+Start-Sleep -Milliseconds 15000

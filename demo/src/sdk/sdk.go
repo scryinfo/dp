@@ -235,6 +235,11 @@ const (
         },
         {
           "indexed": false,
+          "name": "buyer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
           "name": "index",
           "type": "uint8"
         },
@@ -572,8 +577,8 @@ const (
           "type": "uint256"
         },
         {
-          "name": "to",
-          "type": "address"
+          "name": "verifierIndex",
+          "type": "uint8"
         },
         {
           "name": "credit",

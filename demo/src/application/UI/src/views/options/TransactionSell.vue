@@ -34,6 +34,7 @@
 </template>
 
 <script>
+import {utils} from "../../utils";
 export default {
     name: "TransactionSell",
     data () {
@@ -48,56 +49,55 @@ export default {
         }
     },
     methods: {
-        setCurPage: function (curPageReturn) {this.curPage = curPageReturn},
-        setPageSize: function (newPageSize) {this.pageSize = newPageSize},
+        setCurPage: function (curPageReturn) {this.curPage = curPageReturn;},
+        setPageSize: function (newPageSize) {this.pageSize = newPageSize;},
         currentChange: function (curRow) {
             this.selectedTx = {
                 TransactionID: curRow.TransactionID,
                 Buyer: curRow.Buyer,
                 Seller: curRow.Seller,
                 PublishID: curRow.PublishID,
-                MetaDataIDEncWithSeller: curRow.MetaDataIDEncWithSeller // transmission between go and js buy not show out to user.
-            }
+                MetaDataIDEncWithSeller: curRow.MetaDataIDEncWithSeller // WSConnect between go and js buy not show out to user.
+            };
         },
         cancelClickFunc: function () {
-            this.reEncryptDialog = false
+            this.reEncryptDialog = false;
             this.$message({
                 type: "info",
                 message: "取消再加密数据"
-            })
+            });
         },
         reEncrypt:function () {
-            this.reEncryptDialog = false
-            let _this = this
-            let pwd = this.password
-            this.password = ""
-            astilectron.sendMessage({ Name:"reEncrypt",Payload:{password: pwd, tID: this.selectedTx}}, function (message) {
-                if (message.name !== "error") {
-                    console.log("再加密数据成功", message)
-                }else {
-                    console.log("再加密数据失败：", message.payload)
-                    _this.$alert(message.payload, "再加密数据失败！", {
-                        confirmButtonText: "关闭",
-                        showClose: false,
-                        type: "error"
-                    })
-                }
-            })
+            this.reEncryptDialog = false;
+            let pwd = this.password;
+            this.password = "";
+            utils.send({ Name:"reEncrypt", Payload:{password: pwd, tID: this.selectedTx}});
+            utils.addCallbackFunc("reEncrypt.callback", function (payload, _this) {
+                console.log("再加密数据成功", message);
+            });
+            utils.addCallbackFunc("reEncrypt.callback.error", function (payload, _this) {
+                console.log("再加密数据失败：", payload);
+                _this.$alert(payload, "再加密数据失败！", {
+                    confirmButtonText: "关闭",
+                    showClose: false,
+                    type: "error"
+                });
+            });
         }
     },
     computed: {
         listenTxSRefresh() {
-            return this.$store.state.transactionsell
+            return this.$store.state.transactionsell;
         }
     },
     watch: {
         listenTxSRefresh: function () {
-            this.curPage = 1
-            this.total = this.$store.state.transactionsell.length
+            this.curPage = 1;
+            this.total = this.$store.state.transactionsell.length;
         }
     },
     created () {
-        this.total = this.$store.state.transactionsell.length
+        this.total = this.$store.state.transactionsell.length;
     }
 }
 </script>

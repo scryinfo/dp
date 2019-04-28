@@ -1,5 +1,5 @@
 <template>
-    <!-- test some function before use -->
+    <!-- 功能测试界面，针对添加的功能制作的小demo，完成开发后删除本文件或删除相关路由设置 -->
     <section>
         <el-col :span="24" class="section-item">
             <el-button size="mini" type="primary" @click="buyDialog = true">预购买</el-button>

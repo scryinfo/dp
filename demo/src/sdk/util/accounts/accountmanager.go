@@ -32,7 +32,7 @@ type AccountManager struct {
 func (am *AccountManager) Initialize(asNodeAddr string) error {
     cn, err := grpc.Dial(asNodeAddr, grpc.WithInsecure())
     if err != nil {
-        rlog.Error("failed to connect to node:" + asNodeAddr)
+        rlog.Error("failed to WSConnect to node:" + asNodeAddr)
         return err
     }
 

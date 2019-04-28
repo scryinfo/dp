@@ -42,8 +42,8 @@
 </template>
 
 <script>
-import {db_init, acc_db} from "../DBoptions.js"
-import {utils} from "../utils.js"
+import {db_options, acc_db} from "../DBoptions.js";
+import {utils} from "../utils.js";
 export default {
     name: "Login",
     data() {
@@ -58,65 +58,62 @@ export default {
     },
     methods: {
         right: function (description) {
-            this.showControl1 = true;this.showControl2 = false
+            this.showControl1 = true;this.showControl2 = false;
             switch (description) {
-                case "登录": this.buttonControl = true;break
-                case "新建": this.buttonControl = false;break
+                case "登录": this.buttonControl = true;break;
+                case "新建": this.buttonControl = false;break;
             }
-            this.describe = description + ":"
+            this.describe = description + ":";
         },
-        hide: function () { this.showControl1 = false; this.showControl2 = false; this.password = "" },
+        hide: function () {this.showControl1 = false; this.showControl2 = false; this.password = "";},
         submit_login: function () {
-            let pwd = this.password
-            this.password = ""
-            let _this = this
-            astilectron.sendMessage({Name: "login.verify", Payload: {account: this.account,
-                        password: pwd}}, function (message) {
-                if (message.name !== "error") {
-                    _this.$router.push({ name: "home", params: {acc: _this.account}})
-                } else {
-                    console.log("登录验证失败：", message)
-                    _this.$alert(message.payload, "用户名或密码错误！", {
-                        confirmButtonText: "关闭",
-                        showClose: false,
-                        type: "error"
-                    })
-                }
-            })
+            let pwd = this.password;
+            this.password = "";
+            let _login = this;
+            utils.send({Name: "login.verify", Payload: {account: this.account, password: pwd}});
+            utils.addCallbackFunc("login.verify.callback", function (payload, _this) {
+                    _this.$router.push({ name: "home", params: {acc: _login.account}});
+                });
+            utils.addCallbackFunc("login.verify.callback.error", function (payload, _this) {
+                console.log("登录验证失败：", payload);
+                _this.$alert(payload, "用户名或密码错误！", {
+                    confirmButtonText: "关闭",
+                    showClose: false,
+                    type: "error"
+                });
+            });
         },
         submit_new: function () {
-            let _this = this
-            astilectron.sendMessage({Name: "create.new.account", Payload: {password: this.password}}, function (message) {
-                if (message.name !== "error") {
-                    acc_db.write({
-                        address: message.payload,
-                        fromBlock: 1,
-                        isVerifier: false
-                    })
-                    _this.account = message.payload
-                    _this.showControl1 = false;_this.showControl2 = true
-                }else {
-                    console.log("创建新账户失败：", message)
-                    _this.$alert(message.payload, "创建新账户失败！", {
-                        confirmButtonText: "关闭",
-                        showClose: false,
-                        type: "error"
-                    })
-                }
-            })
+            let _login = this;
+            utils.send({Name: "create.new.account", Payload: {password: this.password}});
+            utils.addCallbackFunc("create.new.account.callback", function (payload, _this) {
+                acc_db.write({
+                    address: payload,
+                    fromBlock: 1,
+                    isVerifier: false
+                });
+                _login.account = payload;
+                _login.showControl1 = false;
+                _login.showControl2 = true;
+            });
+            utils.addCallbackFunc("create.new.account.callback.error", function (payload, _this) {
+                console.log("创建新账户失败：", payload);
+                _this.$alert(payload, "创建新账户失败！", {
+                    confirmButtonText: "关闭",
+                    showClose: false,
+                    type: "error"
+                });
+            });
         },
         submit_keystore: function () {
-            this.password = ""
-            this.$router.push({ name: "home", params: {acc: this.account}})
+            this.password = "";
+            this.$router.push({ name: "home", params: {acc: this.account}});
         }
     },
     created() {
-        this.password = "";this.describe = "";this.account = ""
-        let _this = this
-        db_init.utilsDBInit()
-        document.addEventListener("astilectron-ready", function() {
-            utils.listen(_this)
-        })
+        this.password = "";this.describe = "";this.account = "";
+        db_options.utilsDBInit(this);
+        utils.WSConnect(this);
     }
 }
 </script>

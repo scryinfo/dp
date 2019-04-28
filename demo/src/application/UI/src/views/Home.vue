@@ -35,8 +35,8 @@
 </template>
 
 <script>
-import {db_init, acc_db} from "../DBoptions.js"
-import {utils} from "../utils.js"
+import {db_options, dl_db, acc_db} from "../DBoptions.js";
+import {utils} from "../utils.js";
 export default {
     name: "Home",
     data () {
@@ -46,7 +46,7 @@ export default {
     },
     methods: {
         message: function () {
-            this.$router.push("/msg")
+            this.$router.push("/msg");
         },
         logoutMsg: function () {
             this.$confirm("确定退出登录吗？", "提示：", {
@@ -54,56 +54,55 @@ export default {
                 cancelButtonText: "取消",
                 type: "warning"
             }).then(() => {
-                this.logout()
+                this.logout();
             }).catch(() => {
                 this.$message({
                     type:"info",
                     message:"取消退出登录"
-                })
-            })
+                });
+            });
         },
         logout: function () {
-            let _this = this
-            db_init.userDBClose()
-            astilectron.sendMessage({ Name:"logout", Payload: ""}, function (message) {
-                if (message.name !== "error") {
-                    acc_db.init(_this)
-                    _this.$router.push("/")
-                }else {
-                    console.log("退出登录失败：", message.payload)
-                    _this.$alert(message.payload, "退出登录失败！", {
-                        confirmButtonText: "关闭",
-                        showClose: false,
-                        type: "error"
-                    })
-                }
-            })
+            db_options.userDBClose();
+            utils.send({Name:"logout", Payload: ""});
+            utils.addCallbackFunc("logout.callback", function (payload, _this) {
+                setTimeout(function () {
+                    _this.$router.push("/");
+                }, 1000)
+            });
+            utils.addCallbackFunc("logout.callback.error", function (payload, _this) {
+                console.log("退出登录失败：", payload);
+                _this.$alert(payload, "退出登录失败！", {
+                    confirmButtonText: "关闭",
+                    showClose: false,
+                    type: "error"
+                });
+            });
         }
     },
     created() {
-        this.acc = this.$route.params.acc
-        this.$store.state.account = this.$route.params.acc
-        let _this = this
-        db_init.utilsDBInit()
-        db_init.userDBInit(this.$route.params.acc)
-        utils.listen(this)
+        this.acc = this.$route.params.acc;
+        this.$store.state.account = this.$route.params.acc;
+        db_options.utilsDBInit(this);
+        utils.init();
+        db_options.userDBInit(this.$route.params.acc);
         acc_db.read(this.$route.params.acc, function (accinstance) {
-            astilectron.sendMessage({ Name:"block.set", Payload: { fromBlock: accinstance.fromBlock } }, function (message) {
-                if (message.name !== "error") {
-                    console.log("设置初始区块成功", message)
-                    db_init.txDBsDataUpdate(_this)
-                }else {
-                    console.log("设置初始区块失败：", message.payload)
-                    _this.$alert(message.payload, "设置初始区块失败！", {
-                        confirmButtonText: "关闭",
-                        showClose: false,
-                        type: "error"
-                    })
-                    acc_db.init(_this)
-                    _this.$router.push("/")
-                }
-            })
-        })
+            utils.send({Name:"block.set", Payload: {fromBlock: accinstance.fromBlock}});
+            utils.addCallbackFunc("block.set.callback", function (payload, _this) {
+                console.log("设置初始区块成功", payload);
+                db_options.txDBsDataUpdate(_this);
+            });
+            utils.addCallbackFunc("block.set.callback.error", function (payload, _this) {
+                console.log("设置初始区块失败：", payload);
+                _this.$alert(payload, "设置初始区块失败！", {
+                    confirmButtonText: "关闭",
+                    showClose: false,
+                    type: "error"
+                }).then(() => {
+                    _this.$router.push("/");
+                });
+            });
+        });
     }
 }
 </script>

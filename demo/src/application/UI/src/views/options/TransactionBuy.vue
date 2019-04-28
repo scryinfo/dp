@@ -94,6 +94,7 @@
 </template>
 
 <script>
+import {utils} from "../../utils";
 export default {
     name: "TransactionBuy",
     data () {
@@ -121,8 +122,8 @@ export default {
         }
     },
     methods: {
-        setCurPage: function (curPageReturn) {this.curPage = curPageReturn},
-        setPageSize: function (newPageSize) {this.pageSize = newPageSize},
+        setCurPage: function (curPageReturn) {this.curPage = curPageReturn;},
+        setPageSize: function (newPageSize) {this.pageSize = newPageSize;},
         currentChange: function (curRow) {
             this.selectedTx = {
                 TransactionID: curRow.TransactionID,
@@ -132,156 +133,150 @@ export default {
                 SupportVerify: curRow.SupportVerify,
                 Verifier1Response: curRow.Verifier1Response,
                 Verifier2Response: curRow.Verifier2Response
-            }
+            };
         },
         cancelClickFunc: function (dialogName) {
-            let str = ""
+            let str = "";
             switch (dialogName) {
-                case "cancel": this.cancelDialog = false; str = "取消交易"; break
-                case "purchase": this.purchaseDialog = false; str = "购买数据"; break
-                case "decrypt": this.decryptDialog = false; str = "解密数据"; break
-                case "confirm": this.confirmDialog = false; str = "确认数据"; break
-                case "confirm2": this.confirmDialog2 = false; str = "确认数据"; break
-                case "credit": this.creditDialog = false; str = "评价验证者"; break
-                case "credit2": this.creditDialog2 = false; str = "评价验证者"; break
+                case "cancel": this.cancelDialog = false; str = "取消交易"; break;
+                case "purchase": this.purchaseDialog = false; str = "购买数据"; break;
+                case "decrypt": this.decryptDialog = false; str = "解密数据"; break;
+                case "confirm": this.confirmDialog = false; str = "确认数据"; break;
+                case "confirm2": this.confirmDialog2 = false; str = "确认数据"; break;
+                case "credit": this.creditDialog = false; str = "评价验证者"; break;
+                case "credit2": this.creditDialog2 = false; str = "评价验证者"; break;
             }
             this.$message({
                 type: "info",
                 message: "取消" + str
-            })
+            });
         },
         cancelBuying: function () {
-            this.cancelDialog = false
-            let _this = this
-            let pwd = this.password
-            this.password = ""
-            astilectron.sendMessage({ Name:"cancel",Payload:{password: pwd, tID: this.selectedTx}}, function (message) {
-                if (message.name !== "error") {
-                    console.log("取消交易成功")
-                }else {
-                    console.log("取消交易失败：", message.payload)
-                    _this.$alert(message.payload, "取消交易失败！", {
-                        confirmButtonText: "关闭",
-                        showClose: false,
-                        type: "error"
-                    })
-                }
-            })
+            this.cancelDialog = false;
+            let pwd = this.password;
+            this.password = "";
+            utils.send({Name:"cancel", Payload:{password: pwd, tID: this.selectedTx}});
+            utils.addCallbackFunc("cancel.callback", function (payload, _this) {
+                console.log("取消交易成功");
+            });
+            utils.addCallbackFunc("cancel.callback.error", function (payload, _this) {
+                console.log("取消交易失败：", payload);
+                _this.$alert(payload, "取消交易失败！", {
+                    confirmButtonText: "关闭",
+                    showClose: false,
+                    type: "error"
+                });
+            });
         },
         purchase: function () {
-            this.purchaseDialog = false
-            let _this = this
-            let pwd = this.password
-            this.password = ""
-            astilectron.sendMessage({ Name:"purchase",Payload:{password: pwd, tID: this.selectedTx}}, function (message) {
-                if (message.name !== "error") {
-                    console.log("购买数据成功")
-                }else {
-                    console.log("购买数据失败：", message.payload)
-                    _this.$alert(message.payload, "购买数据失败！", {
-                        confirmButtonText: "关闭",
-                        showClose: false,
-                        type: "error"
-                    })
-                }
-            })
+            this.purchaseDialog = false;
+            let pwd = this.password;
+            this.password = "";
+            utils.send({Name:"purchase", Payload:{password: pwd, tID: this.selectedTx}});
+            utils.addCallbackFunc("purchase.callback", function (payload, _this) {
+                console.log("购买数据成功");
+            });
+            utils.addCallbackFunc("purchase.callback.error", function (payload, _this) {
+                console.log("购买数据失败：", payload);
+                _this.$alert(payload, "购买数据失败！", {
+                    confirmButtonText: "关闭",
+                    showClose: false,
+                    type: "error"
+                });
+            });
         },
         decrypt: function () {
-            this.decryptDialog = false
-            let _this = this
-            let pwd = this.password
-            this.password = ""
-            astilectron.sendMessage({ Name:"decrypt",Payload:{password: pwd, tID: this.selectedTx}}, function (message) {
-                if (message.name !== "error") {
-                    _this.$alert(message.payload, "原始数据：", {
-                        confirmButtonText: "关闭",
-                        showClose: false,
-                        type: "info"
-                    })
-                    console.log("解密数据成功", message)
-                }else {
-                    console.log("解密数据失败：", message.payload)
-                    _this.$alert(message.payload, "解密数据失败！", {
-                        confirmButtonText: "关闭",
-                        showClose: false,
-                        type: "error"
-                    })
-                }
-            })
+            this.decryptDialog = false;
+            let pwd = this.password;
+            this.password = "";
+            utils.send({Name:"decrypt", Payload:{password: pwd, tID: this.selectedTx}});
+            utils.addCallbackFunc("decrypt.callback", function (payload, _this) {
+                console.log("解密数据成功", payload);
+                _this.$alert(payload, "原始数据：", {
+                    confirmButtonText: "关闭",
+                    showClose: false,
+                    type: "info"
+                });
+            });
+            utils.addCallbackFunc("decrypt.callback.error", function (payload, _this) {
+                console.log("解密数据失败：", payload);
+                _this.$alert(payload, "解密数据失败！", {
+                    confirmButtonText: "关闭",
+                    showClose: false,
+                    type: "error"
+                });
+            });
         },
         confirmPre: function () {
             if (this.selectedTx.SupportVerify) {
-                this.supportVerify = true
+                this.supportVerify = true;
             }
-            this.confirmDialog = true
+            this.confirmDialog = true;
         },
         confirm: function () {
-            this.confirmDialog2 = false
-            this.confirmDialog = false
-            let _this = this
-            let pwd = this.password
-            this.password = ""
-            astilectron.sendMessage({ Name:"confirm",Payload:{password: pwd, tID: this.selectedTx,
-                    confirmData: this.confirmData}}, function (message) {
-                if (message.name !== "error") {
-                    _this.supportVerify = false
-                    console.log("确认数据成功", message)
-                }else {
-                    console.log("确认数据失败：", message.payload)
-                    _this.$alert(message.payload, "确认数据失败！", {
-                        confirmButtonText: "关闭",
-                        showClose: false,
-                        type: "error"
-                    })
-                }
-            })
+            this.confirmDialog2 = false;
+            this.confirmDialog = false;
+            let pwd = this.password;
+            this.password = "";
+            utils.send({Name:"confirm", Payload:{password: pwd, tID: this.selectedTx, confirmData: this.confirmData}});
+            utils.addCallbackFunc("confirm.callback", function (payload, _this) {
+                _this.supportVerify = false;
+                console.log("确认数据成功", payload);
+            });
+            utils.addCallbackFunc("confirm.callback.error", function (payload, _this) {
+                console.log("确认数据失败：", payload);
+                _this.$alert(payload, "确认数据失败！", {
+                    confirmButtonText: "关闭",
+                    showClose: false,
+                    type: "error"
+                });
+            });
         },
         creditPre: function () {
             if (this.selectedTx.Verifier1Response !== "") {
-                this.verifier1Revert = true
+                this.verifier1Revert = true;
             }
             if (this.selectedTx.Verifier2Response !== "") {
-                this.verifier2Revert = true
+                this.verifier2Revert = true;
             }
-            this.creditDialog = true
+            this.creditDialog = true;
         },
         credit: function () {
-            this.creditDialog2 = false
-            this.creditDialog = false
-            let pwd = this.password
-            this.password = ""
-            let _this = this
-            astilectron.sendMessage({ Name:"credit",Payload:{password: pwd, tID: this.selectedTx, credit: {
+            this.creditDialog2 = false;
+            this.creditDialog = false;
+            let pwd = this.password;
+            this.password = "";
+            utils.send({Name:"credit", Payload:{password: pwd, tID: this.selectedTx, credit: {
                         verifier1Revert: this.verifier1Revert, verifier1Credit: this.verifier1Credit,
-                        verifier2Revert: this.verifier2Revert, verifier2Credit: this.verifier2Credit}}}, function (message) {
-                if (message.name !== "error") {
-                    _this.verifier1Revert = false
-                    _this.verifier2Revert = false
-                    console.log("评价验证者成功")
-                }else {
-                    console.log("评价验证者失败：", message.payload)
-                    _this.$alert(message.payload, "评价验证者失败！", {
-                        confirmButtonText: "关闭",
-                        showClose: false,
-                        type: "error"
-                    })
-                }
-            })
+                        verifier2Revert: this.verifier2Revert, verifier2Credit: this.verifier2Credit}}});
+            utils.addCallbackFunc("credit.callback", function (payload, _this) {
+                _this.verifier1Revert = false;
+                _this.verifier2Revert = false;
+                console.log("评价验证者成功");
+            });
+            utils.addCallbackFunc("credit.callback.error", function (payload, _this) {
+                console.log("评价验证者失败：", payload);
+                _this.$alert(payload, "评价验证者失败！", {
+                    confirmButtonText: "关闭",
+                    showClose: false,
+                    type: "error"
+                });
+            });
         }
     },
     computed: {
         listenTxBRefresh() {
-            return this.$store.state.transactionbuy
+            return this.$store.state.transactionbuy;
         }
     },
     watch: {
         listenTxBRefresh: function () {
-            this.curPage = 1
-            this.total = this.$store.state.transactionbuy.length
+            this.curPage = 1;
+            this.total = this.$store.state.transactionbuy.length;
         }
     },
     created () {
-        this.total = this.$store.state.transactionbuy.length
+        this.total = this.$store.state.transactionbuy.length;
     }
 }
 </script>
