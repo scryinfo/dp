@@ -11,7 +11,7 @@ import (
     "github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/accounts/abi"
     "github.com/ethereum/go-ethereum/accounts/abi/bind"
-    "github.com/scryinfo/iscap/demo/src/sdk/core/ethereum/redo"
+    "github.com/scryinfo/dp/demo/src/sdk/core/ethereum/redo"
 	"math/big"
     "reflect"
     "strings"

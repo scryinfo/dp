@@ -2,11 +2,11 @@ package settings
 
 import (
     "github.com/pkg/errors"
-    cf "github.com/scryinfo/iscap/demo/src/sdk/util/configuration"
+    cf "github.com/scryinfo/dp/demo/src/sdk/util/configuration"
 )
 
 const (
-    SettingLocation = "D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/iscap/demo/src/application/sdkinterface/settings/definition.yaml"
+    SettingLocation = "D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/dp/demo/src/application/sdkinterface/settings/definition.yaml"
 )
 
 func LoadSettings() (*ScryInfo, error) {
