@@ -3,14 +3,14 @@ package main
 import (
 	"flag"
 	"github.com/pkg/errors"
-	"github.com/scryinfo/iscap/demo/src/application/WSConnect"
-	"github.com/scryinfo/iscap/demo/src/application/sdkinterface"
-	"github.com/scryinfo/iscap/demo/src/application/sdkinterface/settings"
-	"github.com/scryinfo/iscap/demo/src/sdk"
+	"github.com/scryinfo/dp/demo/src/application/WSConnect"
+	"github.com/scryinfo/dp/demo/src/application/sdkinterface"
+	"github.com/scryinfo/dp/demo/src/application/sdkinterface/settings"
+	"github.com/scryinfo/dp/demo/src/sdk"
 	rlog "github.com/sirupsen/logrus"
 )
 
-const logPath = "D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/iscap/demo/src/log/scry_sdk.log"
+const logPath = "D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/dp/demo/src/log/scry_sdk.log"
 
 var (
 	scryInfo *settings.ScryInfo

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/scryinfo/iscap/demo/src/sdk/core/ethereum/events"
+	"github.com/scryinfo/dp/demo/src/sdk/core/ethereum/events"
 	rlog "github.com/sirupsen/logrus"
 )
 

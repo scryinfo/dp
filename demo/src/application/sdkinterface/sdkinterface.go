@@ -3,15 +3,15 @@ package sdkinterface
 import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
-	"github.com/scryinfo/iscap/demo/src/application/definition"
-	"github.com/scryinfo/iscap/demo/src/application/sdkinterface/settings"
-	"github.com/scryinfo/iscap/demo/src/sdk"
-	"github.com/scryinfo/iscap/demo/src/sdk/core/chainevents"
-	"github.com/scryinfo/iscap/demo/src/sdk/core/chainoperations"
-	"github.com/scryinfo/iscap/demo/src/sdk/scryclient"
-	cif "github.com/scryinfo/iscap/demo/src/sdk/scryclient/chaininterfacewrapper"
-	"github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
-	"github.com/scryinfo/iscap/demo/src/sdk/util/storage/ipfsaccess"
+	"github.com/scryinfo/dp/demo/src/application/definition"
+	"github.com/scryinfo/dp/demo/src/application/sdkinterface/settings"
+	"github.com/scryinfo/dp/demo/src/sdk"
+	"github.com/scryinfo/dp/demo/src/sdk/core/chainevents"
+	"github.com/scryinfo/dp/demo/src/sdk/core/chainoperations"
+	"github.com/scryinfo/dp/demo/src/sdk/scryclient"
+	cif "github.com/scryinfo/dp/demo/src/sdk/scryclient/chaininterfacewrapper"
+	"github.com/scryinfo/dp/demo/src/sdk/util/accounts"
+	"github.com/scryinfo/dp/demo/src/sdk/util/storage/ipfsaccess"
 	"math/big"
 	"os"
 )
@@ -41,7 +41,7 @@ func CreateUserWithLogin(password string) (string, error) {
 
 	curUser = client
 
-	return client.Account.Address, nil
+	return curUser.Account.Address, nil
 }
 
 func UserLogin(address string, password string) (bool, error) {
