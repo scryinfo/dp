@@ -2,8 +2,8 @@ package chainevents
 
 import (
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/scryinfo/iscap/demo/src/sdk/core/ethereum/events"
-	"github.com/scryinfo/iscap/demo/src/sdk/settings"
+	"github.com/scryinfo/dp/demo/src/sdk/core/ethereum/events"
+	"github.com/scryinfo/dp/demo/src/sdk/settings"
 	rlog "github.com/sirupsen/logrus"
 )
 

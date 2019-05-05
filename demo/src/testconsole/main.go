@@ -3,12 +3,12 @@ package main
 import (
     "fmt"
     "github.com/ethereum/go-ethereum/common"
-    "github.com/scryinfo/iscap/demo/src/sdk"
-    "github.com/scryinfo/iscap/demo/src/sdk/core/chainoperations"
-    "github.com/scryinfo/iscap/demo/src/sdk/core/ethereum/events"
-    "github.com/scryinfo/iscap/demo/src/sdk/scryclient"
-    cif "github.com/scryinfo/iscap/demo/src/sdk/scryclient/chaininterfacewrapper"
-    "github.com/scryinfo/iscap/demo/src/sdk/util/accounts"
+    "github.com/scryinfo/dp/demo/src/sdk"
+    "github.com/scryinfo/dp/demo/src/sdk/core/chainoperations"
+    "github.com/scryinfo/dp/demo/src/sdk/core/ethereum/events"
+    "github.com/scryinfo/dp/demo/src/sdk/scryclient"
+    cif "github.com/scryinfo/dp/demo/src/sdk/scryclient/chaininterfacewrapper"
+    "github.com/scryinfo/dp/demo/src/sdk/util/accounts"
     "math/big"
     "time"
 )
@@ -290,7 +290,7 @@ func Vote(verifier *scryclient.ScryClient) {
 
 func CreditsToVerifier(to common.Address) {
 	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword, big.NewInt(0), false}
-	err := cif.CreditsToVerifier(&txParam, txId, to, 5)
+	err := cif.CreditsToVerifier(&txParam, txId, 1, 5)
 	if err != nil {
 		fmt.Println("CreditsToVerifier:", err)
 	}
