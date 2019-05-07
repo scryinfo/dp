@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
-	"github.com/scryinfo/dp/demo/src/application/definition"
+	"github.com/scryInfo/dp/demo/src/application/definition"
 	rlog "github.com/sirupsen/logrus"
 	"golang.org/x/net/websocket"
 	"net/http"
@@ -15,7 +15,7 @@ type WSServer struct {
 	Port string
 }
 
-const ResourcesDir = "D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/dp/demo/src/application/resources/app"
+const ResourcesDir = "D:/EnglishRoad/workspace/Go/src/github.com/scryInfo/dp/demo/src/application/resources/app"
 
 var (
 	funcMap        = make(map[string]definition.PresetFunc)

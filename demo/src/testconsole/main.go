@@ -3,12 +3,12 @@ package main
 import (
     "fmt"
     "github.com/ethereum/go-ethereum/common"
-    "github.com/scryinfo/dp/demo/src/sdk"
-    "github.com/scryinfo/dp/demo/src/sdk/core/chainoperations"
-    "github.com/scryinfo/dp/demo/src/sdk/core/ethereum/events"
-    "github.com/scryinfo/dp/demo/src/sdk/scryclient"
-    cif "github.com/scryinfo/dp/demo/src/sdk/scryclient/chaininterfacewrapper"
-    "github.com/scryinfo/dp/demo/src/sdk/util/accounts"
+    "github.com/scryInfo/dp/demo/src/sdk"
+    "github.com/scryInfo/dp/demo/src/sdk/core/chainoperations"
+    "github.com/scryInfo/dp/demo/src/sdk/core/ethereum/events"
+    "github.com/scryInfo/dp/demo/src/sdk/scryclient"
+    cif "github.com/scryInfo/dp/demo/src/sdk/scryclient/chaininterfacewrapper"
+    "github.com/scryInfo/dp/demo/src/sdk/util/accounts"
     "math/big"
     "time"
 )

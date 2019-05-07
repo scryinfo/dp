@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package scryinfo;
+package scryInfo;
 
 enum Status {
     OK = 0;
