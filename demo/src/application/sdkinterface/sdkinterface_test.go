@@ -18,10 +18,10 @@ package sdkinterface
 
 import (
 	"fmt"
-	"github.com/scryinfo/dp/demo/src/application/definition"
-	"github.com/scryinfo/dp/demo/src/application/sdkinterface/settings"
-	"github.com/scryinfo/dp/demo/src/sdk"
-	"github.com/scryinfo/dp/demo/src/sdk/core/ethereum/events"
+	"github.com/scryInfo/dp/demo/src/application/definition"
+	"github.com/scryInfo/dp/demo/src/application/sdkinterface/settings"
+	"github.com/scryInfo/dp/demo/src/sdk"
+	"github.com/scryInfo/dp/demo/src/sdk/core/ethereum/events"
 	"math/big"
 	"testing"
 	"time"
@@ -57,7 +57,7 @@ func initialize() error {
 		scryInfo.Chain.Contracts.ProtocolAddr,
 		scryInfo.Chain.Contracts.TokenAddr,
 		scryInfo.Services.Ipfs,
-		"D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/dp/demo/src/log/scry_sdk.log",
+		"D:/EnglishRoad/workspace/Go/src/github.com/scryInfo/dp/demo/src/log/scry_sdk.log",
 		"SDK interface unit test",
 	)
 	SetScryInfo(scryInfo)
