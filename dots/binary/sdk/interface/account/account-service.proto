@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package account;
+
+enum Status {
+    OK = 0;
+    ERROR = 1;
+}
+
+service KeyService {
+    //生成地址
+    rpc GenerateAddress (AddressParameter) returns (AddressInfo) {
+    }
+    //校验地址
+    rpc VerifyAddress (AddressParameter) returns (AddressInfo) {
+    }
+    //内容加密
+    rpc ContentEncrypt (CipherParameter) returns (CipherText) {
+    }
+    //内容解密
+    rpc ContentDecrypt (CipherParameter) returns (CipherText) {
+    }
+    //消息签名
+    rpc Signature (CipherParameter) returns (CipherText) {
+    }
+    //导入keystore文件内容
+    rpc import_keystore (ImportParameter) returns (AddressInfo) {
+
+    }
+}
+
+message ImportParameter {
+    string content_password = 1;
+    string import_psd= 2;
+    bytes content = 3;
+}
+
+message AddressParameter {
+    string password = 1;
+    string address = 2;
+}
+
+message AddressInfo {
+    Status status = 1;
+    string address = 2;
+    string msg = 3;
+}
+
+message CipherParameter {
+    string password = 1;
+    string address = 2;
+    bytes message = 3;
+}
+
+message CipherText {
+    Status status = 1;
+    bytes data = 2;
+    string msg = 3;
+}

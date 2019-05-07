@@ -1,16 +1,15 @@
 package main
 
 import (
-    "fmt"
-    "github.com/ethereum/go-ethereum/common"
-    "github.com/scryInfo/dp/demo/src/sdk"
-    "github.com/scryInfo/dp/demo/src/sdk/core/chainoperations"
-    "github.com/scryInfo/dp/demo/src/sdk/core/ethereum/events"
-    "github.com/scryInfo/dp/demo/src/sdk/scryclient"
-    cif "github.com/scryInfo/dp/demo/src/sdk/scryclient/chaininterfacewrapper"
-    "github.com/scryInfo/dp/demo/src/sdk/util/accounts"
-    "math/big"
-    "time"
+	"fmt"
+	"github.com/ethereum/go-ethereum/common"
+	sdk2 "github.com/scryInfo/dp/dots/binary/sdk"
+	chainoperations2 "github.com/scryInfo/dp/dots/binary/sdk/core/chainoperations"
+	events2 "github.com/scryInfo/dp/dots/binary/sdk/core/ethereum/events"
+	scryclient2 "github.com/scryInfo/dp/dots/binary/sdk/scry"
+	accounts2 "github.com/scryInfo/dp/dots/binary/sdk/util/accounts"
+	"math/big"
+	"time"
 )
 
 var (
@@ -18,25 +17,25 @@ var (
 	txId                    *big.Int = big.NewInt(0)
 	metaDataIdEncWithSeller []byte
 	metaDataIdEncWithBuyer  []byte
-	protocolContractAddr                           = "0x3c4d26e916d79fc3fc925027a79612012462f691"
-	tokenContractAddr                              = "0x5c29f42d640ee25f080cdc648641e8e358459ddc"
-	clientPassword                                 = "888888"
-    suAddress                                      = "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8"
-    suPassword                                     = "111111"
-    seller                  *scryclient.ScryClient = nil
-	buyer                   *scryclient.ScryClient = nil
-	verifier1               *scryclient.ScryClient = nil
-	verifier2               *scryclient.ScryClient = nil
-	verifier3               *scryclient.ScryClient = nil
-	arbitrator              *scryclient.ScryClient = nil
-	sleepTime               time.Duration          = 20000000000
-	startVerify             bool                   = false
-	startTestFromBlock      bool                   = false
+	protocolContractAddr                               = "0x3c4d26e916d79fc3fc925027a79612012462f691"
+	tokenContractAddr                                  = "0x5c29f42d640ee25f080cdc648641e8e358459ddc"
+	clientPassword                                     = "888888"
+    suAddress                                          = "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8"
+    suPassword                                         = "111111"
+    seller                  *scryclient2.scryClientImp = nil
+	buyer                   *scryclient2.scryClientImp = nil
+	verifier1               *scryclient2.scryClientImp = nil
+	verifier2               *scryclient2.scryClientImp = nil
+	verifier3               *scryclient2.scryClientImp = nil
+	arbitrator              *scryclient2.scryClientImp = nil
+	sleepTime               time.Duration              = 20000000000
+	startVerify             bool                       = false
+	startTestFromBlock      bool                       = false
 )
 
 func main() {
 	//note: asServiceAddr is the host of key management service which is outside
-	err := sdk.Init(
+	err := sdk2.Init(
 	    "http://127.0.0.1:8545/",
 	    "192.168.1.14:48080",
         protocolContractAddr,
@@ -70,12 +69,12 @@ func main() {
 func testAccounts() {
 	fmt.Println("Start testing accounts...")
 
-	ac, err := accounts.GetAMInstance().CreateAccount("12345")
+	ac, err := accounts2.GetAMInstance().CreateAccount("12345")
 	if err != nil {
 		fmt.Println("failed to create account, error:", err)
 	}
 
-	rv, err := accounts.GetAMInstance().AuthAccount(ac.Address, "12345")
+	rv, err := accounts2.GetAMInstance().AuthAccount(ac.Address, "12345")
 	if err != nil {
 		fmt.Println("failed to authenticate account, error:", err)
 	}
@@ -135,7 +134,7 @@ func testTxWithVerify() {
 func testFromBlock() {
     startTestFromBlock = true
     seller.SubscribeEvent("DataPublish", onPublish)
-    sdk.StartScan(1)
+    sdk2.StartScan(1)
 }
 
 func subscribeAllEvents()  {
@@ -227,14 +226,14 @@ func initClients() {
 	time.Sleep(sleepTime)
 }
 
-func CreateClientWithToken(token *big.Int, eth *big.Int) (*scryclient.ScryClient, error) {
-	client, err := scryclient.CreateScryClient(clientPassword)
+func CreateClientWithToken(token *big.Int, eth *big.Int) (*scryclient2.scryClientImp, error) {
+	client, err := scryclient2.CreateScryClient(clientPassword)
 	if err != nil {
 		fmt.Println("failed to create user, error:", err)
 		return nil, err
 	}
 
-	_, err = cif.TransferEth(common.HexToAddress(suAddress),
+	_, err = scryclient2.TransferEth(common.HexToAddress(suAddress),
         suPassword,
 		common.HexToAddress(client.Account.Address),
 		eth)
@@ -243,8 +242,8 @@ func CreateClientWithToken(token *big.Int, eth *big.Int) (*scryclient.ScryClient
 		return nil, err
 	}
 
-	txParam := chainoperations.TransactParams{common.HexToAddress(suAddress), suPassword, big.NewInt(0), false}
-	err = cif.TransferTokens(&txParam, common.HexToAddress(client.Account.Address), token)
+	txParam := chainoperations2.TransactParams{common.HexToAddress(suAddress), suPassword, big.NewInt(0), false}
+	err = scryclient2.TransferTokens(&txParam, common.HexToAddress(client.Account.Address), token)
 	if err != nil {
 		fmt.Println("failed to transfer token, error:", err)
 		return nil, err
@@ -260,85 +259,85 @@ func SellerPublishData(supportVerify bool) {
 	proofData := []string{"QmNrTHX545s7hGfbEVrJuCiMqKVwUWJ4cPwXrAPv3GW5pm", "Qmb7csVP7wGco16XHVNqqRXUE7vQMjuA24QRypnZdkeQMD"}
 	despData := "QmQXqZdEwXnWgKpfJmUVaACuVar9R7vpBxtZgddQMTa2UN"
 
-	txParam := chainoperations.TransactParams{common.HexToAddress(seller.Account.Address), clientPassword, big.NewInt(0), false}
-	cif.Publish(&txParam, big.NewInt(1000), metaData, proofData, 2, despData, supportVerify)
+	txParam := chainoperations2.TransactParams{common.HexToAddress(seller.Account.Address), clientPassword, big.NewInt(0), false}
+	scryclient2.Publish(&txParam, big.NewInt(1000), metaData, proofData, 2, despData, supportVerify)
 }
 
-func VerifierApproveTransfer(verifier *scryclient.ScryClient) {
-	txParam := chainoperations.TransactParams{common.HexToAddress(verifier.Account.Address), clientPassword, big.NewInt(0), false}
-	err := cif.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(10000))
+func VerifierApproveTransfer(verifier *scryclient2.scryClientImp) {
+	txParam := chainoperations2.TransactParams{common.HexToAddress(verifier.Account.Address), clientPassword, big.NewInt(0), false}
+	err := scryclient2.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(10000))
 	if err != nil {
 		fmt.Println("VerifierApproveTransfer", err)
 	}
 }
 
-func RegisterAsVerifier(verifier *scryclient.ScryClient) {
-	txParam := chainoperations.TransactParams{common.HexToAddress(verifier.Account.Address), clientPassword, big.NewInt(0), false}
-	err := cif.RegisterAsVerifier(&txParam)
+func RegisterAsVerifier(verifier *scryclient2.scryClientImp) {
+	txParam := chainoperations2.TransactParams{common.HexToAddress(verifier.Account.Address), clientPassword, big.NewInt(0), false}
+	err := scryclient2.RegisterAsVerifier(&txParam)
 	if err != nil {
 		fmt.Println("RegisterAsVerifier", err)
 	}
 }
 
-func Vote(verifier *scryclient.ScryClient) {
-	txParam := chainoperations.TransactParams{common.HexToAddress(verifier.Account.Address), clientPassword, big.NewInt(0), false}
-	err := cif.Vote(&txParam, txId, true, "This could be real from "+verifier.Account.Address)
+func Vote(verifier *scryclient2.scryClientImp) {
+	txParam := chainoperations2.TransactParams{common.HexToAddress(verifier.Account.Address), clientPassword, big.NewInt(0), false}
+	err := scryclient2.Vote(&txParam, txId, true, "This could be real from "+verifier.Account.Address)
 	if err != nil {
 		fmt.Println("Vote:", err)
 	}
 }
 
 func CreditsToVerifier(to common.Address) {
-	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword, big.NewInt(0), false}
-	err := cif.CreditsToVerifier(&txParam, txId, 1, 5)
+	txParam := chainoperations2.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword, big.NewInt(0), false}
+	err := scryclient2.CreditsToVerifier(&txParam, txId, 1, 5)
 	if err != nil {
 		fmt.Println("CreditsToVerifier:", err)
 	}
 }
 
 func BuyerApproveTransfer() {
-	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword, big.NewInt(0), false}
-	err := cif.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(1600))
+	txParam := chainoperations2.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword, big.NewInt(0), false}
+	err := scryclient2.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(1600))
 	if err != nil {
 		fmt.Println("BuyerApproveTransfer:", err)
 	}
 }
 
 func PrepareToBuy(publishId string, startVerify bool) {
-	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword,
+	txParam := chainoperations2.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword,
 		big.NewInt(0), false}
-	err := cif.PrepareToBuy(&txParam, publishId, startVerify)
+	err := scryclient2.PrepareToBuy(&txParam, publishId, startVerify)
 	if err != nil {
 		fmt.Println("failed to prepareToBuy, error:", err)
 	}
 }
 
 func Buy(txId *big.Int) {
-	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword, big.NewInt(0), false}
-	err := cif.BuyData(&txParam, txId)
+	txParam := chainoperations2.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword, big.NewInt(0), false}
+	err := scryclient2.BuyData(&txParam, txId)
 	if err != nil {
 		fmt.Println("failed to buyData, error:", err)
 	}
 }
 
 func SubmitMetaDataIdEncWithBuyer(txId *big.Int) {
-	txParam := chainoperations.TransactParams{common.HexToAddress(seller.Account.Address), clientPassword, big.NewInt(0), false}
-	err := cif.SubmitMetaDataIdEncWithBuyer(&txParam, txId, metaDataIdEncWithBuyer)
+	txParam := chainoperations2.TransactParams{common.HexToAddress(seller.Account.Address), clientPassword, big.NewInt(0), false}
+	err := scryclient2.SubmitMetaDataIdEncWithBuyer(&txParam, txId, metaDataIdEncWithBuyer)
 	if err != nil {
 		fmt.Println("failed to SubmitMetaDataIdEncWithBuyer, error:", err)
 	}
 }
 
 func ConfirmDataTruth(txId *big.Int) {
-	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address),
+	txParam := chainoperations2.TransactParams{common.HexToAddress(buyer.Account.Address),
         clientPassword, big.NewInt(0), false}
-	err := cif.ConfirmDataTruth(&txParam, txId, true)
+	err := scryclient2.ConfirmDataTruth(&txParam, txId, true)
 	if err != nil {
 		fmt.Println("failed to ConfirmDataTruth, error:", err)
 	}
 }
 
-func onPurchase(event events.Event) bool {
+func onPurchase(event events2.Event) bool {
 	fmt.Println("onPurchase:", event)
 	metaDataIdEncWithSeller = event.Data.Get("metaDataIdEncSeller").([]byte)
 	fmt.Println("Node: EncID. ", metaDataIdEncWithSeller)
@@ -349,7 +348,7 @@ func onPurchase(event events.Event) bool {
 	return true
 }
 
-func onReadyForDownload(event events.Event) bool {
+func onReadyForDownload(event events2.Event) bool {
 	fmt.Println("onReadyForDownload:", event)
 	metaDataIdEncWithBuyer = event.Data.Get("metaDataIdEncBuyer").([]byte)
 
@@ -359,7 +358,7 @@ func onReadyForDownload(event events.Event) bool {
 	return true
 }
 
-func onClose(event events.Event) bool {
+func onClose(event events2.Event) bool {
 	fmt.Println("onClose:", event)
 
     fmt.Println("Testing Tx end")
@@ -373,21 +372,21 @@ func onClose(event events.Event) bool {
 	return true
 }
 
-func onApprovalBuyerTransfer(event events.Event) bool {
+func onApprovalBuyerTransfer(event events2.Event) bool {
 	fmt.Println("onApprovalBuyerTransfer:", event)
 
 	PrepareToBuy(publishId, startVerify)
 	return true
 }
 
-func onApprovalVerifierTransfer(event events.Event) bool {
+func onApprovalVerifierTransfer(event events2.Event) bool {
 	fmt.Println("onApprovalVerifierTransfer:", event)
 
 	return true
 }
 
 
-func onTransactionCreate(event events.Event) bool {
+func onTransactionCreate(event events2.Event) bool {
 	fmt.Println("onTransactionCreated:", event)
 	txId = event.Data.Get("transactionId").(*big.Int)
     if !startVerify {
@@ -397,7 +396,7 @@ func onTransactionCreate(event events.Event) bool {
 	return true
 }
 
-func onVerifier1Chosen(event events.Event) bool {
+func onVerifier1Chosen(event events2.Event) bool {
 	fmt.Println("onVerifier1Chosen:", event)
 
 	txId = event.Data.Get("transactionId").(*big.Int)
@@ -405,7 +404,7 @@ func onVerifier1Chosen(event events.Event) bool {
 	return true
 }
 
-func onVerifier2Chosen(event events.Event) bool {
+func onVerifier2Chosen(event events2.Event) bool {
 	fmt.Println("onVerifier2Chosen:", event)
 
 	txId = event.Data.Get("transactionId").(*big.Int)
@@ -413,7 +412,7 @@ func onVerifier2Chosen(event events.Event) bool {
 	return true
 }
 
-func onVerifier3Chosen(event events.Event) bool {
+func onVerifier3Chosen(event events2.Event) bool {
 	fmt.Println("onVerifier3Chosen:", event)
 
 	txId = event.Data.Get("transactionId").(*big.Int)
@@ -421,7 +420,7 @@ func onVerifier3Chosen(event events.Event) bool {
 	return true
 }
 
-func onPublish(event events.Event) bool {
+func onPublish(event events2.Event) bool {
 	fmt.Println("onpublish: ", event)
 
 	publishId = event.Data.Get("publishId").(string)
@@ -433,13 +432,13 @@ func onPublish(event events.Event) bool {
 	return true
 }
 
-func OnRegisterVerifier(event events.Event) bool {
+func OnRegisterVerifier(event events2.Event) bool {
 	fmt.Println("OnRegisterVerifier: ", event)
 
 	return true
 }
 
-func onVote(event events.Event) bool {
+func onVote(event events2.Event) bool {
 	fmt.Println("onVote: ", event)
 
 	Buy(txId)
@@ -447,7 +446,7 @@ func onVote(event events.Event) bool {
 	return true
 }
 
-func onVerifierDisable(event events.Event) bool {
+func onVerifierDisable(event events2.Event) bool {
 	fmt.Println("onVerifierDisable: ", event)
 
 	return true
