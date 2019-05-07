@@ -22,7 +22,7 @@ import (
 func main()  {
 	l, err := line.BuildAndStart(func(l dot.Line) error {
 		//todo
-		return nil
+		return Init()
 	})
 
 	if err != nil {
