@@ -18,7 +18,6 @@ import (
 
 const IPFSOutDir = "D:/desktop" //todo config
 
-
 func SetScryInfo(si *settings2.ScryInfo) {
 	app.GetGapp().ScryInfo = si
 }
@@ -28,7 +27,7 @@ func SetFromBlock(fromBlock uint64) {
 }
 
 func CreateUserWithLogin(password string) (string, error) {
-	client, err := scry.CreateScryClient(password)
+	client, err := scry.CreateScryClient(password, app.GetGapp().ChainWrapper)
 	if err != nil {
 		return "", errors.Wrap(err, "Create new user failed. ")
 	}
@@ -41,7 +40,7 @@ func CreateUserWithLogin(password string) (string, error) {
 func UserLogin(address string, password string) (bool, error) {
 	var err error
 	var client scry.Client
-	if client = scry.NewScryClient(address); client == nil {
+	if client = scry.NewScryClient(address, app.GetGapp().ChainWrapper); client == nil {
 		return false, errors.New("Call NewScryClient failed. ")
 	}
 
@@ -64,7 +63,7 @@ func importAccount(keyJson string, oldPassword string, newPassword string) (scry
 		return nil, errors.Wrap(err, "Import account failed. ")
 	}
 
-	client := scry.NewScryClient(address)
+	client := scry.NewScryClient(address, app.GetGapp().ChainWrapper)
 	return client, nil
 }
 

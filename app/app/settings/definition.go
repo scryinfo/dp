@@ -28,5 +28,5 @@ type Ethereum struct {
 type Services struct {
 	Ipfs     string `yaml:"ipfs"`
 	Keystore string `yaml:"keystore"`
-	Wsport string `yaml:"wsport"`
+	Wsport   string `yaml:"wsport"`
 }

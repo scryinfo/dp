@@ -18,4 +18,3 @@ type Client interface {
 	GetEth(owner common.Address, ec *ethclient.Client) (*big.Int, error)
 	GetScryToken(owner common.Address) (*big.Int, error)
 }
-

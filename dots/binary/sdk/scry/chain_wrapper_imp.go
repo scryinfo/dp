@@ -21,11 +21,9 @@ type chainWrapperImp struct {
 	scryToken    *contract.ScryToken
 }
 
-
 func NewChainWrapper(protocolContractAddress common.Address, tokenContractAddress common.Address, clientConn *ethclient.Client) (ChainWrapper, error) {
 	var err error = nil
 	c := &chainWrapperImp{}
-
 
 	c.scryProtocol, err = contract.NewScryProtocol(protocolContractAddress, clientConn)
 	if err != nil {
@@ -41,10 +39,10 @@ func NewChainWrapper(protocolContractAddress common.Address, tokenContractAddres
 
 	c.conn = clientConn
 
-	return c,err
+	return c, err
 }
 
-func (c *chainWrapperImp)Publish(txParams *chainoperations.TransactParams, price *big.Int, metaDataID []byte, proofDataIDs []string,
+func (c *chainWrapperImp) Publish(txParams *chainoperations.TransactParams, price *big.Int, metaDataID []byte, proofDataIDs []string,
 	proofNum int, detailsID string, supportVerify bool) (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -57,7 +55,7 @@ func (c *chainWrapperImp)Publish(txParams *chainoperations.TransactParams, price
 
 	pdIDs := make([][32]byte, proofNum)
 	var err error = nil
-	for i := 0;i < proofNum;i++ {
+	for i := 0; i < proofNum; i++ {
 		pdIDs[i], err = ipfsHashToBytes32(proofDataIDs[i])
 		if err != nil {
 			rlog.Error("failed to convert ipfs hash to bytes32")
@@ -97,17 +95,17 @@ func ipfsHashToBytes32(src string) ([32]byte, error) {
 }
 
 func Bytes32ToIpfsHash(value [32]byte) (string, error) {
-    byteArray := [34]byte {18, 32}
-    copy(byteArray[2:], value[:])
-    if len(byteArray) != 34 {
-        return "", errors.New("invalid bytes32 value")
-    }
+	byteArray := [34]byte{18, 32}
+	copy(byteArray[2:], value[:])
+	if len(byteArray) != 34 {
+		return "", errors.New("invalid bytes32 value")
+	}
 
-    hash := base58.Encode(byteArray[:])
-    return hash, nil
+	hash := base58.Encode(byteArray[:])
+	return hash, nil
 }
 
-func (c *chainWrapperImp)PrepareToBuy(txParams *chainoperations.TransactParams, publishId string, startVerify bool) error {
+func (c *chainWrapperImp) PrepareToBuy(txParams *chainoperations.TransactParams, publishId string, startVerify bool) error {
 	defer func() {
 		if err := recover(); err != nil {
 			rlog.Error("failed to prepare to buy , error:", err)
@@ -116,13 +114,13 @@ func (c *chainWrapperImp)PrepareToBuy(txParams *chainoperations.TransactParams, 
 
 	tx, err := c.scryProtocol.CreateTransaction(chainoperations.BuildTransactOpts(txParams), getAppSeqNo(), publishId, startVerify)
 	if err == nil {
-		rlog.Debug("CreateTransaction:" + string(tx.Data()), " tx hash:", tx.Hash().String())
+		rlog.Debug("CreateTransaction:"+string(tx.Data()), " tx hash:", tx.Hash().String())
 	}
 
 	return err
 }
 
-func (c *chainWrapperImp)BuyData(txParams *chainoperations.TransactParams, txId *big.Int) error {
+func (c *chainWrapperImp) BuyData(txParams *chainoperations.TransactParams, txId *big.Int) error {
 	tx, err := c.scryProtocol.BuyData(chainoperations.BuildTransactOpts(txParams), getAppSeqNo(), txId)
 	if err == nil {
 		rlog.Debug("BuyData:", string(tx.Data()), " tx hash:", tx.Hash().String())
@@ -131,7 +129,7 @@ func (c *chainWrapperImp)BuyData(txParams *chainoperations.TransactParams, txId 
 	return err
 }
 
-func (c *chainWrapperImp)CancelTransaction(txParams *chainoperations.TransactParams, txId *big.Int) error {
+func (c *chainWrapperImp) CancelTransaction(txParams *chainoperations.TransactParams, txId *big.Int) error {
 	tx, err := c.scryProtocol.CancelTransaction(chainoperations.BuildTransactOpts(txParams), getAppSeqNo(), txId)
 	if err == nil {
 		rlog.Debug("CancelTransaction", string(tx.Data()), " tx hash:", tx.Hash().String())
@@ -140,7 +138,7 @@ func (c *chainWrapperImp)CancelTransaction(txParams *chainoperations.TransactPar
 	return err
 }
 
-func (c *chainWrapperImp)SubmitMetaDataIdEncWithBuyer(txParams *chainoperations.TransactParams, txId *big.Int, encyptedMetaDataId []byte) error {
+func (c *chainWrapperImp) SubmitMetaDataIdEncWithBuyer(txParams *chainoperations.TransactParams, txId *big.Int, encyptedMetaDataId []byte) error {
 	tx, err := c.scryProtocol.SubmitMetaDataIdEncWithBuyer(chainoperations.BuildTransactOpts(txParams), getAppSeqNo(), txId, encyptedMetaDataId)
 	if err == nil {
 		rlog.Debug("SubmitMetaDataIdEncWithBuyer:", string(tx.Data()), " tx hash:", tx.Hash().String())
@@ -149,7 +147,7 @@ func (c *chainWrapperImp)SubmitMetaDataIdEncWithBuyer(txParams *chainoperations.
 	return err
 }
 
-func (c *chainWrapperImp)ConfirmDataTruth(txParams *chainoperations.TransactParams, txId *big.Int, truth bool) error {
+func (c *chainWrapperImp) ConfirmDataTruth(txParams *chainoperations.TransactParams, txId *big.Int, truth bool) error {
 	tx, err := c.scryProtocol.ConfirmDataTruth(chainoperations.BuildTransactOpts(txParams), getAppSeqNo(), txId, truth)
 	if err == nil {
 		rlog.Debug("ConfirmDataTruth:", string(tx.Data()), " tx hash:", tx.Hash().String())
@@ -158,7 +156,7 @@ func (c *chainWrapperImp)ConfirmDataTruth(txParams *chainoperations.TransactPara
 	return err
 }
 
-func (c *chainWrapperImp)ApproveTransfer(txParams *chainoperations.TransactParams, spender common.Address, value *big.Int) error {
+func (c *chainWrapperImp) ApproveTransfer(txParams *chainoperations.TransactParams, spender common.Address, value *big.Int) error {
 	tx, err := c.scryToken.Approve(chainoperations.BuildTransactOpts(txParams), spender, value)
 	if err == nil {
 		rlog.Debug("ApproveTransfer:", string(tx.Data()), " tx hash:", tx.Hash().String())
@@ -167,7 +165,7 @@ func (c *chainWrapperImp)ApproveTransfer(txParams *chainoperations.TransactParam
 	return err
 }
 
-func (c *chainWrapperImp)Vote(txParams *chainoperations.TransactParams, txId *big.Int, judge bool, comments string) error {
+func (c *chainWrapperImp) Vote(txParams *chainoperations.TransactParams, txId *big.Int, judge bool, comments string) error {
 	tx, err := c.scryProtocol.Vote(chainoperations.BuildTransactOpts(txParams), getAppSeqNo(), txId, judge, comments)
 	if err == nil {
 		rlog.Debug("Vote:", string(tx.Data()), " tx hash:", tx.Hash().String())
@@ -176,7 +174,7 @@ func (c *chainWrapperImp)Vote(txParams *chainoperations.TransactParams, txId *bi
 	return err
 }
 
-func (c *chainWrapperImp)RegisterAsVerifier(txParams *chainoperations.TransactParams) error {
+func (c *chainWrapperImp) RegisterAsVerifier(txParams *chainoperations.TransactParams) error {
 	tx, err := c.scryProtocol.RegisterAsVerifier(chainoperations.BuildTransactOpts(txParams), getAppSeqNo())
 	if err == nil {
 		rlog.Debug("RegisterAsVerifier:", string(tx.Data()), " tx hash:", tx.Hash().String())
@@ -185,7 +183,7 @@ func (c *chainWrapperImp)RegisterAsVerifier(txParams *chainoperations.TransactPa
 	return err
 }
 
-func (c *chainWrapperImp)CreditsToVerifier(txParams *chainoperations.TransactParams, txId *big.Int, index uint8, credit uint8) error {
+func (c *chainWrapperImp) CreditsToVerifier(txParams *chainoperations.TransactParams, txId *big.Int, index uint8, credit uint8) error {
 	tx, err := c.scryProtocol.CreditsToVerifier(chainoperations.BuildTransactOpts(txParams), getAppSeqNo(), txId, index, credit)
 	if err == nil {
 		rlog.Debug("CreditsToVerifier:", string(tx.Data()), " tx hash:", tx.Hash().String())
@@ -194,7 +192,7 @@ func (c *chainWrapperImp)CreditsToVerifier(txParams *chainoperations.TransactPar
 	return err
 }
 
-func (c *chainWrapperImp)TransferTokens(txParams *chainoperations.TransactParams, to common.Address, value *big.Int) error {
+func (c *chainWrapperImp) TransferTokens(txParams *chainoperations.TransactParams, to common.Address, value *big.Int) error {
 	tx, err := c.scryToken.Transfer(chainoperations.BuildTransactOpts(txParams), to, value)
 	if err == nil {
 		rlog.Debug("tx:", tx)
@@ -204,21 +202,21 @@ func (c *chainWrapperImp)TransferTokens(txParams *chainoperations.TransactParams
 	return err
 }
 
-func (c *chainWrapperImp)GetTokenBalance(txParams *chainoperations.TransactParams, owner common.Address) (*big.Int, error) {
+func (c *chainWrapperImp) GetTokenBalance(txParams *chainoperations.TransactParams, owner common.Address) (*big.Int, error) {
 	return c.scryToken.BalanceOf(chainoperations.BuildCallOpts(txParams), owner)
 }
 
-func (c *chainWrapperImp)TransferEth(from common.Address,
+func (c *chainWrapperImp) TransferEth(from common.Address,
 	password string,
 	to common.Address,
 	value *big.Int) (*types.Transaction, error) {
 	return chainoperations.TransferEth(from, password, to, value, c.conn)
 }
 
-func (c *chainWrapperImp)GetEthBalance(owner common.Address) (*big.Int, error) {
+func (c *chainWrapperImp) GetEthBalance(owner common.Address) (*big.Int, error) {
 	return chainoperations.GetEthBalance(owner, c.conn)
 }
 
 func getAppSeqNo() string {
-    return settings.GetAppId()
+	return settings.GetAppId()
 }

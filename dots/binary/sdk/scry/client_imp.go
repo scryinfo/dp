@@ -11,46 +11,48 @@ import (
 )
 
 type clientImp struct {
-	Account_ *accounts.Account
-	Chain    ChainWrapper `dot:""`
+	account      *accounts.Account
+	chainWrapper ChainWrapper `dot:""`
 }
 
-func NewScryClient(publicKey string) Client {
+func NewScryClient(publicKey string, chainWrapper ChainWrapper) Client {
 	return &clientImp{
-		Account_: &accounts.Account{publicKey},
+		account:      &accounts.Account{publicKey},
+		chainWrapper: chainWrapper,
 	}
 }
 
-func CreateScryClient(password string) (Client, error) {
+func CreateScryClient(password string, chainWrapper ChainWrapper) (Client, error) {
 	account, err := accounts.GetAMInstance().CreateAccount(password)
 	if err != nil {
-		rlog.Error("failed to create Account_, error:", err)
+		rlog.Error("failed to create account, error:", err)
 		return nil, err
 	}
 
 	return &clientImp{
-		Account_: account,
+		account:      account,
+		chainWrapper: chainWrapper,
 	}, nil
 }
 
 func (c *clientImp) Account() *accounts.Account {
-	return c.Account_
+	return c.account
 }
 
 func (c *clientImp) SubscribeEvent(eventName string, callback chainevents.EventCallback) error {
-	return chainevents.SubscribeExternal(common.HexToAddress(c.Account_.Address), eventName, callback)
+	return chainevents.SubscribeExternal(common.HexToAddress(c.account.Address), eventName, callback)
 }
 
 func (c *clientImp) UnSubscribeEvent(eventName string) error {
-    return chainevents.UnSubscribeExternal(common.HexToAddress(c.Account_.Address), eventName)
+	return chainevents.UnSubscribeExternal(common.HexToAddress(c.account.Address), eventName)
 }
 
 func (c *clientImp) Authenticate(password string) (bool, error) {
-	return accounts.GetAMInstance().AuthAccount(c.Account_.Address, password)
+	return accounts.GetAMInstance().AuthAccount(c.account.Address, password)
 }
 
 func (c *clientImp) TransferEthFrom(from common.Address, password string, value *big.Int, ec *ethclient.Client) error {
-	tx, err := chainoperations.TransferEth(from, password, common.HexToAddress(c.Account_.Address), value, ec)
+	tx, err := chainoperations.TransferEth(from, password, common.HexToAddress(c.account.Address), value, ec)
 	if err == nil {
 		rlog.Debug("transferEthFrom: ", tx.Hash(), tx.Data())
 	}
@@ -60,8 +62,8 @@ func (c *clientImp) TransferEthFrom(from common.Address, password string, value 
 
 func (c *clientImp) TransferTokenFrom(from common.Address, password string, value *big.Int) error {
 	txParam := &chainoperations.TransactParams{From: from, Password: password, Value: value}
-	return c.Chain.TransferTokens(txParam,
-		common.HexToAddress(c.Account_.Address),
+	return c.chainWrapper.TransferTokens(txParam,
+		common.HexToAddress(c.account.Address),
 		value)
 }
 
@@ -70,8 +72,8 @@ func (c *clientImp) GetEth(owner common.Address, ec *ethclient.Client) (*big.Int
 }
 
 func (c *clientImp) GetScryToken(owner common.Address) (*big.Int, error) {
-	from := common.HexToAddress(c.Account_.Address)
+	from := common.HexToAddress(c.account.Address)
 	txParam := &chainoperations.TransactParams{From: from, Pending: true}
 
-	return c.Chain.GetTokenBalance(txParam, owner)
+	return c.chainWrapper.GetTokenBalance(txParam, owner)
 }

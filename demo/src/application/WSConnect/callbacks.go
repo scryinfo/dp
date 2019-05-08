@@ -84,7 +84,7 @@ func onApprove(_ events.Event) bool {
 func onVerifiersChosen(event events.Event) bool {
 	go func() {
 		var (
-			ovc definition.OnVerifiersChosen
+			ovc        definition.OnVerifiersChosen
 			extensions []string
 		)
 		ovc.PublishID = event.Data.Get("publishId").(string)

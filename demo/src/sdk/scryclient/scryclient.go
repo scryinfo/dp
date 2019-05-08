@@ -24,7 +24,7 @@ func NewScryClient(publicKey string) *ScryClient {
 func CreateScryClient(password string) (*ScryClient, error) {
 	account, err := accounts.GetAMInstance().CreateAccount(password)
 	if err != nil {
-		rlog.Error("failed to create Account_, error:", err)
+		rlog.Error("failed to create account_, error:", err)
 		return nil, err
 	}
 
@@ -38,7 +38,7 @@ func (client ScryClient) SubscribeEvent(eventName string, callback chainevents.E
 }
 
 func (client ScryClient) UnSubscribeEvent(eventName string) error {
-    return chainevents.UnSubscribeExternal(common.HexToAddress(client.Account.Address), eventName)
+	return chainevents.UnSubscribeExternal(common.HexToAddress(client.Account.Address), eventName)
 }
 
 func (client ScryClient) Authenticate(password string) (bool, error) {

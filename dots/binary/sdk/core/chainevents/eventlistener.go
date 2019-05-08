@@ -9,13 +9,13 @@ import (
 )
 
 var (
-    builder *events2.Builder = nil
+	builder *events2.Builder = nil
 )
 
 type ContractInfo struct {
-	Address    string
-	Abi        string
-	Events     []string
+	Address string
+	Abi     string
+	Events  []string
 }
 
 func ListenEvent(conn *ethclient.Client, contracts []ContractInfo, fromBlock uint64, interval time.Duration,
@@ -57,10 +57,10 @@ func ListenEvent(conn *ethclient.Client, contracts []ContractInfo, fromBlock uin
 	return rv
 }
 
-func SetFromBlock(from uint64)  {
-    if builder != nil {
-        builder.SetFrom(from)
-    } else {
-      rlog.Warn("Failed to set from block because of nil builder.")
-    }
+func SetFromBlock(from uint64) {
+	if builder != nil {
+		builder.SetFrom(from)
+	} else {
+		rlog.Warn("Failed to set from block because of nil builder.")
+	}
 }

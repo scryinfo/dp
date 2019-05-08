@@ -2,27 +2,27 @@ package events
 
 import (
 	"context"
-    "encoding/binary"
-    "errors"
+	"encoding/binary"
+	"errors"
 	"fmt"
 	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/common"
-    "github.com/ethereum/go-ethereum/core/types"
-    "github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/accounts/abi"
-    "github.com/ethereum/go-ethereum/accounts/abi/bind"
-    "github.com/scryInfo/dp/demo/src/sdk/core/ethereum/redo"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/scryInfo/dp/demo/src/sdk/core/ethereum/redo"
 	"math/big"
-    "reflect"
-    "strings"
+	"reflect"
+	"strings"
 	"time"
 )
 
 var (
-    errBadBool = errors.New("abi: improperly encoded boolean value")
-    reflectHash    = reflect.TypeOf(common.Hash{})
-    reflectAddress = reflect.TypeOf(common.Address{})
-    reflectBigInt  = reflect.TypeOf(new(big.Int))
+	errBadBool     = errors.New("abi: improperly encoded boolean value")
+	reflectHash    = reflect.TypeOf(common.Hash{})
+	reflectAddress = reflect.TypeOf(common.Address{})
+	reflectBigInt  = reflect.TypeOf(new(big.Int))
 )
 
 type Event struct {
@@ -185,338 +185,335 @@ func (cm contractMeta) HasEvent(name string) bool {
 	return false
 }
 
-func (cm contractMeta) UnpackLogToJson(out JSONObj, event string, log types.Log) (error) {
-    if len(log.Data) > 0 {
-        if err := cm.Unpack(out, event, log.Data); err != nil {
-            return err
-        }
-    }
-    var indexed abi.Arguments
-    for _, arg := range cm.abi.Events[event].Inputs {
-        if arg.Indexed {
-            indexed = append(indexed, arg)
-        }
-    }
-    return parseTopics(out, indexed, log.Topics[1:])
+func (cm contractMeta) UnpackLogToJson(out JSONObj, event string, log types.Log) error {
+	if len(log.Data) > 0 {
+		if err := cm.Unpack(out, event, log.Data); err != nil {
+			return err
+		}
+	}
+	var indexed abi.Arguments
+	for _, arg := range cm.abi.Events[event].Inputs {
+		if arg.Indexed {
+			indexed = append(indexed, arg)
+		}
+	}
+	return parseTopics(out, indexed, log.Topics[1:])
 }
 
 func (cm contractMeta) Unpack(v JSONObj, name string, output []byte) (err error) {
-    if len(output) == 0 {
-        return fmt.Errorf("abi: unmarshalling empty output")
-    }
+	if len(output) == 0 {
+		return fmt.Errorf("abi: unmarshalling empty output")
+	}
 
-    if method, ok := cm.abi.Methods[name]; ok {
-        if len(output)%32 != 0 {
-            return fmt.Errorf("abi: improperly formatted output")
-        }
-        return cm.UnpackArgs(v, output, method.Outputs)
-    } else if event, ok := cm.abi.Events[name]; ok {
-        return cm.UnpackArgs(v, output, event.Inputs)
-    }
-    return fmt.Errorf("abi: could not locate named method or event")
+	if method, ok := cm.abi.Methods[name]; ok {
+		if len(output)%32 != 0 {
+			return fmt.Errorf("abi: improperly formatted output")
+		}
+		return cm.UnpackArgs(v, output, method.Outputs)
+	} else if event, ok := cm.abi.Events[name]; ok {
+		return cm.UnpackArgs(v, output, event.Inputs)
+	}
+	return fmt.Errorf("abi: could not locate named method or event")
 }
 
 func (cm contractMeta) UnpackArgs(v JSONObj, data []byte, args abi.Arguments) error {
-    if cm.isTuple(args) {
-        return cm.unpackTuple(v, data, args)
-    }
-    return cm.unpackAtomic(v, data, args)
+	if cm.isTuple(args) {
+		return cm.unpackTuple(v, data, args)
+	}
+	return cm.unpackAtomic(v, data, args)
 }
 
 func (cm contractMeta) isTuple(args abi.Arguments) bool {
-    return len(args) > 1
+	return len(args) > 1
 }
 
 func (cm contractMeta) unpackTuple(v JSONObj, output []byte, args abi.Arguments) error {
-    i, j := -1, 0
-    for _, arg := range args {
+	i, j := -1, 0
+	for _, arg := range args {
 
-        if arg.Indexed {
-            // can't read, continue
-            continue
-        }
-        i++
-        marshalledValue, err := toGoType((i+j)*32, arg.Type, output)
-        if err != nil {
-            return err
-        }
-        v.Set(arg.Name, marshalledValue)
-    }
-    return nil
+		if arg.Indexed {
+			// can't read, continue
+			continue
+		}
+		i++
+		marshalledValue, err := toGoType((i+j)*32, arg.Type, output)
+		if err != nil {
+			return err
+		}
+		v.Set(arg.Name, marshalledValue)
+	}
+	return nil
 }
 
 // unpackAtomic unpacks ( hexdata -> go ) a single value
 func (cm contractMeta) unpackAtomic(v JSONObj, output []byte, args abi.Arguments) error {
-    arg := args[0]
-    if arg.Indexed {
-        return fmt.Errorf("abi: attempting to unpack indexed variable into element.")
-    }
+	arg := args[0]
+	if arg.Indexed {
+		return fmt.Errorf("abi: attempting to unpack indexed variable into element.")
+	}
 
-    marshalledValue, err := toGoType(0, arg.Type, output)
-    if err != nil {
-        return err
-    }
-    v.Set(arg.Name, marshalledValue)
-    return nil
+	marshalledValue, err := toGoType(0, arg.Type, output)
+	if err != nil {
+		return err
+	}
+	v.Set(arg.Name, marshalledValue)
+	return nil
 }
-
 
 // toGoType parses the output bytes and recursively assigns the value of these bytes
 // into a go type with accordance with the ABI spec.
 func toGoType(index int, t abi.Type, output []byte) (interface{}, error) {
-    if index+32 > len(output) {
-        return nil, fmt.Errorf("abi: cannot marshal in to go type: length insufficient %d require %d", len(output), index+32)
-    }
+	if index+32 > len(output) {
+		return nil, fmt.Errorf("abi: cannot marshal in to go type: length insufficient %d require %d", len(output), index+32)
+	}
 
-    var (
-        returnOutput []byte
-        begin, end   int
-        err          error
-    )
+	var (
+		returnOutput []byte
+		begin, end   int
+		err          error
+	)
 
-    // if we require a length prefix, find the beginning word and size returned.
-    if requiresLengthPrefix(t) {
-        begin, end, err = lengthPrefixPointsTo(index, output)
-        if err != nil {
-            return nil, err
-        }
-    } else {
-        returnOutput = output[index : index+32]
-    }
+	// if we require a length prefix, find the beginning word and size returned.
+	if requiresLengthPrefix(t) {
+		begin, end, err = lengthPrefixPointsTo(index, output)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		returnOutput = output[index : index+32]
+	}
 
-    switch t.T {
-    case abi.SliceTy:
-        return forEachUnpack(t, output, begin, end)
-    case abi.ArrayTy:
-        return forEachUnpack(t, output, index, t.Size)
-    case abi.StringTy: // variable arrays are written at the end of the return bytes
-        return string(output[begin : begin+end]), nil
-    case abi.IntTy, abi.UintTy:
-        return readInteger(t.Kind, returnOutput), nil
-    case abi.BoolTy:
-        return readBool(returnOutput)
-    case abi.AddressTy:
-        return common.BytesToAddress(returnOutput), nil
-    case abi.HashTy:
-        return common.BytesToHash(returnOutput), nil
-    case abi.BytesTy:
-        return output[begin : begin+end], nil
-    case abi.FixedBytesTy:
-        return readFixedBytes(t, returnOutput)
-    case abi.FunctionTy:
-        return readFunctionType(t, returnOutput)
-    default:
-        return nil, fmt.Errorf("abi: unknown type %v", t.T)
-    }
+	switch t.T {
+	case abi.SliceTy:
+		return forEachUnpack(t, output, begin, end)
+	case abi.ArrayTy:
+		return forEachUnpack(t, output, index, t.Size)
+	case abi.StringTy: // variable arrays are written at the end of the return bytes
+		return string(output[begin : begin+end]), nil
+	case abi.IntTy, abi.UintTy:
+		return readInteger(t.Kind, returnOutput), nil
+	case abi.BoolTy:
+		return readBool(returnOutput)
+	case abi.AddressTy:
+		return common.BytesToAddress(returnOutput), nil
+	case abi.HashTy:
+		return common.BytesToHash(returnOutput), nil
+	case abi.BytesTy:
+		return output[begin : begin+end], nil
+	case abi.FixedBytesTy:
+		return readFixedBytes(t, returnOutput)
+	case abi.FunctionTy:
+		return readFunctionType(t, returnOutput)
+	default:
+		return nil, fmt.Errorf("abi: unknown type %v", t.T)
+	}
 }
-
 
 // reads the integer based on its kind
 func readInteger(kind reflect.Kind, b []byte) interface{} {
-    switch kind {
-    case reflect.Uint8:
-        return b[len(b)-1]
-    case reflect.Uint16:
-        return binary.BigEndian.Uint16(b[len(b)-2:])
-    case reflect.Uint32:
-        return binary.BigEndian.Uint32(b[len(b)-4:])
-    case reflect.Uint64:
-        return binary.BigEndian.Uint64(b[len(b)-8:])
-    case reflect.Int8:
-        return int8(b[len(b)-1])
-    case reflect.Int16:
-        return int16(binary.BigEndian.Uint16(b[len(b)-2:]))
-    case reflect.Int32:
-        return int32(binary.BigEndian.Uint32(b[len(b)-4:]))
-    case reflect.Int64:
-        return int64(binary.BigEndian.Uint64(b[len(b)-8:]))
-    default:
-        return new(big.Int).SetBytes(b)
-    }
+	switch kind {
+	case reflect.Uint8:
+		return b[len(b)-1]
+	case reflect.Uint16:
+		return binary.BigEndian.Uint16(b[len(b)-2:])
+	case reflect.Uint32:
+		return binary.BigEndian.Uint32(b[len(b)-4:])
+	case reflect.Uint64:
+		return binary.BigEndian.Uint64(b[len(b)-8:])
+	case reflect.Int8:
+		return int8(b[len(b)-1])
+	case reflect.Int16:
+		return int16(binary.BigEndian.Uint16(b[len(b)-2:]))
+	case reflect.Int32:
+		return int32(binary.BigEndian.Uint32(b[len(b)-4:]))
+	case reflect.Int64:
+		return int64(binary.BigEndian.Uint64(b[len(b)-8:]))
+	default:
+		return new(big.Int).SetBytes(b)
+	}
 }
 
 // reads a bool
 func readBool(word []byte) (bool, error) {
-    for _, b := range word[:31] {
-        if b != 0 {
-            return false, errBadBool
-        }
-    }
-    switch word[31] {
-    case 0:
-        return false, nil
-    case 1:
-        return true, nil
-    default:
-        return false, errBadBool
-    }
+	for _, b := range word[:31] {
+		if b != 0 {
+			return false, errBadBool
+		}
+	}
+	switch word[31] {
+	case 0:
+		return false, nil
+	case 1:
+		return true, nil
+	default:
+		return false, errBadBool
+	}
 }
 
 // A function type is simply the address with the function selection signature at the end.
 // This enforces that standard by always presenting it as a 24-array (address + sig = 24 bytes)
 func readFunctionType(t abi.Type, word []byte) (funcTy [24]byte, err error) {
-    if t.T != abi.FunctionTy {
-        return [24]byte{}, fmt.Errorf("abi: invalid type in call to make function type byte array")
-    }
-    if garbage := binary.BigEndian.Uint64(word[24:32]); garbage != 0 {
-        err = fmt.Errorf("abi: got improperly encoded function type, got %v", word)
-    } else {
-        copy(funcTy[:], word[0:24])
-    }
-    return
+	if t.T != abi.FunctionTy {
+		return [24]byte{}, fmt.Errorf("abi: invalid type in call to make function type byte array")
+	}
+	if garbage := binary.BigEndian.Uint64(word[24:32]); garbage != 0 {
+		err = fmt.Errorf("abi: got improperly encoded function type, got %v", word)
+	} else {
+		copy(funcTy[:], word[0:24])
+	}
+	return
 }
 
 // through reflection, creates a fixed array to be read from
 func readFixedBytes(t abi.Type, word []byte) (interface{}, error) {
-    if t.T != abi.FixedBytesTy {
-        return nil, fmt.Errorf("abi: invalid type in call to make fixed byte array")
-    }
-    // convert
-    array := reflect.New(t.Type).Elem()
+	if t.T != abi.FixedBytesTy {
+		return nil, fmt.Errorf("abi: invalid type in call to make fixed byte array")
+	}
+	// convert
+	array := reflect.New(t.Type).Elem()
 
-    reflect.Copy(array, reflect.ValueOf(word[0:t.Size]))
-    return array.Interface(), nil
+	reflect.Copy(array, reflect.ValueOf(word[0:t.Size]))
+	return array.Interface(), nil
 
 }
 
 func requiresLengthPrefix(t abi.Type) bool {
-    return t.T == abi.StringTy || t.T == abi.BytesTy || t.T == abi.SliceTy
+	return t.T == abi.StringTy || t.T == abi.BytesTy || t.T == abi.SliceTy
 }
 
 // interprets a 32 byte slice as an offset and then determines which indice to look to decode the type.
 func lengthPrefixPointsTo(index int, output []byte) (start int, length int, err error) {
-    offset := int(binary.BigEndian.Uint64(output[index+24 : index+32]))
-    if offset+32 > len(output) {
-        return 0, 0, fmt.Errorf("abi: cannot marshal in to go slice: offset %d would go over slice boundary (len=%d)", len(output), offset+32)
-    }
-    length = int(binary.BigEndian.Uint64(output[offset+24 : offset+32]))
-    if offset+32+length > len(output) {
-        return 0, 0, fmt.Errorf("abi: cannot marshal in to go type: length insufficient %d require %d", len(output), offset+32+length)
-    }
-    start = offset + 32
+	offset := int(binary.BigEndian.Uint64(output[index+24 : index+32]))
+	if offset+32 > len(output) {
+		return 0, 0, fmt.Errorf("abi: cannot marshal in to go slice: offset %d would go over slice boundary (len=%d)", len(output), offset+32)
+	}
+	length = int(binary.BigEndian.Uint64(output[offset+24 : offset+32]))
+	if offset+32+length > len(output) {
+		return 0, 0, fmt.Errorf("abi: cannot marshal in to go type: length insufficient %d require %d", len(output), offset+32+length)
+	}
+	start = offset + 32
 
-    return
+	return
 }
 
 // iteratively unpack elements
 func forEachUnpack(t abi.Type, output []byte, start, size int) (interface{}, error) {
-    if start+32*size > len(output) {
-        return nil, fmt.Errorf("abi: cannot marshal in to go array: offset %d would go over slice boundary (len=%d)", len(output), start+32*size)
-    }
+	if start+32*size > len(output) {
+		return nil, fmt.Errorf("abi: cannot marshal in to go array: offset %d would go over slice boundary (len=%d)", len(output), start+32*size)
+	}
 
-    // this value will become our slice or our array, depending on the type
-    var refSlice reflect.Value
-    slice := output[start : start+size*32]
+	// this value will become our slice or our array, depending on the type
+	var refSlice reflect.Value
+	slice := output[start : start+size*32]
 
-    if t.T == abi.SliceTy {
-        // declare our slice
-        refSlice = reflect.MakeSlice(t.Type, size, size)
-    } else if t.T == abi.ArrayTy {
-        // declare our array
-        refSlice = reflect.New(t.Type).Elem()
-    } else {
-        return nil, fmt.Errorf("abi: invalid type in array/slice unpacking stage")
-    }
+	if t.T == abi.SliceTy {
+		// declare our slice
+		refSlice = reflect.MakeSlice(t.Type, size, size)
+	} else if t.T == abi.ArrayTy {
+		// declare our array
+		refSlice = reflect.New(t.Type).Elem()
+	} else {
+		return nil, fmt.Errorf("abi: invalid type in array/slice unpacking stage")
+	}
 
-    for i, j := start, 0; j*32 < len(slice); i, j = i+32, j+1 {
-        // this corrects the arrangement so that we get all the underlying array values
-        if t.Elem.T == abi.ArrayTy && j != 0 {
-            i = start + t.Elem.Size*32*j
-        }
-        inter, err := toGoType(i, *t.Elem, output)
-        if err != nil {
-            return nil, err
-        }
-        // append the item to our reflect slice
-        refSlice.Index(j).Set(reflect.ValueOf(inter))
-    }
+	for i, j := start, 0; j*32 < len(slice); i, j = i+32, j+1 {
+		// this corrects the arrangement so that we get all the underlying array values
+		if t.Elem.T == abi.ArrayTy && j != 0 {
+			i = start + t.Elem.Size*32*j
+		}
+		inter, err := toGoType(i, *t.Elem, output)
+		if err != nil {
+			return nil, err
+		}
+		// append the item to our reflect slice
+		refSlice.Index(j).Set(reflect.ValueOf(inter))
+	}
 
-    // return the interface
-    return refSlice.Interface(), nil
+	// return the interface
+	return refSlice.Interface(), nil
 }
 
 func parseTopics(out JSONObj, fields abi.Arguments, topics []common.Hash) error {
-    // Sanity check that the fields and topics match up
-    if len(fields) != len(topics) {
-        return errors.New("topic/field count mismatch")
-    }
-    // Iterate over all the fields and reconstruct them from topics
-    for _, arg := range fields {
-        if !arg.Indexed {
-            return errors.New("non-indexed field in topic reconstruction")
-        }
-        name := arg.Name
-        // Try to parse the topic back into the fields based on primitive types
-        switch arg.Type.Kind {
-        case reflect.Bool:
-            if topics[0][common.HashLength-1] == 1 {
-                out.Set(name, true)
-            } else {
-                out.Set(name, false)
-            }
-        case reflect.Int8:
-            num := new(big.Int).SetBytes(topics[0][:])
-            out.Set(name, num.Int64())
+	// Sanity check that the fields and topics match up
+	if len(fields) != len(topics) {
+		return errors.New("topic/field count mismatch")
+	}
+	// Iterate over all the fields and reconstruct them from topics
+	for _, arg := range fields {
+		if !arg.Indexed {
+			return errors.New("non-indexed field in topic reconstruction")
+		}
+		name := arg.Name
+		// Try to parse the topic back into the fields based on primitive types
+		switch arg.Type.Kind {
+		case reflect.Bool:
+			if topics[0][common.HashLength-1] == 1 {
+				out.Set(name, true)
+			} else {
+				out.Set(name, false)
+			}
+		case reflect.Int8:
+			num := new(big.Int).SetBytes(topics[0][:])
+			out.Set(name, num.Int64())
 
-        case reflect.Int16:
-            num := new(big.Int).SetBytes(topics[0][:])
-            out.Set(name, num.Int64())
+		case reflect.Int16:
+			num := new(big.Int).SetBytes(topics[0][:])
+			out.Set(name, num.Int64())
 
-        case reflect.Int32:
-            num := new(big.Int).SetBytes(topics[0][:])
-            out.Set(name, num.Int64())
+		case reflect.Int32:
+			num := new(big.Int).SetBytes(topics[0][:])
+			out.Set(name, num.Int64())
 
-        case reflect.Int64:
-            num := new(big.Int).SetBytes(topics[0][:])
-            out.Set(name, num.Int64())
+		case reflect.Int64:
+			num := new(big.Int).SetBytes(topics[0][:])
+			out.Set(name, num.Int64())
 
-        case reflect.Uint8:
-            num := new(big.Int).SetBytes(topics[0][:])
-            out.Set(name, uint8(num.Int64()))
+		case reflect.Uint8:
+			num := new(big.Int).SetBytes(topics[0][:])
+			out.Set(name, uint8(num.Int64()))
 
-        case reflect.Uint16:
-            num := new(big.Int).SetBytes(topics[0][:])
-            out.Set(name, uint16(num.Int64()))
+		case reflect.Uint16:
+			num := new(big.Int).SetBytes(topics[0][:])
+			out.Set(name, uint16(num.Int64()))
 
-        case reflect.Uint32:
-            num := new(big.Int).SetBytes(topics[0][:])
-            out.Set(name, uint32(num.Int64()))
+		case reflect.Uint32:
+			num := new(big.Int).SetBytes(topics[0][:])
+			out.Set(name, uint32(num.Int64()))
 
-        case reflect.Uint64:
-            num := new(big.Int).SetBytes(topics[0][:])
-            out.Set(name, num.Uint64())
+		case reflect.Uint64:
+			num := new(big.Int).SetBytes(topics[0][:])
+			out.Set(name, num.Uint64())
 
-        default:
-            // Ran out of plain primitive types, try custom types
-            switch arg.Type.Type {
-            case reflectHash: // Also covers all dynamic types
-                out.Set(name, topics[0].Hex())
+		default:
+			// Ran out of plain primitive types, try custom types
+			switch arg.Type.Type {
+			case reflectHash: // Also covers all dynamic types
+				out.Set(name, topics[0].Hex())
 
-            case reflectAddress:
-                var addr common.Address
-                copy(addr[:], topics[0][common.HashLength-common.AddressLength:])
-                out.Set(name, addr.Hex())
+			case reflectAddress:
+				var addr common.Address
+				copy(addr[:], topics[0][common.HashLength-common.AddressLength:])
+				out.Set(name, addr.Hex())
 
-            case reflectBigInt:
-                num := new(big.Int).SetBytes(topics[0][:])
-                out.Set(name, num)
+			case reflectBigInt:
+				num := new(big.Int).SetBytes(topics[0][:])
+				out.Set(name, num)
 
-            default:
-                // Ran out of custom types, try the crazies
-                switch {
-                case arg.Type.T == abi.FixedBytesTy:
-                    out.Set(name, topics[0][common.HashLength-arg.Type.Size:])
+			default:
+				// Ran out of custom types, try the crazies
+				switch {
+				case arg.Type.T == abi.FixedBytesTy:
+					out.Set(name, topics[0][common.HashLength-arg.Type.Size:])
 
-                default:
-                    return fmt.Errorf("unsupported indexed type: %v", arg.Type)
-                }
-            }
-        }
-        topics = topics[1:]
-    }
-    return nil
+				default:
+					return fmt.Errorf("unsupported indexed type: %v", arg.Type)
+				}
+			}
+		}
+		topics = topics[1:]
+	}
+	return nil
 }
-
 
 type contractMap map[string]contractMeta
 
@@ -539,7 +536,6 @@ func (cm contractMap) GetMeta(addr common.Address) (contractMeta, bool) {
 	}
 	return meta, ok
 }
-
 
 type eventScanner struct {
 	conn          *ethclient.Client
@@ -647,13 +643,13 @@ func (es *eventScanner) scan(ctx *redo.RedoCtx) {
 }
 
 func unpackMatchedLog(out JSONObj, log types.Log, meta *contractMeta) (string, error) {
-    topic_hex := log.Topics[0].Hex()
-    for name, evt := range meta.abi.Events {
-        if evt.Id().Hex() == topic_hex {
-            return name, meta.UnpackLogToJson(out, name, log)
-        }
-    }
-    return "", errors.New("Can't find mathed event")
+	topic_hex := log.Topics[0].Hex()
+	for name, evt := range meta.abi.Events {
+		if evt.Id().Hex() == topic_hex {
+			return name, meta.UnpackLogToJson(out, name, log)
+		}
+	}
+	return "", errors.New("Can't find mathed event")
 }
 
 func bindContract(abi_str string, address common.Address, backend bind.ContractBackend) (*bind.BoundContract, *abi.ABI, error) {
