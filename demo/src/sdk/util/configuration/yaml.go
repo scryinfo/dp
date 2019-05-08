@@ -1,10 +1,10 @@
 package configuration
 
 import (
-    "github.com/go-yaml/yaml"
-    "io/ioutil"
-    "os"
-    "reflect"
+	"github.com/go-yaml/yaml"
+	"io/ioutil"
+	"os"
+	"reflect"
 )
 
 func GetYAMLStructure(fileAddr string, v interface{}) (interface{}, error) {
@@ -23,10 +23,9 @@ func GetYAMLStructure(fileAddr string, v interface{}) (interface{}, error) {
 	return conf, nil
 }
 
-
 /*
-    This function will delete items in .yaml file which not in structure.go,
-    so make sure items in structure.go is not less than in .yaml file.
+   This function will delete items in .yaml file which not in structure.go,
+   so make sure items in structure.go is not less than in .yaml file.
 */
 func SaveChanges(fileAddr string, conf interface{}) error {
 	err := writeFile(fileAddr, conf, os.O_TRUNC) //O_TRUNC param will rewrite the file

@@ -18,7 +18,7 @@ type WSServer struct {
 const ResourcesDir = "D:/EnglishRoad/workspace/Go/src/github.com/scryInfo/dp/services/binary_s/application/resources/app"
 
 var (
-	funcMap        = make(map[string]definition2.PresetFunc)
+	funcMap    = make(map[string]definition2.PresetFunc)
 	connParams *websocket.Conn
 	err        error
 )

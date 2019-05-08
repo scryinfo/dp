@@ -5,22 +5,19 @@ import (
 	"github.com/scryInfo/dp/dots/binary/sdk/scry"
 )
 
-
 var (
 	app Gapp
 )
 
 //todo 减少全局变量的个数
 type Gapp struct {
-	Client scry.Client
+	Client       scry.Client
 	ChainWrapper scry.ChainWrapper
-	CurUser  scry.Client
-	Deployer scry.Client
-	ScryInfo *settings.ScryInfo
+	CurUser      scry.Client
+	Deployer     scry.Client
+	ScryInfo     *settings.ScryInfo
 }
 
-func GetGapp() *Gapp  {
+func GetGapp() *Gapp {
 	return &app
 }
-
-

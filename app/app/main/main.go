@@ -17,12 +17,10 @@ import (
 	"path/filepath"
 )
 
-
-
-func main()  {
+func main() {
 	l, err := line.BuildAndStart(func(l dot.Line) error {
 		//todo
-		return Init()
+		return Init(l)
 	})
 
 	if err != nil {
@@ -37,12 +35,12 @@ func main()  {
 	line.StopAndDestroy(l, true)
 }
 
-func Init() error {
-	setFile, logFile := "","" //todo config
+func Init(l dot.Line) error {
+	setFile, logFile := "", "" //todo config
 	if ex, err := os.Executable(); err == nil {
 		exPath := filepath.Dir(ex)
 		setFile = filepath.Join(exPath, "definition.yaml")
-		logFile = filepath.Join(exPath,"log.log")
+		logFile = filepath.Join(exPath, "log.log")
 	}
 
 	scryInfo, err := settings2.LoadSettings(setFile)
@@ -56,10 +54,12 @@ func Init() error {
 		scryInfo.Chain.Contracts.ProtocolAddr,
 		scryInfo.Chain.Contracts.TokenAddr,
 		scryInfo.Services.Ipfs,
-		logFile,"App demo",
+		logFile, "App demo",
 	)
+	l.ToInjecter().ReplaceOrAddByType(app.GetGapp().ChainWrapper)
+
 	sdkinterface2.SetScryInfo(scryInfo)
-	if err = WSConnect2.WebsocketConnect(scryInfo.Services.Wsport); err != nil {
+	if err = WSConnect2.WebsocketConnect(scryInfo.Services.Wsport); err != nil { //todo do not block
 		rlog.Error(errors.Wrap(err, "WebSocket Connect failed. "))
 	}
 	return err

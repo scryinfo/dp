@@ -18,9 +18,8 @@ package sdkinterface
 
 import (
 	"fmt"
-	"github.com/scryInfo/dp/app/app"
-	settings2 "github.com/scryInfo/dp/app/app/settings"
-	sdk2 "github.com/scryInfo/dp/dots/binary/sdk"
+	"github.com/scryInfo/dp/app/app/settings"
+	"github.com/scryInfo/dp/dots/binary/sdk"
 	events2 "github.com/scryInfo/dp/dots/binary/sdk/core/ethereum/events"
 	"math/big"
 	"testing"
@@ -51,8 +50,8 @@ var (
 )
 
 func initialize() error {
-	scryInfo, err := settings2.LoadSettings()
-	err = sdk2.Init(scryInfo.Chain.Ethereum.EthNode,
+	scryInfo, err := settings.LoadSettings()
+	err = sdk.Init(scryInfo.Chain.Ethereum.EthNode,
 		scryInfo.Services.Keystore,
 		scryInfo.Chain.Contracts.ProtocolAddr,
 		scryInfo.Chain.Contracts.TokenAddr,

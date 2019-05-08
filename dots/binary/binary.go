@@ -3,9 +3,7 @@ package binary
 import "github.com/scryInfo/dot/dot"
 
 type Binary struct {
-
 }
-
 
 func NewBinary() *Binary {
 	return &Binary{}
@@ -26,5 +24,3 @@ func (c *Binary) Stop(ignore bool) error {
 func (c *Binary) Destroy(ignore bool) error {
 	return nil
 }
-
-

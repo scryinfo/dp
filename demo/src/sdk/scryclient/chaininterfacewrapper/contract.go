@@ -53,7 +53,7 @@ func Publish(txParams *op.TransactParams, price *big.Int, metaDataID []byte, pro
 
 	pdIDs := make([][32]byte, proofNum)
 	var err error = nil
-	for i := 0;i < proofNum;i++ {
+	for i := 0; i < proofNum; i++ {
 		pdIDs[i], err = ipfsHashToBytes32(proofDataIDs[i])
 		if err != nil {
 			rlog.Error("failed to convert ipfs hash to bytes32")
@@ -93,14 +93,14 @@ func ipfsHashToBytes32(src string) ([32]byte, error) {
 }
 
 func Bytes32ToIpfsHash(value [32]byte) (string, error) {
-    byteArray := [34]byte {18, 32}
-    copy(byteArray[2:], value[:])
-    if len(byteArray) != 34 {
-        return "", errors.New("invalid bytes32 value")
-    }
+	byteArray := [34]byte{18, 32}
+	copy(byteArray[2:], value[:])
+	if len(byteArray) != 34 {
+		return "", errors.New("invalid bytes32 value")
+	}
 
-    hash := base58.Encode(byteArray[:])
-    return hash, nil
+	hash := base58.Encode(byteArray[:])
+	return hash, nil
 }
 
 func PrepareToBuy(txParams *op.TransactParams, publishId string, startVerify bool) error {
@@ -112,7 +112,7 @@ func PrepareToBuy(txParams *op.TransactParams, publishId string, startVerify boo
 
 	tx, err := scryProtocol.CreateTransaction(op.BuildTransactOpts(txParams), getAppSeqNo(), publishId, startVerify)
 	if err == nil {
-		rlog.Debug("CreateTransaction:" + string(tx.Data()), " tx hash:", tx.Hash().String())
+		rlog.Debug("CreateTransaction:"+string(tx.Data()), " tx hash:", tx.Hash().String())
 	}
 
 	return err
@@ -216,5 +216,5 @@ func GetEthBalance(owner common.Address) (*big.Int, error) {
 }
 
 func getAppSeqNo() string {
-    return settings.GetAppId()
+	return settings.GetAppId()
 }

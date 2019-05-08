@@ -1,6 +1,5 @@
 package define
 
-
 type Conf struct {
 	Person    `yaml:"Person"`
 	Contact   `yaml:"Contact"`

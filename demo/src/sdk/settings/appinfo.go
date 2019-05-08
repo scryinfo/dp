@@ -1,29 +1,28 @@
 package settings
 
 import (
-    "github.com/scryInfo/dp/demo/src/sdk/util/uuid"
-    "os"
+	"github.com/scryInfo/dp/demo/src/sdk/util/uuid"
+	"os"
 )
 
 var (
-    appId = "Scry-App-" + uuid.GenerateUUID()
-    logDir, _ = os.Getwd()
-    logPath = logDir + "scry_sdk.log"
+	appId     = "Scry-App-" + uuid.GenerateUUID()
+	logDir, _ = os.Getwd()
+	logPath   = logDir + "scry_sdk.log"
 )
 
-func SetAppId(v string)  {
-    appId = v
+func SetAppId(v string) {
+	appId = v
 }
 
 func GetAppId() string {
-    return appId
+	return appId
 }
 
-func SetLogPath(d string)  {
-    logPath = d
+func SetLogPath(d string) {
+	logPath = d
 }
 
 func GetLogPath() string {
-    return logPath
+	return logPath
 }
-
