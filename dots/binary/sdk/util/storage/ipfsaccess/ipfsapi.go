@@ -8,7 +8,6 @@ import (
 	"sync"
 )
 
-var IPFSOutDir = "D:/desktop"
 var ipaccessor *IpfsAccessor = nil
 var once sync.Once
 
@@ -44,10 +43,10 @@ func (ia *IpfsAccessor) SaveToIPFS(content []byte) (string, error) {
 	return ia.sh.Add(strings.NewReader(string(content)))
 }
 
-func (ia *IpfsAccessor) GetFromIPFS(hash string) error {
+func (ia *IpfsAccessor) GetFromIPFS(hash string, outDir string) error {
 	if ia.sh == nil {
 		return errors.New("Get from IPFS failed, IPFS-api shell is nil. ")
 	}
 
-	return ia.sh.Get(hash, IPFSOutDir)
+	return ia.sh.Get(hash, outDir)
 }

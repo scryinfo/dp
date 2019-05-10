@@ -14,8 +14,12 @@
             </el-dialog>
         </div>
         <div v-if="showControl">
-            <el-col :span="24" class="section-item">
-                <el-button size="mini" type="primary" @click="VoteDialog = true">验证数据</el-button></el-col>
+            <el-col :span="20" class="section-item">
+                <el-button size="mini" type="primary" @click="VoteDialog = true">验证数据</el-button>
+            </el-col>
+            <el-col :span="4" class="section-item">
+                <el-button size="mini" type="primary" @click="initTxV">刷新列表</el-button>
+            </el-col>
             <el-table :data="this.$store.state.transactionverifier.slice((curPage-1)*pageSize, curPage*pageSize)"
                       highlight-current-row border :height=height @current-change="currentChange">
                 <el-table-column prop="Title" label="标题" show-overflow-tooltip></el-table-column>
@@ -52,8 +56,8 @@
 </template>
 
 <script>
-import {acc_db} from "../../DBoptions";
 import {utils} from "../../utils";
+import {acc_db, txVerifier_db} from "../../DBoptions";
 export default {
     name: "Verify.vue",
     data () {
@@ -89,6 +93,9 @@ export default {
                 type: "info",
                 message: "取消" + str
             });
+        },
+        initTxV: function () {
+            txVerifier_db.init(this);
         },
         refresh: function () {
             let _this = this;

@@ -1,11 +1,14 @@
 <template>
     <section>
-        <el-col :span="24" class="section-item">
+        <el-col :span="20" class="section-item">
             <el-button size="mini" type="danger" @click="cancelDialog = true">取消交易</el-button>
             <el-button size="mini" type="primary" @click="purchaseDialog = true">购买数据</el-button>
             <el-button size="mini" type="primary" @click="decryptDialog = true">解密数据</el-button>
             <el-button size="mini" type="primary" @click="confirmPre">确认数据</el-button>
             <el-button size="mini" type="primary" @click="creditPre">评价验证者</el-button>
+        </el-col>
+        <el-col :span="4" class="section-item">
+            <el-button size="mini" type="primary" @click="initTxB">刷新列表</el-button>
         </el-col>
 
         <el-table :data="this.$store.state.transactionbuy.slice((curPage-1)*pageSize, curPage*pageSize)"
@@ -95,6 +98,7 @@
 
 <script>
 import {utils} from "../../utils";
+import {txBuyer_db} from "../../DBoptions"
 export default {
     name: "TransactionBuy",
     data () {
@@ -128,6 +132,7 @@ export default {
             this.selectedTx = {
                 TransactionID: curRow.TransactionID,
                 User: curRow.Buyer,
+                Price: curRow.Price,
                 MetaDataIDEncrypt: curRow.MetaDataIDEncWithBuyer,
                 MetaDataExtension: curRow.MetaDataExtension,
                 SupportVerify: curRow.SupportVerify,
@@ -151,13 +156,16 @@ export default {
                 message: "取消" + str
             });
         },
+        initTxB: function () {
+            txBuyer_db.init(this);
+        },
         cancelBuying: function () {
             this.cancelDialog = false;
             let pwd = this.password;
             this.password = "";
             utils.send({Name:"cancel", Payload:{password: pwd, tID: this.selectedTx}});
             utils.addCallbackFunc("cancel.callback", function (payload, _this) {
-                console.log("取消交易成功");
+                console.log("取消交易成功", payload);
             });
             utils.addCallbackFunc("cancel.callback.error", function (payload, _this) {
                 console.log("取消交易失败：", payload);
@@ -174,7 +182,7 @@ export default {
             this.password = "";
             utils.send({Name:"purchase", Payload:{password: pwd, tID: this.selectedTx}});
             utils.addCallbackFunc("purchase.callback", function (payload, _this) {
-                console.log("购买数据成功");
+                console.log("购买数据成功", payload);
             });
             utils.addCallbackFunc("purchase.callback.error", function (payload, _this) {
                 console.log("购买数据失败：", payload);
@@ -252,7 +260,7 @@ export default {
             utils.addCallbackFunc("credit.callback", function (payload, _this) {
                 _this.verifier1Revert = false;
                 _this.verifier2Revert = false;
-                console.log("评价验证者成功");
+                console.log("评价验证者成功", payload);
             });
             utils.addCallbackFunc("credit.callback.error", function (payload, _this) {
                 console.log("评价验证者失败：", payload);
