@@ -1,7 +1,10 @@
 <template>
     <section>
-        <el-col :span="24" class="section-item">
+        <el-col :span="20" class="section-item">
             <el-button size="mini" type="primary" @click="reEncryptDialog = true" >再加密数据</el-button>
+        </el-col>
+        <el-col :span="4" class="section-item">
+            <el-button size="mini" type="primary" @click="initTxS">刷新列表</el-button>
         </el-col>
 
         <el-table :data="this.$store.state.transactionsell.slice((curPage-1)*pageSize, curPage*pageSize)"
@@ -35,6 +38,7 @@
 
 <script>
 import {utils} from "../../utils";
+import {txSeller_db} from "../../DBoptions";
 export default {
     name: "TransactionSell",
     data () {
@@ -66,6 +70,9 @@ export default {
                 type: "info",
                 message: "取消再加密数据"
             });
+        },
+        initTxS: function () {
+            txSeller_db.init(this);
         },
         reEncrypt:function () {
             this.reEncryptDialog = false;

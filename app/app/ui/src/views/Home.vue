@@ -83,8 +83,8 @@ export default {
     created() {
         this.acc = this.$route.params.acc;
         this.$store.state.account = this.$route.params.acc;
-        db_options.utilsDBInit(this);
         utils.init();
+        db_options.utilsDBInit(this);
         db_options.userDBInit(this.$route.params.acc);
         acc_db.read(this.$route.params.acc, function (accinstance) {
             utils.send({Name:"block.set", Payload: {fromBlock: accinstance.fromBlock}});

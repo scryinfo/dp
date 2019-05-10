@@ -21,7 +21,10 @@ type chainWrapperImp struct {
 	scryToken    *contract.ScryToken
 }
 
-func NewChainWrapper(protocolContractAddress common.Address, tokenContractAddress common.Address, clientConn *ethclient.Client) (ChainWrapper, error) {
+func NewChainWrapper(protocolContractAddress common.Address,
+	tokenContractAddress common.Address,
+	clientConn *ethclient.Client,
+) (ChainWrapper, error) {
 	var err error = nil
 	c := &chainWrapperImp{}
 
@@ -42,8 +45,8 @@ func NewChainWrapper(protocolContractAddress common.Address, tokenContractAddres
 	return c, err
 }
 
-func (c *chainWrapperImp) Publish(txParams *chainoperations.TransactParams, price *big.Int, metaDataID []byte, proofDataIDs []string,
-	proofNum int, detailsID string, supportVerify bool) (string, error) {
+func (c *chainWrapperImp) Publish(txParams *chainoperations.TransactParams, price *big.Int, metaDataID []byte,
+	proofDataIDs []string, proofNum int, detailsID string, supportVerify bool) (string, error) {
 	defer func() {
 		if err := recover(); err != nil {
 			rlog.Error("failed to publish data, error:", err)

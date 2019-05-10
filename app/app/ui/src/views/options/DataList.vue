@@ -1,7 +1,10 @@
 <template>
     <section>
-        <el-col :span="24" class="section-item">
+        <el-col :span="20" class="section-item">
             <el-button size="mini" type="primary" @click="buyDialog = true">预购买</el-button>
+        </el-col>
+        <el-col :span="4" class="section-item">
+            <el-button size="mini" type="primary" @click="initDL">刷新列表</el-button>
         </el-col>
 
         <el-table :data="this.$store.state.datalist.slice((curPage-1)*pageSize, curPage*pageSize)"
@@ -41,11 +44,12 @@
 
 <script>
 import {utils} from "../../utils";
+import {dl_db} from "../../DBoptions";
 export default {
     name: "DataList",
     data () {
         return {
-            selectedData: {},    // {pID: "", SupportVerify: false}
+            selectedData: {},    // {pID: "", SupportVerify: false, Price: 0}
             curPage: 1,
             pageSize: 6,
             total: 0,
@@ -62,7 +66,8 @@ export default {
         currentChange: function (curRow) {
             this.selectedData = {
                 PublishID: curRow.PublishID,
-                SupportVerify: curRow.SupportVerify
+                SupportVerify: curRow.SupportVerify,
+                Price: curRow.Price
             };
         },
         cancelClickFunc: function (dialogName) {
@@ -75,6 +80,9 @@ export default {
                 message: "取消预购买"
             });
         },
+        initDL: function () {
+            dl_db.init(this);
+        },
         buy: function () {
             this.buyDialog = false;
             this.buyDialog2 = false;
@@ -84,7 +92,7 @@ export default {
             this.startVerify = false;
             utils.send({Name:"buy",Payload:{password: pwd, startVerify: sv, pID: this.selectedData}});
             utils.addCallbackFunc("buy.callback", function (payload, _this) {
-                console.log("预购买成功");
+                console.log("预购买成功", payload);
             });
             utils.addCallbackFunc("buy.callback.error", function (payload, _this) {
                 console.log("预购买失败：", payload);

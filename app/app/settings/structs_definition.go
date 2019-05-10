@@ -1,4 +1,4 @@
-package definition
+package settings
 
 import "encoding/json"
 
@@ -14,6 +14,7 @@ type MessageOut struct {
 
 type PresetFunc = func(*MessageIn) (interface{}, error)
 
+// todo: some structs have same item, will "list all simple items and pick them up to make a struct" be a good idea?
 type AccInfo struct {
 	Account  string `json:"account"`
 	Password string `json:"password"`
@@ -54,7 +55,8 @@ type BuyData struct {
 	SelectedData SelectedData `json:"pID"`
 }
 type SelectedData struct {
-	PublishID string `json:"PublishID"`
+	PublishID string  `json:"PublishID"`
+	Price     float64 `json:"Price"`
 }
 
 type OnApprove struct {

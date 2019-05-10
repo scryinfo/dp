@@ -17,7 +17,7 @@ type clientImp struct {
 
 func NewScryClient(publicKey string, chainWrapper ChainWrapper) Client {
 	return &clientImp{
-		account:      &accounts.Account{publicKey},
+		account:      &accounts.Account{Address: publicKey},
 		chainWrapper: chainWrapper,
 	}
 }
