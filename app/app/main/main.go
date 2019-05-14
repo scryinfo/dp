@@ -12,6 +12,7 @@ import (
 	sdk2 "github.com/scryInfo/dp/dots/binary/sdk"
 	"github.com/scryInfo/scryg/sutils/ssignal"
 	rlog "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 	"os"
 )
 
@@ -34,6 +35,7 @@ func main() {
 }
 
 func Init(l dot.Line) error {
+	logger := dot.Logger()
 	var err error = nil
 	conf := & settings2.ScryInfo{}
 	l.SConfig().UnmarshalKey("app", conf)
@@ -45,12 +47,14 @@ func Init(l dot.Line) error {
 		conf.Chain.Contracts.TokenAddr,
 		conf.Services.Keystore,
 		conf.Services.Ipfs,
-		conf.Config.LogPath,
 		conf.Config.AppId,
 	)
+	if err != nil {
+		logger.Errorln("", zap.Any("", err))
+	}
 	l.ToInjecter().ReplaceOrAddByType(app.GetGapp().ChainWrapper)
 
-	l.SLogger().Infoln("inited ChainWrapper")
+	logger.Infoln("inited ChainWrapper")
 
 	WSConnect2.SetCurUser(sdkinterface.NewSDKWrapperImp())
 	WSConnect2.MessageHandlerInit()
