@@ -28,7 +28,6 @@ type Services struct {
 type Config struct {
 	WSPort         string `yaml:"wsPort",json:"wsPort"`
 	UIResourcesDir string `yaml:"uiResourcesDir",json:"uiResourcesDir"`
-	LogPath        string `yaml:"logPath",json:"logPath"`
 	AppId          string `yaml:"appId",json:"appId"`
 	IPFSOutDir     string `yaml:"ipfsOutDir",json:"ipfsOutDir"`
 }

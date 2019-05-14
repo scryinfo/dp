@@ -1,15 +1,12 @@
 package sdk
 
 import (
-	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/scryInfo/dp/dots/binary/sdk/core"
 	"github.com/scryInfo/dp/dots/binary/sdk/core/chainevents"
 	"github.com/scryInfo/dp/dots/binary/sdk/scry"
 	"github.com/scryInfo/dp/dots/binary/sdk/settings"
-	rlog "github.com/sirupsen/logrus"
-	"os"
 )
 
 const (
@@ -601,16 +598,9 @@ func Init(
 	tokenAddr string,
 	keyServiceAddr string,
 	ipfsNodeAddr string,
-	logPath string,
 	appId string,
 ) (scry.ChainWrapper, error) {
 	settings.SetAppId(appId)
-	settings.SetLogPath(logPath)
-
-	if err := initLog(); err != nil {
-		fmt.Println(initSdkFailed, err)
-		return nil, err
-	}
 
 	contracts := getContracts(protocolAddr, tokenAddr)
 	conn, err := core.StartEngine(
@@ -619,7 +609,6 @@ func Init(
 		contracts,
 		ipfsNodeAddr)
 	if err != nil {
-		rlog.Error(startEngineFailed, err)
 		return nil, errors.New(startEngineFailed)
 	}
 
@@ -629,7 +618,6 @@ func Init(
 		common.HexToAddress(contracts[1].Address),
 		conn)
 	if err != nil {
-		rlog.Error(initContractWrapperFailed, err)
 		return nil, errors.New(initContractWrapperFailed)
 	}
 
@@ -665,21 +653,6 @@ func getContracts(
 	}
 
 	return contracts
-}
-
-func initLog() error {
-	filePath := settings.GetLogPath()
-	f, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		fmt.Println(loadPathFailed, err)
-		return err
-	}
-
-	rlog.SetFormatter(&rlog.TextFormatter{})
-	rlog.SetOutput(f)
-	rlog.SetLevel(rlog.DebugLevel)
-
-	return nil
 }
 
 func StartScan(fromBlock uint64) {
