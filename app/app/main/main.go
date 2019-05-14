@@ -34,29 +34,28 @@ func main() {
 }
 
 func Init(l dot.Line) error {
-	dir, _ := os.Getwd() // todo: is it necessary to handle error here? read origin code choose a time.
-	scryInfo, err := settings2.LoadSettings(dir + "/config.yaml")
-	if err != nil {
-		return err
-	}
-
-	app.GetGapp().ScryInfo = scryInfo
+	var err error = nil
+	conf := & settings2.ScryInfo{}
+	l.SConfig().UnmarshalKey("app", conf)
+	app.GetGapp().ScryInfo = conf
 	//todo
 	app.GetGapp().ChainWrapper, err = sdk2.Init(
-		scryInfo.Chain.Ethereum.EthNode,
-		scryInfo.Chain.Contracts.ProtocolAddr,
-		scryInfo.Chain.Contracts.TokenAddr,
-		scryInfo.Services.Keystore,
-		scryInfo.Services.Ipfs,
-		scryInfo.Config.LogPath,
-		scryInfo.Config.AppId,
+		conf.Chain.Ethereum.EthNode,
+		conf.Chain.Contracts.ProtocolAddr,
+		conf.Chain.Contracts.TokenAddr,
+		conf.Services.Keystore,
+		conf.Services.Ipfs,
+		conf.Config.LogPath,
+		conf.Config.AppId,
 	)
 	l.ToInjecter().ReplaceOrAddByType(app.GetGapp().ChainWrapper)
+
+	l.SLogger().Infoln("inited ChainWrapper")
 
 	WSConnect2.SetCurUser(sdkinterface.NewSDKWrapperImp())
 	WSConnect2.MessageHandlerInit()
 
-	if err = WSConnect2.ConnectWithProtocolWebsocket(scryInfo.Config.WSPort); err != nil { //todo do not block
+	if err = WSConnect2.ConnectWithProtocolWebsocket(conf.Config.WSPort); err != nil { //todo do not block
 		rlog.Error(errors.Wrap(err, "WebSocket Connect failed. "))
 	}
 

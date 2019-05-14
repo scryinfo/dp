@@ -6,36 +6,36 @@ import (
 )
 
 type ScryInfo struct {
-	Chain    Chain    `yaml:"chain"`
-	Services Services `yaml:"services"`
-	Config   Config   `yaml:"config"`
+	Chain    Chain    `yaml:"chain",json:"chain"`
+	Services Services `yaml:"services",json:"services"`
+	Config   Config   `yaml:"config",json:"config"`
 }
 
 type Chain struct {
-	Contracts Contracts `yaml:"contracts"`
-	Ethereum  Ethereum  `yaml:"ethereum"`
+	Contracts Contracts `yaml:"contracts",json:"contracts"`
+	Ethereum  Ethereum  `yaml:"ethereum",json:"ethereum"`
 }
 type Contracts struct {
-	TokenAddr        string `yaml:"token_contract_addr"`
-	ProtocolAddr     string `yaml:"protocol_contract_addr"`
-	DeployerKeyJson  string `yaml:"deployer_keyjson"`
-	DeployerPassword string `yaml:"deployer_password"`
+	TokenAddr        string `yaml:"token_contract_addr",json:"tokenAddr"`
+	ProtocolAddr     string `yaml:"protocol_contract_addr",json:"protocolAddr"`
+	DeployerKeyJson  string `yaml:"deployer_keyjson",json:"deployerKeyJson"`
+	DeployerPassword string `yaml:"deployer_password",json:"deployerPassword"`
 }
 type Ethereum struct {
-	EthNode string `yaml:"node"`
+	EthNode string `yaml:"node",json:"ethNode"`
 }
 
 type Services struct {
-	Ipfs     string `yaml:"ipfs"`
-	Keystore string `yaml:"keystore"`
+	Ipfs     string `yaml:"ipfs",json:"ipfs"`
+	Keystore string `yaml:"keystore",json:"keystore"`
 }
 
 type Config struct {
-	WSPort         string `yaml:"websocket_port"`
-	UIResourcesDir string `yaml:"ui_resources_dir"`
-	LogPath        string `yaml:"log_path"`
-	AppId          string `yaml:"app_id"`
-	IPFSOutDir     string `yaml:"ipfs_out_dir"`
+	WSPort         string `yaml:"websocket_port",json:"wsPort"`
+	UIResourcesDir string `yaml:"ui_resources_dir",json:"uiResourcesDir"`
+	LogPath        string `yaml:"log_path",json:"logPath"`
+	AppId          string `yaml:"app_id",json:"appId"`
+	IPFSOutDir     string `yaml:"ipfs_out_dir",json:"ipfsOutDir"`
 }
 
 func LoadSettings(setfile string) (*ScryInfo, error) {
