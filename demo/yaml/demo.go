@@ -1,20 +1,20 @@
 package main
 
 import (
-	"github.com/scryInfo/dp/demo"
-	configuration2 "github.com/scryInfo/dp/dots/binary/sdk/util/config_yaml"
+	"github.com/scryInfo/dp/demo/src/sdk/util/configuration"
+	"github.com/scryInfo/dp/demo/yaml/define"
 	rlog "github.com/sirupsen/logrus"
 )
 
 //modify the directory before you run this demo.
 func main() {
-	rv, err := configuration2.GetYAMLStructure("./test/test.yaml", &demo.Conf{})
+	rv, err := configuration.GetYAMLStructure("./test/test.yaml", &define.Conf{})
 	if err != nil {
 		rlog.Println(err)
 		return
 	}
 
-	conf, ok := rv.(*demo.Conf)
+	conf, ok := rv.(*define.Conf)
 	if !ok {
 		rlog.Error("failed to get yaml structure")
 		return
@@ -24,7 +24,7 @@ func main() {
 
 	conf.Contact.EMail = []string{"982200000@qq.com", "mat00000000@foxmail.com", "new e-mail."}
 	conf.ForeignLanguage = []string{"CET-4", "no others."}
-	err = configuration2.SaveChanges("./test/test.yaml", conf)
+	err = configuration.SaveChanges("./test/test.yaml", conf)
 	if err != nil {
 		rlog.Println(err)
 		return

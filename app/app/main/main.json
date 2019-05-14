@@ -1,6 +1,6 @@
 {
   "log": {
-    "file": "log.l",
+    "file": "log.log",
     "level": "debug"
   },
   "dots": [],
