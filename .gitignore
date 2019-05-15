@@ -45,3 +45,4 @@ Thumbs.db
 ####################
 nohup.out
 /services/binary_s/main/main.exe
+/go.sum
