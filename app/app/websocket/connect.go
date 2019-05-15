@@ -49,7 +49,7 @@ func (ws *WSServer) start() error {
 	return nil
 }
 func bindHTMLFile(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r,  app.GetGapp().ScryInfo.Config.UIResourcesDir+ "/index.html")
+	http.ServeFile(w, r, app.GetGapp().ScryInfo.Config.UIResourcesDir+"/index.html")
 }
 
 func (ws *WSServer) handleMessages(conn *websocket.Conn) {
@@ -100,7 +100,7 @@ func sendMessage(name string, payload interface{}) (err error) {
 	var b []byte
 
 	mo := settings2.MessageOut{
-		Name: name,
+		Name:    name,
 		Payload: payload,
 	}
 	if b, err = json.Marshal(mo); err != nil {

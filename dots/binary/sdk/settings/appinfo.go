@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	appId     = "Scry-App-" + util.GenerateUUID()
+	appId = "Scry-App-" + util.GenerateUUID()
 )
 
 func SetAppId(v string) {

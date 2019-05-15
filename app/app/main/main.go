@@ -37,7 +37,7 @@ func main() {
 func Init(l dot.Line) error {
 	logger := dot.Logger()
 	var err error = nil
-	conf := & settings2.ScryInfo{}
+	conf := &settings2.ScryInfo{}
 	l.SConfig().UnmarshalKey("app", conf)
 	app.GetGapp().ScryInfo = conf
 	//todo

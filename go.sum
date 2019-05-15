@@ -138,8 +138,8 @@ github.com/rjeczalik/notify v0.9.2 h1:MiTWrPj55mNDHEiIX5YUSKefw/+lCQVoAFmD6oQm5w
 github.com/rjeczalik/notify v0.9.2/go.mod h1:aErll2f0sUX9PXZnVNyeiObbmTlk5jnMoCa4QEjJeqM=
 github.com/rs/cors v1.6.0 h1:G9tHG9lebljV9mfp9SNPDL36nCDxmo3zTlAf1YgvzmI=
 github.com/rs/cors v1.6.0/go.mod h1:gFx+x8UowdsKA9AchylcLynDq+nNFfI8FkUZdN/jGCU=
-github.com/scryInfo/dot v0.1.1-0.20190514095433-109208c745ea h1:5N6c5WbJv5Lsv5uqBwXFNKX5gM7joovwDxNTIb9Pmxs=
-github.com/scryInfo/dot v0.1.1-0.20190514095433-109208c745ea/go.mod h1:t4lg1y4VkIpQEn3soDVibyi7lX7by63JaEjBpIt1dAs=
+github.com/scryInfo/dot v0.1.1-0.20190515004649-e00fc9f45e97 h1:Xptt64yNtUtZOOwCWCqFdvrT7VFwLRII5BTlxxxMYF8=
+github.com/scryInfo/dot v0.1.1-0.20190515004649-e00fc9f45e97/go.mod h1:t4lg1y4VkIpQEn3soDVibyi7lX7by63JaEjBpIt1dAs=
 github.com/scryInfo/scryg v0.0.0-20190424065940-c5b292c361d7/go.mod h1:fue3qHHPgkF7i439bSQZXd3rRvb705NTVDB8RNkuBwE=
 github.com/scryInfo/scryg v0.0.0-20190513112006-5b8e0a70fd09 h1:yRONrWqpZ7kfBNX60tZK9jS5VyRpjr+fsvNrfKzQ14w=
 github.com/scryInfo/scryg v0.0.0-20190513112006-5b8e0a70fd09/go.mod h1:fue3qHHPgkF7i439bSQZXd3rRvb705NTVDB8RNkuBwE=

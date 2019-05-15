@@ -118,7 +118,7 @@ func onTransactionCreate(event events2.Event) bool {
 		var (
 			otc        settings2.OnTransactionCreate
 			extensions []string
-			err error
+			err        error
 		)
 		otc.PublishID = event.Data.Get("publishId").(string)
 		if err = sendMessage("onProofFilesExtensions", otc.PublishID); err != nil {
@@ -259,7 +259,7 @@ func onRegisterAsVerifier(event events2.Event) bool {
 
 func onVote(event events2.Event) bool {
 	go func() {
-		var ov      settings2.OnVote
+		var ov settings2.OnVote
 
 		ov.Block = event.BlockNumber
 		ov.VerifierIndex = strconv.Itoa(int(event.Data.Get("index").(uint8)))
