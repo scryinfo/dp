@@ -71,10 +71,10 @@ func (swi *sdkWrapperImp) TransferTokenFromDeployer(token *big.Int) error {
 	}
 
 	txParam := chainoperations2.TransactParams{
-		From: common.HexToAddress(app.GetGapp().Deployer.Account().Address),
+		From:     common.HexToAddress(app.GetGapp().Deployer.Account().Address),
 		Password: app.GetGapp().ScryInfo.Chain.Contracts.DeployerPassword,
-		Value: big.NewInt(0),
-		Pending: false}
+		Value:    big.NewInt(0),
+		Pending:  false}
 	if err = app.GetGapp().ChainWrapper.TransferTokens(&txParam, common.HexToAddress(swi.CurUser.Account().Address), token); err != nil {
 		return errors.Wrap(err, "Transfer token from deployer failed. ")
 	}
@@ -127,10 +127,10 @@ func (swi *sdkWrapperImp) PublishData(data *settings2.PublishData) (string, erro
 	}
 
 	txParam := chainoperations2.TransactParams{
-		From: common.HexToAddress(swi.CurUser.Account().Address),
+		From:     common.HexToAddress(swi.CurUser.Account().Address),
 		Password: data.Password,
-		Value: big.NewInt(0),
-		Pending: false}
+		Value:    big.NewInt(0),
+		Pending:  false}
 
 	return app.GetGapp().ChainWrapper.Publish(&txParam,
 		big.NewInt(int64(data.Price)),
@@ -152,10 +152,10 @@ func (swi *sdkWrapperImp) approveTransfer(password string, protocolContractAddr 
 	}
 
 	txParam := chainoperations2.TransactParams{
-		From: common.HexToAddress(swi.CurUser.Account().Address),
+		From:     common.HexToAddress(swi.CurUser.Account().Address),
 		Password: password,
-		Value: big.NewInt(0),
-		Pending: false}
+		Value:    big.NewInt(0),
+		Pending:  false}
 	if err := app.GetGapp().ChainWrapper.ApproveTransfer(&txParam, protocolContractAddr, token); err != nil {
 		return errors.Wrap(err, "Contract transfer token from buyer failed. ")
 	}
@@ -169,10 +169,10 @@ func (swi *sdkWrapperImp) CreateTransaction(publishId string, password string, s
 	}
 
 	txParam := chainoperations2.TransactParams{
-		From: common.HexToAddress(swi.CurUser.Account().Address),
+		From:     common.HexToAddress(swi.CurUser.Account().Address),
 		Password: password,
-		Value: big.NewInt(0),
-		Pending: false}
+		Value:    big.NewInt(0),
+		Pending:  false}
 	if err := app.GetGapp().ChainWrapper.PrepareToBuy(&txParam, publishId, startVerify); err != nil {
 		return errors.Wrap(err, "Transaction create failed. ")
 	}
@@ -191,10 +191,10 @@ func (swi *sdkWrapperImp) Buy(txId string, password string) error {
 	}
 
 	txParam := chainoperations2.TransactParams{
-		From: common.HexToAddress(swi.CurUser.Account().Address),
+		From:     common.HexToAddress(swi.CurUser.Account().Address),
 		Password: password,
-		Value: big.NewInt(0),
-		Pending: false}
+		Value:    big.NewInt(0),
+		Pending:  false}
 	if err := app.GetGapp().ChainWrapper.BuyData(&txParam, tID); err != nil {
 		return errors.Wrap(err, "Buy data failed. ")
 	}
@@ -214,10 +214,10 @@ func (swi *sdkWrapperImp) SubmitMetaDataIdEncWithBuyer(txId string, password, se
 	}
 
 	txParam := chainoperations2.TransactParams{
-		From: common.HexToAddress(swi.CurUser.Account().Address),
+		From:     common.HexToAddress(swi.CurUser.Account().Address),
 		Password: password,
-		Value: big.NewInt(0),
-		Pending: false}
+		Value:    big.NewInt(0),
+		Pending:  false}
 	if err := app.GetGapp().ChainWrapper.SubmitMetaDataIdEncWithBuyer(&txParam, tID, metaDataIdEncWithBuyer); err != nil {
 		return errors.Wrap(err, "Submit encrypted ID with buyer failed. ")
 	}
@@ -232,10 +232,10 @@ func (swi *sdkWrapperImp) CancelTransaction(txId, password string) error {
 	}
 
 	txParam := chainoperations2.TransactParams{
-		From: common.HexToAddress(swi.CurUser.Account().Address),
+		From:     common.HexToAddress(swi.CurUser.Account().Address),
 		Password: password,
-		Value: big.NewInt(0),
-		Pending: false}
+		Value:    big.NewInt(0),
+		Pending:  false}
 	if err := app.GetGapp().ChainWrapper.CancelTransaction(&txParam, tID); err != nil {
 		return errors.Wrap(err, "Cancel transaction failed. ")
 	}
@@ -276,10 +276,10 @@ func (swi *sdkWrapperImp) ConfirmDataTruth(txId string, password string, truth b
 	}
 
 	txParam := chainoperations2.TransactParams{
-		From: common.HexToAddress(swi.CurUser.Account().Address),
+		From:     common.HexToAddress(swi.CurUser.Account().Address),
 		Password: password,
-		Value: big.NewInt(0),
-		Pending: false}
+		Value:    big.NewInt(0),
+		Pending:  false}
 	if err := app.GetGapp().ChainWrapper.ConfirmDataTruth(&txParam, tID, truth); err != nil {
 		return errors.Wrap(err, "Confirm data truth failed. ")
 	}
@@ -293,10 +293,10 @@ func (swi *sdkWrapperImp) RegisterAsVerifier(password string) error {
 	}
 
 	txParam := chainoperations2.TransactParams{
-		From: common.HexToAddress(swi.CurUser.Account().Address),
+		From:     common.HexToAddress(swi.CurUser.Account().Address),
 		Password: password,
-		Value: big.NewInt(0),
-		Pending: false}
+		Value:    big.NewInt(0),
+		Pending:  false}
 	if err := app.GetGapp().ChainWrapper.RegisterAsVerifier(&txParam); err != nil {
 		return errors.Wrap(err, "Register as verifier failed. ")
 	}
@@ -315,10 +315,10 @@ func (swi *sdkWrapperImp) Vote(password, txId string, judge bool, comment string
 	}
 
 	txParam := chainoperations2.TransactParams{
-		From: common.HexToAddress(swi.CurUser.Account().Address),
+		From:     common.HexToAddress(swi.CurUser.Account().Address),
 		Password: password,
-		Value: big.NewInt(0),
-		Pending: false}
+		Value:    big.NewInt(0),
+		Pending:  false}
 	if err := app.GetGapp().ChainWrapper.Vote(&txParam, tID, judge, comment); err != nil {
 		return errors.Wrap(err, "Vote failed. ")
 	}
@@ -337,10 +337,10 @@ func (swi *sdkWrapperImp) CreditToVerifiers(creditData *settings2.CreditData) er
 	}
 
 	txParam := chainoperations2.TransactParams{
-		From: common.HexToAddress(swi.CurUser.Account().Address),
+		From:     common.HexToAddress(swi.CurUser.Account().Address),
 		Password: creditData.Password,
-		Value: big.NewInt(0),
-		Pending: false}
+		Value:    big.NewInt(0),
+		Pending:  false}
 
 	if creditData.Credit.Verifier1Revert {
 		credit := uint8(creditData.Credit.Verifier1Credit)

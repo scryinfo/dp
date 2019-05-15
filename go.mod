@@ -27,12 +27,12 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/rjeczalik/notify v0.9.2 // indirect
 	github.com/rs/cors v1.6.0 // indirect
-	github.com/scryInfo/dot v0.1.1-0.20190514095433-109208c745ea
+	github.com/scryInfo/dot v0.1.1-0.20190515004649-e00fc9f45e97
 	github.com/scryInfo/scryg v0.0.0-20190513112006-5b8e0a70fd09
 	github.com/sirupsen/logrus v1.4.1
 	github.com/syndtr/goleveldb v1.0.0 // indirect
 	go.uber.org/atomic v1.4.0 // indirect
-	go.uber.org/zap v1.10.0 // indirect
+	go.uber.org/zap v1.10.0
 	golang.org/x/crypto v0.0.0-20190513172903-22d7a77e9e5f // indirect
 	golang.org/x/net v0.0.0-20190509222800-a4d6f7feada5
 	golang.org/x/sync v0.0.0-20181108010431-42b317875d0f // indirect
