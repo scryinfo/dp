@@ -2,6 +2,7 @@
   "name": "app",
   "version": "1.0.0",
   "description": "dp app demo. ",
+  "license": "SEE LICENSE IN 'dp/license'",
   "author": "mats9693 <982254249@qq.com>",
   "scripts": {
     "dev": "node build/dev-server.js",
