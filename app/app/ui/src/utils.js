@@ -207,7 +207,7 @@ let presetFunc = {
             utils.send({ Name:"extensions", Payload: {extensions: dlInstance.ProofDataExtensions}});
             utils.addCallbackFunc("extensions.callback", function (payload, _this) {});
             utils.addCallbackFunc("extensions.callback.error", function (payload, _this) {
-                _this.$alert(payload, "获取数据扩展名失败！", {
+                _this.$alert(payload, "获取证明文件扩展名失败！", {
                     confirmButtonText: "关闭",
                     showClose: false,
                     type: "error"

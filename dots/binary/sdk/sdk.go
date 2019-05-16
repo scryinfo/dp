@@ -3,17 +3,15 @@ package sdk
 import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
-	"github.com/scryInfo/dp/dots/binary/sdk/core"
-	"github.com/scryInfo/dp/dots/binary/sdk/core/chainevents"
-	"github.com/scryInfo/dp/dots/binary/sdk/scry"
-	"github.com/scryInfo/dp/dots/binary/sdk/settings"
+	"github.com/scryinfo/dp/dots/binary/sdk/core"
+	"github.com/scryinfo/dp/dots/binary/sdk/core/chainevents"
+	"github.com/scryinfo/dp/dots/binary/sdk/scry"
+	"github.com/scryinfo/dp/dots/binary/sdk/settings"
 )
 
 const (
 	startEngineFailed         = "failed to start engine"
 	initContractWrapperFailed = "failed to initialize contract interface"
-	loadPathFailed            = "failed to load log path"
-	initSdkFailed             = "failed to initialize sdk"
 
 	protocolAbi = `[
     {

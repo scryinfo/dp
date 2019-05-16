@@ -3,7 +3,7 @@ Remove-Item ".\resources\app\*" -Recurse
 echo "|-> * Webpack UI files prepared. "
 Start-Sleep -Milliseconds 3000
 
-npm run build
+npm run build --report
 
 echo "|-> * Webpack UI files finished. "
 echo "|-> * End. "

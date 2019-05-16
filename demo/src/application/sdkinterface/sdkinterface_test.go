@@ -18,10 +18,10 @@ package sdkinterface
 
 import (
 	"fmt"
-	"github.com/scryInfo/dp/demo/src/application/definition"
-	"github.com/scryInfo/dp/demo/src/application/sdkinterface/settings"
-	"github.com/scryInfo/dp/demo/src/sdk"
-	"github.com/scryInfo/dp/demo/src/sdk/core/ethereum/events"
+	"github.com/scryinfo/dp/demo/src/application/definition"
+	"github.com/scryinfo/dp/demo/src/application/sdkinterface/settings"
+	"github.com/scryinfo/dp/demo/src/sdk"
+	"github.com/scryinfo/dp/demo/src/sdk/core/ethereum/events"
 	"math/big"
 	"testing"
 	"time"
@@ -51,16 +51,16 @@ var (
 )
 
 func initialize() error {
-	scryInfo, err := settings.LoadSettings()
-	err = sdk.Init(scryInfo.Chain.Ethereum.EthNode,
-		scryInfo.Services.Keystore,
-		scryInfo.Chain.Contracts.ProtocolAddr,
-		scryInfo.Chain.Contracts.TokenAddr,
-		scryInfo.Services.Ipfs,
-		"D:/EnglishRoad/workspace/Go/src/github.com/scryInfo/dp/demo/src/log/scry_sdk.log",
+	scryinfo, err := settings.LoadSettings()
+	err = sdk.Init(scryinfo.Chain.Ethereum.EthNode,
+		scryinfo.Services.Keystore,
+		scryinfo.Chain.Contracts.ProtocolAddr,
+		scryinfo.Chain.Contracts.TokenAddr,
+		scryinfo.Services.Ipfs,
+		"D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/dp/demo/src/log/scry_sdk.log",
 		"SDK interface unit test",
 	)
-	SetScryInfo(scryInfo)
+	SetScryInfo(scryinfo)
 	SetFromBlock(0)
 	return err
 }

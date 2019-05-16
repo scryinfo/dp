@@ -3,32 +3,32 @@ package main
 import (
 	"flag"
 	"github.com/pkg/errors"
-	"github.com/scryInfo/dp/demo/src/application/WSConnect"
-	"github.com/scryInfo/dp/demo/src/application/sdkinterface"
-	"github.com/scryInfo/dp/demo/src/application/sdkinterface/settings"
-	"github.com/scryInfo/dp/demo/src/sdk"
+	"github.com/scryinfo/dp/demo/src/application/WSConnect"
+	"github.com/scryinfo/dp/demo/src/application/sdkinterface"
+	"github.com/scryinfo/dp/demo/src/application/sdkinterface/settings"
+	"github.com/scryinfo/dp/demo/src/sdk"
 	rlog "github.com/sirupsen/logrus"
 )
 
-const logPath = "D:/EnglishRoad/workspace/Go/src/github.com/scryInfo/dp/demo/src/log/scry_sdk.log"
+const logPath = "D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/dp/demo/src/log/scry_sdk.log"
 
 var (
-	scryInfo *settings.ScryInfo
+	scryinfo *settings.scryinfo
 	err      error = nil
 	port           = flag.String("port", "9822", "")
 )
 
 func init() {
-	scryInfo, err = settings.LoadSettings()
-	err = sdk.Init(scryInfo.Chain.Ethereum.EthNode,
-		scryInfo.Services.Keystore,
-		scryInfo.Chain.Contracts.ProtocolAddr,
-		scryInfo.Chain.Contracts.TokenAddr,
-		scryInfo.Services.Ipfs,
+	scryinfo, err = settings.LoadSettings()
+	err = sdk.Init(scryinfo.Chain.Ethereum.EthNode,
+		scryinfo.Services.Keystore,
+		scryinfo.Chain.Contracts.ProtocolAddr,
+		scryinfo.Chain.Contracts.TokenAddr,
+		scryinfo.Services.Ipfs,
 		logPath,
 		"App demo",
 	)
-	sdkinterface.SetScryInfo(scryInfo)
+	sdkinterface.SetScryInfo(scryinfo)
 }
 
 func main() {

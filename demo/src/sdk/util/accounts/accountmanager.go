@@ -3,7 +3,7 @@ package accounts
 import (
 	"context"
 	"github.com/pkg/errors"
-	"github.com/scryInfo/dp/demo/src/sdk/interface/accountinterface"
+	"github.com/scryinfo/dp/demo/src/sdk/interface/accountinterface"
 	rlog "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"sync"
@@ -25,7 +25,7 @@ type Account struct {
 }
 
 type AccountManager struct {
-	client   scryInfo.KeyServiceClient
+	client   scryinfo.KeyServiceClient
 	accounts []*Account
 }
 
@@ -36,7 +36,7 @@ func (am *AccountManager) Initialize(asNodeAddr string) error {
 		return err
 	}
 
-	am.client = scryInfo.NewKeyServiceClient(cn)
+	am.client = scryinfo.NewKeyServiceClient(cn)
 	if am.client == nil {
 		return errors.New("failed to create account service client")
 	}
@@ -56,11 +56,11 @@ func (am *AccountManager) CreateAccount(password string) (*Account, error) {
 		return nil, errors.New("failed to create account, error: null account service")
 	}
 
-	addr, err := am.client.GenerateAddress(context.Background(), &scryInfo.AddressParameter{Password: password})
+	addr, err := am.client.GenerateAddress(context.Background(), &scryinfo.AddressParameter{Password: password})
 	if err != nil {
 		rlog.Error("failed to create account, error:", err)
 		return nil, errors.New("failed to create account, error:" + err.Error())
-	} else if addr != nil && addr.Status != scryInfo.Status_OK {
+	} else if addr != nil && addr.Status != scryinfo.Status_OK {
 		rlog.Error("failed to create account, error:", addr.Msg)
 		return nil, errors.New("failed to create account, error:" + addr.Msg)
 	} else if addr == nil {

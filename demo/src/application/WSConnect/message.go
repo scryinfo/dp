@@ -2,8 +2,8 @@ package WSConnect
 
 import (
 	"encoding/json"
-	"github.com/scryInfo/dp/demo/src/application/definition"
-	"github.com/scryInfo/dp/demo/src/application/sdkinterface"
+	"github.com/scryinfo/dp/demo/src/application/definition"
+	"github.com/scryinfo/dp/demo/src/application/sdkinterface"
 	"math/big"
 )
 

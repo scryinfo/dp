@@ -15,18 +15,18 @@ export default {
     },
     created() {
         let clock = window.setInterval(() => {
-            this.count--
+            this.count--;
             if (this.count < 0) {
-                window.clearInterval(clock)
-                this.count = 5
-                this.$router.push({ path: "/"})
+                window.clearInterval(clock);
+                this.count = 5;
+                this.$router.push({ path: "/"});
             }
-        },1000)
+        },1000);
     }
 }
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .page-container {
     font-size: 40px;
     text-align: center;

@@ -3,15 +3,15 @@ package sdkinterface
 import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
-	"github.com/scryInfo/dp/demo/src/application/definition"
-	"github.com/scryInfo/dp/demo/src/application/sdkinterface/settings"
-	"github.com/scryInfo/dp/demo/src/sdk"
-	"github.com/scryInfo/dp/demo/src/sdk/core/chainevents"
-	"github.com/scryInfo/dp/demo/src/sdk/core/chainoperations"
-	"github.com/scryInfo/dp/demo/src/sdk/scryclient"
-	cif "github.com/scryInfo/dp/demo/src/sdk/scryclient/chaininterfacewrapper"
-	"github.com/scryInfo/dp/demo/src/sdk/util/accounts"
-	"github.com/scryInfo/dp/demo/src/sdk/util/storage/ipfsaccess"
+	"github.com/scryinfo/dp/demo/src/application/definition"
+	"github.com/scryinfo/dp/demo/src/application/sdkinterface/settings"
+	"github.com/scryinfo/dp/demo/src/sdk"
+	"github.com/scryinfo/dp/demo/src/sdk/core/chainevents"
+	"github.com/scryinfo/dp/demo/src/sdk/core/chainoperations"
+	"github.com/scryinfo/dp/demo/src/sdk/scryclient"
+	cif "github.com/scryinfo/dp/demo/src/sdk/scryclient/chaininterfacewrapper"
+	"github.com/scryinfo/dp/demo/src/sdk/util/accounts"
+	"github.com/scryinfo/dp/demo/src/sdk/util/storage/ipfsaccess"
 	"math/big"
 	"os"
 )
@@ -21,12 +21,12 @@ const IPFSOutDir = "D:/desktop"
 var (
 	curUser  *scryclient.ScryClient
 	deployer *scryclient.ScryClient
-	scryInfo *settings.ScryInfo
+	scryinfo *settings.scryinfo
 	err      error
 )
 
-func SetScryInfo(si *settings.ScryInfo) {
-	scryInfo = si
+func SetScryInfo(si *settings.scryinfo) {
+	scryinfo = si
 }
 
 func SetFromBlock(fromBlock uint64) {
@@ -74,9 +74,9 @@ func importAccount(keyJson string, oldPassword string, newPassword string) (*scr
 
 func TransferTokenFromDeployer(token *big.Int) error {
 	if deployer == nil {
-		deployer, err = importAccount(scryInfo.Chain.Contracts.DeployerKeyJson,
-			scryInfo.Chain.Contracts.DeployerPassword,
-			scryInfo.Chain.Contracts.DeployerPassword)
+		deployer, err = importAccount(scryinfo.Chain.Contracts.DeployerKeyJson,
+			scryinfo.Chain.Contracts.DeployerPassword,
+			scryinfo.Chain.Contracts.DeployerPassword)
 		if err != nil {
 			return errors.Wrap(err, "Deployer init failed. ")
 		}
@@ -87,7 +87,7 @@ func TransferTokenFromDeployer(token *big.Int) error {
 	}
 
 	txParam := chainoperations.TransactParams{From: common.HexToAddress(deployer.Account.Address),
-		Password: scryInfo.Chain.Contracts.DeployerPassword, Value: big.NewInt(0), Pending: false}
+		Password: scryinfo.Chain.Contracts.DeployerPassword, Value: big.NewInt(0), Pending: false}
 	if err = cif.TransferTokens(&txParam, common.HexToAddress(curUser.Account.Address), token); err != nil {
 		return errors.Wrap(err, "Transfer token failed. ")
 	}
@@ -135,11 +135,11 @@ func PublishData(data *definition.PublishData) (string, error) {
 }
 
 func ApproveTransferForRegisterAsVerifier(password string) error {
-	return approveTransfer(password, common.HexToAddress(scryInfo.Chain.Contracts.ProtocolAddr), big.NewInt(10000))
+	return approveTransfer(password, common.HexToAddress(scryinfo.Chain.Contracts.ProtocolAddr), big.NewInt(10000))
 }
 
 func ApproveTransferForBuying(password string) error {
-	return approveTransfer(password, common.HexToAddress(scryInfo.Chain.Contracts.ProtocolAddr), big.NewInt(1600))
+	return approveTransfer(password, common.HexToAddress(scryinfo.Chain.Contracts.ProtocolAddr), big.NewInt(1600))
 }
 
 func approveTransfer(password string, protocolContractAddr common.Address, token *big.Int) error {

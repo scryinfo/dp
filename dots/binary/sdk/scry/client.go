@@ -3,8 +3,8 @@ package scry
 import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/scryInfo/dp/dots/binary/sdk/core/chainevents"
-	"github.com/scryInfo/dp/dots/binary/sdk/util/accounts"
+	"github.com/scryinfo/dp/dots/binary/sdk/core/chainevents"
+	"github.com/scryinfo/dp/dots/binary/sdk/util/accounts"
 	"math/big"
 )
 

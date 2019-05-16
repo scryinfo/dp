@@ -1,89 +1,64 @@
-require('./check-versions')()
+require('./check-versions')();
 
-var config = require('../config')
+let config = require('../config');
 if (!process.env.NODE_ENV) {
-  process.env.NODE_ENV = JSON.parse(config.dev.env.NODE_ENV)
+  process.env.NODE_ENV = JSON.parse(config.dev.env.NODE_ENV);
 }
 
-var opn = require('opn')
-var path = require('path')
-var express = require('express')
-var webpack = require('webpack')
-var proxyMiddleware = require('http-proxy-middleware')
-var webpackConfig = require('./webpack.dev.conf')
+let path = require('path');
+let webpack = require('webpack');
+let webpackConfig = require('./webpack.dev.conf.js');
 
-// default port where dev server listens for incoming traffic
-var port = process.env.PORT || config.dev.port
-// automatically open browser, if not set will be false
-var autoOpenBrowser = !!config.dev.autoOpenBrowser
-// Define HTTP proxies to your custom API backend
-// https://github.com/chimurai/http-proxy-middleware
-var proxyTable = config.dev.proxyTable
+let compiler = webpack(webpackConfig);
 
-var app = express()
-var compiler = webpack(webpackConfig)
-
-var devMiddleware = require('webpack-dev-middleware')(compiler, {
+let devMiddleware = require('webpack-dev-middleware')(compiler, {
   publicPath: webpackConfig.output.publicPath,
   quiet: true
-})
+});
 
-var hotMiddleware = require('webpack-hot-middleware')(compiler, {
+let hotMiddleware = require('webpack-hot-middleware')(compiler, {
   log: () => {}
-})
-// force page reload when html-webpack-plugin template changes
+});
 compiler.plugin('compilation', function (compilation) {
   compilation.plugin('html-webpack-plugin-after-emit', function (data, cb) {
-    hotMiddleware.publish({ action: 'reload' })
-    cb()
-  })
-})
+    hotMiddleware.publish({ action: 'reload' });
+    cb();
+  });
+});
 
-// proxy api requests
-Object.keys(proxyTable).forEach(function (context) {
-  var options = proxyTable[context]
-  if (typeof options === 'string') {
-    options = { target: options }
-  }
-  app.use(proxyMiddleware(options.filter || context, options))
-})
 
-// handle fallback for HTML5 history API
-// app.use(require('WSConnect-history-api-fallback')())
+let express = require('express');
+let app = express();
 
-// serve webpack bundle output
-app.use(devMiddleware)
+app.use(devMiddleware);
+app.use(hotMiddleware);
 
-// enable hot-reload and state-preserving
-// compilation error display
-app.use(hotMiddleware)
+let staticPath = path.posix.join(config.dev.assetsPublicPath, config.dev.assetsSubDirectory);
+app.use(staticPath, express.static('./static'));
 
-// serve pure static assets
-var staticPath = path.posix.join(config.dev.assetsPublicPath, config.dev.assetsSubDirectory)
-app.use(staticPath, express.static('./static'))
+let _resolve;
+let readyPromise = new Promise(resolve => {
+  _resolve = resolve;
+});
 
-var uri = 'http://localhost:' + port
+let port = process.env.PORT || config.dev.port;
 
-var _resolve
-var readyPromise = new Promise(resolve => {
-  _resolve = resolve
-})
-
-console.log('> Starting dev server...')
+let opn = require('opn');
+console.log('> Starting dev server...');
 devMiddleware.waitUntilValid(() => {
-  console.log('> Listening at ' + uri + '\n')
-  // when env is testing, don't need open it
-  if (autoOpenBrowser && process.env.NODE_ENV !== 'testing') {
-    opn(uri)
+  let url = 'http://localhost:' + port;
+  console.log('> Listening at ' + url + '\n');
+  if (!!config.dev.autoOpenBrowser && process.env.NODE_ENV !== 'testing') {
+    opn(url);
   }
-  _resolve()
-})
+  _resolve();
+});
 
-var server = app.listen(port)
+let server = app.listen(port);
 
 module.exports = {
   ready: readyPromise,
   close: () => {
-    server.close()
+    server.close();
   }
-}
+};

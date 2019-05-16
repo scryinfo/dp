@@ -2,7 +2,7 @@ package chainevents
 
 import (
 	"github.com/ethereum/go-ethereum/common"
-	events2 "github.com/scryInfo/dp/dots/binary/sdk/core/ethereum/events"
+	events2 "github.com/scryinfo/dp/dots/binary/sdk/core/ethereum/events"
 	"testing"
 )
 

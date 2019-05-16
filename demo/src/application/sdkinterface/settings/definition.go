@@ -1,6 +1,6 @@
 package settings
 
-type ScryInfo struct {
+type scryinfo struct {
 	Chain    Chain    `yaml:"chain"`
 	Services Services `yaml:"services"`
 }

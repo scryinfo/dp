@@ -4,10 +4,11 @@ import (
 	"context"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
-	chainevents2 "github.com/scryInfo/dp/dots/binary/sdk/core/chainevents"
-	accounts2 "github.com/scryInfo/dp/dots/binary/sdk/util/accounts"
-	ipfsaccess2 "github.com/scryInfo/dp/dots/binary/sdk/util/storage/ipfsaccess"
-	rlog "github.com/sirupsen/logrus"
+	"github.com/scryinfo/dot/dot"
+	chainevents2 "github.com/scryinfo/dp/dots/binary/sdk/core/chainevents"
+	accounts2 "github.com/scryinfo/dp/dots/binary/sdk/util/accounts"
+	ipfsaccess2 "github.com/scryinfo/dp/dots/binary/sdk/util/storage/ipfsaccess"
+	"go.uber.org/zap"
 )
 
 type Connector struct {
@@ -19,29 +20,31 @@ type Connector struct {
 func StartEngine(ethNodeAddr string,
 	asServiceAddr string,
 	contracts []chainevents2.ContractInfo,
-	ipfsNodeAddr string) (*ethclient.Client, error) {
+	ipfsNodeAddr string,
+) (*ethclient.Client, error) {
+	logger := dot.Logger()
 
 	defer func() {
-		if err := recover(); err != nil {
-			rlog.Error("failed to initialize start engine, error:", err)
+		if er := recover(); er != nil {
+			logger.Errorln("", zap.Any("failed to initialize start engine, error:", er))
 		}
 	}()
 
 	err := ipfsaccess2.GetIAInstance().Initialize(ipfsNodeAddr)
 	if err != nil {
-		rlog.Error("failed to initialize ipfs. error: ", err)
+		logger.Errorln("", zap.NamedError("failed to initialize ipfs. error: ", err))
 		return nil, err
 	}
 
 	connector, err := newConnector(ethNodeAddr)
 	if err != nil {
-		rlog.Error("failed to initialize connector. error: ", err)
+		logger.Errorln("", zap.NamedError("failed to initialize connector. error: ", err))
 		return nil, err
 	}
 
 	err = accounts2.GetAMInstance().Initialize(asServiceAddr)
 	if err != nil {
-		rlog.Error("failed to initialize account service, error:", err)
+		logger.Errorln("", zap.NamedError("failed to initialize account service, error:", err))
 		return nil, err
 	}
 

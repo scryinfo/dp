@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
-	sdk2 "github.com/scryInfo/dp/dots/binary/sdk"
-	chainoperations2 "github.com/scryInfo/dp/dots/binary/sdk/core/chainoperations"
-	events2 "github.com/scryInfo/dp/dots/binary/sdk/core/ethereum/events"
-	scryclient2 "github.com/scryInfo/dp/dots/binary/sdk/scry"
-	accounts2 "github.com/scryInfo/dp/dots/binary/sdk/util/accounts"
+	sdk2 "github.com/scryinfo/dp/dots/binary/sdk"
+	chainoperations2 "github.com/scryinfo/dp/dots/binary/sdk/core/chainoperations"
+	events2 "github.com/scryinfo/dp/dots/binary/sdk/core/ethereum/events"
+	scryclient2 "github.com/scryinfo/dp/dots/binary/sdk/scry"
+	accounts2 "github.com/scryinfo/dp/dots/binary/sdk/util/accounts"
 	"math/big"
 	"time"
 )

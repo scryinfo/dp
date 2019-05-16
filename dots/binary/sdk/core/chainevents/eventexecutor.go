@@ -2,9 +2,10 @@ package chainevents
 
 import (
 	"github.com/ethereum/go-ethereum/common"
-	events2 "github.com/scryInfo/dp/dots/binary/sdk/core/ethereum/events"
-	settings2 "github.com/scryInfo/dp/dots/binary/sdk/settings"
-	rlog "github.com/sirupsen/logrus"
+	"github.com/scryinfo/dot/dot"
+	events2 "github.com/scryinfo/dp/dots/binary/sdk/core/ethereum/events"
+	settings2 "github.com/scryinfo/dp/dots/binary/sdk/settings"
+	"go.uber.org/zap"
 )
 
 const (
@@ -17,15 +18,15 @@ const (
 
 func ExecuteEvents(dataChannel chan events2.Event, externalEventRepo *EventRepository) {
 	defer func() {
-		if err := recover(); err != nil {
-			rlog.Error("Error: failed to execute event, error: ", err)
+		if er := recover(); er != nil {
+			dot.Logger().Errorln("", zap.Any("Error: failed to execute event, error: ", er))
 		}
 	}()
 
 	for {
 		select {
 		case event := <-dataChannel:
-			rlog.Debug("event coming:", event.String())
+			dot.Logger().Debugln("event coming:" + event.String())
 			executeEvent(event, externalEventRepo)
 		}
 	}
@@ -33,14 +34,14 @@ func ExecuteEvents(dataChannel chan events2.Event, externalEventRepo *EventRepos
 
 func executeEvent(event events2.Event, eventRepo *EventRepository) bool {
 	defer func() {
-		if err := recover(); err != nil {
-			rlog.Error("error: failed to execute event "+event.Name+" because of error: ", err)
+		if er := recover(); er != nil {
+			dot.Logger().Errorln("", zap.Any("error: failed to execute event "+event.Name+" because of error: ", er))
 		}
 	}()
 
 	subscribeInfoMap := eventRepo.mapEventSubscribe[event.Name]
 	if subscribeInfoMap == nil {
-		rlog.Error("warning: no event was executed, event:", event.Name)
+		dot.Logger().Warnln("warning: no event was executed, event:" + event.Name)
 		return false
 	}
 
@@ -64,7 +65,7 @@ func executeEvent(event events2.Event, eventRepo *EventRepository) bool {
 			owner := common.HexToAddress(obj)
 			executeMatchedEvent(subscribeInfoMap, []common.Address{owner}, event)
 		} else {
-			rlog.Error("Warning: unknown event type, event:", event.Name)
+			dot.Logger().Warnln("Warning: unknown event type, event:" + event.Name)
 		}
 	}
 

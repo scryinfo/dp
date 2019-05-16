@@ -4,8 +4,8 @@ import (
 	"errors"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	events2 "github.com/scryInfo/dp/dots/binary/sdk/core/ethereum/events"
-	rlog "github.com/sirupsen/logrus"
+	"github.com/scryinfo/dot/dot"
+	events2 "github.com/scryinfo/dp/dots/binary/sdk/core/ethereum/events"
 )
 
 var (
@@ -19,12 +19,12 @@ func StartEventProcessing(
 	conn *ethclient.Client,
 	contracts []ContractInfo,
 ) {
-	rlog.Info("start event processing...")
+	dot.Logger().Infoln("start event processing...")
 
 	go ExecuteEvents(dataChannel, externalEventRepo)
 	go ListenEvent(conn, contracts, 0, 60, dataChannel, errorChannel)
 
-	rlog.Info("finished event processing.")
+	dot.Logger().Infoln("finished event processing.")
 }
 
 func SubscribeExternal(

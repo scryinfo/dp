@@ -1,7 +1,7 @@
 package settings
 
 import (
-	"github.com/scryInfo/dp/demo/src/sdk/util/uuid"
+	"github.com/scryinfo/dp/demo/src/sdk/util/uuid"
 	"os"
 )
 

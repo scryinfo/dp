@@ -9,7 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
-	accounts2 "github.com/scryInfo/dp/dots/binary/sdk/util/accounts"
+	accounts2 "github.com/scryinfo/dp/dots/binary/sdk/util/accounts"
 	"math/big"
 	"strings"
 )
