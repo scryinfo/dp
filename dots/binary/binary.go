@@ -1,6 +1,6 @@
 package binary
 
-import "github.com/scryInfo/dot/dot"
+import "github.com/scryinfo/dot/dot"
 
 type Binary struct {
 }

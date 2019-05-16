@@ -1,11 +1,7 @@
-var path = require('path')
-var utils = require('./utils')
-var config = require('../config')
-var vueLoaderConfig = require('./vue-loader.conf')
-
-function resolve(dir) {
-  return path.join(__dirname, '..', dir)
-}
+let path = require('path');
+let utils = require('./utils.js');
+let config = require('../config');
+let vueLoaderConfig = require('./vue-loader.conf.js');
 
 module.exports = {
   entry: {
@@ -22,8 +18,7 @@ module.exports = {
     extensions: ['.js', '.vue', '.json'],
     alias: {
       'vue$': 'vue/dist/vue.esm.js',
-      '@': resolve('src'),
-      'scss_vars': '@/styles/vars.scss'
+      '@': path.join(__dirname, '../src')
     }
   },
   module: {
@@ -36,10 +31,10 @@ module.exports = {
       {
         test: /\.js$/,
         loader: 'babel-loader',
-        include: [resolve('src'), resolve('test')]
+        include: [path.join(__dirname, '../src')]
       },
       {
-        test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+        test: /\.(png|jpe?g|gif)(\?.*)?$/,
         loader: 'url-loader',
         options: {
           limit: 10000,
@@ -47,7 +42,7 @@ module.exports = {
         }
       },
       {
-        test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+        test: /\.(woff2?|ttf|otf)(\?.*)?$/,
         loader: 'url-loader',
         options: {
           limit: 10000,
@@ -56,4 +51,4 @@ module.exports = {
       }
     ]
   }
-}
+};

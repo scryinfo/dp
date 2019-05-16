@@ -19,12 +19,6 @@ let routes = [
         hidden: true
     },
     {
-        path: "/404",
-        component: NotFound,
-        name: "not found",
-        hidden: true
-    },
-    {
         path: "/home",
         component: Home,
         name: "home",
@@ -39,6 +33,12 @@ let routes = [
             {path: "/testpage",      component: test,          name: "Test",                    hidden: true}, // for test
             {path: "/administrator", component: administrator, name: "Administrator Functions", hidden: true} // for test
         ]
+    },
+    {
+        path: "/404",
+        component: NotFound,
+        name: "not found",
+        hidden: true
     },
     {
         path: "*",

@@ -3,8 +3,9 @@ package chainevents
 import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	events2 "github.com/scryInfo/dp/dots/binary/sdk/core/ethereum/events"
-	rlog "github.com/sirupsen/logrus"
+	"github.com/scryinfo/dot/dot"
+	events2 "github.com/scryinfo/dp/dots/binary/sdk/core/ethereum/events"
+	"go.uber.org/zap"
 	"time"
 )
 
@@ -20,18 +21,19 @@ type ContractInfo struct {
 
 func ListenEvent(conn *ethclient.Client, contracts []ContractInfo, fromBlock uint64, interval time.Duration,
 	dataChannel chan events2.Event, errorChannel chan error) bool {
+	logger := dot.Logger()
 	rv := true
-	rlog.Info("start listening events...")
+	logger.Infoln("start listening events...")
 
 	defer func() {
-		if err := recover(); err != nil {
-			rlog.Error("Failed to listen event. error:", err)
+		if er := recover(); er != nil {
+			logger.Errorln("", zap.Any("Failed to listen event. error:", er))
 			rv = false
 		}
 	}()
 
 	if len(contracts) == 0 {
-		rlog.Error("invalid contracts parameter")
+		logger.Errorln("invalid contracts parameter")
 		return false
 	}
 
@@ -48,7 +50,7 @@ func ListenEvent(conn *ethclient.Client, contracts []ContractInfo, fromBlock uin
 		SetInterval(interval).
 		BuildAndRun()
 	if err != nil {
-		rlog.Error("failed to listen to events.", err)
+		logger.Errorln("", zap.NamedError("failed to listen to events.", err))
 		return false
 	}
 
@@ -61,6 +63,6 @@ func SetFromBlock(from uint64) {
 	if builder != nil {
 		builder.SetFrom(from)
 	} else {
-		rlog.Warn("Failed to set from block because of nil builder.")
+		dot.Logger().Warnln("Failed to set from block because of nil builder.")
 	}
 }

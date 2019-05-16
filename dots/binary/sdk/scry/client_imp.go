@@ -3,10 +3,11 @@ package scry
 import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/scryInfo/dp/dots/binary/sdk/core/chainevents"
-	"github.com/scryInfo/dp/dots/binary/sdk/core/chainoperations"
-	"github.com/scryInfo/dp/dots/binary/sdk/util/accounts"
-	rlog "github.com/sirupsen/logrus"
+	"github.com/scryinfo/dot/dot"
+	"github.com/scryinfo/dp/dots/binary/sdk/core/chainevents"
+	"github.com/scryinfo/dp/dots/binary/sdk/core/chainoperations"
+	"github.com/scryinfo/dp/dots/binary/sdk/util/accounts"
+	"go.uber.org/zap"
 	"math/big"
 )
 
@@ -25,7 +26,7 @@ func NewScryClient(publicKey string, chainWrapper ChainWrapper) Client {
 func CreateScryClient(password string, chainWrapper ChainWrapper) (Client, error) {
 	account, err := accounts.GetAMInstance().CreateAccount(password)
 	if err != nil {
-		rlog.Error("failed to create account, error:", err)
+		dot.Logger().Errorln("", zap.NamedError("failed to create account, error:", err))
 		return nil, err
 	}
 
@@ -54,7 +55,7 @@ func (c *clientImp) Authenticate(password string) (bool, error) {
 func (c *clientImp) TransferEthFrom(from common.Address, password string, value *big.Int, ec *ethclient.Client) error {
 	tx, err := chainoperations.TransferEth(from, password, common.HexToAddress(c.account.Address), value, ec)
 	if err == nil {
-		rlog.Debug("transferEthFrom: ", tx.Hash(), tx.Data())
+		dot.Logger().Debugln("transferEthFrom: " + tx.Hash().String() + string(tx.Data()))
 	}
 
 	return err

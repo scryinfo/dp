@@ -170,7 +170,7 @@ let txBuyer_db = {
             cb(event.target.result);
         };
     },
-    shut: function () {
+    closeDB: function () {
         txBuyer_db.db.close();
     },
     reset: function () {
@@ -238,7 +238,7 @@ let txSeller_db = {
             cb(event.target.result);
         };
     },
-    shut: function () {
+    closeDB: function () {
         txSeller_db.db.close();
     },
     reset:function() {
@@ -306,7 +306,7 @@ let txVerifier_db = {
             cb(event.target.result);
         };
     },
-    shut: function () {
+    closeDB: function () {
         txVerifier_db.db.close();
     },
     reset: function () {
@@ -362,9 +362,12 @@ let db_options = {
         txVerifier_db.init(_this);
     },
     userDBClose: function () {
-        txBuyer_db.shut();
-        txSeller_db.shut();
-        txVerifier_db.shut();
+        txBuyer_db.closeDB();
+        txSeller_db.closeDB();
+        txVerifier_db.closeDB();
+    },
+    deleteDB: function (db_name) {
+        window.indexedDB.deleteDatabase(db_name);
     }
 };
 

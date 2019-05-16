@@ -1,16 +1,18 @@
 <template>
-    <!-- 管理员操作界面，提供一些便捷功能供测试使用，正式版本删除本文件或删除相关路由设置。 -->
+    <!-- 管理员功能，提供一些便捷功能供测试使用，正式版本删除本文件或删除相关路由设置。 -->
     <section class="administrator">
+        <el-col :span="24" class="administrator">
+            管理员功能，提供一些便捷功能供测试使用，正式版本删除本文件或删除相关路由设置。</el-col>
         <el-col :span="24" class="section-item">
-            <el-button size="mini" type="primary" style="width: 200px" @click="welcome">Welcome</el-button></el-col>
+            <el-button size="mini" type="primary" @click="welcome">Welcome</el-button></el-col>
         <el-col :span="24" class="section-item">
-            <el-button size="mini" type="primary" style="width: 200px" @click="resetChain">ResetChain</el-button></el-col>
+            <el-button size="mini" type="primary" @click="resetChain">ResetChain</el-button></el-col>
         <el-col :span="24" class="section-item">
-            <el-button size="mini" type="primary" style="width: 200px" @click="initDL">InitDL</el-button></el-col>
+            <el-button size="mini" type="primary" @click="initDL">InitDL</el-button></el-col>
         <el-col :span="24" class="section-item">
-            <el-button size="mini" type="primary" style="width: 200px" @click="initTx">InitTx</el-button></el-col>
+            <el-button size="mini" type="primary" @click="initTx">InitTx</el-button></el-col>
         <el-col :span="24" class="section-item">
-            <el-button size="mini" type="primary" style="width: 200px" @click="testTxDBsConnect">TestTxDBsConnect</el-button></el-col>
+            <el-button size="mini" type="primary" @click="testTxDBsConnect">TestTxDBsConnect</el-button></el-col>
     </section>
 </template>
 
@@ -58,12 +60,13 @@ export default {
             console.log(result)
         },
         resetTxDBs: function () {
+            let _this = this
             let c = acc_db.db.transaction(acc_db.db_store_name,"readwrite").objectStore(acc_db.db_store_name).openCursor();
             c.onsuccess = function (evt) {
                 let cursor = evt.target.result;
                 if (cursor) {
                     db_options.userDBInit(cursor.value.address);
-                    db_options.userDBClose();
+                    db_options.deleteDB(cursor.value.address);
                     cursor.continue();
                 }
             }

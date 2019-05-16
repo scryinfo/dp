@@ -5,9 +5,9 @@ import (
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
-	"github.com/scryInfo/dp/demo/src/application/definition"
-	"github.com/scryInfo/dp/demo/src/sdk/core/ethereum/events"
-	"github.com/scryInfo/dp/demo/src/sdk/util/storage/ipfsaccess"
+	"github.com/scryinfo/dp/demo/src/application/definition"
+	"github.com/scryinfo/dp/demo/src/sdk/core/ethereum/events"
+	"github.com/scryinfo/dp/demo/src/sdk/util/storage/ipfsaccess"
 	rlog "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"math/big"
@@ -41,7 +41,7 @@ func onPublish(event events.Event) bool {
 func getPubDataDetails(ipfsID string) (definition.OnPublish, error) {
 	defer func() {
 		if er := recover(); er != nil {
-			rlog.Error(errors.Wrap(er.(error), "onPublish.callback: get publish data details failed. "))
+			rlog.Error("onPublish.callback: get publish data details failed. ", er)
 		}
 	}()
 
@@ -140,7 +140,7 @@ func onTransactionCreate(event events.Event) bool {
 func getAndRenameProofFiles(ipfsIDs [][32]byte, extensions []string) ([]string, error) {
 	defer func() {
 		if er := recover(); er != nil {
-			rlog.Error(errors.Wrap(er.(error), "in callback: get and rename proof files failed. "))
+			rlog.Error(er, "in callback: get and rename proof files failed. ")
 		}
 	}()
 	var (

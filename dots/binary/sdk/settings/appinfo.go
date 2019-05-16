@@ -1,12 +1,10 @@
 package settings
 
 import (
-	"github.com/scryInfo/dp/util"
+	"github.com/scryinfo/dp/util"
 )
 
-var (
-	appId = "Scry-App-" + util.GenerateUUID()
-)
+var appId = "Scry-App-" + util.GenerateUUID()
 
 func SetAppId(v string) {
 	appId = v

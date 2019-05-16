@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/scryInfo/dp/demo/src/sdk/util/configuration"
-	"github.com/scryInfo/dp/demo/yaml/define"
+	"github.com/scryinfo/dp/demo/src/sdk/util/configuration"
+	"github.com/scryinfo/dp/demo/yaml/define"
 	rlog "github.com/sirupsen/logrus"
 )
 

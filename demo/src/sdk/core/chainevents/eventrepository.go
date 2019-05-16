@@ -2,7 +2,7 @@ package chainevents
 
 import (
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/scryInfo/dp/demo/src/sdk/core/ethereum/events"
+	"github.com/scryinfo/dp/demo/src/sdk/core/ethereum/events"
 )
 
 type EventCallback func(event events.Event) bool

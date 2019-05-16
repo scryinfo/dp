@@ -3,8 +3,9 @@ package accounts
 import (
 	"context"
 	"github.com/pkg/errors"
-	"github.com/scryInfo/dp/dots/binary/sdk/interface/account"
-	rlog "github.com/sirupsen/logrus"
+	"github.com/scryinfo/dot/dot"
+	"github.com/scryinfo/dp/dots/binary/sdk/interface/account"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"sync"
 )
@@ -32,7 +33,7 @@ type AccountManager struct {
 func (am *AccountManager) Initialize(asNodeAddr string) error {
 	cn, err := grpc.Dial(asNodeAddr, grpc.WithInsecure())
 	if err != nil {
-		rlog.Error("failed to WSConnect to node:" + asNodeAddr)
+		dot.Logger().Errorln("failed to WSConnect to node:" + asNodeAddr)
 		return err
 	}
 
@@ -45,10 +46,9 @@ func (am *AccountManager) Initialize(asNodeAddr string) error {
 }
 
 func (am *AccountManager) CreateAccount(password string) (*Account, error) {
-
 	defer func() {
-		if err := recover(); err != nil {
-			rlog.Error("failed to create account, error:", err)
+		if er := recover(); er != nil {
+			dot.Logger().Errorln("", zap.Any("failed to create account, error:", er))
 		}
 	}()
 
@@ -58,14 +58,15 @@ func (am *AccountManager) CreateAccount(password string) (*Account, error) {
 
 	addr, err := am.client.GenerateAddress(context.Background(), &account.AddressParameter{Password: password})
 	if err != nil {
-		rlog.Error("failed to create account, error:", err)
-		return nil, errors.New("failed to create account, error:" + err.Error())
+		err = errors.Wrap(err, "failed to create account, error:")
 	} else if addr != nil && addr.Status != account.Status_OK {
-		rlog.Error("failed to create account, error:", addr.Msg)
-		return nil, errors.New("failed to create account, error:" + addr.Msg)
+		err = errors.New("failed to create account, error:" + addr.Msg)
 	} else if addr == nil {
-		rlog.Error("failed to create account, error: addr is nil")
-		return nil, errors.New("failed to create account, error: addr is nil")
+		err = errors.New("failed to create account, error: addr is nil")
+	}
+	if err != nil {
+		dot.Logger().Errorln("", zap.NamedError("", err))
+		return nil, err
 	}
 
 	newAccount := &Account{addr.Address}
@@ -76,8 +77,8 @@ func (am *AccountManager) CreateAccount(password string) (*Account, error) {
 
 func (am AccountManager) AuthAccount(address string, password string) (bool, error) {
 	defer func() {
-		if err := recover(); err != nil {
-			rlog.Error("failed to authenticate account, error:", err)
+		if er := recover(); er != nil {
+			dot.Logger().Errorln("", zap.Any("failed to authenticate account, error:", er))
 		}
 	}()
 
@@ -88,11 +89,13 @@ func (am AccountManager) AuthAccount(address string, password string) (bool, err
 	addr, err := am.client.VerifyAddress(context.Background(),
 		&account.AddressParameter{Password: password, Address: address})
 	if err != nil {
-		rlog.Error("failed to authenticate user, error:", err)
-		return false, errors.New("failed to authenticate user, error:" + err.Error())
+		err = errors.Wrap(err, "failed to authenticate user, error:")
 	} else if addr == nil {
-		rlog.Error("failed to authenticate user, error: addr is nil")
-		return false, errors.New("failed to authenticate user, error: addr is nil")
+		err = errors.New("failed to authenticate user, error: addr is nil")
+	}
+	if err != nil {
+		dot.Logger().Errorln("", zap.NamedError("", err))
+		return false, err
 	}
 
 	rv := addr.Status == account.Status_OK
@@ -116,10 +119,11 @@ func (am AccountManager) AccountValid(address string) bool {
 
 func (am AccountManager) Encrypt(
 	plainText []byte,
-	address string) ([]byte, error) {
+	address string,
+) ([]byte, error) {
 	defer func() {
-		if err := recover(); err != nil {
-			rlog.Error("failed to encrypt, error:", err)
+		if er := recover(); er != nil {
+			dot.Logger().Errorln("", zap.Any("failed to encrypt, error:", er))
 		}
 	}()
 
@@ -130,14 +134,15 @@ func (am AccountManager) Encrypt(
 	in := account.CipherParameter{Message: plainText, Address: address}
 	out, err := am.client.ContentEncrypt(context.Background(), &in)
 	if err != nil {
-		rlog.Error("failed to encrypt data, error:", err)
-		return nil, errors.New("failed to encrypt data, error:" + err.Error())
+		err = errors.Wrap(err, "failed to encrypt data, error:")
 	} else if out == nil {
-		rlog.Error("failed to encrypt data, error: addr is nil")
-		return nil, errors.New("failed to encrypt data, error: addr is nil")
+		err = errors.New("failed to encrypt data, error: addr is nil")
 	} else if out.Status != account.Status_OK {
-		rlog.Error("failed to encrypt data, error:", out.Msg)
-		return nil, errors.New("failed to encrypt data, error:" + out.Msg)
+		err = errors.New("failed to encrypt data, error:" + out.Msg)
+	}
+	if err != nil {
+		dot.Logger().Errorln("", zap.NamedError("", err))
+		return nil, err
 	}
 
 	return out.Data, nil
@@ -149,8 +154,8 @@ func (am AccountManager) Decrypt(
 	password string) ([]byte, error) {
 
 	defer func() {
-		if err := recover(); err != nil {
-			rlog.Error("failed to decrypt, error:", err)
+		if er := recover(); er != nil {
+			dot.Logger().Errorln("", zap.Any("failed to decrypt, error:", er))
 		}
 	}()
 
@@ -165,14 +170,15 @@ func (am AccountManager) Decrypt(
 	}
 	out, err := am.client.ContentDecrypt(context.Background(), &in)
 	if err != nil {
-		rlog.Error("failed to decrypt data, error:", err)
-		return nil, errors.New("failed to encrypt data, error:" + err.Error())
+		err = errors.Wrap(err, "failed to decrypt data, error:")
 	} else if out == nil {
-		rlog.Error("failed to decrypt data, error: addr is nil")
-		return nil, errors.New("failed to encrypt data, error: addr is nil")
+		err = errors.New("failed to encrypt data, error: addr is nil")
 	} else if out.Status != account.Status_OK {
-		rlog.Error("failed to decrypt, error:", out.Msg)
-		return nil, errors.New("failed to decrypt, error:" + out.Msg)
+		err = errors.New("failed to decrypt, error:" + out.Msg)
+	}
+	if err != nil {
+		dot.Logger().Errorln("", zap.Any("", err))
+		return nil, err
 	}
 
 	return out.Data, nil
@@ -182,10 +188,11 @@ func (am AccountManager) ReEncrypt(
 	cipherText []byte,
 	address1 string,
 	address2 string,
-	password string) ([]byte, error) {
+	password string,
+) ([]byte, error) {
 	defer func() {
-		if err := recover(); err != nil {
-			rlog.Error("failed to reencrypt, error:", err)
+		if er := recover(); er != nil {
+			dot.Logger().Errorln("", zap.Any("failed to reencrypt, error:", er))
 		}
 	}()
 
@@ -196,27 +203,29 @@ func (am AccountManager) ReEncrypt(
 	in := account.CipherParameter{Message: cipherText, Address: address1, Password: password}
 	out, err := am.client.ContentDecrypt(context.Background(), &in)
 	if err != nil {
-		rlog.Error("failed to decrypt data, error:", err)
-		return nil, errors.New("failed to encrypt data, error:" + err.Error())
+		err = errors.Wrap(err, "failed to encrypt data, error:")
 	} else if out == nil {
-		rlog.Error("failed to decrypt data, error: addr is nil")
-		return nil, errors.New("failed to encrypt data, error: addr is nil")
+		err = errors.New("failed to encrypt data, error: addr is nil")
 	} else if out.Status != account.Status_OK {
-		rlog.Error("failed to decrypt, error:", out.Msg)
-		return nil, errors.New("failed to decrypt, error:" + out.Msg)
+		err = errors.New("failed to decrypt, error:" + out.Msg)
+	}
+	if err != nil {
+		dot.Logger().Errorln("", zap.NamedError("", err))
+		return nil, err
 	}
 
 	in = account.CipherParameter{Message: out.Data, Address: address2}
 	out, err = am.client.ContentEncrypt(context.Background(), &in)
 	if err != nil {
-		rlog.Error("failed to encrypt data, error:", err)
-		return nil, errors.New("failed to encrypt data, error:" + err.Error())
+		err = errors.Wrap(err, "failed to encrypt data, error:")
 	} else if out == nil {
-		rlog.Error("failed to encrypt data, error: addr is nil")
-		return nil, errors.New("failed to encrypt data, error: addr is nil")
+		err = errors.New("failed to encrypt data, error: addr is nil")
 	} else if out.Status != account.Status_OK {
-		rlog.Error("failed to encrypt data, error:", out.Msg)
-		return nil, errors.New("failed to encrypt data, error:" + out.Msg)
+		err = errors.New("failed to encrypt data, error:" + out.Msg)
+	}
+	if err != nil {
+		dot.Logger().Errorln("", zap.NamedError("", err))
+		return nil, err
 	}
 
 	return out.Data, nil
@@ -224,8 +233,8 @@ func (am AccountManager) ReEncrypt(
 
 func (am AccountManager) SignTransaction(message []byte, address string, password string) ([]byte, error) {
 	defer func() {
-		if err := recover(); err != nil {
-			rlog.Error("failed to encrypt, error:", err)
+		if er := recover(); er != nil {
+			dot.Logger().Errorln("", zap.Any("failed to encrypt, error:", er))
 		}
 	}()
 
@@ -241,14 +250,15 @@ func (am AccountManager) SignTransaction(message []byte, address string, passwor
 
 	out, err := am.client.Signature(context.Background(), &in)
 	if err != nil {
-		rlog.Error("failed to signature, error:", err)
-		return nil, errors.New("failed to signature, error:" + err.Error())
+		err = errors.Wrap(err, "failed to signature, error:")
 	} else if out == nil {
-		rlog.Error("failed to signature, error: addr is nil")
-		return nil, errors.New("failed to signature, error: addr is nil")
+		err = errors.New("failed to signature, error: addr is nil")
 	} else if out.Status != account.Status_OK {
-		rlog.Error("failed to signature, error:", out.Msg)
-		return nil, errors.New("failed to signature, error:" + out.Msg)
+		err = errors.New("failed to signature, error:" + out.Msg)
+	}
+	if err != nil {
+		dot.Logger().Errorln("", zap.NamedError("", err))
+		return nil, err
 	}
 
 	return out.Data, nil
@@ -259,8 +269,8 @@ func (am AccountManager) ImportAccount(
 	oldPassword string,
 	newPassword string) (string, error) {
 	defer func() {
-		if err := recover(); err != nil {
-			rlog.Error("failed to import account, error:", err)
+		if er := recover(); er != nil {
+			dot.Logger().Errorln("", zap.Any("failed to import account, error:", er))
 		}
 	}()
 
@@ -271,14 +281,15 @@ func (am AccountManager) ImportAccount(
 	in := account.ImportParameter{ContentPassword: oldPassword, ImportPsd: newPassword, Content: keyJson}
 	out, err := am.client.ImportKeystore(context.Background(), &in)
 	if err != nil {
-		rlog.Error("failed to import account, error:", err)
-		return "", errors.New("failed to import account, error:" + err.Error())
+		err = errors.Wrap(err, "failed to import account, error:")
 	} else if out == nil {
-		rlog.Error("failed to import account, error: addr is nil")
-		return "", errors.New("failed to import account, error: addr is nil")
+		err = errors.New("failed to import account, error: addr is nil")
 	} else if out.Status != account.Status_OK {
-		rlog.Error("failed to import account, error:", out.Msg)
-		return "", errors.New("failed to import account, error:" + out.Msg)
+		err = errors.New("failed to import account, error:" + out.Msg)
+	}
+	if err != nil {
+		dot.Logger().Errorln("", zap.NamedError("", err))
+		return "", err
 	}
 
 	return out.Address, nil

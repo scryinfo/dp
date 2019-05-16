@@ -2,11 +2,11 @@ package websocket
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/pkg/errors"
-	"github.com/scryInfo/dp/app/app"
-	settings2 "github.com/scryInfo/dp/app/app/settings"
-	rlog "github.com/sirupsen/logrus"
+	"github.com/scryinfo/dot/dot"
+	"github.com/scryinfo/dp/app/app"
+	settings2 "github.com/scryinfo/dp/app/app/settings"
+	"go.uber.org/zap"
 	"golang.org/x/net/websocket"
 	"net/http"
 	"os/exec"
@@ -14,7 +14,7 @@ import (
 
 const EventSendFailed = " event send failed. "
 
-var ( // todo: think how to reduce global variables.
+var ( // todo: use goroutine handle read and write, use struct instance instead of global variable.
 	funcMap    = make(map[string]settings2.PresetFunc)
 	connParams *websocket.Conn
 )
@@ -27,11 +27,11 @@ func ConnectWithProtocolWebsocket(port string) error {
 	ws := WSServer{
 		Port: port,
 	}
-	return errors.Wrap(ws.start(), "websocket WSConnect failed. ")
+	return errors.Wrap(ws.start(), "Websocket connect failed. ")
 }
 
 func (ws *WSServer) start() error {
-	fmt.Println("> Start listening ... ")
+	dot.Logger().Infoln("> Start listening ... ")
 
 	http.HandleFunc("/", bindHTMLFile)
 	t := http.StripPrefix("/static/", http.FileServer(http.Dir(app.GetGapp().ScryInfo.Config.UIResourcesDir+"/static")))
@@ -41,7 +41,9 @@ func (ws *WSServer) start() error {
 	if err := exec.Command("cmd", "/c start http://127.0.0.1:"+ws.Port).Start(); err != nil {
 		return errors.Wrap(err, "auto-open url failed, (origin: http://127.0.0.1:"+ws.Port+"). ")
 	}
-	fmt.Println("> Listening at http://127.0.0.1:" + ws.Port)
+
+	dot.Logger().Infoln("> Listening at http://127.0.0.1:" + ws.Port)
+
 	if err := http.ListenAndServe(":"+ws.Port, nil); err != nil {
 		return errors.Wrap(err, "Listen and Server failed. ")
 	}
@@ -53,24 +55,27 @@ func bindHTMLFile(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ws *WSServer) handleMessages(conn *websocket.Conn) {
+	logger := dot.Logger()
 	connParams = conn
-	fmt.Printf("> A new websocket connection: %s -> %s\n", conn.RemoteAddr().String(), conn.LocalAddr().String())
+
+	logger.Infoln("> A new websocket connection: " + conn.RemoteAddr().String() + " -> " + conn.LocalAddr().String())
+
 	var err error
 	for {
-		// receive reply form js.
+		// receive message form js.
 		var mi settings2.MessageIn
 		{
 			var reply []byte
 			if err = websocket.Message.Receive(conn, &reply); err != nil {
-				rlog.Error(errors.Wrap(err, "Received failed. "))
+				logger.Errorln("", zap.NamedError("Received failed. ", err))
 				continue
 			}
 			if err = json.Unmarshal(reply, &mi); err != nil {
-				rlog.Error(errors.Wrap(err, "json unmarshal failed. "))
+				logger.Errorln("", zap.NamedError("JSON unmarshal failed. ", err))
 				continue
 			}
 			if _, ok := funcMap[mi.Name]; !ok {
-				rlog.Error("Unknown method name: ", mi.Name)
+				logger.Errorln("Unknown method name: " + mi.Name)
 				continue
 			}
 		}
@@ -85,32 +90,29 @@ func (ws *WSServer) handleMessages(conn *websocket.Conn) {
 			if err != nil {
 				name += ".error"
 				payload = errors.Wrap(err, mi.Name+" failed. ")
-				rlog.Error(payload)
+				logger.Errorln("", zap.Any("", payload))
 			}
 
 			// send
 			if err = sendMessage(name, payload); err != nil {
-				rlog.Error(errors.Wrap(err, name+EventSendFailed))
+				logger.Errorln("", zap.NamedError(name+EventSendFailed, err))
 			}
 		}
 	}
 }
 
-func sendMessage(name string, payload interface{}) (err error) {
-	var b []byte
-
+func sendMessage(name string, payload interface{}) error {
 	mo := settings2.MessageOut{
 		Name:    name,
 		Payload: payload,
 	}
-	if b, err = json.Marshal(mo); err != nil {
-		return
-	}
-	if err = websocket.Message.Send(connParams, string(b)); err != nil {
-		return
+
+	b, err := json.Marshal(mo)
+	if err != nil {
+		return errors.Wrap(err, "Json marshal failed. ")
 	}
 
-	return
+	return websocket.Message.Send(connParams, string(b))
 }
 
 func addCallbackFunc(name string, presetFunc settings2.PresetFunc) {

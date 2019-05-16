@@ -1,8 +1,9 @@
 package app
 
 import (
-	"github.com/scryInfo/dp/app/app/settings"
-	"github.com/scryInfo/dp/dots/binary/sdk/scry"
+	"github.com/scryinfo/dp/app/app/sdkinterface"
+	"github.com/scryinfo/dp/app/app/settings"
+	"github.com/scryinfo/dp/dots/binary/sdk/scry"
 )
 
 var app Gapp
@@ -11,6 +12,7 @@ var app Gapp
 type Gapp struct {
 	ChainWrapper scry.ChainWrapper
 	Deployer     scry.Client
+	CurUser      sdkinterface.SDKWrapper
 	ScryInfo     *settings.ScryInfo
 }
 

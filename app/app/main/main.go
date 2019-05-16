@@ -2,16 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
-	"github.com/scryInfo/dot/dot"
-	"github.com/scryInfo/dot/dots/line"
-	"github.com/scryInfo/dp/app/app"
-	"github.com/scryInfo/dp/app/app/sdkinterface"
-	settings2 "github.com/scryInfo/dp/app/app/settings"
-	WSConnect2 "github.com/scryInfo/dp/app/app/websocket"
-	sdk2 "github.com/scryInfo/dp/dots/binary/sdk"
-	"github.com/scryInfo/scryg/sutils/ssignal"
-	rlog "github.com/sirupsen/logrus"
+	"github.com/scryinfo/dot/dot"
+	"github.com/scryinfo/dot/dots/line"
+	"github.com/scryinfo/dp/app/app"
+	"github.com/scryinfo/dp/app/app/sdkinterface"
+	settings2 "github.com/scryinfo/dp/app/app/settings"
+	WSConnect2 "github.com/scryinfo/dp/app/app/websocket"
+	sdk2 "github.com/scryinfo/dp/dots/binary/sdk"
+	"github.com/scryinfo/scryg/sutils/ssignal"
 	"go.uber.org/zap"
 	"os"
 )
@@ -34,9 +32,8 @@ func main() {
 	line.StopAndDestroy(l, true)
 }
 
-func Init(l dot.Line) error {
+func Init(l dot.Line) (err error) {
 	logger := dot.Logger()
-	var err error = nil
 	conf := &settings2.ScryInfo{}
 	l.SConfig().UnmarshalKey("app", conf)
 	app.GetGapp().ScryInfo = conf
@@ -50,17 +47,18 @@ func Init(l dot.Line) error {
 		conf.Config.AppId,
 	)
 	if err != nil {
-		logger.Errorln("", zap.Any("", err))
+		logger.Errorln("", zap.NamedError("", err))
 	}
 	l.ToInjecter().ReplaceOrAddByType(app.GetGapp().ChainWrapper)
 
-	logger.Infoln("inited ChainWrapper")
+	logger.Infoln("ChainWrapper init finished. ")
 
-	WSConnect2.SetCurUser(sdkinterface.NewSDKWrapperImp())
+	app.GetGapp().CurUser = sdkinterface.CreateSDKWrapperImp(app.GetGapp().ChainWrapper, app.GetGapp().ScryInfo)
+
 	WSConnect2.MessageHandlerInit()
 
 	if err = WSConnect2.ConnectWithProtocolWebsocket(conf.Config.WSPort); err != nil { //todo do not block
-		rlog.Error(errors.Wrap(err, "WebSocket Connect failed. "))
+		logger.Errorln("", zap.NamedError("WebSocket Connect failed. ", err))
 	}
 
 	return err

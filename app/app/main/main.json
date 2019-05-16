@@ -22,7 +22,7 @@
     },
     "config": {
       "wsPort": "9822",
-      "uiResourcesDir": "D:/EnglishRoad/workspace/Go/src/github.com/scryInfo/dp/app/app/ui/resources/app",
+      "uiResourcesDir": "D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/dp/app/app/ui/resources/app",
       "appId": "App demo",
       "ipfsOutDir": "D:/desktop"
     }

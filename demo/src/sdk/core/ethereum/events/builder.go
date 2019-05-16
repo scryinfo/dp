@@ -11,7 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/scryInfo/dp/demo/src/sdk/core/ethereum/redo"
+	"github.com/scryinfo/dp/demo/src/sdk/core/ethereum/redo"
 	"math/big"
 	"reflect"
 	"strings"

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-PRJ_PATH=D:/EnglishRoad/workspace/Go/src/github.com/scryInfo/dp/services/binary_s
+PRJ_PATH=D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/dp/services/binary_s
 PROTO_PATH="$PRJ_PATH/sdk/interface/accountinterface"
 PROTO_FILE="account-service.proto"
 OUTPUT_FILEPATH="$PRJ_PATH/sdk/interface/accountinterface"
