@@ -1,7 +1,7 @@
-var ScryToken = artifacts.require("./ScryToken.sol");
-var ScryProtocol = artifacts.require("./ScryProtocol.sol");
+let ScryToken = artifacts.require("./ScryToken.sol");
+let ScryProtocol = artifacts.require("./ScryProtocol.sol");
 
-var tokenContract;
+let tokenContract;
 module.exports = function(deployer, network, accounts) {
     deployer.deploy(ScryToken).then(function(instance) {
         tokenContract = instance;
