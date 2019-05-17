@@ -1,6 +1,7 @@
 import {dl_db, acc_db, txBuyer_db, txSeller_db, txVerifier_db} from "./DBoptions.js";
 let utils = {
     ws: WebSocket,
+    // todo: ipfs node config
     ipfs: require("ipfs-http-client")({host: 'localhost', port: '5001', protocol: 'http'}),
     map: {},
     voteMutex: true,
