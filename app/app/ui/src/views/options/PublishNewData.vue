@@ -11,8 +11,8 @@
             <el-form-item label="是否支持验证：">
                 <el-switch v-model="SupportVerify" active-text="是" inactive-text="否"></el-switch>
             </el-form-item>
-            <el-form-item label="数据:"><el-input ref="selectedData" type="file"></el-input></el-form-item>
-            <el-form-item label="证明:"><el-input ref="selectedProofs" type="file" multiple></el-input></el-form-item>
+            <el-form-item label="数据:"><input class="el-input__inner" ref="selectedData" type="file"></el-form-item>
+            <el-form-item label="证明:"><input class="el-input__inner" ref="selectedProofs" type="file" multiple></el-form-item>
             <el-form-item><el-button type="primary" @click="pubPrepare">Publish</el-button></el-form-item>
         </el-form>
     </section>
@@ -55,7 +55,7 @@ export default {
             });
         },
         pubPrepare: function () {
-            this.count = this.$refs.selectedProofs.$refs.input.files.length;
+            this.count = this.$refs.selectedProofs.files.length;
             this.pubData.details.Seller = this.$store.state.account;
             this.setDataID();
             this.setProofIDs();
@@ -63,7 +63,7 @@ export default {
         setDataID: function () {
             this.IDs.metaDataID = "";
             let _this = this;
-            let data = this.$refs.selectedData.$refs.input.files[0];
+            let data = this.$refs.selectedData.files[0];
             this.pubData.details.MetaDataExtension = data.name.slice(data.name.indexOf("."));
             let reader = new FileReader();
             reader.readAsArrayBuffer(data);
@@ -84,7 +84,7 @@ export default {
         setProofIDs: function () {
             this.IDs.proofDataIDs = [];
             let _this = this;
-            let proofs = this.$refs.selectedProofs.$refs.input.files;
+            let proofs = this.$refs.selectedProofs.files;
             for (let i=0;i<proofs.length;i++) {
                 this.pubData.details.ProofDataExtensions.push( proofs[i].name.slice(proofs[i].name.indexOf(".")) );
                 let reader = new FileReader();
