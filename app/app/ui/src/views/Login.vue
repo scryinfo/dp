@@ -1,4 +1,4 @@
-<template>
+ <template>
     <div>
         <el-row>
             <el-col :span="24"><div class="top">App demo</div></el-col>
@@ -12,8 +12,10 @@
                         <el-option v-for="acc in this.$store.state.accounts" :key="acc.address"
                                    :value="acc.address" :label="acc.address"></el-option>
                     </el-select>
-                    <el-button class="left-button" @click="right('登录')">登录</el-button>
-                    <el-button class="left-button" @click="right('新建')">创建新用户</el-button>
+                    <div class="left-button-margin">
+                        <el-button class="left-button" @click="right('登录')">登录</el-button>
+                        <el-button class="left-button" @click="right('新建')">创建新用户</el-button>
+                    </div>
                 </div>
             </el-col>
             <el-col :span="16">
@@ -139,10 +141,13 @@ export default {
     width: 70%;
     margin: 30px 15% 70px 15%;
 }
+.left-button-margin {
+    margin-left: 17%
+}
 .left-button {
     width: 65%;
     padding: 5px 20px;
-    margin: 5px 17%;
+    margin: 5px 10px;
 }
 .right {
     padding: 100px 20%;

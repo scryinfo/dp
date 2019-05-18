@@ -1,9 +1,9 @@
 ﻿## 编译环境：
-- go (12.5)
-- node.js (>=6, 10.15.0)
-- ipfs客户端
-- geth客户端
-- 浏览器 （支持websocket协议，chrome 66）
+- go (1.12.5)
+- node.js (>=8, 10.15.0, 10.15.3)
+- ipfs客户端 (0.4.15, 0.4.20)
+- geth客户端 (1.8.27)
+- 浏览器 （支持HTML5，chrome 66，chrome 74）
 
 ## 编译步骤：
 ### 连接ipfs：
@@ -22,17 +22,16 @@ app只使用ipfs的读写功能，如果你只在一台终端上使用，单节�
 
 ### 部署智能合约：
 
-在上一步搭建好的链上部署dp/dots/binary/contracts目录下的智能合约。
+    我们假设你已经完成了node.js的下载与安装。
+cd在上一步搭建好的链上部署dp/dots/binary/contracts目录下的智能合约。
 
 在上述目录下执行npm.ps1文件，下载相关的依赖。
 
 如果你的链使用了自定义的端口等内容，修改truffle配置文件与之匹配，然后使用truffle部署智能合约。
 
-请查询并记录 智能合约各自的地址 与合约部署者的私钥，以供后续使用。
+请查询并记录 所有智能合约的地址 ，以供后续使用。
 
 ### 打包UI资源文件：
-
-    我们假设你已经完成了node.js的下载与安装。
 
 下载dp/app/app/ui/package.json中配置好的依赖，然后使用webpack打包UI资源文件。
 
@@ -45,8 +44,8 @@ app只使用ipfs的读写功能，如果你只在一台终端上使用，单节�
 |:------- |:------- |
 app.chain.contracts.tokenAddr | 修改为前面记录的token合约地址 
 app.chain.contracts.protocolAddr | 修改为前面记录的protocol合约地址
-app.chain.contracts.deployerKeyjson | 使用contracts/tool目录下的genKeyJSON.js文件生成，生成前应替换合约部署者的私钥和密码，替换前应转义双引号。
-app.chain.contracts.deployerPassword | 与.js文件中的password一致
+app.chain.contracts.deployerKeyjson | 修改为keystore目录下，对应用户的文件内容，注意转义双引号
+app.chain.contracts.deployerPassword | 修改为创建账户时使用的密码
 app.chain. ethereum.ethNode | 按照格式修改为geth的节点地址
 app.services.keystore | 修改为认证服务的地址
 app.config.uiResourcesDir | 修改dp的目录即可
