@@ -6,7 +6,7 @@
 
 ## 使用：
 
-安装下面列出的[环境](#env)，并按照文档中的指引完成[编译过程](#compile)与[运行准备](#run_pre)步骤后，即可通过生成的可执行文件体验本demo。
+安装下面列出的[环境](#env)，并按照文档中的指引完成[编译过程](#compile)与[运行准备](#run_pre)步骤后，即可通过生成的可执行文件开始体验。
 
 ## <span id="env">环境</span>：
 
@@ -41,6 +41,10 @@
 在dp/app/app/main目录下执行go build。
 
 ## <span id="run_pre">运行准备</span>：
+
+### 启动用户服务：
+
+运行用户服务的可执行文件，默认使用48080端口。
 
 ### 连接ipfs：
 
@@ -81,4 +85,6 @@ app.config.ipfsOutDir | 修改为你期望的ipfs下载路径
 
 ## 异常处理：
 
-- 用户服务启动失败，找不到vcruntime140.dll：[下载vcre](https://www.microsoft.com/zh-cn/download/details.aspx?id=48145)
+- npm install error， 找不到python exec：安装python2或忽略该问题。
+
+- 用户服务启动失败，找不到vcruntime140.dll：[安装vcre](https://www.microsoft.com/zh-cn/download/details.aspx?id=48145)。
