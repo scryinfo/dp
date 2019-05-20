@@ -18,7 +18,7 @@
     },
     "services": {
       "ipfs": "/ip4/127.0.0.1/tcp/5001",
-      "keystore": "192.168.1.14:48080"
+      "keystore": "localhost:48080"
     },
     "config": {
       "wsPort": "9822",

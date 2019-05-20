@@ -22,7 +22,7 @@ module.exports = {
 		  network_id: '*'
 	  },
 
-	  gethtest: {
+	  geth: {
 		  host: 'localhost',
 		  port: '8545',
 		  network_id: '*'
