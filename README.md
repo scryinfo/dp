@@ -1,9 +1,19 @@
 # dp
-# Install
-## Install GRPC
-1. Protocol Compiler Installation, https://github.com/protocolbuffers/protobuf/blob/master/README.md#protocol-compiler-installation
-2. go get install 
-```
-    go get -u google.golang.org/grpc
-    go get -u github.com/golang/protobuf/protoc-gen-go
-```
+
+通过区块链提供数据交换的SDK，让开发者可以快速方便的开发DAPP应用。
+
+主要包含这些内容：
+数据加解密、签名、智能合约、事件通知、数据存储接口、数据获取与查询、数字货币支付、第三方App支付接口等。
+过程如下：
+
+数据提供者通过SDK写入数据及元数据（数据包含静态数据、动态数据，数据有约定的格式，元数据主要包含数据签名、数据描述等信息）；
+
+数据需求者通过SDK查找需要的数据，支付数字货币后，可以获得数据；
+
+数据验证者，通过向智能合约抵押一定的数字货币来成为验证者。在数据交换过程中，数据需求者可以向合约发起有偿数据验证请求或交易仲裁，验证者由智能合约随机选取。
+
+数据交换的所有参与者可以在参与的交易中相互评分；智能合约会记录参与者交易及评分信息，生成参与者的信誉评价，信誉评价信息可以通过SDK查询。
+
+## demo
+
+我们在app目录下，提供了一个基于dp的Dapp demo。
