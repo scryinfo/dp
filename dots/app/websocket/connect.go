@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"github.com/pkg/errors"
 	"github.com/scryinfo/dot/dot"
-	"github.com/scryinfo/dp/app/app"
+	app2 "github.com/scryinfo/dp/dots/app"
 	"github.com/scryinfo/dp/dots/app/settings"
 	"go.uber.org/zap"
 	"golang.org/x/net/websocket"
@@ -37,7 +37,7 @@ func (ws *WSServer) start() error {
 	dot.Logger().Infoln("> Start listening ... ")
 
 	http.HandleFunc("/", bindHTMLFile)
-	t := http.StripPrefix("/static/", http.FileServer(http.Dir(app.GetGapp().ScryInfo.Config.UIResourcesDir+"/static")))
+	t := http.StripPrefix("/static/", http.FileServer(http.Dir(app2.GetGapp().ScryInfo.Config.UIResourcesDir+"/static")))
 	http.Handle("/static/", t)
 	http.Handle("/ws", websocket.Handler(ws.handleMessages))
 
@@ -54,7 +54,7 @@ func (ws *WSServer) start() error {
 	return nil
 }
 func bindHTMLFile(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, app.GetGapp().ScryInfo.Config.UIResourcesDir+"/index.html")
+	http.ServeFile(w, r, app2.GetGapp().ScryInfo.Config.UIResourcesDir+"/index.html")
 }
 
 func (ws *WSServer) handleMessages(conn *websocket.Conn) {
