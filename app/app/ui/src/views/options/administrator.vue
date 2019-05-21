@@ -1,3 +1,6 @@
+<!-- Scry Info.  All rights reserved.-->
+<!-- license that can be found in the license file.-->
+
 <template>
     <!-- 管理员功能，提供一些便捷功能供测试使用，正式版本删除本文件或删除相关路由设置。 -->
     <section class="administrator">
