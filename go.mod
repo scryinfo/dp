@@ -27,17 +27,17 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/rjeczalik/notify v0.9.2 // indirect
 	github.com/rs/cors v1.6.0 // indirect
-	github.com/scryinfo/dot v0.1.1-0.20190515153407-004cc2ed23ea
-	github.com/scryinfo/scryg v0.0.0-20190515073313-9c06c30f2a39
+	github.com/scryinfo/dot v0.1.2-0.20190521085526-551310bef10f
+	github.com/scryinfo/scryg v0.0.0-20190521085119-4d7bee6acb67
 	github.com/sirupsen/logrus v1.4.1
 	github.com/syndtr/goleveldb v1.0.0 // indirect
 	go.uber.org/atomic v1.4.0 // indirect
 	go.uber.org/zap v1.10.0
 	golang.org/x/crypto v0.0.0-20190513172903-22d7a77e9e5f // indirect
-	golang.org/x/net v0.0.0-20190509222800-a4d6f7feada5
-	golang.org/x/sys v0.0.0-20190509141414-a5b02f93d862 // indirect
+	golang.org/x/net v0.0.0-20190520210107-018c4d40a106
+	golang.org/x/sys v0.0.0-20190520201301-c432e742b0af // indirect
 	golang.org/x/text v0.3.2 // indirect
-	google.golang.org/genproto v0.0.0-20190513181449-d00d292a067c // indirect
+	google.golang.org/genproto v0.0.0-20190516172635-bb713bdc0e52 // indirect
 	google.golang.org/grpc v1.20.1
 	gopkg.in/natefinch/npipe.v2 v2.0.0 // indirect
 	gopkg.in/urfave/cli.v1 v1.20.0 // indirect
