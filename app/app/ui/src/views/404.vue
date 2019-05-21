@@ -1,3 +1,5 @@
+<!-- Scry Info.  All rights reserved.-->
+<!-- license that can be found in the license file.-->
 <template>
     <p class="page-container">
         404 :&nbsp;&nbsp;&nbsp;WALLPAGE NOT FOUND.<br/>

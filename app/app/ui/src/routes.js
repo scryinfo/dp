@@ -1,3 +1,6 @@
+// Scry Info.  All rights reserved.
+// license that can be found in the license file.
+
 import NotFound        from "./views/404.vue";
 import Login           from "./views/Login.vue";
 import Home            from "./views/Home.vue";
@@ -8,8 +11,8 @@ import PublishNewData  from "./views/options/PublishNewData.vue";
 import Verify          from "./views/options/Verify.vue";
 import Arbitrate       from "./views/options/Arbitrate.vue";
 import Message         from "./views/options/Message.vue";
-import test            from "./views/options/test.vue";  // for test
-import administrator   from "./views/options/administrator.vue"; // for test
+// import test            from "./views/options/test.vue";  // for test
+// import administrator   from "./views/options/administrator.vue"; // for test
 
 let routes = [
     {
@@ -30,8 +33,8 @@ let routes = [
             {path: "/vf",  component: Verify,          name: "我验证的数据"},
             {path: "/at",  component: Arbitrate,       name: "我仲裁的数据",  hidden: true},
             {path: "/msg", component: Message,         name: "Short Message", hidden: true},
-            {path: "/testpage",      component: test,          name: "Test",                    hidden: true}, // for test
-            {path: "/administrator", component: administrator, name: "Administrator Functions", hidden: true} // for test
+            // {path: "/testpage",      component: test,          name: "Test",                    hidden: true}, // for test
+            // {path: "/administrator", component: administrator, name: "Administrator Functions", hidden: true} // for test
         ]
     },
     {

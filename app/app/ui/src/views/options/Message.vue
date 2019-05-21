@@ -1,3 +1,5 @@
+<!-- Scry Info.  All rights reserved.-->
+<!-- license that can be found in the license file.-->
 <template>
     <section>
         <el-col :span="24" class="section-item">
