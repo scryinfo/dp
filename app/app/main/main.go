@@ -8,9 +8,9 @@ import (
 	"github.com/scryinfo/dot/dot"
 	"github.com/scryinfo/dot/dots/line"
 	"github.com/scryinfo/dp/app/app"
-	"github.com/scryinfo/dp/app/app/sdkinterface"
-	settings2 "github.com/scryinfo/dp/app/app/settings"
 	WSConnect2 "github.com/scryinfo/dp/app/app/websocket"
+	sdkinterface2 "github.com/scryinfo/dp/dots/app/sdkinterface"
+	"github.com/scryinfo/dp/dots/app/settings"
 	sdk2 "github.com/scryinfo/dp/dots/binary/sdk"
 	"github.com/scryinfo/scryg/sutils/ssignal"
 	"go.uber.org/zap"
@@ -38,7 +38,7 @@ func main() {
 
 func Init(l dot.Line) (err error) {
 	logger := dot.Logger()
-	conf := &settings2.ScryInfo{}
+	conf := &settings.ScryInfo{}
 	l.SConfig().UnmarshalKey("app", conf)
 	app.GetGapp().ScryInfo = conf
 	//todo
@@ -57,7 +57,7 @@ func Init(l dot.Line) (err error) {
 
 	logger.Infoln("ChainWrapper init finished. ")
 
-	app.GetGapp().CurUser = sdkinterface.CreateSDKWrapperImp(app.GetGapp().ChainWrapper, app.GetGapp().ScryInfo)
+	app.GetGapp().CurUser = sdkinterface2.CreateSDKWrapperImp(app.GetGapp().ChainWrapper, app.GetGapp().ScryInfo)
 
 	WSConnect2.MessageHandlerInit()
 

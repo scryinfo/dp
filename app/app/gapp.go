@@ -4,8 +4,8 @@
 package app
 
 import (
-	"github.com/scryinfo/dp/app/app/sdkinterface"
-	"github.com/scryinfo/dp/app/app/settings"
+	sdkinterface2 "github.com/scryinfo/dp/dots/app/sdkinterface"
+	settings2 "github.com/scryinfo/dp/dots/app/settings"
 	"github.com/scryinfo/dp/dots/binary/sdk/scry"
 )
 
@@ -15,8 +15,8 @@ var app Gapp
 type Gapp struct {
 	ChainWrapper scry.ChainWrapper
 	Deployer     scry.Client
-	CurUser      sdkinterface.SDKWrapper
-	ScryInfo     *settings.ScryInfo
+	CurUser      sdkinterface2.SDKWrapper
+	ScryInfo     *settings2.ScryInfo
 }
 
 func GetGapp() *Gapp {
