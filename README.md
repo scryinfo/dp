@@ -22,7 +22,7 @@
 > 我们假设你已经完成了node.js的下载与安装。
 
 执行dp/app/app/ui目录下的**webpackUI.ps1**脚本文件完成这一步骤。  
-  
+
 你可以通过ui/config/index.js中的*bundleAnalyzerReport*控制是否显示webpack结果分析报告。  
 
 ### 构建app可执行文件：
@@ -105,3 +105,5 @@ app.config.ipfsOutDir | 修改为你期望的ipfs下载路径
 - 智能合约部署失败，连接不到以太坊客户端：检查是否使用了自定义的端口搭建私链，修改contracts目录下的truffle.js配置文件network.geth.port与之一致。
 
 - 智能合约部署无显示：查看geth_init.ps1打开的powershell窗口是否仍在挖矿（不断有消息刷新）。
+
+# [Code Style -- Go](https://github.com/scryinfo/scryg/blob/master/codestyle_go.md)
