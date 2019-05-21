@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/scryinfo/dot/dot"
 	"github.com/scryinfo/dp/app/app"
-	settings2 "github.com/scryinfo/dp/app/app/settings"
+	"github.com/scryinfo/dp/dots/app/settings"
 	events2 "github.com/scryinfo/dp/dots/binary/sdk/core/ethereum/events"
 	ipfsaccess2 "github.com/scryinfo/dp/dots/binary/sdk/util/storage/ipfsaccess"
 	"go.uber.org/zap"
@@ -18,7 +18,7 @@ import (
 )
 
 func onPublish(event events2.Event) bool {
-	var op settings2.OnPublish
+	var op settings.OnPublish
 	{
 		var err error
 		if op, err = getPubDataDetails(event.Data.Get("despDataId").(string)); err != nil {
@@ -37,7 +37,7 @@ func onPublish(event events2.Event) bool {
 	return true
 }
 
-func getPubDataDetails(ipfsID string) (detailsData settings2.OnPublish, err error) {
+func getPubDataDetails(ipfsID string) (detailsData settings.OnPublish, err error) {
 	defer func() {
 		if er := recover(); er != nil {
 			dot.Logger().Errorln("", zap.Any("onPublish.callback: get publish data details failed. ", er))
@@ -81,7 +81,7 @@ func onApprove(_ events2.Event) bool {
 }
 
 func onVerifiersChosen(event events2.Event) bool {
-	var ovc settings2.OnVerifiersChosen
+	var ovc settings.OnVerifiersChosen
 	{
 		ovc.PublishID = event.Data.Get("publishId").(string)
 		if err := sendMessage("onProofFilesExtensions", ovc.PublishID); err != nil {
@@ -107,7 +107,7 @@ func onVerifiersChosen(event events2.Event) bool {
 }
 
 func onTransactionCreate(event events2.Event) bool {
-	var otc settings2.OnTransactionCreate
+	var otc settings.OnTransactionCreate
 	{
 		otc.PublishID = event.Data.Get("publishId").(string)
 		if err := sendMessage("onProofFilesExtensions", otc.PublishID); err != nil {
@@ -175,7 +175,7 @@ func ipfsBytes32ToHash(ipfsb [32]byte) string {
 }
 
 func onPurchase(event events2.Event) bool {
-	var op settings2.OnPurchase
+	var op settings.OnPurchase
 	{
 		op.Block = event.BlockNumber
 		op.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
@@ -196,7 +196,7 @@ func onPurchase(event events2.Event) bool {
 }
 
 func onReadyForDownload(event events2.Event) bool {
-	var orfd settings2.OnReadyForDownload
+	var orfd settings.OnReadyForDownload
 	{
 		orfd.Block = event.BlockNumber
 		orfd.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
@@ -213,7 +213,7 @@ func onReadyForDownload(event events2.Event) bool {
 }
 
 func onClose(event events2.Event) bool {
-	var oc settings2.OnClose
+	var oc settings.OnClose
 	{
 		oc.Block = event.BlockNumber
 		oc.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
@@ -229,7 +229,7 @@ func onClose(event events2.Event) bool {
 }
 
 func onRegisterAsVerifier(event events2.Event) bool {
-	var orav settings2.OnRegisterAsVerifier
+	var orav settings.OnRegisterAsVerifier
 	{
 		orav.Block = event.BlockNumber
 	}
@@ -242,7 +242,7 @@ func onRegisterAsVerifier(event events2.Event) bool {
 }
 
 func onVote(event events2.Event) bool {
-	var ov settings2.OnVote
+	var ov settings.OnVote
 	{
 		ov.Block = event.BlockNumber
 		ov.VerifierIndex = strconv.Itoa(int(event.Data.Get("index").(uint8)))
@@ -262,7 +262,7 @@ func onVote(event events2.Event) bool {
 }
 
 func onVerifierDisable(event events2.Event) bool {
-	var ovd settings2.OnVerifierDisable
+	var ovd settings.OnVerifierDisable
 	{
 		ovd.Block = event.BlockNumber
 	}
