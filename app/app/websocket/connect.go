@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/scryinfo/dot/dot"
 	"github.com/scryinfo/dp/app/app"
-	settings2 "github.com/scryinfo/dp/app/app/settings"
+	"github.com/scryinfo/dp/dots/app/settings"
 	"go.uber.org/zap"
 	"golang.org/x/net/websocket"
 	"net/http"
@@ -18,7 +18,7 @@ import (
 const EventSendFailed = " event send failed. "
 
 var ( // todo: use goroutine handle read and write, use struct instance instead of global variable.
-	funcMap    = make(map[string]settings2.PresetFunc)
+	funcMap    = make(map[string]settings.PresetFunc)
 	connParams *websocket.Conn
 )
 
@@ -66,7 +66,7 @@ func (ws *WSServer) handleMessages(conn *websocket.Conn) {
 	var err error
 	for {
 		// receive message form js.
-		var mi settings2.MessageIn
+		var mi settings.MessageIn
 		{
 			var reply []byte
 			if err = websocket.Message.Receive(conn, &reply); err != nil {
@@ -105,7 +105,7 @@ func (ws *WSServer) handleMessages(conn *websocket.Conn) {
 }
 
 func sendMessage(name string, payload interface{}) error {
-	mo := settings2.MessageOut{
+	mo := settings.MessageOut{
 		Name:    name,
 		Payload: payload,
 	}
@@ -118,6 +118,6 @@ func sendMessage(name string, payload interface{}) error {
 	return websocket.Message.Send(connParams, string(b))
 }
 
-func addCallbackFunc(name string, presetFunc settings2.PresetFunc) {
+func addCallbackFunc(name string, presetFunc settings.PresetFunc) {
 	funcMap[name] = presetFunc
 }

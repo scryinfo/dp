@@ -6,8 +6,8 @@ package websocket
 import (
 	"encoding/json"
 	"github.com/scryinfo/dp/app/app"
-	sdkinterface2 "github.com/scryinfo/dp/app/app/sdkinterface"
-	settings2 "github.com/scryinfo/dp/app/app/settings"
+	"github.com/scryinfo/dp/dots/app/sdkinterface"
+	"github.com/scryinfo/dp/dots/app/settings"
 	"math/big"
 )
 
@@ -41,8 +41,8 @@ func MessageHandlerInit() {
 	addCallbackFunc("credit", credit)
 }
 
-func loginVerify(mi *settings2.MessageIn) (payload interface{}, err error) {
-	var ai settings2.AccInfo
+func loginVerify(mi *settings.MessageIn) (payload interface{}, err error) {
+	var ai settings.AccInfo
 	if err = json.Unmarshal(mi.Payload, &ai); err != nil {
 		return
 	}
@@ -53,8 +53,8 @@ func loginVerify(mi *settings2.MessageIn) (payload interface{}, err error) {
 	return
 }
 
-func createNewAccount(mi *settings2.MessageIn) (payload interface{}, err error) {
-	var pwd settings2.AccInfo
+func createNewAccount(mi *settings.MessageIn) (payload interface{}, err error) {
+	var pwd settings.AccInfo
 	if err = json.Unmarshal(mi.Payload, &pwd); err != nil {
 		return
 	}
@@ -65,8 +65,8 @@ func createNewAccount(mi *settings2.MessageIn) (payload interface{}, err error) 
 	return
 }
 
-func blockSet(mi *settings2.MessageIn) (payload interface{}, err error) {
-	var sid settings2.SDKInitData
+func blockSet(mi *settings.MessageIn) (payload interface{}, err error) {
+	var sid settings.SDKInitData
 	if err = json.Unmarshal(mi.Payload, &sid); err != nil {
 		return
 	}
@@ -74,7 +74,7 @@ func blockSet(mi *settings2.MessageIn) (payload interface{}, err error) {
 		onClose, onRegisterAsVerifier, onVote, onVerifierDisable); err != nil {
 		return
 	}
-	sdkinterface2.SetFromBlock(uint64(sid.FromBlock))
+	sdkinterface.SetFromBlock(uint64(sid.FromBlock))
 	// when an user login success, he will get 1,000,000 tokens for test. in 'block.set' case.
 	if err = app.GetGapp().CurUser.TransferTokenFromDeployer(big.NewInt(1000000)); err != nil { // for test
 		return
@@ -84,7 +84,7 @@ func blockSet(mi *settings2.MessageIn) (payload interface{}, err error) {
 	return
 }
 
-func logout(_ *settings2.MessageIn) (payload interface{}, err error) {
+func logout(_ *settings.MessageIn) (payload interface{}, err error) {
 	if err = app.GetGapp().CurUser.UnsubscribeEvents(eventName); err != nil {
 		return
 	}
@@ -93,8 +93,8 @@ func logout(_ *settings2.MessageIn) (payload interface{}, err error) {
 	return
 }
 
-func publish(mi *settings2.MessageIn) (payload interface{}, err error) {
-	var pd settings2.PublishData
+func publish(mi *settings.MessageIn) (payload interface{}, err error) {
+	var pd settings.PublishData
 	if err = json.Unmarshal(mi.Payload, &pd); err != nil {
 		return
 	}
@@ -105,8 +105,8 @@ func publish(mi *settings2.MessageIn) (payload interface{}, err error) {
 	return
 }
 
-func buy(mi *settings2.MessageIn) (payload interface{}, err error) {
-	var bd settings2.BuyData
+func buy(mi *settings.MessageIn) (payload interface{}, err error) {
+	var bd settings.BuyData
 	if err = json.Unmarshal(mi.Payload, &bd); err != nil {
 		return
 	}
@@ -127,8 +127,8 @@ func buy(mi *settings2.MessageIn) (payload interface{}, err error) {
 	return
 }
 
-func extensions(mi *settings2.MessageIn) (payload interface{}, err error) {
-	var p settings2.Prepared
+func extensions(mi *settings.MessageIn) (payload interface{}, err error) {
+	var p settings.Prepared
 	if err = json.Unmarshal(mi.Payload, &p); err != nil {
 		return
 	}
@@ -138,8 +138,8 @@ func extensions(mi *settings2.MessageIn) (payload interface{}, err error) {
 	return
 }
 
-func purchase(mi *settings2.MessageIn) (payload interface{}, err error) {
-	var pd settings2.PurchaseData
+func purchase(mi *settings.MessageIn) (payload interface{}, err error) {
+	var pd settings.PurchaseData
 	if err = json.Unmarshal(mi.Payload, &pd); err != nil {
 		return
 	}
@@ -151,8 +151,8 @@ func purchase(mi *settings2.MessageIn) (payload interface{}, err error) {
 	return
 }
 
-func reEncrypt(mi *settings2.MessageIn) (payload interface{}, err error) {
-	var re settings2.ReEncryptData
+func reEncrypt(mi *settings.MessageIn) (payload interface{}, err error) {
+	var re settings.ReEncryptData
 	if err = json.Unmarshal(mi.Payload, &re); err != nil {
 		return
 	}
@@ -165,8 +165,8 @@ func reEncrypt(mi *settings2.MessageIn) (payload interface{}, err error) {
 	return
 }
 
-func cancel(mi *settings2.MessageIn) (payload interface{}, err error) {
-	var pd settings2.PurchaseData
+func cancel(mi *settings.MessageIn) (payload interface{}, err error) {
+	var pd settings.PurchaseData
 	if err = json.Unmarshal(mi.Payload, &pd); err != nil {
 		return
 	}
@@ -178,8 +178,8 @@ func cancel(mi *settings2.MessageIn) (payload interface{}, err error) {
 	return
 }
 
-func decrypt(mi *settings2.MessageIn) (payload interface{}, err error) {
-	var dd settings2.DecryptData
+func decrypt(mi *settings.MessageIn) (payload interface{}, err error) {
+	var dd settings.DecryptData
 	if err = json.Unmarshal(mi.Payload, &dd); err != nil {
 		return
 	}
@@ -191,8 +191,8 @@ func decrypt(mi *settings2.MessageIn) (payload interface{}, err error) {
 	return
 }
 
-func confirm(mi *settings2.MessageIn) (payload interface{}, err error) {
-	var cd settings2.ConfirmData
+func confirm(mi *settings.MessageIn) (payload interface{}, err error) {
+	var cd settings.ConfirmData
 	if err = json.Unmarshal(mi.Payload, &cd); err != nil {
 		return
 	}
@@ -204,8 +204,8 @@ func confirm(mi *settings2.MessageIn) (payload interface{}, err error) {
 	return
 }
 
-func register(mi *settings2.MessageIn) (payload interface{}, err error) {
-	var rvd settings2.RegisterVerifierData
+func register(mi *settings.MessageIn) (payload interface{}, err error) {
+	var rvd settings.RegisterVerifierData
 	if err = json.Unmarshal(mi.Payload, &rvd); err != nil {
 		return
 	}
@@ -220,8 +220,8 @@ func register(mi *settings2.MessageIn) (payload interface{}, err error) {
 	return
 }
 
-func verify(mi *settings2.MessageIn) (payload interface{}, err error) {
-	var vd settings2.VerifyData
+func verify(mi *settings.MessageIn) (payload interface{}, err error) {
+	var vd settings.VerifyData
 	if err = json.Unmarshal(mi.Payload, &vd); err != nil {
 		return
 	}
@@ -233,8 +233,8 @@ func verify(mi *settings2.MessageIn) (payload interface{}, err error) {
 	return
 }
 
-func credit(mi *settings2.MessageIn) (payload interface{}, err error) {
-	var cd settings2.CreditData
+func credit(mi *settings.MessageIn) (payload interface{}, err error) {
+	var cd settings.CreditData
 	if err = json.Unmarshal(mi.Payload, &cd); err != nil {
 		return
 	}
