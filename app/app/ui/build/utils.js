@@ -1,3 +1,6 @@
+// Scry Info.  All rights reserved.
+// license that can be found in the license file.
+
 let path = require('path');
 let config = require('../config');
 let ExtractTextPlugin = require('extract-text-webpack-plugin');

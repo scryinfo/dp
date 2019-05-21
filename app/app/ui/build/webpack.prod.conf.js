@@ -1,3 +1,6 @@
+// Scry Info.  All rights reserved.
+// license that can be found in the license file.
+
 let path = require('path');
 let utils = require('./utils.js');
 let config = require('../config');

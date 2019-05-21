@@ -1,3 +1,6 @@
+// Scry Info.  All rights reserved.
+// license that can be found in the license file.
+
 pragma solidity ^0.4.24;
 
 import "zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";

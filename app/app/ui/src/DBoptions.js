@@ -1,3 +1,6 @@
+// Scry Info.  All rights reserved.
+// license that can be found in the license file.
+
 let dl_db = {
     db_name: "Utils",
     db_store_name: "datalist",
