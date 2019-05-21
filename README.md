@@ -73,10 +73,7 @@
 > 我们假设你已经完成了geth的下载与安装。
 
 执行dp/dots/binary/contracts/geth_init目录下的**geth_init.ps1**脚本文件完成私链搭建。  
-成功执行会进入js console，在">"后执行下面这条命令：
-```javascript
-loadScript('.\create_account.js')
-```  
+执行相同目录下的**geth_acc_mine.ps1**脚本文件创建用户并开始挖矿。
 
 ### 部署智能合约：
 
