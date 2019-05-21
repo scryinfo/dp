@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"github.com/scryinfo/dot/dot"
 	"github.com/scryinfo/dot/dots/line"
-	"github.com/scryinfo/dp/app/app"
-	WSConnect2 "github.com/scryinfo/dp/app/app/websocket"
+	app2 "github.com/scryinfo/dp/dots/app"
 	sdkinterface2 "github.com/scryinfo/dp/dots/app/sdkinterface"
 	"github.com/scryinfo/dp/dots/app/settings"
+	"github.com/scryinfo/dp/dots/app/websocket"
 	sdk2 "github.com/scryinfo/dp/dots/binary/sdk"
 	"github.com/scryinfo/scryg/sutils/ssignal"
 	"go.uber.org/zap"
@@ -40,9 +40,9 @@ func Init(l dot.Line) (err error) {
 	logger := dot.Logger()
 	conf := &settings.ScryInfo{}
 	l.SConfig().UnmarshalKey("app", conf)
-	app.GetGapp().ScryInfo = conf
+	app2.GetGapp().ScryInfo = conf
 	//todo
-	app.GetGapp().ChainWrapper, err = sdk2.Init(
+	app2.GetGapp().ChainWrapper, err = sdk2.Init(
 		conf.Chain.Ethereum.EthNode,
 		conf.Chain.Contracts.ProtocolAddr,
 		conf.Chain.Contracts.TokenAddr,
@@ -53,15 +53,15 @@ func Init(l dot.Line) (err error) {
 	if err != nil {
 		logger.Errorln("", zap.NamedError("", err))
 	}
-	l.ToInjecter().ReplaceOrAddByType(app.GetGapp().ChainWrapper)
+	l.ToInjecter().ReplaceOrAddByType(app2.GetGapp().ChainWrapper)
 
 	logger.Infoln("ChainWrapper init finished. ")
 
-	app.GetGapp().CurUser = sdkinterface2.CreateSDKWrapperImp(app.GetGapp().ChainWrapper, app.GetGapp().ScryInfo)
+	app2.GetGapp().CurUser = sdkinterface2.CreateSDKWrapperImp(app2.GetGapp().ChainWrapper, app2.GetGapp().ScryInfo)
 
-	WSConnect2.MessageHandlerInit()
+	websocket.MessageHandlerInit()
 
-	if err = WSConnect2.ConnectWithProtocolWebsocket(conf.Config.WSPort); err != nil { //todo do not block
+	if err = websocket.ConnectWithProtocolWebsocket(conf.Config.WSPort); err != nil { //todo do not block
 		logger.Errorln("", zap.NamedError("WebSocket Connect failed. ", err))
 	}
 
