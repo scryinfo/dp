@@ -3,7 +3,7 @@ package sdkinterface
 import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
-	settings2 "github.com/scryinfo/dp/app/app/settings"
+	"github.com/scryinfo/dp/dots/app/settings"
 	sdk2 "github.com/scryinfo/dp/dots/binary/sdk"
 	chainevents2 "github.com/scryinfo/dp/dots/binary/sdk/core/chainevents"
 	chainoperations2 "github.com/scryinfo/dp/dots/binary/sdk/core/chainoperations"
@@ -18,10 +18,10 @@ type sdkWrapperImp struct {
 	curUser scry.Client
 	dp      scry.Client
 	cw      scry.ChainWrapper
-	si      *settings2.ScryInfo
+	si      *settings.ScryInfo
 }
 
-func CreateSDKWrapperImp(cw scry.ChainWrapper, si *settings2.ScryInfo) SDKWrapper {
+func CreateSDKWrapperImp(cw scry.ChainWrapper, si *settings.ScryInfo) SDKWrapper {
 	return &sdkWrapperImp{
 		cw: cw,
 		si: si,
@@ -126,7 +126,7 @@ func (swi *sdkWrapperImp) UnsubscribeEvents(eventName []string) error {
 	return nil
 }
 
-func (swi *sdkWrapperImp) PublishData(data *settings2.PublishData) (string, error) {
+func (swi *sdkWrapperImp) PublishData(data *settings.PublishData) (string, error) {
 	if swi.curUser == nil {
 		return "", errors.New("Current user is nil. ")
 	}
@@ -331,7 +331,7 @@ func (swi *sdkWrapperImp) Vote(password, txId string, judge bool, comment string
 	return nil
 }
 
-func (swi *sdkWrapperImp) CreditToVerifiers(creditData *settings2.CreditData) error {
+func (swi *sdkWrapperImp) CreditToVerifiers(creditData *settings.CreditData) error {
 	if swi.curUser == nil {
 		return errors.New("Current user is nil. ")
 	}
