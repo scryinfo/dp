@@ -1,51 +1,53 @@
-# 介绍
+[中文](./README-cn.md)  
+[EN](./README.md)  
+# Introduction
 
-通过区块链提供数据交换的SDK，让开发者可以快速方便的开发DAPP应用。主要包含这些内容：数据加解密、签名、智能合约、事件通知、数据存储接口、数据获取与查询、数字货币支付、第三方App支付接口等。过程如下：
+Through SDK for data exchange with blockchain, developers can get easy access to DAPP development. It mainly includes data encryption and decryption, signature, smart contract, event notification, data storage API, data acquisition and search, digital currency payment, third party APP payment API and so on.The process is as following: 
 	
-数据提供者通过SDK写入数据及元数据（数据包含静态数据、动态数据，数据有约定的格式，元数据主要包含数据签名、数据描述等信息）；数据需求者通过SDK查找需要的数据，支付数字货币后，可以获得数据；数据验证者，通过向智能合约抵押一定的数字货币来成为验证者。在数据交换过程中，数据需求者可以向合约发起有偿数据验证请求或交易仲裁，验证者由智能合约随机选取。数据交换的所有参与者可以在参与的交易中相互评分；智能合约会记录参与者交易及评分信息，生成参与者的信誉评价，信誉评价信息可以通过SDK查询。
+Data provider inputs data and metadata through SDK (data includes static data and dynamic data which have the agreed format; metadata mainly includes data signature, data description and etc). Data demander can find the required data through SDK and obtain the data after paying digital currency. The data verifier can be qualified by pledging a certain amount of digital currency to the smart contract. In the process of data exchange, the data demander can initiate the compensable data verification request or transaction arbitration to the smart contract, and the verifier will be randomly selected by the smart contract. All participants in the data exchange can score each other in the transaction；The smart contract would record the transaction and scores of the participants thus generate the reputation evaluation of the participants which can be inquired through SDK
 
 # Windows
 
-##  编译
+##  Edit
 
-###  编译环境
+###  Edit environment
 
-> 下列环境需要自行安装，未列出不需要自行安装的环境(如webpack、truffle)与可选的环境(如python)。  
-> 括号内为经过测试的推荐版本。
+> The following environment should be installed yourself. Excepted environment(like webpack, truffle) and optional environment(like python) is not listed here
+> The following is suggested version that has been tested
 
 - go (1.12.5)
 - node.js (10.15.3)
 - gcc (mingw-w64 v8.1.0)
 
-### 打包UI资源文件：
+### Package UI source files：
 
-> 我们假设你已经完成了node.js的下载与安装。
+> We assume that you have finished node.js download and installation
 
-执行dp/app/app/ui目录下的**webpackUI.ps1**脚本文件完成这一步骤。  
+Run **webpackUI.ps1** script in dp/app/app/ui content to finish this process
 
-你可以通过ui/config/index.js中的*bundleAnalyzerReport*控制是否显示webpack结果分析报告。  
+You can control whether to display webpack result analysis through *bundleAnalyzerReport* in ui/config/index.js  
 
-### 构建app可执行文件：
+### Build app executable file：
 
-在dp/app/app/main目录下执行go build，成功执行后，会生成入口文件：**main.exe**。
+Run: go build in dp/app/app/main content，entrance file: **main.exe** will be generated if succeeded
 
-##  运行
+##  Operation
 
-### 运行环境
+### Operating environment
 
-- ipfs客户端 (0.4.20)
-- geth客户端 (1.8.27)
-- 浏览器 (chrome 74)
+- ipfs client (0.4.20)
+- geth client (1.8.27)
+- Browser (chrome 74)
 
-### 启动用户服务：
+### Start user service:
 
-运行dp/dots/auth目录下的，用户服务的可执行文件，默认使用48080端口。
+Run user service executable file in dp/dots/auth content，default API is 48080
 
-### 连接ipfs：
+### ipfs connection：
 
-> 我们假设你已经完成了ipfs的下载与安装。
+> We assume that you have finished ipfs download and installation
 
-- 修改配置文件，在你的ipfs下载路径中，找到config文件，如下所示，为其一级配置项"API"添加下面三条"Access..."配置：  
+- Adjust config files: find config files in your ipfs download path like following, add following 3 "Access..." for config item "API"   Config：  
 ```json
 "API": {
   "HTTPHeaders": {
@@ -64,46 +66,46 @@
   }
 },
 ```
-- 在命令行执行 ipfs daemon 命令，执行成功时会显示"Daemon is ready"，保持命令行窗口开启。
+- Run ipfs daemon in command line，"Daemon is ready" will be displayed if succeeded，Keep command line open
 
-> 因为app使用js进行ipfs上传，所以上面添加了"允许ipfs跨域执行post请求"的配置。
+> Since app use js to upload ipfs ，so "permit ipfs Cross-domain execute post request" config is added above  
 
-### 搭建一条私链：
+### Build one private chain:
 
-> 我们假设你已经完成了geth的下载与安装。
+> We assume that you have finished geth download and installation
 
-执行dp/dots/binary/contracts/geth_init目录下的**geth_init.ps1**脚本文件完成私链搭建。  
-执行相同目录下的**geth_acc_mine.ps1**脚本文件创建用户并开始挖矿。
+Run **geth_init.ps1** script in dp/dots/binary/contracts/geth_init content to finish private chain building 
+Run **geth_acc_mine.ps1** script in the same content to create user and start mining
 
-### 部署智能合约：
+### Deploy smart contract:
 
-执行dp/dots/binary/contracts目录下的**contract.ps1**脚本文件完成这一步骤。  
-脚本会将部分结果输出到相同目录下的migrate.log文件，在文件末尾可以找到*ScryToken*、*ScryProtocol*两个"0x"开头的42个字符的地址。
+Run **contract.ps1** script in dp/dots/binary/contracts content to finish this process 
+Script will input part of result to migrate.log in the same content, *ScryToken*、*ScryProtocol* two  42-character address with "0x" in the beginning can be found in the file end  
 
-### 修改app配置文件：
+### Adjust app config file：
 
 | key | value |
 |:------- |:------- |
-app.chain.contracts.tokenAddr | 修改为日志文件中找到的ScryToken地址 
-app.chain.contracts.protocolAddr | 修改为日志文件中找到的ScryProtocol地址
-app.chain.contracts.deployerKeyjson | 修改为dp/dots/binary/contracks/geth_init/chain/keystore目录下，唯一文件的内容，注意转义双引号
-app.config.uiResourcesDir | 修改dp的目录即可
-app.config.ipfsOutDir | 修改为你期望的ipfs下载路径
+app.chain.contracts.tokenAddr | Adjust to ScryToken address found in logfile 
+app.chain.contracts.protocolAddr | Adjust to ScryProtocol address found in logfile 
+app.chain.contracts.deployerKeyjson | Adjust to unique file contents under dp/dots/binary/contracks/geth_init/chain/keystore content，pay attention to double quotes
+app.config.uiResourcesDir | Adjust the content of dp 
+app.config.ipfsOutDir | Adjust to your selected ipfs download path
 
-### 体验
+### Experience
 
-完成上述所有步骤后，即可通过dp/app/app/main/main.exe入口文件进行体验。
+After finishing all process above, you can experience it through dp/app/app/main/main.exe entrance file
 
-## 异常处理：
+## Exception handling：
 
-- windows禁止ps1脚本执行：使用管理员权限打开命令行，执行Set-ExecutionPolicy unrestricted命令。
+- windows banned ps1 script operation：Use administrator privileges to open command line, run Set-ExecutionPolicy unrestricted
 
-- npm install error，找不到python exec：安装python2或忽略该问题。
+- npm install error，找不到python exec is not found：install python2 or ignore this problem
 
-- 用户服务启动失败，找不到vcruntime140.dll：[安装vcre](https://www.microsoft.com/zh-cn/download/details.aspx?id=48145)。
+- User service start failure, vcruntime140.dll is not found：[install vcre](https://www.microsoft.com/zh-cn/download/details.aspx?id=48145)。
 
-- 智能合约部署失败，连接不到以太坊客户端：检查是否使用了自定义的端口搭建私链，修改contracts目录下的truffle.js配置文件network.geth.port与之一致。
+- Smart contract deployment failure, failed to get connected to ether client: Check whether customized API is used to build private chain, adjust truffle.js config file network.geth.port in contracts content to get consistent with it
 
-- 智能合约部署无显示：查看geth_init.ps1打开的powershell窗口是否仍在挖矿（不断有消息刷新）。
+- Smart contract deployment is not displayed: Check powershell opened by geth_init.ps1 is still mining or not(information will be refreshed constantly).
 
 # [Code Style -- Go](https://github.com/scryinfo/scryg/blob/master/codestyle_go.md)
