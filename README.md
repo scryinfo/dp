@@ -45,14 +45,14 @@
 
 > 我们假设你已经完成了ipfs的下载与安装。
 
-- 修改配置文件，在你的ipfs下载路径中，找到config文件，如下所示，为其一级配置项"API"添加粗体的三条配置：  
+- 修改配置文件，在你的ipfs下载路径中，找到config文件，如下所示，为其一级配置项"API"添加下面三条"Access..."配置：  
 ```
 "API": {
   "HTTPHeaders": {
     "Server": [
       "go-ipfs/0.4.14"
     ],
-    **"Access-Control-Allow-Origin": [
+    "Access-Control-Allow-Origin": [
       "*"
     ],
     "Access-Control-Allow-Credentials": [
@@ -60,7 +60,7 @@
     ],
     "Access-Control-Allow-Methods": [
       "POST"
-    ]**
+    ]
   }
 },
 ```
@@ -90,6 +90,10 @@ app.chain.contracts.protocolAddr | 修改为日志文件中找到的ScryProtocol
 app.chain.contracts.deployerKeyjson | 修改为dp/dots/binary/contracks/geth_init/chain/keystore目录下，唯一文件的内容，注意转义双引号
 app.config.uiResourcesDir | 修改dp的目录即可
 app.config.ipfsOutDir | 修改为你期望的ipfs下载路径
+
+### 体验
+
+完成上述所有步骤后，即可通过dp/app/app/main/main.exe入口文件进行体验。
 
 ## 异常处理：
 
