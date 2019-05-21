@@ -100,9 +100,9 @@ After finishing all process above, you can experience it through dp/app/app/main
 
 - windows banned ps1 script operation：Use administrator privileges to open command line, run Set-ExecutionPolicy unrestricted
 
-- npm install error，找不到python exec is not found：install python2 or ignore this problem
+- npm install error，python exec is not found：install python2 or ignore this problem
 
-- User service start failure, vcruntime140.dll is not found：[install vcre](https://www.microsoft.com/zh-cn/download/details.aspx?id=48145)。
+- User service start failure, vcruntime140.dll is not found：[install vcre](https://www.microsoft.com/zh-cn/download/details.aspx?id=48145).
 
 - Smart contract deployment failure, failed to get connected to ether client: Check whether customized API is used to build private chain, adjust truffle.js config file network.geth.port in contracts content to get consistent with it
 
