@@ -46,22 +46,24 @@
 > 我们假设你已经完成了ipfs的下载与安装。
 
 - 修改配置文件，在你的ipfs下载路径中，找到config文件，如下所示，为其一级配置项"API"添加粗体的三条配置：  
-    "API": {
-        "HTTPHeaders": {
-          "Server": [
-            "go-ipfs/0.4.14"
-          ],
-          **"Access-Control-Allow-Origin": [
-            "*"
-          ],
-          "Access-Control-Allow-Credentials": [
-            "true"
-          ],
-          "Access-Control-Allow-Methods": [
-            "POST"
-          ]**
-        }
-      },
+```
+"API": {
+  "HTTPHeaders": {
+    "Server": [
+      "go-ipfs/0.4.14"
+    ],
+    **"Access-Control-Allow-Origin": [
+      "*"
+    ],
+    "Access-Control-Allow-Credentials": [
+      "true"
+    ],
+    "Access-Control-Allow-Methods": [
+      "POST"
+    ]**
+  }
+},
+```
 - 在命令行执行 ipfs daemon 命令，执行成功时会显示"Daemon is ready"，保持命令行窗口开启。
 
 > 因为app使用js进行ipfs上传，所以上面添加了"允许ipfs跨域执行post请求"的配置。
