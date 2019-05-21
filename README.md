@@ -23,7 +23,7 @@
 
 执行dp/app/app/ui目录下的**webpackUI.ps1**脚本文件完成这一步骤。  
   
-你可以通过ui/config/index.js中的bundleAnalyzerReport控制是否显示webpack结果分析报告。  
+你可以通过ui/config/index.js中的*bundleAnalyzerReport*控制是否显示webpack结果分析报告。  
 
 ### 构建app可执行文件：
 
@@ -46,7 +46,7 @@
 > 我们假设你已经完成了ipfs的下载与安装。
 
 - 修改配置文件，在你的ipfs下载路径中，找到config文件，如下所示，为其一级配置项"API"添加下面三条"Access..."配置：  
-```
+```json
 "API": {
   "HTTPHeaders": {
     "Server": [
@@ -72,14 +72,16 @@
 
 > 我们假设你已经完成了geth的下载与安装。
 
-执行dp/dots/binary/contracts/geth_init目录下的geth_init.ps1脚本文件完成私链搭建。  
+执行dp/dots/binary/contracts/geth_init目录下的**geth_init.ps1**脚本文件完成私链搭建。  
 成功执行会进入js console，在">"后执行下面这条命令：
-    loadScript('.\create_account.js')  
+```javascript
+loadScript('.\create_account.js')
+```  
 
 ### 部署智能合约：
 
-执行dp/dots/binary/contracts目录下的no_exit.ps1脚本文件完成这一步骤。  
-脚本会将部分结果输出到相同目录下的migrate.log文件，在文件末尾可以找到ScryToken、ScryProtocol两个"0x"开头的42个字符的地址。
+执行dp/dots/binary/contracts目录下的**contract.ps1**脚本文件完成这一步骤。  
+脚本会将部分结果输出到相同目录下的migrate.log文件，在文件末尾可以找到*ScryToken*、*ScryProtocol*两个"0x"开头的42个字符的地址。
 
 ### 修改app配置文件：
 
