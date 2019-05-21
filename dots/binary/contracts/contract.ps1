@@ -1,3 +1,6 @@
+echo "Scry Info.  All rights reserved."
+echo "license that can be found in the license file."
+
 cd $PSScriptRoot
 
 echo "|-> * npm install prepared. "

@@ -1,3 +1,6 @@
+// Scry Info.  All rights reserved.
+// license that can be found in the license file.
+
 import {dl_db, acc_db, txBuyer_db, txSeller_db, txVerifier_db} from "./DBoptions.js";
 let utils = {
     ws: WebSocket,

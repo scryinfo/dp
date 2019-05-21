@@ -1,3 +1,5 @@
+<!-- Scry Info.  All rights reserved.-->
+<!-- license that can be found in the license file.-->
 <template>
     <!-- 功能测试界面，针对添加的功能制作的小demo，完成开发后删除本文件或删除相关路由设置 -->
     <section>
