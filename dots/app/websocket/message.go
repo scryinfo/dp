@@ -5,7 +5,7 @@ package websocket
 
 import (
 	"encoding/json"
-	"github.com/scryinfo/dp/app/app"
+	app2 "github.com/scryinfo/dp/dots/app"
 	"github.com/scryinfo/dp/dots/app/sdkinterface"
 	"github.com/scryinfo/dp/dots/app/settings"
 	"math/big"
@@ -46,7 +46,7 @@ func loginVerify(mi *settings.MessageIn) (payload interface{}, err error) {
 	if err = json.Unmarshal(mi.Payload, &ai); err != nil {
 		return
 	}
-	if payload, err = app.GetGapp().CurUser.UserLogin(ai.Account, ai.Password); !(payload.(bool)) {
+	if payload, err = app2.GetGapp().CurUser.UserLogin(ai.Account, ai.Password); !(payload.(bool)) {
 		return
 	}
 
@@ -58,7 +58,7 @@ func createNewAccount(mi *settings.MessageIn) (payload interface{}, err error) {
 	if err = json.Unmarshal(mi.Payload, &pwd); err != nil {
 		return
 	}
-	if payload, err = app.GetGapp().CurUser.CreateUserWithLogin(pwd.Password); err != nil {
+	if payload, err = app2.GetGapp().CurUser.CreateUserWithLogin(pwd.Password); err != nil {
 		return
 	}
 
@@ -70,13 +70,13 @@ func blockSet(mi *settings.MessageIn) (payload interface{}, err error) {
 	if err = json.Unmarshal(mi.Payload, &sid); err != nil {
 		return
 	}
-	if err = app.GetGapp().CurUser.SubscribeEvents(eventName, onPublish, onApprove, onVerifiersChosen, onTransactionCreate, onPurchase, onReadyForDownload,
+	if err = app2.GetGapp().CurUser.SubscribeEvents(eventName, onPublish, onApprove, onVerifiersChosen, onTransactionCreate, onPurchase, onReadyForDownload,
 		onClose, onRegisterAsVerifier, onVote, onVerifierDisable); err != nil {
 		return
 	}
 	sdkinterface.SetFromBlock(uint64(sid.FromBlock))
 	// when an user login success, he will get 1,000,000 tokens for test. in 'block.set' case.
-	if err = app.GetGapp().CurUser.TransferTokenFromDeployer(big.NewInt(1000000)); err != nil { // for test
+	if err = app2.GetGapp().CurUser.TransferTokenFromDeployer(big.NewInt(1000000)); err != nil { // for test
 		return
 	}
 	payload = true
@@ -85,7 +85,7 @@ func blockSet(mi *settings.MessageIn) (payload interface{}, err error) {
 }
 
 func logout(_ *settings.MessageIn) (payload interface{}, err error) {
-	if err = app.GetGapp().CurUser.UnsubscribeEvents(eventName); err != nil {
+	if err = app2.GetGapp().CurUser.UnsubscribeEvents(eventName); err != nil {
 		return
 	}
 	payload = true
@@ -98,7 +98,7 @@ func publish(mi *settings.MessageIn) (payload interface{}, err error) {
 	if err = json.Unmarshal(mi.Payload, &pd); err != nil {
 		return
 	}
-	if payload, err = app.GetGapp().CurUser.PublishData(&pd); err != nil {
+	if payload, err = app2.GetGapp().CurUser.PublishData(&pd); err != nil {
 		return
 	}
 
@@ -115,11 +115,11 @@ func buy(mi *settings.MessageIn) (payload interface{}, err error) {
 	if bd.StartVerify {
 		fee += int64(verifierNum * verifierBonus)
 	}
-	if err = app.GetGapp().CurUser.ApproveTransferToken(bd.Password, big.NewInt(fee)); err != nil {
+	if err = app2.GetGapp().CurUser.ApproveTransferToken(bd.Password, big.NewInt(fee)); err != nil {
 		return
 	}
 
-	if err = app.GetGapp().CurUser.CreateTransaction(bd.SelectedData.PublishID, bd.Password, bd.StartVerify); err != nil {
+	if err = app2.GetGapp().CurUser.CreateTransaction(bd.SelectedData.PublishID, bd.Password, bd.StartVerify); err != nil {
 		return
 	}
 	payload = true
@@ -143,7 +143,7 @@ func purchase(mi *settings.MessageIn) (payload interface{}, err error) {
 	if err = json.Unmarshal(mi.Payload, &pd); err != nil {
 		return
 	}
-	if err = app.GetGapp().CurUser.Buy(pd.SelectedTx.TransactionID, pd.Password); err != nil {
+	if err = app2.GetGapp().CurUser.Buy(pd.SelectedTx.TransactionID, pd.Password); err != nil {
 		return
 	}
 	payload = true
@@ -156,7 +156,7 @@ func reEncrypt(mi *settings.MessageIn) (payload interface{}, err error) {
 	if err = json.Unmarshal(mi.Payload, &re); err != nil {
 		return
 	}
-	if err = app.GetGapp().CurUser.SubmitMetaDataIdEncWithBuyer(re.SelectedTx.TransactionID, re.Password, re.SelectedTx.Seller,
+	if err = app2.GetGapp().CurUser.SubmitMetaDataIdEncWithBuyer(re.SelectedTx.TransactionID, re.Password, re.SelectedTx.Seller,
 		re.SelectedTx.Buyer, re.SelectedTx.MetaDataIDEncWithSeller); err != nil {
 		return
 	}
@@ -170,7 +170,7 @@ func cancel(mi *settings.MessageIn) (payload interface{}, err error) {
 	if err = json.Unmarshal(mi.Payload, &pd); err != nil {
 		return
 	}
-	if err = app.GetGapp().CurUser.CancelTransaction(pd.SelectedTx.TransactionID, pd.Password); err != nil {
+	if err = app2.GetGapp().CurUser.CancelTransaction(pd.SelectedTx.TransactionID, pd.Password); err != nil {
 		return
 	}
 	payload = true
@@ -183,7 +183,7 @@ func decrypt(mi *settings.MessageIn) (payload interface{}, err error) {
 	if err = json.Unmarshal(mi.Payload, &dd); err != nil {
 		return
 	}
-	if payload, err = app.GetGapp().CurUser.DecryptAndGetMetaDataFromIPFS(dd.Password, dd.SelectedTx.MetaDataIDEncrypt,
+	if payload, err = app2.GetGapp().CurUser.DecryptAndGetMetaDataFromIPFS(dd.Password, dd.SelectedTx.MetaDataIDEncrypt,
 		dd.SelectedTx.User, dd.SelectedTx.MetaDataExtension); err != nil {
 		return
 	}
@@ -196,7 +196,7 @@ func confirm(mi *settings.MessageIn) (payload interface{}, err error) {
 	if err = json.Unmarshal(mi.Payload, &cd); err != nil {
 		return
 	}
-	if err = app.GetGapp().CurUser.ConfirmDataTruth(cd.SelectedTx.TransactionID, cd.Password, cd.Truth); err != nil {
+	if err = app2.GetGapp().CurUser.ConfirmDataTruth(cd.SelectedTx.TransactionID, cd.Password, cd.Truth); err != nil {
 		return
 	}
 	payload = true
@@ -209,10 +209,10 @@ func register(mi *settings.MessageIn) (payload interface{}, err error) {
 	if err = json.Unmarshal(mi.Payload, &rvd); err != nil {
 		return
 	}
-	if err = app.GetGapp().CurUser.ApproveTransferToken(rvd.Password, big.NewInt(registerAsVerifierCost)); err != nil {
+	if err = app2.GetGapp().CurUser.ApproveTransferToken(rvd.Password, big.NewInt(registerAsVerifierCost)); err != nil {
 		return
 	}
-	if err = app.GetGapp().CurUser.RegisterAsVerifier(rvd.Password); err != nil {
+	if err = app2.GetGapp().CurUser.RegisterAsVerifier(rvd.Password); err != nil {
 		return
 	}
 	payload = true
@@ -225,7 +225,7 @@ func verify(mi *settings.MessageIn) (payload interface{}, err error) {
 	if err = json.Unmarshal(mi.Payload, &vd); err != nil {
 		return
 	}
-	if err = app.GetGapp().CurUser.Vote(vd.Password, vd.TransactionID, vd.Verify.Suggestion, vd.Verify.Comment); err != nil {
+	if err = app2.GetGapp().CurUser.Vote(vd.Password, vd.TransactionID, vd.Verify.Suggestion, vd.Verify.Comment); err != nil {
 		return
 	}
 	payload = true
@@ -238,7 +238,7 @@ func credit(mi *settings.MessageIn) (payload interface{}, err error) {
 	if err = json.Unmarshal(mi.Payload, &cd); err != nil {
 		return
 	}
-	if err = app.GetGapp().CurUser.CreditToVerifiers(&cd); err != nil {
+	if err = app2.GetGapp().CurUser.CreditToVerifiers(&cd); err != nil {
 		return
 	}
 	payload = true
