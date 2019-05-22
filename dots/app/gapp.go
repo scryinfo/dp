@@ -11,7 +11,7 @@ import (
 
 var app Gapp
 
-//todo 减少全局变量的个数
+//todo decrease the number of global variables
 type Gapp struct {
 	ChainWrapper scry.ChainWrapper
 	Deployer     scry.Client

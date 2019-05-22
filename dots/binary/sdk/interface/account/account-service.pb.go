@@ -366,17 +366,17 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type KeyServiceClient interface {
-	//生成地址
+	//Generate address
 	GenerateAddress(ctx context.Context, in *AddressParameter, opts ...grpc.CallOption) (*AddressInfo, error)
-	//校验地址
+	//Proof address
 	VerifyAddress(ctx context.Context, in *AddressParameter, opts ...grpc.CallOption) (*AddressInfo, error)
-	//内容加密
+	//Content encryption
 	ContentEncrypt(ctx context.Context, in *CipherParameter, opts ...grpc.CallOption) (*CipherText, error)
-	//内容解密
+	//Content decryption
 	ContentDecrypt(ctx context.Context, in *CipherParameter, opts ...grpc.CallOption) (*CipherText, error)
-	//消息签名
+	//Info signature
 	Signature(ctx context.Context, in *CipherParameter, opts ...grpc.CallOption) (*CipherText, error)
-	//导入keystore文件内容
+	//Input keystore file content
 	ImportKeystore(ctx context.Context, in *ImportParameter, opts ...grpc.CallOption) (*AddressInfo, error)
 }
 
@@ -444,17 +444,17 @@ func (c *keyServiceClient) ImportKeystore(ctx context.Context, in *ImportParamet
 
 // KeyServiceServer is the server API for KeyService service.
 type KeyServiceServer interface {
-	//生成地址
+	//Generate address
 	GenerateAddress(context.Context, *AddressParameter) (*AddressInfo, error)
-	//校验地址
+	//Proof address
 	VerifyAddress(context.Context, *AddressParameter) (*AddressInfo, error)
-	//内容加密
+	//Content encryption
 	ContentEncrypt(context.Context, *CipherParameter) (*CipherText, error)
-	//内容解密
+	//Content decryption
 	ContentDecrypt(context.Context, *CipherParameter) (*CipherText, error)
-	//消息签名
+	//Info signature
 	Signature(context.Context, *CipherParameter) (*CipherText, error)
-	//导入keystore文件内容
+	//Input keystore file content
 	ImportKeystore(context.Context, *ImportParameter) (*AddressInfo, error)
 }
 

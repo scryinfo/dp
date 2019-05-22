@@ -31,7 +31,7 @@ func main() {
 	defer line.StopAndDestroy(l, true)
 
 	ssignal.WatiCtrlC(func(s os.Signal) bool {
-		return false //退出
+		return false //quit
 	})
 
 }

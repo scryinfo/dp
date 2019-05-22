@@ -11,22 +11,22 @@ enum Status {
 }
 
 service KeyService {
-    //生成地址
+    //Generate address
     rpc GenerateAddress (AddressParameter) returns (AddressInfo) {
     }
-    //校验地址
+    //Proof address
     rpc VerifyAddress (AddressParameter) returns (AddressInfo) {
     }
-    //内容加密
+    //Content encryption
     rpc ContentEncrypt (CipherParameter) returns (CipherText) {
     }
-    //内容解密
+    //Content decryption
     rpc ContentDecrypt (CipherParameter) returns (CipherText) {
     }
-    //消息签名
+    //Info signature
     rpc Signature (CipherParameter) returns (CipherText) {
     }
-    //导入keystore文件内容
+    //Input keystore file content
     rpc import_keystore (ImportParameter) returns (AddressInfo) {
 
     }
