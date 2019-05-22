@@ -4,9 +4,9 @@
 Through SDK for data exchange with blockchain, developers can get easy access to DAPP development. It mainly includes data encryption and decryption, signature, smart contract, event notification, data storage API, data acquisition and search, digital currency payment, third party APP payment API and so on.The process is as following:  
 Data provider inputs data and metadata through SDK (data includes static data and dynamic data which have the agreed format; metadata mainly includes data signature, data description and etc). Data demander can find the required data through SDK and obtain the data after paying digital currency. The data verifier can be qualified by pledging a certain amount of digital currency to the smart contract. In the process of data exchange, the data demander can initiate the compensable data verification request or transaction arbitration to the smart contract, and the verifier will be randomly selected by the smart contract. All participants in the data exchange can score each other in the transaction；The smart contract would record the transaction and scores of the participants thus generate the reputation evaluation of the participants which can be inquired through SDK
 # Windows
-##  Edit
-###  Edit environment
-> The following environment should be installed yourself. Excepted environment(like webpack, truffle) and optional environment(like python) is not listed here
+##  Compile
+###  Compile environment
+> The following environment should be installed yourself. Excepted environment(like webpack, truffle) and optional environment(like python) is not listed here  
 > The following is suggested version that has been tested
 - go (1.12.5)
 - node.js (10.15.3)
@@ -17,9 +17,9 @@ Data provider inputs data and metadata through SDK (data includes static data an
 Run **webpackUI.ps1** script in dp/app/app/ui content to finish this process 
 You can control whether to display webpack result analysis through *bundleAnalyzerReport* in ui/config/index.js  
 ### Build app executable file：
-Run: go build in dp/app/app/main content，entrance file: **main.exe** will be generated if succeeded.
-##  Operation
-### Operating environment
+Run: ```go build``` in dp/app/app/main content，entrance file: **main.exe** will be generated if succeeded.
+##  Run
+### Prerequisites
 - ipfs client (0.4.20)
 - geth client (1.8.27)
 - Browser (chrome 74)
@@ -27,7 +27,7 @@ Run: go build in dp/app/app/main content，entrance file: **main.exe** will be g
 Run user service executable file in dp/dots/auth content，default port is 48080
 ### ipfs connection：
 > We assume that you have finished ipfs download and installation
-- Adjust config files: find config files in your ipfs download path like following, add following 3 "Access..." for config item "API"   Config：  
+- Adjust config file: find ```config``` file in your ipfs download path, add following 3 "Access..." for config item "API"：  
 ```json
 "API": {
   "HTTPHeaders": {
@@ -70,7 +70,7 @@ After finishing all process above, you can experience it through dp/app/app/main
 - windows banned ps1 script operation：Use administrator privileges to open command line, run Set-ExecutionPolicy unrestricted
 - npm install error，python exec is not found：install python2 or ignore this problem
 - User service start failure, vcruntime140.dll is not found：[install vcre](https://www.microsoft.com/zh-cn/download/details.aspx?id=48145).
-- Smart contract deployment failure, failed to get connected to ether client: Check whether customized API is used to build private chain, adjust truffle.js config file network.geth.port in contracts content to get consistent with it
+- Smart contract deployment failure, failed to get connected to ether client: Check whether customized port is used to build private chain, adjust truffle.js config file network.geth.port in contracts content to get consistent with it
 - Smart contract deployment is not displayed: Check powershell opened by geth_init.ps1 is still mining or not(information will be refreshed constantly).
 # [Code Style -- Go](https://github.com/scryinfo/scryg/blob/master/codestyle_go.md)
 # [ScryInfo Protocol Layer SDK API Document v0.0.5](https://github.com/scryinfo/dp/blob/master/document/ScryInfo%20protocol%20layer%20SDK%20%20v0.0.5.md)
