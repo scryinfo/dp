@@ -24,7 +24,7 @@ Run: go build in dp/app/app/main content，entrance file: **main.exe** will be g
 - geth client (1.8.27)
 - Browser (chrome 74)
 ### Start user service:
-Run user service executable file in dp/dots/auth content，default API is 48080
+Run user service executable file in dp/dots/auth content，default port is 48080
 ### ipfs connection：
 > We assume that you have finished ipfs download and installation
 - Adjust config files: find config files in your ipfs download path like following, add following 3 "Access..." for config item "API"   Config：  
