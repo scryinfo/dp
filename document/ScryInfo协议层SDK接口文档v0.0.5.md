@@ -1,11 +1,10 @@
+[中文](./ScryInfo协议层SDK接口文档v0.0.5.md)  
+[EN](./ScryInfo%20protocol%20layer%20SDK%20%20v0.0.5.md)  
 ---
-title: ScryInfo 协议层（简化版）SDK接口文档 v1.0
-tags: v0.0.5
-grammar_cjkRuby: true
+title: ScryInfo 协议层SDK接口文档 v0.0.5  
+tags: v0.0.5  
+grammar_cjkRuby: true  
 ---
-
-
-
 ### Scry协议层业务流程
 
 ![Diagram](./img/processes.jpg)
@@ -16,17 +15,20 @@ Package: sdk
 
 |seq|definition|functionality|
 |:-------|:-------|:-------|
-|1|Init(<br/>ethNodeAddr string,<br/>keyServiceAddr string,<br/>protocolAddr string,<br/>tokenAddr string,<br/>fromBlock uint64,<br/>ipfsNodeAddr string,<br/>logPath string,<br/>appId string,<br/>) error|在使⽤scryinfo协议层SDK之前，需要对整个SDK进⾏初始化。<br/>ethNodeAddr: 以太坊节点地址。<br/>keyServiceAddr: 密钥服务地址<br/> protocolAddr: 协议智能合约的地址<br/>tokenAddr: token智能合约的地址<br/>fromBlock: event扫描的起始区块，默认为0，即从当前最新块开始扫描<br/>ipfsNodeAddr: IPFS节点地址<br/>logPath: SDK⽇志存放全路径，包含⽂件名<br/>appId: 应⽤程序ID。同⼀ID下的消息是互通的
+|1|Init(<br/> ethNodeAddr string,<br/>keyServiceAddr string,<br/>protocolAddr string,<br/>tokenAddr string,<br/>fromBlock uint64,<br/>ipfsNodeAddr string,<br/>) error|在使⽤scryinfo协议层SDK之前，需要对整个SDK进⾏初始化。<br/>ethNodeAddr: 以太坊节点地址。<br/>keyServiceAddr: 密钥服务地址<br/> protocolAddr: 协议智能合约的地址<br/>tokenAddr: token智能合约的地址<br/>fromBlock: event扫描的起始区块，一般默认为0<br/>ipfsNodeAddr: IPFS节点地址
 
 ##### ScryClient - Scry客户端操作
 Package: sdk/scryclient
 
 |seq|definition|functionality|
 |:-------|:-------|:-------|
-|1|NewScryClient(address string) *ScryClient|创建⼀个ScryClient实例(如名为scryClient)<br/>⽤户访问scryClient.Account.Address能够得到⽤户的账户地址。<br/><br/>address: 待创建⽤户的地址
+|1|CreateScryClient(password string) (*ScryClient, error)|接口调用成功后，会创建⼀个ScryClient实例(如名为scryClient)，包括创建用户的公私钥账户，私钥经加密后保存。<br/>⽤户访问scryClient.Account.Address能够得到⽤户的账户地址。<br/><br/>password: 待创建账户的密码，请牢记
 |2|SubscribeEvent(eventName string, callback chainevents.EventCallback)|当前ScryClient通过调用此接口，可订购链上此用户的指定事件（event）。当event到来时，会触发指定的callback函数，可以订购的event有：<br/><br/>DataPublish<br/>TransactionCreate<br/>Buy<br/>ReadyForDownload<br/>TransactionClose<br/>Approval
-|3|GetEth(owner common.Address) (*big.Int, error)|获取账户地址为owner的ETH数额，单位为wei。<br/><br/>owner: 账户地址
-|4|GetScryToken(owner common.Address) (*big.Int, error)|获取账户地址为owner的Token数额，单位为 1 token。<br/><br/>owner: 账户地址
+|3|Authenticate(password string) (bool, error)|验证用户密码是否正确<br/><br/>password: 待验证密码
+|4|TransferEthFrom(from common.Address, password string, value *big.Int) error|从地址为from的账户向本client账户进行ETH转账。<br/><br/>from: 源账户<br/>password: 源账户密码<br/> value: 待转账数额，单位为 1 wei
+|5|TransferTokenFrom(from common.Address, password string, value *big.Int) error|从地址为from的账户向本client账户进行Token转账。<br/><br/>from: 源账户<br/>password: 源账户密码，用作交易签名<br/>value: 待转账数额，单位为 1 token
+|6|GetEth(owner common.Address) (*big.Int, error)|获取账户地址为owner的ETH数额，单位为wei。<br/><br/>owner: 账户地址
+|7|GetScryToken(owner common.Address) (*big.Int, error)|获取账户地址为owner的Token数额，单位为 1 token。<br/><br/>owner: 账户地址
 
 ##### Contract - 合约操作
 Package: sdk/scryclient/chaininterfacewrapper
@@ -39,7 +41,6 @@ Package: sdk/scryclient/chaininterfacewrapper
 |4|BuyData(txParams *op.TransactParams,txId *big.Int)error|买⽅正式购买数据。<br/><br/>txParams   : 区块链交易参数<br/>txId: : 本次交易ID，由TransactionCreate事件的transactionId字段取得。<br/><br/>链收到请求后，会发送Buy事件给卖方<br/>Buy事件以Json格式定义，参见Event接口
 |5|SubmitMetaDataIdEncWithBuyer(txParams *op.TransactParams, txId *big.Int, encyptedMetaDataId []byte) error|卖方上传待售数据的metaDataId到区块链上，该ID使用买方公钥加密。<br/><br/>txParams: 区块链交易参数<br/>txId: 本次交易ID，由Buy事件的transactionId字段取得<br/>encyptedMetaDataId: 使用买方公钥加密的metaDataId<br/><br/>链收到请求后，会发送ReadyForDownload事件给买方。<br/>买方得到metaDataId并用私钥解密，得到真正的meta data ID，就可以从IPFS上下载数据了。<br/>ReadyForDownload事件以Json格式定义，参见Event接口。
 |6|ConfirmDataTruth(txParams *op.TransactParams, txId *big.Int, truth bool) error|买方确认数据真实性。<br/><br/>txParams: 区块链交易参数<br/>txId: 本次交易ID，由Buy事件的transactionId字段取得<br/>truth: 数据是否真实<br/><br/>链收到请求后，会发送TransactionClose事件给所有用户，并关闭交易。<br/>若数据为真，合约会将买方押金支付给卖方。<br/>TransactionClose事件以Json格式定义，参见Event接口。
-|7|Bytes32ToIpfsHash(value [32]byte) (string, error)|工具函数，用来把bytes32转换为base58编码的IPFS hash
 
 ##### Key Manager - 密钥管理接口
 Package: sdk/util/accounts
@@ -58,7 +59,7 @@ Package: sdk/util/accounts
 |1|DataPublish|{<br/>"despDataId": "QmhKnroYBFp", //数据描述ID，可以从IPFS取得待售数据的描述<br/>"price": 1000,// 待售数据价格<br/>"publishId": "155212056", //本次发布的ID，与Publish()第一个返回值相同<br/>"seqNo": "155212057",<br/>"users": "[0xxxx]"<br/>}
 |2|Approval|{<br/>"owner": "0x3Ab0dAA324", //授权人<br/>"spender": "0x3c4d26E91", //被授权人<br/>"value": 1600 //授权额度<br/>}
 |3|TransactionCreate|{<br/>"proofIds":[[211, 159], [170, 49]], //证明数据ID<br/>"publishId": "1552121", // 数据发布ID<br/>"seqNo": "15521219",<br/>"transactionId": 4, //本次交易ID<br/>"users":["0xxxx"]<br/>}
-|4|Buy|{<br/>"metaDataIdEncSeller": "SdWeLSqpSyhGA==", //使用卖方公钥加密的元数据ID<br/>"publishId": "1552121827295982593-913139", //数据发布ID<br/>"seqNo": "1552121924035218179-67679122","transactionId": 4, //本次交易ID<br/>"buyer": "0x3Ab0dAA324", //买方地址<br/>"users": ["0xxxx"]<br/>}
+|4|Buy|{<br/>"metaDataIdEncSeller": "SdWeLSqpSyhGA==", //使用卖方公钥加密的元数据ID<br/>"publishId": "1552121827295982593-913139", //数据发布ID<br/>"seqNo": "1552121924035218179-67679122","transactionId": 4, //本次交易ID<br/>"users": ["0xxxx"]<br/>}
 |5|ReadyForDownload|{<br/>"metaDataIdEncBuyer": "tql/mAZY/z0aR2g==", //使用买方公钥加密的元数据ID<br/>"seqNo": "1552126832692923242-89400636",<br/>"transactionId": 4, //本次交易ID<br/>"users":["0xxxx"]<br/>}
 |6|TransactionClose|{<br/>"seqNo": "1552126873209063970-5512851552272651527",<br/>"transactionId": 4, //本次交易ID<br/>"users": ["0xxxx"]<br/>}
 
