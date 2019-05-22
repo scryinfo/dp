@@ -14,10 +14,10 @@ Data provider inputs data and metadata through SDK (data includes static data an
 ### Package UI source files：
 > We assume that you have finished node.js download and installation  
 
-Run **webpackUI.ps1** script in dp/app/app/ui content to finish this process
+Run **webpackUI.ps1** script in dp/app/app/ui content to finish this process 
 You can control whether to display webpack result analysis through *bundleAnalyzerReport* in ui/config/index.js  
 ### Build app executable file：
-Run: go build in dp/app/app/main content，entrance file: **main.exe** will be generated if succeeded
+Run: go build in dp/app/app/main content，entrance file: **main.exe** will be generated if succeeded.
 ##  Operation
 ### Operating environment
 - ipfs client (0.4.20)
@@ -46,12 +46,12 @@ Run user service executable file in dp/dots/auth content，default API is 48080
   }
 },
 ```
-- Run ipfs daemon in command line，"Daemon is ready" will be displayed if succeeded，Keep command line open
+- Run ```ipfs daemon``` in command line，"Daemon is ready" will be displayed if succeeded，Keep command line open
 > Since app use js to upload ipfs ，so "permit ipfs Cross-domain execute post request" config is added above  
 ### Build one private chain:
 > We assume that you have finished geth download and installation
 
-Run **geth_init.ps1** script in dp/dots/binary/contracts/geth_init content to finish private chain building 
+Run **geth_init.ps1** script in dp/dots/binary/contracts/geth_init content to finish private chain building   
 Run **geth_acc_mine.ps1** script in the same content to create user and start mining
 ### Deploy smart contract:
 Run **contract.ps1** script in dp/dots/binary/contracts content to finish this process 
