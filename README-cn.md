@@ -73,4 +73,4 @@ app.config.ipfsOutDir | 修改为你期望的ipfs下载路径
 - 智能合约部署失败，连接不到以太坊客户端：检查是否使用了自定义的端口搭建私链，修改contracts目录下的truffle.js配置文件network.geth.port与之一致。
 - 智能合约部署无显示：查看geth_init.ps1打开的powershell窗口是否仍在挖矿（不断有消息刷新）。
 # [Code Style -- Go](https://github.com/scryinfo/scryg/blob/master/codestyle_go-cn.md)
-# [协议层SDK接口文档（简化版）v0.0.5](https://github.com/scryinfo/dp/blob/master/document/ScryInfo%E5%8D%8F%E8%AE%AE%E5%B1%82%EF%BC%88%E7%AE%80%E5%8C%96%E7%89%88%EF%BC%89SDK%E6%8E%A5%E5%8F%A3%E6%96%87%E6%A1%A3v0.0.5.md)
+# [ScryInfo协议层SDK接口文档v0.0.5](https://github.com/scryinfo/dp/blob/master/document/ScryInfo%E5%8D%8F%E8%AE%AE%E5%B1%82SDK%E6%8E%A5%E5%8F%A3%E6%96%87%E6%A1%A3v0.0.5.md)
