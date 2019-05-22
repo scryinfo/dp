@@ -73,4 +73,4 @@ After finishing all process above, you can experience it through dp/app/app/main
 - Smart contract deployment failure, failed to get connected to ether client: Check whether customized API is used to build private chain, adjust truffle.js config file network.geth.port in contracts content to get consistent with it
 - Smart contract deployment is not displayed: Check powershell opened by geth_init.ps1 is still mining or not(information will be refreshed constantly).
 # [Code Style -- Go](https://github.com/scryinfo/scryg/blob/master/codestyle_go.md)
-# [Protocol Layer SDK Interface Document (Simplified Version) v0.0.5](https://github.com/scryinfo/dp/blob/master/document/ScryInfo%20protocol%20layer%20SDK%20%20v0.0.5.md)
+# [ScryInfo Protocol Layer SDK API Document v0.0.5](https://github.com/scryinfo/dp/blob/master/document/ScryInfo%20protocol%20layer%20SDK%20%20v0.0.5.md)
