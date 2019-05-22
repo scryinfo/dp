@@ -1,6 +1,6 @@
 ---
 title: ScryInfo 协议层（简化版）SDK接口文档 v1.0
-tags: 
+tags: v0.0.5
 grammar_cjkRuby: true
 ---
 

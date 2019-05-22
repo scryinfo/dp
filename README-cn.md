@@ -13,6 +13,7 @@
 - gcc (mingw-w64 v8.1.0)
 ### 打包UI资源文件：
 > 我们假设你已经完成了node.js的下载与安装。
+
 执行dp/app/app/ui目录下的**webpackUI.ps1**脚本文件完成这一步骤。  
 你可以通过ui/config/index.js中的*bundleAnalyzerReport*控制是否显示webpack结果分析报告。  
 ### 构建app可执行文件：
@@ -26,7 +27,7 @@
 运行dp/dots/auth目录下的，用户服务的可执行文件，默认使用48080端口。
 ### 连接ipfs：
 > 我们假设你已经完成了ipfs的下载与安装。
-- 修改配置文件，在你的ipfs下载路径中，找到config文件，如下所示，为其一级配置项"API"添加下面三条"Access..."配置：  
+- 修改配置文件，在你的ipfs下载路径中，找到config文件。如下所示，为其一级配置项"API"添加下面三条"Access..."配置：  
 ```json
 "API": {
   "HTTPHeaders": {
@@ -49,6 +50,7 @@
 > 因为app使用js进行ipfs上传，所以上面添加了"允许ipfs跨域执行post请求"的配置。
 ### 搭建一条私链：
 > 我们假设你已经完成了geth的下载与安装。
+
 执行dp/dots/binary/contracts/geth_init目录下的**geth_init.ps1**脚本文件完成私链搭建。  
 执行相同目录下的**geth_acc_mine.ps1**脚本文件创建用户并开始挖矿。
 ### 部署智能合约：
@@ -71,3 +73,4 @@ app.config.ipfsOutDir | 修改为你期望的ipfs下载路径
 - 智能合约部署失败，连接不到以太坊客户端：检查是否使用了自定义的端口搭建私链，修改contracts目录下的truffle.js配置文件network.geth.port与之一致。
 - 智能合约部署无显示：查看geth_init.ps1打开的powershell窗口是否仍在挖矿（不断有消息刷新）。
 # [Code Style -- Go](https://github.com/scryinfo/scryg/blob/master/codestyle_go-cn.md)
+# [协议层SDK接口文档（简化版）v0.0.5](https://github.com/scryinfo/dp/blob/master/document/ScryInfo%E5%8D%8F%E8%AE%AE%E5%B1%82%EF%BC%88%E7%AE%80%E5%8C%96%E7%89%88%EF%BC%89SDK%E6%8E%A5%E5%8F%A3%E6%96%87%E6%A1%A3v0.0.5.md)

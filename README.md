@@ -12,7 +12,8 @@ Data provider inputs data and metadata through SDK (data includes static data an
 - node.js (10.15.3)
 - gcc (mingw-w64 v8.1.0)
 ### Package UI source files：
-> We assume that you have finished node.js download and installation
+> We assume that you have finished node.js download and installation  
+
 Run **webpackUI.ps1** script in dp/app/app/ui content to finish this process
 You can control whether to display webpack result analysis through *bundleAnalyzerReport* in ui/config/index.js  
 ### Build app executable file：
@@ -49,6 +50,7 @@ Run user service executable file in dp/dots/auth content，default API is 48080
 > Since app use js to upload ipfs ，so "permit ipfs Cross-domain execute post request" config is added above  
 ### Build one private chain:
 > We assume that you have finished geth download and installation
+
 Run **geth_init.ps1** script in dp/dots/binary/contracts/geth_init content to finish private chain building 
 Run **geth_acc_mine.ps1** script in the same content to create user and start mining
 ### Deploy smart contract:
@@ -71,3 +73,4 @@ After finishing all process above, you can experience it through dp/app/app/main
 - Smart contract deployment failure, failed to get connected to ether client: Check whether customized API is used to build private chain, adjust truffle.js config file network.geth.port in contracts content to get consistent with it
 - Smart contract deployment is not displayed: Check powershell opened by geth_init.ps1 is still mining or not(information will be refreshed constantly).
 # [Code Style -- Go](https://github.com/scryinfo/scryg/blob/master/codestyle_go.md)
+# [Protocol Layer SDK Interface Document (Simplified Version) v0.0.5](https://github.com/scryinfo/dp/blob/master/document/ScryInfo%E5%8D%8F%E8%AE%AE%E5%B1%82%EF%BC%88%E7%AE%80%E5%8C%96%E7%89%88%EF%BC%89SDK%E6%8E%A5%E5%8F%A3%E6%96%87%E6%A1%A3v0.0.5.md)
