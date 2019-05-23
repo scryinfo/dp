@@ -73,5 +73,5 @@ app.config.ipfsOutDir | 希望するipfsのダウンロードルートに修正�
 - ユーザーサービスの起動が失敗します。vcruntime140.dll：[インストールしvcre](https://www.microsoft.com/zh-cn/download/details.aspx?id=48145)が見つかりません。  
 - スマートコントラクトの配置が失敗します。イーサリアムクライアントにアクセスできません。自己定義インタフェースを使ってプライベートチェインを構築するかどうかをチェックします。コンテンツcontractsの中のtruffle.jsの配置ファイルnetwork.geth.portを修正して一致させます。  
 - スマートコントラクトの配置が現れません。geth_init.ps1で起動するインタフェースpowershellがマイニングしているかどうかをチェックします（メッセージが更新し続けています）。  
-# [Code Style -- Go](https://github.com/scryinfo/scryg/blob/master/codestyle_go.md)
+# [Code Style -- Go](https://github.com/scryinfo/scryg/blob/master/codestyle_go-ja.md)
 # [ScryInfo Protocol Layer SDK API Document v0.0.5](https://github.com/scryinfo/dp/blob/master/document/ScryInfo%20protocol%20layer%20SDK%20%20v0.0.5.md)
