@@ -1,5 +1,6 @@
 [中文](./README-cn.md)  
 [EN](./README.md)  
+[日本語](./README-ja.md)  
 # Introduction
 Through SDK for data exchange with blockchain, developers can get easy access to DAPP development. It mainly includes data encryption and decryption, signature, smart contract, event notification, data storage API, data acquisition and search, digital currency payment, third party APP payment API and so on.The process is as following:  
 Data provider inputs data and metadata through SDK (data includes static data and dynamic data which have the agreed format; metadata mainly includes data signature, data description and etc). Data demander can find the required data through SDK and obtain the data after paying digital currency. The data verifier can be qualified by pledging a certain amount of digital currency to the smart contract. In the process of data exchange, the data demander can initiate the compensable data verification request or transaction arbitration to the smart contract, and the verifier will be randomly selected by the smart contract. All participants in the data exchange can score each other in the transaction；The smart contract would record the transaction and scores of the participants thus generate the reputation evaluation of the participants which can be inquired through SDK
