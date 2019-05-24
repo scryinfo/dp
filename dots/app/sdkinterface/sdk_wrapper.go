@@ -11,11 +11,18 @@ import (
 
 // wrap sdk interface call.
 type SDKWrapper interface {
+	// user management
 	CreateUserWithLogin(password string) (string, error)
 	UserLogin(address string, password string) (bool, error)
+
+	// before transfer token.
 	TransferTokenFromDeployer(token *big.Int) error
+
+	// 'event listen' model will call cb function preset here.
 	SubscribeEvents(eventName []string, cb ...chainevents2.EventCallback) error
 	UnsubscribeEvents(eventName []string) error
+
+	// functions
 	PublishData(data *settings.PublishData) (string, error)
 	ApproveTransferToken(password string, quantity *big.Int) error
 	CreateTransaction(publishId string, password string, startVerify bool) error
