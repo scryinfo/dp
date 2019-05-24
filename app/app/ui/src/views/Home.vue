@@ -68,9 +68,10 @@ export default {
             db_options.userDBClose();
             utils.send({Name:"logout", Payload: ""});
             utils.addCallbackFunc("logout.callback", function (payload, _this) {
+                utils.map = {};
                 setTimeout(function () {
                     _this.$router.push("/");
-                }, 1000)
+                }, 1000);
             });
             utils.addCallbackFunc("logout.callback.error", function (payload, _this) {
                 console.log("退出登录失败：", payload);

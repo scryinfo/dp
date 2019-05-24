@@ -1,7 +1,7 @@
 // Scry Info.  All rights reserved.
 // license that can be found in the license file.
 
-package websocket
+package msg_handler
 
 import (
 	"encoding/json"
@@ -10,6 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/scryinfo/dot/dot"
 	app2 "github.com/scryinfo/dp/dots/app"
+	"github.com/scryinfo/dp/dots/app/connection"
 	"github.com/scryinfo/dp/dots/app/settings"
 	events2 "github.com/scryinfo/dp/dots/binary/sdk/core/ethereum/events"
 	ipfsaccess2 "github.com/scryinfo/dp/dots/binary/sdk/util/storage/ipfsaccess"
@@ -33,8 +34,8 @@ func onPublish(event events2.Event) bool {
 		op.SupportVerify = event.Data.Get("supportVerify").(bool)
 	}
 
-	if err := sendMessage("onPublish", op); err != nil {
-		dot.Logger().Errorln("", zap.NamedError("onPublish"+EventSendFailed, err))
+	if err := app2.GetGapp().Connection.SendMessage("onPublish", op); err != nil {
+		dot.Logger().Errorln("", zap.NamedError("onPublish"+ connection.EventSendFailed, err))
 	}
 
 	return true
@@ -87,8 +88,8 @@ func onVerifiersChosen(event events2.Event) bool {
 	var ovc settings.OnVerifiersChosen
 	{
 		ovc.PublishID = event.Data.Get("publishId").(string)
-		if err := sendMessage("onProofFilesExtensions", ovc.PublishID); err != nil {
-			dot.Logger().Errorln("", zap.NamedError("onProofFilesExtensions"+EventSendFailed, err))
+		if err := app2.GetGapp().Connection.SendMessage("onProofFilesExtensions", ovc.PublishID); err != nil {
+			dot.Logger().Errorln("", zap.NamedError("onProofFilesExtensions"+connection.EventSendFailed, err))
 		}
 
 		ovc.Block = event.BlockNumber
@@ -102,8 +103,8 @@ func onVerifiersChosen(event events2.Event) bool {
 		}
 	}
 
-	if err := sendMessage("onVerifiersChosen", ovc); err != nil {
-		dot.Logger().Errorln("", zap.NamedError("onVerifiersChosen"+EventSendFailed, err))
+	if err := app2.GetGapp().Connection.SendMessage("onVerifiersChosen", ovc); err != nil {
+		dot.Logger().Errorln("", zap.NamedError("onVerifiersChosen"+connection.EventSendFailed, err))
 	}
 
 	return true
@@ -113,8 +114,8 @@ func onTransactionCreate(event events2.Event) bool {
 	var otc settings.OnTransactionCreate
 	{
 		otc.PublishID = event.Data.Get("publishId").(string)
-		if err := sendMessage("onProofFilesExtensions", otc.PublishID); err != nil {
-			dot.Logger().Errorln("", zap.NamedError("onProofFilesExtensions"+EventSendFailed, err))
+		if err := app2.GetGapp().Connection.SendMessage("onProofFilesExtensions", otc.PublishID); err != nil {
+			dot.Logger().Errorln("", zap.NamedError("onProofFilesExtensions"+connection.EventSendFailed, err))
 		}
 
 		otc.Block = event.BlockNumber
@@ -130,8 +131,8 @@ func onTransactionCreate(event events2.Event) bool {
 		}
 	}
 
-	if err := sendMessage("onTransactionCreate", otc); err != nil {
-		dot.Logger().Errorln("", zap.NamedError("onTransactionCreate"+EventSendFailed, err))
+	if err := app2.GetGapp().Connection.SendMessage("onTransactionCreate", otc); err != nil {
+		dot.Logger().Errorln("", zap.NamedError("onTransactionCreate"+connection.EventSendFailed, err))
 	}
 
 	return true
@@ -191,8 +192,8 @@ func onPurchase(event events2.Event) bool {
 		op.Buyer = event.Data.Get("buyer").(common.Address).String()
 	}
 
-	if err := sendMessage("onPurchase", op); err != nil {
-		dot.Logger().Errorln("", zap.NamedError("onPurchase"+EventSendFailed, err))
+	if err := app2.GetGapp().Connection.SendMessage("onPurchase", op); err != nil {
+		dot.Logger().Errorln("", zap.NamedError("onPurchase"+connection.EventSendFailed, err))
 	}
 
 	return true
@@ -208,8 +209,8 @@ func onReadyForDownload(event events2.Event) bool {
 		orfd.TxState = setTxState(event.Data.Get("state").(uint8))
 	}
 
-	if err := sendMessage("onReadyForDownload", orfd); err != nil {
-		dot.Logger().Errorln("", zap.NamedError("onReadyForDownload"+EventSendFailed, err))
+	if err := app2.GetGapp().Connection.SendMessage("onReadyForDownload", orfd); err != nil {
+		dot.Logger().Errorln("", zap.NamedError("onReadyForDownload"+connection.EventSendFailed, err))
 	}
 
 	return true
@@ -224,8 +225,8 @@ func onClose(event events2.Event) bool {
 		oc.TxState = setTxState(event.Data.Get("state").(uint8))
 	}
 
-	if err := sendMessage("onClose", oc); err != nil {
-		dot.Logger().Errorln("", zap.NamedError("onClose"+EventSendFailed, err))
+	if err := app2.GetGapp().Connection.SendMessage("onClose", oc); err != nil {
+		dot.Logger().Errorln("", zap.NamedError("onClose"+connection.EventSendFailed, err))
 	}
 
 	return true
@@ -237,8 +238,8 @@ func onRegisterAsVerifier(event events2.Event) bool {
 		orav.Block = event.BlockNumber
 	}
 
-	if err := sendMessage("onRegisterVerifier", orav); err != nil {
-		dot.Logger().Errorln("", zap.NamedError("onRegisterVerifier"+EventSendFailed, err))
+	if err := app2.GetGapp().Connection.SendMessage("onRegisterVerifier", orav); err != nil {
+		dot.Logger().Errorln("", zap.NamedError("onRegisterVerifier"+connection.EventSendFailed, err))
 	}
 
 	return true
@@ -257,8 +258,8 @@ func onVote(event events2.Event) bool {
 		ov.VerifierResponse = setJudge(judge) + ", " + comment
 	}
 
-	if err := sendMessage("onVote", ov); err != nil {
-		dot.Logger().Errorln("", zap.NamedError("onVote"+EventSendFailed, err))
+	if err := app2.GetGapp().Connection.SendMessage("onVote", ov); err != nil {
+		dot.Logger().Errorln("", zap.NamedError("onVote"+connection.EventSendFailed, err))
 	}
 
 	return true
@@ -270,8 +271,8 @@ func onVerifierDisable(event events2.Event) bool {
 		ovd.Block = event.BlockNumber
 	}
 
-	if err := sendMessage("onVerifierDisable", ovd); err != nil {
-		dot.Logger().Errorln("", zap.NamedError("onVerifierDisable"+EventSendFailed, err))
+	if err := app2.GetGapp().Connection.SendMessage("onVerifierDisable", ovd); err != nil {
+		dot.Logger().Errorln("", zap.NamedError("onVerifierDisable"+connection.EventSendFailed, err))
 	}
 
 	return true

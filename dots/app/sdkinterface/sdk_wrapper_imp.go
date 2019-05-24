@@ -24,6 +24,8 @@ type sdkWrapperImp struct {
 	si      *settings.ScryInfo
 }
 
+var _ SDKWrapper = (*sdkWrapperImp)(nil)
+
 func CreateSDKWrapperImp(cw scry.ChainWrapper, si *settings.ScryInfo) SDKWrapper {
 	return &sdkWrapperImp{
 		cw: cw,

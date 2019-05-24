@@ -27,7 +27,7 @@ func WebsocketConnect(port string) error {
 	ws := WSServer{
 		Port: port,
 	}
-	return errors.Wrap(ws.start(), "websocket WSConnect failed. ")
+	return errors.Wrap(ws.start(), "connection WSConnect failed. ")
 }
 
 func (ws *WSServer) start() error {

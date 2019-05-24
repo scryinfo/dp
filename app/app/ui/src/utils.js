@@ -26,7 +26,7 @@ let utils = {
         let port = window.location.href.split(":")[2].split("/")[0];
         utils.ws = new WebSocket("ws://127.0.0.1:"+ port + "/ws", "ws");
         utils.ws.onopen = function (evt) {
-            console.log("websocket onopen. ", evt);
+            console.log("connection onopen. ", evt);
         };
         utils.ws.onmessage = function (evt) {
             console.log(evt.data);
@@ -34,10 +34,15 @@ let utils = {
             utils.map[obj.Name](obj.Payload, _this);
         };
         utils.ws.onclose = function (evt) {
-            console.log("websocket onclose. ", evt);
+            console.log("connection onclose. ", evt);
+            utils.ws.close();
         };
         utils.ws.onerror = function (evt) {
-            console.log("websocket onerror. ", evt);
+            console.log("connection onerror. ", evt);
+            utils.ws.close();
+        };
+        windows.onbeforeunload = function () {
+            utils.ws.close();
         };
         utils.WSConnect = function () {};
     },

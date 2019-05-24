@@ -1,7 +1,7 @@
 // Scry Info.  All rights reserved.
 // license that can be found in the license file.
 
-package websocket
+package msg_handler
 
 import (
 	"encoding/json"
@@ -24,21 +24,21 @@ var (
 )
 
 func MessageHandlerInit() {
-	addCallbackFunc("login.verify", loginVerify)
-	addCallbackFunc("create.new.account", createNewAccount)
-	addCallbackFunc("block.set", blockSet)
-	addCallbackFunc("logout", logout)
-	addCallbackFunc("publish", publish)
-	addCallbackFunc("buy", buy)
-	addCallbackFunc("extensions", extensions)
-	addCallbackFunc("purchase", purchase)
-	addCallbackFunc("reEncrypt", reEncrypt)
-	addCallbackFunc("cancel", cancel)
-	addCallbackFunc("decrypt", decrypt)
-	addCallbackFunc("confirm", confirm)
-	addCallbackFunc("register", register)
-	addCallbackFunc("verify", verify)
-	addCallbackFunc("credit", credit)
+	app2.GetGapp().Connection.AddCallbackFunc("login.verify", loginVerify)
+	app2.GetGapp().Connection.AddCallbackFunc("create.new.account", createNewAccount)
+	app2.GetGapp().Connection.AddCallbackFunc("block.set", blockSet)
+	app2.GetGapp().Connection.AddCallbackFunc("logout", logout)
+	app2.GetGapp().Connection.AddCallbackFunc("publish", publish)
+	app2.GetGapp().Connection.AddCallbackFunc("buy", buy)
+	app2.GetGapp().Connection.AddCallbackFunc("extensions", extensions)
+	app2.GetGapp().Connection.AddCallbackFunc("purchase", purchase)
+	app2.GetGapp().Connection.AddCallbackFunc("reEncrypt", reEncrypt)
+	app2.GetGapp().Connection.AddCallbackFunc("cancel", cancel)
+	app2.GetGapp().Connection.AddCallbackFunc("decrypt", decrypt)
+	app2.GetGapp().Connection.AddCallbackFunc("confirm", confirm)
+	app2.GetGapp().Connection.AddCallbackFunc("register", register)
+	app2.GetGapp().Connection.AddCallbackFunc("verify", verify)
+	app2.GetGapp().Connection.AddCallbackFunc("credit", credit)
 }
 
 func loginVerify(mi *settings.MessageIn) (payload interface{}, err error) {

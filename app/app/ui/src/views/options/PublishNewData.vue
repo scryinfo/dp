@@ -1,3 +1,5 @@
+<!-- Scry Info.  All rights reserved.-->
+<!-- license that can be found in the license file.-->
 <template>
     <section>
         <el-form class="pubForm" :model="pubData" label-position="left" label-width="25%" :style-height="height">
@@ -12,9 +14,7 @@
                 <el-switch v-model="SupportVerify" active-text="是" inactive-text="否"></el-switch>
             </el-form-item>
             <el-form-item label="数据:"><input class="el-input__inner" ref="selectedData" type="file"></el-form-item>
-            <el-form-item label="证明:"><input class="el-input__inner<!-- Scry Info.  All rights reserved.-->
-<!-- license that can be found in the license file.-->
-" ref="selectedProofs" type="file" multiple></el-form-item>
+            <el-form-item label="证明:"><input class="el-input__inner" ref="selectedProofs" type="file" multiple></el-form-item>
             <el-form-item><el-button type="primary" @click="pubPrepare">Publish</el-button></el-form-item>
         </el-form>
     </section>
@@ -126,8 +126,7 @@ export default {
             utils.send({Name:"publish", Payload: {password: pwd, supportVerify: this.SupportVerify,
                     price: this.pubData.Price, IDs: this.IDs}});
             utils.addCallbackFunc("publish.callback", function (payload, _this) {
-                // optimize?: dl_db.write here, seller will see his publish before contract emit event.
-                console.log("发布新数据成功");
+                console.log("发布新数据成功", payload);
             });
             utils.addCallbackFunc("publish.callback.error", function (payload, _this) {
                 console.log("发布新数据失败：", payload);
