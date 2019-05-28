@@ -33,7 +33,7 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/rjeczalik/notify v0.9.2 // indirect
 	github.com/rs/cors v1.6.0 // indirect
-	github.com/scryinfo/dot v0.1.3-0.20190528033249-a194ad237ae6
+	github.com/scryinfo/dot v0.1.3-0.20190528055454-5ce7a05174dc
 	github.com/scryinfo/scryg v0.1.3-0.20190523074957-3a6377ac45ea
 	github.com/sirupsen/logrus v1.4.1
 	github.com/stretchr/objx v0.2.0 // indirect
