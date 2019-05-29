@@ -2,10 +2,10 @@
 <!-- license that can be found in the license file.-->
 <template>
     <section>
-        <el-col :span="20" class="section-item">
-            <el-button size="mini" type="primary" @click="reEncryptDialog = true" >再加密数据</el-button>
+        <el-col :span="21" class="section-item">
+            <s-f-t button-name="再加密数据" @password="reEncrypt"></s-f-t>
         </el-col>
-        <el-col :span="4" class="section-item">
+        <el-col :span="3" class="section-item">
             <el-button size="mini" type="primary" @click="initTxS">刷新列表</el-button>
         </el-col>
 
@@ -26,21 +26,13 @@
         <el-pagination class="pagination" @current-change="setCurPage" @size-change="setPageSize" :total="total"
                        layout="sizes, total, prev, pager, next, jumper" :page-sizes="[5, 6]" :page-size="pageSize"
         ></el-pagination>
-
-        <!-- dialogs -->
-        <el-dialog :visible.sync="reEncryptDialog" title="输入密码：">
-            <p>{{this.$store.state.account}}</p><el-input v-model="password" show-password clearable></el-input>
-            <div slot="footer">
-                <el-button @click="cancelClickFunc">取消</el-button>
-                <el-button type="primary" @click="reEncrypt">确认</el-button>
-            </div>
-        </el-dialog>
     </section>
 </template>
 
 <script>
-import {utils} from "../../utils";
-import {txSeller_db} from "../../DBoptions";
+import {connect} from "../../utils/connect";
+import {txSeller_db} from "../../utils/DBoptions";
+import SFT from "../templates/simple_function_template.vue";
 export default {
     name: "TransactionSell",
     data () {
@@ -49,9 +41,7 @@ export default {
             curPage: 1,
             pageSize: 6,
             total: 0,
-            password: "",
             height: window.innerHeight - 170,
-            reEncryptDialog: false
         }
     },
     methods: {
@@ -66,25 +56,13 @@ export default {
                 MetaDataIDEncWithSeller: curRow.MetaDataIDEncWithSeller // WSConnect between go and js buy not show out to user.
             };
         },
-        cancelClickFunc: function () {
-            this.reEncryptDialog = false;
-            this.$message({
-                type: "info",
-                message: "取消再加密数据"
-            });
-        },
         initTxS: function () {
             txSeller_db.init(this);
         },
-        reEncrypt:function () {
-            this.reEncryptDialog = false;
-            let pwd = this.password;
-            this.password = "";
-            utils.send({ Name:"reEncrypt", Payload:{password: pwd, tID: this.selectedTx}});
-            utils.addCallbackFunc("reEncrypt.callback", function (payload, _this) {
-                console.log("再加密数据成功", message);
-            });
-            utils.addCallbackFunc("reEncrypt.callback.error", function (payload, _this) {
+        reEncrypt:function (pwd) {
+            connect.send({ Name:"reEncrypt", Payload:{password: pwd, tID: this.selectedTx}}, function (payload, _this) {
+                console.log("再加密数据成功", payload);
+            }, function (payload, _this) {
                 console.log("再加密数据失败：", payload);
                 _this.$alert(payload, "再加密数据失败！", {
                     confirmButtonText: "关闭",
@@ -93,6 +71,9 @@ export default {
                 });
             });
         }
+    },
+    components: {
+        SFT
     },
     computed: {
         listenTxSRefresh() {

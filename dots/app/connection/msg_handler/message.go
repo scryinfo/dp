@@ -70,8 +70,8 @@ func blockSet(mi *settings.MessageIn) (payload interface{}, err error) {
 	if err = json.Unmarshal(mi.Payload, &sid); err != nil {
 		return
 	}
-	if err = app2.GetGapp().CurUser.SubscribeEvents(eventName, onPublish, onApprove, onVerifiersChosen, onTransactionCreate, onPurchase, onReadyForDownload,
-		onClose, onRegisterAsVerifier, onVote, onVerifierDisable); err != nil {
+	if err = app2.GetGapp().CurUser.SubscribeEvents(eventName, onPublish, onApprove, onVerifiersChosen, onTransactionCreate,
+		onPurchase, onReadyForDownload, onClose, onRegisterAsVerifier, onVote, onVerifierDisable); err != nil {
 		return
 	}
 	sdkinterface.SetFromBlock(uint64(sid.FromBlock))

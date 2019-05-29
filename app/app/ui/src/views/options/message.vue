@@ -20,6 +20,9 @@ export default {
     padding: 10px;
     background-color: lightgrey;
 }
+.section-item-right {
+    float: right;
+}
 .tx-table-expand label {
     width: 20%;
     color: #99a9bf;

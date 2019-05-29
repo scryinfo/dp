@@ -1,6 +1,7 @@
 cd $PSScriptRoot
 
-Remove-Item "./chain/*" -Recurseecho "Scry Info.  All rights reserved."
+Remove-Item "./chain/*" -Recurse
+echo "Scry Info.  All rights reserved."
 echo "license that can be found in the license file."
 
 

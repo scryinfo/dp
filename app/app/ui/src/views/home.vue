@@ -37,8 +37,9 @@
 </template>
 
 <script>
-import {db_options, dl_db, acc_db} from "../DBoptions.js";
-import {utils} from "../utils.js";
+import {db_options, acc_db} from "../utils/DBoptions.js";
+import {connect} from "../utils/connect.js";
+import {utils} from "../utils/utils.js";
 export default {
     name: "Home",
     data () {
@@ -66,14 +67,12 @@ export default {
         },
         logout: function () {
             db_options.userDBClose();
-            utils.send({Name:"logout", Payload: ""});
-            utils.addCallbackFunc("logout.callback", function (payload, _this) {
-                utils.map = {};
+            connect.send({Name:"logout", Payload: ""}, function (payload, _this) {
+                connect.cleanMap();
                 setTimeout(function () {
                     _this.$router.push("/");
                 }, 1000);
-            });
-            utils.addCallbackFunc("logout.callback.error", function (payload, _this) {
+            }, function (payload, _this) {
                 console.log("退出登录失败：", payload);
                 _this.$alert(payload, "退出登录失败！", {
                     confirmButtonText: "关闭",
@@ -90,12 +89,10 @@ export default {
         db_options.utilsDBInit(this);
         db_options.userDBInit(this.$route.params.acc);
         acc_db.read(this.$route.params.acc, function (accinstance) {
-            utils.send({Name:"block.set", Payload: {fromBlock: accinstance.fromBlock}});
-            utils.addCallbackFunc("block.set.callback", function (payload, _this) {
+            connect.send({Name:"block.set", Payload: {fromBlock: accinstance.fromBlock}}, function (payload, _this) {
                 console.log("设置初始区块成功", payload);
                 db_options.txDBsDataUpdate(_this);
-            });
-            utils.addCallbackFunc("block.set.callback.error", function (payload, _this) {
+            }, function (payload, _this) {
                 console.log("设置初始区块失败：", payload);
                 _this.$alert(payload, "设置初始区块失败！", {
                     confirmButtonText: "关闭",

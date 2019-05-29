@@ -60,15 +60,13 @@ func Init(l dot.Line) (err error) {
 
 	logger.Infoln("ChainWrapper init finished. ")
 
-	app2.GetGapp().CurUser = sdkinterface2.CreateSDKWrapperImp(app2.GetGapp().ChainWrapper, app2.GetGapp().ScryInfo)
+	app2.GetGapp().CurUser = sdkinterface2.CreateSDKWrapperImp(app2.GetGapp().ChainWrapper, conf)
 
 	msg_handler.MessageHandlerInit()
 
 	if err = app2.GetGapp().Connection.Connect(); err != nil {
 		logger.Errorln("WebSocket Connect failed. ", zap.NamedError("", err))
 	}
-
-	logger.Infoln("Connect finished. ")
 
 	return err
 }
