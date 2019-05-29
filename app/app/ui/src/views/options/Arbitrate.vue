@@ -63,7 +63,7 @@
 </template>
 
 <script>
-import {acc_db} from "../../DBoptions";
+import {acc_db} from "../../utils/DBoptions";
 export default {
     name: "Arbitrate.vue",
     data () {

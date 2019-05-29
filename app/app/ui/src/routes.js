@@ -2,17 +2,18 @@
 // license that can be found in the license file.
 
 import NotFound        from "./views/404.vue";
-import Login           from "./views/Login.vue";
-import Home            from "./views/Home.vue";
-import DataList        from "./views/options/DataList.vue";
-import TransactionBuy  from "./views/options/TransactionBuy.vue";
-import TransactionSell from "./views/options/TransactionSell.vue";
-import PublishNewData  from "./views/options/PublishNewData.vue";
-import Verify          from "./views/options/Verify.vue";
+import Login           from "./views/login.vue";
+import Home            from "./views/home.vue";
+import DataList        from "./views/options/datalist.vue";
+import TransactionBuy  from "./views/options/transactionBuy.vue";
+import TransactionSell from "./views/options/transactionSell.vue";
+import PublishNewData  from "./views/options/publish.vue";
+import Verify          from "./views/options/verify.vue";
 import Arbitrate       from "./views/options/Arbitrate.vue";
-import Message         from "./views/options/Message.vue";
-// import test            from "./views/options/test.vue";  // for test
-// import administrator   from "./views/options/administrator.vue"; // for test
+import Message         from "./views/options/message.vue";
+import test            from "./views/options/T_Test.vue";  // for test
+import test2           from "./views/options/T_TestTwo.vue"; // for test
+// import administrator   from "./views/options/T_Administrator.vue"; // for test
 
 let routes = [
     {
@@ -33,8 +34,9 @@ let routes = [
             {path: "/vf",  component: Verify,          name: "我验证的数据"},
             {path: "/at",  component: Arbitrate,       name: "我仲裁的数据",  hidden: true},
             {path: "/msg", component: Message,         name: "Short Message", hidden: true},
-            // {path: "/testpage",      component: test,          name: "Test",                    hidden: true}, // for test
-            // {path: "/administrator", component: administrator, name: "Administrator Functions", hidden: true} // for test
+            {path: "/test_page",      component: test,          name: "Test",                    hidden: true}, // for test
+            {path: "/test_page2",     component: test2,         name: "Test2",                   hidden: true}, // for test
+            // {path: "/administrator",  component: administrator, name: "Administrator Functions", hidden: true} // for test
         ]
     },
     {

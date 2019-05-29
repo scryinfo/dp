@@ -7,9 +7,9 @@
   "app": {
     "chain": {
       "contracts": {
-        "tokenAddr": "0xc67d1847fb1b00173dcdbc00c7cbe32651537daa",
-        "protocolAddr": "0xbb7bae05bdbc0ed9e514ce18122fc6b4cbcca346",
-        "deployerKeyjson": "{\"version\":3,\"id\":\"e315aa5f-6202-4cea-aeab-88793c2414ab\",\"address\":\"61ad28110ce3911a9aafabba551cdc932a02bd52\",\"crypto\":{\"ciphertext\":\"92bf7244f050a4e84eac4cf5e9f1bc364d72abcf1b08f6e428490b6565404e8a\",\"cipherparams\":{\"iv\":\"f8ead2d0bcd99e53409da9dc78de7ef5\"},\"cipher\":\"aes-128-ctr\",\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"salt\":\"3772d92a3f6f04dca15a2994e9a6bc7b912f2d4c1ddbf8074f4e592e0fb33913\",\"n\":262144,\"r\":8,\"p\":1},\"mac\":\"7144a1868bcc8821a793349ea2ccf7bfbfeb611a154c6badffc27ed9f4b70d89\"}}}",
+        "tokenAddr": "0xb01dc601387cbb126131f4a874a15cbb2931dc46",
+        "protocolAddr": "0x16a6b0833f704180b56d6eb45eb84dba74d5960c",
+        "deployerKeyjson": "{\"address\":\"f5f2218109e0d02b536e2a542cd659c3f30a8eb1\",\"crypto\":{\"cipher\":\"aes-128-ctr\",\"ciphertext\":\"f518a1f933a831367656fe1f0d62279132cad91383a577426b30017af73eb773\",\"cipherparams\":{\"iv\":\"2a664a2c925af9c39178b9253935a464\"},\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":262144,\"p\":1,\"r\":8,\"salt\":\"45a0a64bc8ea78d94598a111243556c9b2ae229dfe1f5d20ecc2c1ba190d23cb\"},\"mac\":\"fa3f4ca52b3ac6d6f765bf54c6f7e628bccf8c01bac5f15d3a34de78d629917b\"},\"id\":\"40e31379-793e-430b-bfd2-0b6d74cc5f8b\",\"version\":3}",
         "deployerPassword": "123456"
       },
       "ethereum": {

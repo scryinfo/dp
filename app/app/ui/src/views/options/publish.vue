@@ -5,7 +5,7 @@
         <el-form class="pubForm" :model="pubData" label-position="left" label-width="25%" :style-height="height">
             <el-form-item label="输入密码:"><el-input v-model="password" show-password clearable></el-input></el-form-item>
             <el-form-item label="标题:"><el-input v-model="pubData.details.Title" clearable></el-input></el-form-item>
-            <el-form-item label="价格:"><el-input v-model.number="pubData.Price" clearable></el-input></el-form-item>
+            <el-form-item label="价格:"><el-input type="number" v-model.number="pubData.Price" clearable placeholder="uint is DDD"></el-input></el-form-item>
             <el-form-item label="标签:"><el-input v-model="pubData.details.Keys" clearable></el-input></el-form-item>
             <el-form-item label="描述:">
                 <el-input v-model="pubData.details.Description" type="textarea" :rows=2 clearable></el-input>
@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import {utils} from "../../utils";
+import {connect} from "../../utils/connect";
 export default {
     name: "PublishNewData",
     data () {
@@ -36,7 +36,7 @@ export default {
                     ProofDataExtensions: [],
                     Seller: ""
                 },
-                Price: 0
+                Price: Number
             },
             SupportVerify: false,
             IDs: {
@@ -70,7 +70,7 @@ export default {
             let reader = new FileReader();
             reader.readAsArrayBuffer(data);
             reader.onload = function (evt) {
-                utils.ipfs.add(Buffer.from(evt.target.result, "utf-8")).then(function (result) {
+                connect.ipfs.add(Buffer.from(evt.target.result, "utf-8")).then(function (result) {
                     _this.IDs.metaDataID = result[0].hash;
                     _this.count--;
                 }).catch(function (err) {
@@ -92,7 +92,7 @@ export default {
                 let reader = new FileReader();
                 reader.readAsArrayBuffer(proofs[i]);
                 reader.onload = function (evt) {
-                    utils.ipfs.add(Buffer.from(evt.target.result, "utf-8")).then(function (result) {
+                    connect.ipfs.add(Buffer.from(evt.target.result, "utf-8")).then(function (result) {
                         _this.IDs.proofDataIDs.push(result[0].hash);
                         _this.count--;
                     }).catch(function (err) {
@@ -108,7 +108,7 @@ export default {
         },
         setDetailsID: function () {
             let _this = this;
-            utils.ipfs.add(Buffer.from(JSON.stringify(this.pubData.details), "utf-8")).then(function (result) {
+            connect.ipfs.add(Buffer.from(JSON.stringify(this.pubData.details), "utf-8")).then(function (result) {
                 _this.IDs.detailsID = result[0].hash;
                 _this.count--;
             }).catch(function (err) {
@@ -123,12 +123,11 @@ export default {
         pub: function () {
             let pwd = this.password;
             this.password = "";
-            utils.send({Name:"publish", Payload: {password: pwd, supportVerify: this.SupportVerify,
-                    price: this.pubData.Price, IDs: this.IDs}});
-            utils.addCallbackFunc("publish.callback", function (payload, _this) {
+            connect.send({Name:"publish", Payload: {password: pwd, supportVerify: this.SupportVerify,
+                    price: this.pubData.Price, IDs: this.IDs}},
+                function (payload, _this) {
                 console.log("发布新数据成功", payload);
-            });
-            utils.addCallbackFunc("publish.callback.error", function (payload, _this) {
+            }, function (payload, _this) {
                 console.log("发布新数据失败：", payload);
                 _this.$alert(payload, "发布新数据失败！", {
                     confirmButtonText: "关闭",
