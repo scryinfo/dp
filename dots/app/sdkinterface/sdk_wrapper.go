@@ -34,4 +34,6 @@ type SDKWrapper interface {
 	RegisterAsVerifier(password string) error
 	Vote(password, txId string, judge bool, comment string) error
 	CreditToVerifiers(creditData *settings.CreditData) error
+	GetEthBalance(password string) (string, error)
+	GetTokenBalance(password string) (string, error)
 }

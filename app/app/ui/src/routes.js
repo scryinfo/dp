@@ -7,12 +7,13 @@ import Home            from "./views/home.vue";
 import DataList        from "./views/options/datalist.vue";
 import TransactionBuy  from "./views/options/transactionBuy.vue";
 import TransactionSell from "./views/options/transactionSell.vue";
-import PublishNewData  from "./views/options/publish.vue";
+import Publish         from "./views/options/publish.vue";
 import Verify          from "./views/options/verify.vue";
-import Arbitrate       from "./views/options/Arbitrate.vue";
+// import Arbitrate       from "./views/options/Arbitrate.vue";
+import Balance         from "./views/options/balance.vue";
 import Message         from "./views/options/message.vue";
-import test            from "./views/options/T_Test.vue";  // for test
-import test2           from "./views/options/T_TestTwo.vue"; // for test
+// import test            from "./views/options/T_Test.vue";          // for test
+// import test2           from "./views/options/T_TestTwo.vue";       // for test
 // import administrator   from "./views/options/T_Administrator.vue"; // for test
 
 let routes = [
@@ -30,13 +31,14 @@ let routes = [
             {path: "/dl",  component: DataList,        name: "数据列表"},
             {path: "/tb",  component: TransactionBuy,  name: "我购买的数据"},
             {path: "/ts",  component: TransactionSell, name: "我出售的数据"},
-            {path: "/pd",  component: PublishNewData,  name: "发布新数据"},
+            {path: "/pd",  component: Publish,  name: "发布新数据"},
             {path: "/vf",  component: Verify,          name: "我验证的数据"},
-            {path: "/at",  component: Arbitrate,       name: "我仲裁的数据",  hidden: true},
+            // {path: "/at",  component: Arbitrate,       name: "我仲裁的数据",  hidden: true},
+            {path: "/blc", component: Balance,         name: "Balance",       hidden: true},
             {path: "/msg", component: Message,         name: "Short Message", hidden: true},
-            {path: "/test_page",      component: test,          name: "Test",                    hidden: true}, // for test
-            {path: "/test_page2",     component: test2,         name: "Test2",                   hidden: true}, // for test
-            // {path: "/administrator",  component: administrator, name: "Administrator Functions", hidden: true} // for test
+            // {path: "/test_page",      component: test,          name: "Test",                    hidden: true}, // for test
+            // {path: "/test_page2",     component: test2,         name: "Test2",                   hidden: true}, // for test
+            // {path: "/administrator",  component: administrator, name: "Administrator Functions", hidden: true}  // for test
         ]
     },
     {
