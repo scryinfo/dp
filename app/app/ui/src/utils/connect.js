@@ -34,8 +34,12 @@ let connect = {
         if (!connect.ws) {
             return;
         }
-        connect.addCallbackFunc(obj.Name + ".callback", cbs);
-        connect.addCallbackFunc(obj.Name + ".callback.error", cbf);
+        if (!!cbs) {
+            connect.addCallbackFunc(obj.Name + ".callback", cbs);
+        }
+        if (!!cbf) {
+            connect.addCallbackFunc(obj.Name + ".callback.error", cbf);
+        }
         connect.ws.send(JSON.stringify(obj));
     },
     addCallbackFunc: function (name, func) {

@@ -9,7 +9,8 @@
                     <el-dropdown class="top-dropdown" trigger="click">
                         <span>{{acc}}</span>
                         <el-dropdown-menu slot="dropdown">
-                            <el-dropdown-item @click.native="message">通知</el-dropdown-item>
+                            <el-dropdown-item @click.native="getBalance">余额查询</el-dropdown-item>
+                            <el-dropdown-item @click.native="message">消息处理</el-dropdown-item>
                             <el-dropdown-item divided @click.native="logoutMsg">退出登录</el-dropdown-item>
                         </el-dropdown-menu>
                     </el-dropdown>
@@ -48,9 +49,8 @@ export default {
         }
     },
     methods: {
-        message: function () {
-            this.$router.push("/msg");
-        },
+        getBalance: function () { this.$router.push("/blc"); },
+        message: function () { this.$router.push("/msg"); },
         logoutMsg: function () {
             this.$confirm("确定退出登录吗？", "提示：", {
                 confirmButtonText: "确认",
