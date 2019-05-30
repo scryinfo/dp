@@ -33,7 +33,13 @@ let state = {
     // {address: "", fromBlock: 0(uint64), isVerifier: false}
     //  primary key: address.
 
-    account: ""
+    account: "",
+
+    ethBalance: "-",
+    ethTime: "-",
+
+    tokenBalance: "-",
+    tokenTime: "-"
 };
 
 let Store = new Vuex.Store({
