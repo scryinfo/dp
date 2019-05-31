@@ -39,7 +39,7 @@ import {acc_db, txVerifier_db} from "../../utils/DBoptions";
 import SFT from "../templates/simple_function_template.vue";
 import CFT from "../templates/complex_function_template.vue";
 export default {
-    name: "Verify.vue",
+    name: "verify.vue",
     data () {
         return {
             selectedTx: "",     // txID: ""

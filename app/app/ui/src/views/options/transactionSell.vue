@@ -34,7 +34,7 @@ import {connect} from "../../utils/connect";
 import {txSeller_db} from "../../utils/DBoptions";
 import SFT from "../templates/simple_function_template.vue";
 export default {
-    name: "TransactionSell",
+    name: "transactionSell.vue",
     data () {
         return {
             selectedTx: {},  // {tID: "", Buyer: "", Seller: "", MetaDataIDEncWithSeller: "", pID: ""}

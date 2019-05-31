@@ -11,6 +11,7 @@ import Publish         from "./views/options/publish.vue";
 import Verify          from "./views/options/verify.vue";
 // import Arbitrate       from "./views/options/Arbitrate.vue";
 import Balance         from "./views/options/balance.vue";
+import NickName        from "./views/options/nickname.vue";
 import Message         from "./views/options/message.vue";
 // import test            from "./views/options/T_Test.vue";          // for test
 // import test2           from "./views/options/T_TestTwo.vue";       // for test
@@ -35,6 +36,7 @@ let routes = [
             {path: "/vf",  component: Verify,          name: "我验证的数据"},
             // {path: "/at",  component: Arbitrate,       name: "我仲裁的数据",  hidden: true},
             {path: "/blc", component: Balance,         name: "Balance",       hidden: true},
+            {path: "/ncn", component: NickName,        name: "NickName",      hidden: true},
             {path: "/msg", component: Message,         name: "Short Message", hidden: true},
             // {path: "/test_page",      component: test,          name: "Test",                    hidden: true}, // for test
             // {path: "/test_page2",     component: test2,         name: "Test2",                   hidden: true}, // for test

@@ -56,7 +56,7 @@ import {txBuyer_db} from "../../utils/DBoptions"
 import SFT from "../templates/simple_function_template.vue"
 import CFT from "../templates/complex_function_template.vue"
 export default {
-    name: "TransactionBuy",
+    name: "transactionBuy.vue",
     data () {
         return {
             selectedTx: {},  // {tID: "", User: "", MetaDataIDEncrypt: "", MetaDataExtension: "",
