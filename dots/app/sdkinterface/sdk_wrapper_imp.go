@@ -367,3 +367,35 @@ func (swi *sdkWrapperImp) CreditToVerifiers(creditData *settings.CreditData) err
 
 	return nil
 }
+
+func (swi *sdkWrapperImp) GetEthBalance(password string) (string, error) {
+	if swi.curUser == nil {
+		return "", errors.New("Current user is nil. ")
+	}
+
+	balance, err := swi.cw.GetEthBalance(common.HexToAddress(swi.curUser.Account().Address))
+	if err != nil {
+		return "", errors.Wrap(err, "Get eth balance failed. ")
+	}
+
+	return balance.String(), nil
+}
+
+func (swi *sdkWrapperImp) GetTokenBalance(password string) (string, error) {
+	if swi.curUser == nil {
+		return "", errors.New("Current user is nil. ")
+	}
+
+	address := common.HexToAddress(swi.curUser.Account().Address)
+	txParam := chainoperations2.TransactParams{
+		From:     address,
+		Password: password,
+		Value:    big.NewInt(0),
+		Pending:  false}
+	balance, err := swi.cw.GetTokenBalance(&txParam, address)
+	if err != nil {
+		return "", errors.Wrap(err, "Get token balance failed. ")
+	}
+
+	return balance.String(), nil
+}

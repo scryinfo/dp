@@ -1,7 +1,7 @@
 {
   "name": "app",
-  "version": "1.0.0",
-  "description": "dp app demo. ",
+  "version": "0.1.2",
+  "description": "dp dapp demo. ",
   "license": "SEE LICENSE IN 'dp/license'",
   "author": "mats9693 <982254249@qq.com>",
   "scripts": {
