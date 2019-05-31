@@ -24,16 +24,20 @@ let state = {
     //  primary key: TransactionID.
 
     transactionsell: [],
-    // the same as transactionbuy, four arrays use the same database.
+    // the same as txb, all tx arrays use the same database.
     
     transactionverifier: [],
-    // the same as transactionbuy, four arrays use the same database.
+    // the same as txb, all tx arrays use the same database.
     
     accounts: [],
-    // {address: "", fromBlock: 0(uint64), isVerifier: false}
+    // {address: "", nickname: "", fromBlock: 0(uint64), isVerifier: false}
     //  primary key: address.
 
-    account: ""
+    account: "",
+    nickname: {
+        type: String,
+        default: "用户昵称加载中..."
+    },
 };
 
 let Store = new Vuex.Store({

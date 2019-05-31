@@ -20,9 +20,9 @@
 </template>
 
 <script>
-import {dl_db, acc_db, txBuyer_db, txSeller_db, txVerifier_db, db_options} from "../../DBoptions.js";
+import {dl_db, acc_db, txBuyer_db, txSeller_db, txVerifier_db, db_options} from "../../utils/DBoptions.js";
 export default {
-    name: "Administrator.vue",
+    name: "T_Administrator.vue",
     data () {
         return {
 

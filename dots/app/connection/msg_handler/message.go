@@ -9,12 +9,15 @@ import (
 	"github.com/scryinfo/dp/dots/app/sdkinterface"
 	"github.com/scryinfo/dp/dots/app/settings"
 	"math/big"
+	"time"
 )
 
 const (
 	verifierNum            = 2
 	verifierBonus          = 300
 	registerAsVerifierCost = 10000
+
+	sep = "|"
 )
 
 var (
@@ -39,6 +42,8 @@ func MessageHandlerInit() {
 	app2.GetGapp().Connection.AddCallbackFunc("register", register)
 	app2.GetGapp().Connection.AddCallbackFunc("verify", verify)
 	app2.GetGapp().Connection.AddCallbackFunc("credit", credit)
+	app2.GetGapp().Connection.AddCallbackFunc("get.eth.balance", getEthBalance)
+	app2.GetGapp().Connection.AddCallbackFunc("get.token.balance", getTokenBalance)
 }
 
 func loginVerify(mi *settings.MessageIn) (payload interface{}, err error) {
@@ -70,8 +75,8 @@ func blockSet(mi *settings.MessageIn) (payload interface{}, err error) {
 	if err = json.Unmarshal(mi.Payload, &sid); err != nil {
 		return
 	}
-	if err = app2.GetGapp().CurUser.SubscribeEvents(eventName, onPublish, onApprove, onVerifiersChosen, onTransactionCreate, onPurchase, onReadyForDownload,
-		onClose, onRegisterAsVerifier, onVote, onVerifierDisable); err != nil {
+	if err = app2.GetGapp().CurUser.SubscribeEvents(eventName, onPublish, onApprove, onVerifiersChosen, onTransactionCreate,
+		onPurchase, onReadyForDownload, onClose, onRegisterAsVerifier, onVote, onVerifierDisable); err != nil {
 		return
 	}
 	sdkinterface.SetFromBlock(uint64(sid.FromBlock))
@@ -242,6 +247,38 @@ func credit(mi *settings.MessageIn) (payload interface{}, err error) {
 		return
 	}
 	payload = true
+
+	return
+}
+
+func getEthBalance(mi *settings.MessageIn) (payload interface{}, err error) {
+	var pwd settings.AccInfo
+	if err = json.Unmarshal(mi.Payload, &pwd); err != nil {
+		return
+	}
+
+	var balance string
+	if balance, err = app2.GetGapp().CurUser.GetEthBalance(pwd.Password); err != nil {
+		return
+	}
+
+	payload = balance + sep + time.Now().String()
+
+	return
+}
+
+func getTokenBalance(mi *settings.MessageIn) (payload interface{}, err error) {
+	var pwd settings.AccInfo
+	if err = json.Unmarshal(mi.Payload, &pwd); err != nil {
+		return
+	}
+
+	var balance string
+	if balance, err = app2.GetGapp().CurUser.GetTokenBalance(pwd.Password); err != nil {
+		return
+	}
+
+	payload = balance + sep + time.Now().String()
 
 	return
 }

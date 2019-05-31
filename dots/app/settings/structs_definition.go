@@ -193,3 +193,8 @@ type Credit struct {
 type OnVerifierDisable struct {
 	Block uint64
 }
+
+type Balance struct {
+	Balance   string
+	TimeStamp string
+}

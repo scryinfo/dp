@@ -3,7 +3,7 @@
 <template>
     <div>
         <el-row>
-            <el-col :span="24"><div class="top">App demo</div></el-col>
+            <el-col :span="24"><div class="top">Dapp</div></el-col>
         </el-row>
         <el-row>
             <el-col :span="8">
@@ -46,10 +46,10 @@
 </template>
 
 <script>
-import {db_options, acc_db} from "../DBoptions.js";
-import {utils} from "../utils.js";
+import {db_options, acc_db} from "../utils/DBoptions.js";
+import {connect} from "../utils/connect.js";
 export default {
-    name: "Login",
+    name: "login.vue",
     data() {
         return {
             account: "",
@@ -74,11 +74,14 @@ export default {
             let pwd = this.password;
             this.password = "";
             let _login = this;
-            utils.send({Name: "login.verify", Payload: {account: this.account, password: pwd}});
-            utils.addCallbackFunc("login.verify.callback", function (payload, _this) {
-                    _this.$router.push({ name: "home", params: {acc: _login.account}});
+            if (!(this.account.length === 42 && this.account.split("0x")[0] === "")) {
+                acc_db.readIndex(acc_db.db_index_name, this.account, function (accInstance) {
+                    _login.account = accInstance.nickname;
                 });
-            utils.addCallbackFunc("login.verify.callback.error", function (payload, _this) {
+            }
+            connect.send({Name: "login.verify", Payload: {account: this.account, password: pwd}}, function (payload, _this) {
+                _this.$router.push({ name: "home", params: {acc: _login.account}});
+            }, function (payload, _this) {
                 console.log("登录验证失败：", payload);
                 _this.$alert(payload, "用户名或密码错误！", {
                     confirmButtonText: "关闭",
@@ -89,18 +92,17 @@ export default {
         },
         submit_new: function () {
             let _login = this;
-            utils.send({Name: "create.new.account", Payload: {password: this.password}});
-            utils.addCallbackFunc("create.new.account.callback", function (payload, _this) {
+            connect.send({Name: "create.new.account", Payload: {password: this.password}}, function (payload, _this) {
                 acc_db.write({
                     address: payload,
+                    nickname: payload,
                     fromBlock: 1,
                     isVerifier: false
                 });
                 _login.account = payload;
                 _login.showControl1 = false;
                 _login.showControl2 = true;
-            });
-            utils.addCallbackFunc("create.new.account.callback.error", function (payload, _this) {
+            }, function (payload, _this) {
                 console.log("创建新账户失败：", payload);
                 _this.$alert(payload, "创建新账户失败！", {
                     confirmButtonText: "关闭",
@@ -117,7 +119,7 @@ export default {
     created() {
         this.password = "";this.describe = "";this.account = "";
         db_options.utilsDBInit(this);
-        utils.WSConnect(this);
+        connect.WSConnect(this);
     }
 }
 </script>
