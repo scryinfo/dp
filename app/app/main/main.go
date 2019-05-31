@@ -13,7 +13,8 @@ import (
 	sdkinterface2 "github.com/scryinfo/dp/dots/app/sdkinterface"
 	"github.com/scryinfo/dp/dots/app/settings"
 	sdk2 "github.com/scryinfo/dp/dots/binary/sdk"
-	"github.com/scryinfo/scryg/sutils/ssignal"
+    "github.com/scryinfo/dp/dots/storage"
+    "github.com/scryinfo/scryg/sutils/ssignal"
 	"go.uber.org/zap"
 	"os"
 )
@@ -21,7 +22,8 @@ import (
 func main() {
 	l, err := line.BuildAndStart(func(l dot.Line) error {
 		//todo
-		return Init(l)
+        l.PreAdd(storage.IpfsTypeLive())
+        return Init(l)
 	})
 
 	if err != nil {
