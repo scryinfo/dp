@@ -3,7 +3,7 @@
 <template>
     <div>
         <el-row>
-            <el-col :span="24"><div class="top">App demo</div></el-col>
+            <el-col :span="24"><div class="top">Dapp</div></el-col>
         </el-row>
         <el-row>
             <el-col :span="8">
@@ -49,7 +49,7 @@
 import {db_options, acc_db} from "../utils/DBoptions.js";
 import {connect} from "../utils/connect.js";
 export default {
-    name: "Login",
+    name: "login.vue",
     data() {
         return {
             account: "",
@@ -74,6 +74,11 @@ export default {
             let pwd = this.password;
             this.password = "";
             let _login = this;
+            if (!(this.account.length === 42 && this.account.split("0x")[0] === "")) {
+                acc_db.readIndex(acc_db.db_index_name, this.account, function (accInstance) {
+                    _login.account = accInstance.nickname;
+                });
+            }
             connect.send({Name: "login.verify", Payload: {account: this.account, password: pwd}}, function (payload, _this) {
                 _this.$router.push({ name: "home", params: {acc: _login.account}});
             }, function (payload, _this) {
@@ -90,6 +95,7 @@ export default {
             connect.send({Name: "create.new.account", Payload: {password: this.password}}, function (payload, _this) {
                 acc_db.write({
                     address: payload,
+                    nickname: payload,
                     fromBlock: 1,
                     isVerifier: false
                 });

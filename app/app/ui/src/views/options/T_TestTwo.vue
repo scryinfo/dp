@@ -17,7 +17,7 @@
 
 <script>
 export default {
-    name: "child",
+    name: "T_TestTwo.vue",
     data () {
         return {
             input: "default string. ",

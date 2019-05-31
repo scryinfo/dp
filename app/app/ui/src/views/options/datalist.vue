@@ -34,7 +34,7 @@ import {connect} from "../../utils/connect";
 import {dl_db} from "../../utils/DBoptions";
 import CFT from "../templates/complex_function_template.vue"
 export default {
-    name: "DataList",
+    name: "datalist.vue",
     data () {
         return {
             selectedData: {},    // {pID: "", SupportVerify: false, Price: 0}

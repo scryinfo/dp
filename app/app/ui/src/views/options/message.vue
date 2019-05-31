@@ -10,14 +10,14 @@
 
 <script>
 export default {
-    name: "Message"
+    name: "message.vue"
 }
 </script>
 
 <style>
 .section-item {
     margin: 10px 0;
-    padding: 10px;
+    padding: 10px 30px;
     background-color: lightgrey;
 }
 .section-item-right {
@@ -29,5 +29,9 @@ export default {
 }
 .pagination {
     text-align: center;
+}
+.center {
+    display: flex;
+    align-items: center;
 }
 </style>

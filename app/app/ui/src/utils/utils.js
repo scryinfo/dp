@@ -56,6 +56,7 @@ let utils = {
                     acc_db.read(_this.$store.state.account, function (accInstance) {
                         acc_db.write({
                             address: accInstance.address,
+                            nickname: accInstance.nickname,
                             fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
                             isVerifier: accInstance.isVerifier
                         });
@@ -95,6 +96,7 @@ let utils = {
                     acc_db.read(_this.$store.state.account, function (accInstance) {
                         acc_db.write({
                             address: accInstance.address,
+                            nickname: accInstance.nickname,
                             fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
                             isVerifier: accInstance.isVerifier
                         });
@@ -134,6 +136,7 @@ let utils = {
                     acc_db.read(_this.$store.state.account, function (accInstance) {
                         acc_db.write({
                             address: accInstance.address,
+                            nickname: accInstance.nickname,
                             fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
                             isVerifier: accInstance.isVerifier
                         });
@@ -168,6 +171,7 @@ let presetFunc = {
         acc_db.read(_this.$store.state.account, function (accInstance) {
             acc_db.write({
                 address: accInstance.address,
+                nickname: accInstance.nickname,
                 fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
                 isVerifier: accInstance.isVerifier
             });
@@ -218,6 +222,7 @@ let presetFunc = {
         acc_db.read(_this.$store.state.account, function (accInstance) {
             acc_db.write({
                 address: accInstance.address,
+                nickname: accInstance.nickname,
                 fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
                 isVerifier: accInstance.isVerifier
             });
@@ -256,6 +261,7 @@ let presetFunc = {
         acc_db.read(_this.$store.state.account, function (accInstance) {
             acc_db.write({
                 address: accInstance.address,
+                nickname: accInstance.nickname,
                 fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
                 isVerifier: accInstance.isVerifier
             });
@@ -293,6 +299,7 @@ let presetFunc = {
                     acc_db.read(_this.$store.state.account, function (accInstance) {
                         acc_db.write({
                             address: accInstance.address,
+                            nickname: accInstance.nickname,
                             fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
                             isVerifier: accInstance.isVerifier
                         });
@@ -324,6 +331,7 @@ let presetFunc = {
                     acc_db.read(_this.$store.state.account, function (accInstance) {
                         acc_db.write({
                             address: accInstance.address,
+                            nickname: accInstance.nickname,
                             fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
                             isVerifier: accInstance.isVerifier
                         });
@@ -355,6 +363,7 @@ let presetFunc = {
                     acc_db.read(_this.$store.state.account, function (accInstance) {
                         acc_db.write({
                             address: accInstance.address,
+                            nickname: accInstance.nickname,
                             fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
                             isVerifier: accInstance.isVerifier
                         });
@@ -395,6 +404,7 @@ let presetFunc = {
                     acc_db.read(_this.$store.state.account, function (accInstance) {
                         acc_db.write({
                             address: accInstance.address,
+                            nickname: accInstance.nickname,
                             fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
                             isVerifier: accInstance.isVerifier
                         });
@@ -426,6 +436,7 @@ let presetFunc = {
                     acc_db.read(_this.$store.state.account, function (accInstance) {
                         acc_db.write({
                             address: accInstance.address,
+                            nickname: accInstance.nickname,
                             fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
                             isVerifier: accInstance.isVerifier
                         });
@@ -457,6 +468,7 @@ let presetFunc = {
                     acc_db.read(_this.$store.state.account, function (accInstance) {
                         acc_db.write({
                             address: accInstance.address,
+                            nickname: accInstance.nickname,
                             fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
                             isVerifier: accInstance.isVerifier
                         });
@@ -497,6 +509,7 @@ let presetFunc = {
                     acc_db.read(_this.$store.state.account, function (accInstance) {
                         acc_db.write({
                             address: accInstance.address,
+                            nickname: accInstance.nickname,
                             fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
                             isVerifier: accInstance.isVerifier
                         });
@@ -528,6 +541,7 @@ let presetFunc = {
                     acc_db.read(_this.$store.state.account, function (accInstance) {
                         acc_db.write({
                             address: accInstance.address,
+                            nickname: accInstance.nickname,
                             fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
                             isVerifier: accInstance.isVerifier
                         });
@@ -559,6 +573,7 @@ let presetFunc = {
                     acc_db.read(_this.$store.state.account, function (accInstance) {
                         acc_db.write({
                             address: accInstance.address,
+                            nickname: accInstance.nickname,
                             fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
                             isVerifier: accInstance.isVerifier
                         });
@@ -577,6 +592,7 @@ let presetFunc = {
         acc_db.read(_this.$store.state.account, function (accInstance) {
             acc_db.write({
                 address: accInstance.address,
+                nickname: accInstance.nickname,
                 fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
                 isVerifier: true
             });
@@ -601,6 +617,7 @@ let presetFunc = {
         acc_db.read(_this.$store.state.account, function (accInstance) {
             acc_db.write({
                 address: accInstance.address,
+                nickname: accInstance.nickname,
                 fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
                 isVerifier: false
             });

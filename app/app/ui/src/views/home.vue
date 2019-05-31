@@ -4,12 +4,13 @@
     <div>
         <el-row>
             <el-col :span="24" class="top">
-                <el-col :span="18">App demo</el-col>
+                <el-col :span="18">Dapp</el-col>
                 <el-col :span="6">
                     <el-dropdown class="top-dropdown" trigger="click">
-                        <span>{{acc}}</span>
+                        <span>{{ this.$store.state.nickname }}</span>
                         <el-dropdown-menu slot="dropdown">
                             <el-dropdown-item @click.native="getBalance">余额查询</el-dropdown-item>
+                            <el-dropdown-item @click.native="nickName">修改昵称</el-dropdown-item>
                             <el-dropdown-item @click.native="message">消息处理</el-dropdown-item>
                             <el-dropdown-item divided @click.native="logoutMsg">退出登录</el-dropdown-item>
                         </el-dropdown-menu>
@@ -42,14 +43,15 @@ import {db_options, acc_db} from "../utils/DBoptions.js";
 import {connect} from "../utils/connect.js";
 import {utils} from "../utils/utils.js";
 export default {
-    name: "Home",
+    name: "home.vue",
     data () {
         return {
-            acc: "",
+
         }
     },
     methods: {
         getBalance: function () { this.$router.push("/blc"); },
+        nickName: function () { this.$router.push("/ncn"); },
         message: function () { this.$router.push("/msg"); },
         logoutMsg: function () {
             this.$confirm("确定退出登录吗？", "提示：", {
@@ -83,13 +85,11 @@ export default {
         }
     },
     created() {
-        this.acc = this.$route.params.acc;
-        this.$store.state.account = this.$route.params.acc;
-        utils.init();
-        db_options.utilsDBInit(this);
-        db_options.userDBInit(this.$route.params.acc);
-        acc_db.read(this.$route.params.acc, function (accinstance) {
-            connect.send({Name:"block.set", Payload: {fromBlock: accinstance.fromBlock}}, function (payload, _this) {
+        let _home = this;
+        acc_db.read(this.$route.params.acc, function (accInstance) {
+            _home.$store.state.account = accInstance.address;
+            _home.$store.state.nickname = accInstance.nickname;
+            connect.send({Name:"block.set", Payload: {fromBlock: accInstance.fromBlock}}, function (payload, _this) {
                 console.log("设置初始区块成功", payload);
                 db_options.txDBsDataUpdate(_this);
             }, function (payload, _this) {
@@ -103,6 +103,9 @@ export default {
                 });
             });
         });
+        utils.init();
+        db_options.utilsDBInit(this);
+        db_options.userDBInit(this.$route.params.acc);
     }
 }
 </script>

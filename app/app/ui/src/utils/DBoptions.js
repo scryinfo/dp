@@ -58,6 +58,7 @@ let dl_db = {
 let acc_db = {
     db_name: "Utils",
     db_store_name: "accounts",
+    db_index_name: "nickname",
     db: IDBDatabase,
     init: function (_this){
         _this.$store.state.accounts = [{ address: "", fromBlock: 1, isVerifier:false}];
@@ -91,7 +92,17 @@ let acc_db = {
             cb(event.target.result);
         };
     },
-    // prepare a single remove function, for delete a account, maybe I can give out a button for user?
+    readIndex: function (indexName, indexValue, cb) {
+        let store = acc_db.db.transaction(acc_db.db_store_name, "readwrite").objectStore(acc_db.db_store_name);
+        let request = store.index(indexName).get(indexValue);
+        request.onerror = function (err) {
+            console.log(err);
+        };
+        request.onsuccess = function (event) {
+            cb(event.target.result);
+        };
+    },
+    // todo: prepare a single remove function, for delete a account, maybe I can give out a button for user?
     remove: function (key) {
         let store = acc_db.db.transaction(acc_db.db_store_name, "readwrite").objectStore(acc_db.db_store_name);
         let request = store.delete(key);
@@ -99,7 +110,7 @@ let acc_db = {
             console.log(err);
         };
     },
-    // Administrator function: reset acc_db when chain restart anyhow.
+    // todo: Administrator function: reset acc_db when chain restart anyhow.
     reset: function () {
         let store = acc_db.db.transaction(acc_db.db_store_name,"readwrite").objectStore(acc_db.db_store_name);
         let c = store.openCursor();
@@ -328,7 +339,8 @@ let db_options = {
             dl_db.db = event.target.result;
             acc_db.db = event.target.result;
             event.target.result.createObjectStore(dl_db.db_store_name, {keyPath: "PublishID"});
-            event.target.result.createObjectStore(acc_db.db_store_name, {keyPath: "address"});
+            let store = event.target.result.createObjectStore(acc_db.db_store_name, {keyPath: "address"});
+            store.createIndex(acc_db.db_index_name, acc_db.db_index_name, {unique: false});
         };
         request.onsuccess = function (event) {
             dl_db.db = event.target.result;

@@ -2,14 +2,14 @@
 <!-- license that can be found in the license file.-->
 <template>
     <p class="page-container">
-        404 :&nbsp;&nbsp;&nbsp;WALLPAGE NOT FOUND.<br/>
-        Redirect to login page after {{count}} seconds.
+        <span class="page-text">404 :&nbsp;&nbsp;&nbsp;WALLPAGE NOT FOUND.<br/><br/>
+            Redirect to login page after {{ count }} seconds.</span>
     </p>
 </template>
 
 <script>
 export default {
-    name: "notFound",
+    name: "404.vue",
     data () {
         return {
             count: 5
@@ -31,10 +31,13 @@ export default {
 <style scoped>
 .page-container {
     font-size: 40px;
-    text-align: center;
     color: rgb(192, 204, 218);
-    height: 100px;
-    line-height: 100px;
-    margin-top: 70px;
+    height: calc(100vh - 40px);
+    display: flex;
+    align-items: center;
+    text-align: center;
+}
+.page-text {
+    width: 100%;
 }
 </style>

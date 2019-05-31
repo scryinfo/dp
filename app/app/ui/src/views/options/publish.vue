@@ -23,7 +23,7 @@
 <script>
 import {connect} from "../../utils/connect";
 export default {
-    name: "PublishNewData",
+    name: "publish.vue",
     data () {
         return {
             height: window.innerHeight - 20,
