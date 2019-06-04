@@ -13,7 +13,7 @@ import (
 	"github.com/scryinfo/dp/dots/binary/sdk/core/chainoperations"
 	"github.com/scryinfo/dp/dots/binary/sdk/interface/contract"
 	"github.com/scryinfo/dp/dots/binary/sdk/settings"
-	"github.com/scryinfo/dp/dots/binary/sdk/util/accounts"
+	"github.com/scryinfo/dp/dots/service"
 	"github.com/scryinfo/dp/util"
 	"go.uber.org/zap"
 	"math/big"
@@ -72,7 +72,7 @@ func (c *chainWrapperImp) Publish(txParams *chainoperations.TransactParams, pric
 		}
 	}
 
-	encMetaId, err := accounts.GetAMInstance().Encrypt(metaDataID, txParams.From.String())
+	encMetaId, err := service.GetAMIns().Encrypt(metaDataID, txParams.From.String())
 	if err != nil {
 		logger.Errorln("", zap.NamedError("failed to encrypt meta data hash, error: ", err))
 		return "", err

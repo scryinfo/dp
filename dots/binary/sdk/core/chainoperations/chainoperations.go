@@ -12,7 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
-	accounts2 "github.com/scryinfo/dp/dots/binary/sdk/util/accounts"
+	"github.com/scryinfo/dp/dots/service"
 	"math/big"
 	"strings"
 )
@@ -65,7 +65,7 @@ func SignTransaction(signer types.Signer, address common.Address,
 	var sign []byte
 	var err error
 
-	sign, err = accounts2.GetAMInstance().SignTransaction(h[:], address.String(), password)
+	sign, err = service.GetAMIns().SignTransaction(h[:], address.String(), password)
 	if err != nil {
 		return nil, err
 	}

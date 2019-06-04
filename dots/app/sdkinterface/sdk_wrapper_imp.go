@@ -11,8 +11,8 @@ import (
 	chainevents2 "github.com/scryinfo/dp/dots/binary/sdk/core/chainevents"
 	chainoperations2 "github.com/scryinfo/dp/dots/binary/sdk/core/chainoperations"
 	"github.com/scryinfo/dp/dots/binary/sdk/scry"
-	accounts2 "github.com/scryinfo/dp/dots/binary/sdk/util/accounts"
-	ipfsaccess2 "github.com/scryinfo/dp/dots/binary/sdk/util/storage/ipfsaccess"
+	"github.com/scryinfo/dp/dots/service"
+	"github.com/scryinfo/dp/dots/storage"
 	"math/big"
 	"os"
 )
@@ -92,7 +92,7 @@ func (swi *sdkWrapperImp) TransferTokenFromDeployer(token *big.Int) error {
 	return nil
 }
 func (swi *sdkWrapperImp) importAccount(keyJson string, oldPassword string, newPassword string) (scry.Client, error) {
-	address, err := accounts2.GetAMInstance().ImportAccount([]byte(keyJson), oldPassword, newPassword)
+	address, err := service.GetAMIns().ImportAccount([]byte(keyJson), oldPassword, newPassword)
 	if err != nil {
 		return nil, errors.Wrap(err, "Import account failed. ")
 	}
@@ -213,7 +213,7 @@ func (swi *sdkWrapperImp) Buy(txId string, password string) error {
 }
 
 func (swi *sdkWrapperImp) SubmitMetaDataIdEncWithBuyer(txId string, password, seller, buyer string, metaDataIDEncSeller []byte) error {
-	metaDataIdEncWithBuyer, err := accounts2.GetAMInstance().ReEncrypt(metaDataIDEncSeller, seller, buyer, password)
+	metaDataIdEncWithBuyer, err := service.GetAMIns().ReEncrypt(metaDataIDEncSeller, seller, buyer, password)
 	if err != nil {
 		return errors.Wrap(err, "Re-encrypt meta data ID failed. ")
 	}
@@ -256,12 +256,12 @@ func (swi *sdkWrapperImp) CancelTransaction(txId, password string) error {
 func (swi *sdkWrapperImp) DecryptAndGetMetaDataFromIPFS(password string, metaDataIdEncWithBuyer []byte, buyer, extension string) (string, error) {
 	var oldFileName string
 	{
-		metaDataIDByte, err := accounts2.GetAMInstance().Decrypt(metaDataIdEncWithBuyer, buyer, password)
+		metaDataIDByte, err := service.GetAMIns().Decrypt(metaDataIdEncWithBuyer, buyer, password)
 		if err != nil {
 			return "", errors.Wrap(err, "Decrypt meta data ID encrypted with buyer failed. ")
 		}
-		outDir := swi.si.Config.IPFSOutDir
-		if err := ipfsaccess2.GetIAInstance().GetFromIPFS(string(metaDataIDByte), outDir); err != nil {
+		outDir := storage.GetIPFSConfig().OutDir
+		if err := storage.GetIPFSIns().Get(string(metaDataIDByte), outDir); err != nil {
 			return "", errors.Wrap(err, "Get meta data from IPFS failed. ")
 		}
 		oldFileName = outDir + "/" + string(metaDataIDByte)

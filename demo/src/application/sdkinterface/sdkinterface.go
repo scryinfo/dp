@@ -12,6 +12,7 @@ import (
 	cif "github.com/scryinfo/dp/demo/src/sdk/scryclient/chaininterfacewrapper"
 	"github.com/scryinfo/dp/demo/src/sdk/util/accounts"
 	"github.com/scryinfo/dp/demo/src/sdk/util/storage/ipfsaccess"
+	"github.com/scryinfo/dp/dots/service"
 	"math/big"
 	"os"
 )
@@ -64,7 +65,7 @@ func UserLogin(address string, password string) (bool, error) {
 
 func importAccount(keyJson string, oldPassword string, newPassword string) (*scryclient.ScryClient, error) {
 	var address string
-	if address, err = accounts.GetAMInstance().ImportAccount([]byte(keyJson), oldPassword, newPassword); err != nil {
+	if address, err = service.GetAMIns().ImportAccount([]byte(keyJson), oldPassword, newPassword); err != nil {
 		return nil, errors.Wrap(err, "Import account failed. ")
 	}
 
@@ -191,7 +192,7 @@ func Buy(txId string, password string) error {
 
 func SubmitMetaDataIdEncWithBuyer(txId string, password, seller, buyer string, metaDataIDEncSeller []byte) error {
 	var metaDataIdEncWithBuyer []byte
-	if metaDataIdEncWithBuyer, err = accounts.GetAMInstance().ReEncrypt(metaDataIDEncSeller, seller, buyer, password); err != nil {
+	if metaDataIdEncWithBuyer, err = service.GetAMIns().ReEncrypt(metaDataIDEncSeller, seller, buyer, password); err != nil {
 		return errors.Wrap(err, "Re-encrypt meta data ID failed. ")
 	}
 
@@ -222,7 +223,7 @@ func CancelTransaction(txId, password string) error {
 
 func DecryptAndGetMetaDataFromIPFS(password string, metaDataIdEncWithBuyer []byte, buyer, extension string) (string, error) {
 	var metaDataIDByte []byte
-	if metaDataIDByte, err = accounts.GetAMInstance().Decrypt(metaDataIdEncWithBuyer, buyer, password); err != nil {
+	if metaDataIDByte, err = service.GetAMIns().Decrypt(metaDataIdEncWithBuyer, buyer, password); err != nil {
 		return "", errors.Wrap(err, "Decrypt meta data ID encrypted with buyer failed. ")
 	}
 	if err = ipfsaccess.GetIAInstance().GetFromIPFS(string(metaDataIDByte)); err != nil {

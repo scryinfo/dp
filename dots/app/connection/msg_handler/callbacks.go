@@ -13,7 +13,7 @@ import (
 	"github.com/scryinfo/dp/dots/app/connection"
 	"github.com/scryinfo/dp/dots/app/settings"
 	events2 "github.com/scryinfo/dp/dots/binary/sdk/core/ethereum/events"
-	ipfsaccess2 "github.com/scryinfo/dp/dots/binary/sdk/util/storage/ipfsaccess"
+	"github.com/scryinfo/dp/dots/storage"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"math/big"
@@ -50,8 +50,8 @@ func getPubDataDetails(ipfsID string) (detailsData settings.OnPublish, err error
 
 	var fileName string
 	{
-		outDir := app2.GetGapp().ScryInfo.Config.IPFSOutDir
-		if err = ipfsaccess2.GetIAInstance().GetFromIPFS(ipfsID, outDir); err != nil {
+		outDir := storage.GetIPFSConfig().OutDir
+		if err = storage.GetIPFSIns().Get(ipfsID, outDir); err != nil {
 			return
 		}
 
@@ -151,10 +151,10 @@ func getAndRenameProofFiles(ipfsIDs [][32]byte, extensions []string) ([]string, 
 
 	var proofs = make([]string, len(ipfsIDs))
 
-	outDir := app2.GetGapp().ScryInfo.Config.IPFSOutDir
+	outDir := storage.GetIPFSConfig().OutDir
 	for i := 0; i < len(ipfsIDs); i++ {
 		ipfsID := ipfsBytes32ToHash(ipfsIDs[i])
-		if err := ipfsaccess2.GetIAInstance().GetFromIPFS(ipfsID, outDir); err != nil {
+		if err := storage.GetIPFSIns().Get(ipfsID, outDir); err != nil {
 			err = errors.Wrap(err, "Node - callback: IPFS get failed. ")
 			break
 		}

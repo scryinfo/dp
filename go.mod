@@ -79,7 +79,7 @@ replace (
 	google.golang.org/api => github.com/google/google-api-go-client v0.5.0
 	google.golang.org/appengine => github.com/golang/appengine v1.5.0
 	google.golang.org/genproto => github.com/google/go-genproto v0.0.0-20190513181449-d00d292a067c
-	google.golang.org/grpc => github.com/grpc/grpc-go v1.20.1
+	google.golang.org/grpc => github.com/grpc/grpc-go v1.21.0
 	gopkg.in/check.v1 => github.com/go-check/check v0.0.0-20180628173108-788fd7840127
 	gopkg.in/natefinch/npipe.v2 => github.com/natefinch/npipe v0.0.0-20160621034901-c1b8fa8bdcce
 	gopkg.in/urfave/cli.v1 => github.com/urfave/cli v1.20.0

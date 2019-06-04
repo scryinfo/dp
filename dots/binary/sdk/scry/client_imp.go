@@ -9,25 +9,25 @@ import (
 	"github.com/scryinfo/dot/dot"
 	"github.com/scryinfo/dp/dots/binary/sdk/core/chainevents"
 	"github.com/scryinfo/dp/dots/binary/sdk/core/chainoperations"
-	"github.com/scryinfo/dp/dots/binary/sdk/util/accounts"
+	"github.com/scryinfo/dp/dots/service"
 	"go.uber.org/zap"
 	"math/big"
 )
 
 type clientImp struct {
-	account      *accounts.Account
+	account      *service.Account
 	chainWrapper ChainWrapper `dot:""`
 }
 
 func NewScryClient(publicKey string, chainWrapper ChainWrapper) Client {
 	return &clientImp{
-		account:      &accounts.Account{Address: publicKey},
+		account:      &service.Account{Address: publicKey},
 		chainWrapper: chainWrapper,
 	}
 }
 
 func CreateScryClient(password string, chainWrapper ChainWrapper) (Client, error) {
-	account, err := accounts.GetAMInstance().CreateAccount(password)
+	account, err := service.GetAMIns().CreateAccount(password)
 	if err != nil {
 		dot.Logger().Errorln("", zap.NamedError("failed to create account, error:", err))
 		return nil, err
@@ -39,7 +39,7 @@ func CreateScryClient(password string, chainWrapper ChainWrapper) (Client, error
 	}, nil
 }
 
-func (c *clientImp) Account() *accounts.Account {
+func (c *clientImp) Account() *service.Account {
 	return c.account
 }
 
@@ -52,7 +52,7 @@ func (c *clientImp) UnSubscribeEvent(eventName string) error {
 }
 
 func (c *clientImp) Authenticate(password string) (bool, error) {
-	return accounts.GetAMInstance().AuthAccount(c.account.Address, password)
+	return service.GetAMIns().AuthAccount(c.account.Address, password)
 }
 
 func (c *clientImp) TransferEthFrom(from common.Address, password string, value *big.Int, ec *ethclient.Client) error {

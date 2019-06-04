@@ -44,7 +44,7 @@ func executeEvent(event events2.Event, eventRepo *EventRepository) bool {
 
 	subscribeInfoMap := eventRepo.mapEventSubscribe[event.Name]
 	if subscribeInfoMap == nil {
-		dot.Logger().Warnln("warning: no event was executed, event:" + event.Name)
+		dot.Logger().Debugln("warning: no event was executed, event:" + event.Name)
 		return false
 	}
 
