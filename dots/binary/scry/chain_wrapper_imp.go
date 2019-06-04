@@ -4,19 +4,19 @@
 package scry
 
 import (
-	"errors"
-	"github.com/btcsuite/btcutil/base58"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/scryinfo/dot/dot"
-	"github.com/scryinfo/dp/dots/binary/sdk/core/chainoperations"
-	"github.com/scryinfo/dp/dots/binary/sdk/interface/contract"
-	"github.com/scryinfo/dp/dots/binary/sdk/settings"
-	"github.com/scryinfo/dp/dots/binary/sdk/util/accounts"
-	"github.com/scryinfo/dp/util"
-	"go.uber.org/zap"
-	"math/big"
+    "errors"
+    "github.com/btcsuite/btcutil/base58"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/core/types"
+    "github.com/ethereum/go-ethereum/ethclient"
+    "github.com/scryinfo/dot/dot"
+    "github.com/scryinfo/dp/dots/binary/core/chainoperations"
+    "github.com/scryinfo/dp/dots/binary/interface/contract"
+    "github.com/scryinfo/dp/dots/binary/sdk/settings"
+    "github.com/scryinfo/dp/dots/binary/util/accounts"
+    "github.com/scryinfo/dp/util"
+    "go.uber.org/zap"
+    "math/big"
 )
 
 type chainWrapperImp struct {

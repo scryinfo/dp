@@ -6,9 +6,9 @@ package sdk
 import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
-	"github.com/scryinfo/dp/dots/binary/sdk/core"
-	"github.com/scryinfo/dp/dots/binary/sdk/core/chainevents"
-	"github.com/scryinfo/dp/dots/binary/sdk/scry"
+	"github.com/scryinfo/dp/dots/binary/core"
+	"github.com/scryinfo/dp/dots/binary/core/chainevents"
+	"github.com/scryinfo/dp/dots/binary/scry"
 	"github.com/scryinfo/dp/dots/binary/sdk/settings"
 )
 

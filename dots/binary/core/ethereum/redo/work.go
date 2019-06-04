@@ -66,27 +66,27 @@ func performWork(once Job, duration time.Duration, catchSignal bool) *Recipet {
 		once(ctx)
 	}
 	recipet := newRecipet()
-	recipet.catchSignal = catchSignal
+	catchSignal = catchSignal
 	go func(m *Recipet) {
 		if catchSignal {
-			batchCatchSignals(recipet.sigchan)
+			batchCatchSignals(sigchan)
 		}
-		pls_exit := m.requestStopChan()
+		pls_exit := requestStopChan()
 		for {
 			ctx := newCtx(duration)
 			onceFunc(ctx)
 			if ctx.stopRedo {
-				m.Stop()
+				Stop()
 			}
 
 			select {
 			case <-pls_exit:
-				m.closeChannels()
+				closeChannels()
 				return
-			case <-recipet.sigchan:
-				signal.Stop(recipet.sigchan)
-				m.stopWithRequest(STOP_SYS)
-				m.closeChannels()
+			case <-sigchan:
+				signal.Stop(sigchan)
+				stopWithRequest(STOP_SYS)
+				closeChannels()
 				return
 			case <-time.After(ctx.delayBeforeNextLoop):
 			}

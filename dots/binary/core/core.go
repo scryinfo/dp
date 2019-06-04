@@ -4,14 +4,14 @@
 package core
 
 import (
-	"context"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/pkg/errors"
-	"github.com/scryinfo/dot/dot"
-	chainevents2 "github.com/scryinfo/dp/dots/binary/sdk/core/chainevents"
-	accounts2 "github.com/scryinfo/dp/dots/binary/sdk/util/accounts"
-	ipfsaccess2 "github.com/scryinfo/dp/dots/binary/sdk/util/storage/ipfsaccess"
-	"go.uber.org/zap"
+    "context"
+    "github.com/ethereum/go-ethereum/ethclient"
+    "github.com/pkg/errors"
+    "github.com/scryinfo/dot/dot"
+    "github.com/scryinfo/dp/dots/binary/core/chainevents"
+    "github.com/scryinfo/dp/dots/binary/util/accounts"
+    ipfsaccess2 "github.com/scryinfo/dp/dots/binary/util/storage/ipfsaccess"
+    "go.uber.org/zap"
 )
 
 type Connector struct {
@@ -22,7 +22,7 @@ type Connector struct {
 //start
 func StartEngine(ethNodeAddr string,
 	asServiceAddr string,
-	contracts []chainevents2.ContractInfo,
+	contracts []evt.ContractInfo,
 	ipfsNodeAddr string,
 ) (*ethclient.Client, error) {
 	logger := dot.Logger()
@@ -45,19 +45,19 @@ func StartEngine(ethNodeAddr string,
 		return nil, err
 	}
 
-	err = accounts2.GetAMInstance().Initialize(asServiceAddr)
+	err = accounts.GetAMInstance().Initialize(asServiceAddr)
 	if err != nil {
 		logger.Errorln("", zap.NamedError("failed to initialize account service, error:", err))
 		return nil, err
 	}
 
-	chainevents2.StartEventProcessing(connector.conn, contracts)
+	chainevents.StartEventProcessing(connector.conn, contracts)
 
 	return connector.conn, nil
 }
 
 func StartScan(fromBlock uint64) {
-	chainevents2.SetFromBlock(fromBlock)
+	chainevents.SetFromBlock(fromBlock)
 }
 
 func newConnector(ethNodeAddr string) (*Connector, error) {

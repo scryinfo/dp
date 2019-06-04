@@ -7,7 +7,7 @@ import (
 	"context"
 	"github.com/pkg/errors"
 	"github.com/scryinfo/dot/dot"
-	"github.com/scryinfo/dp/dots/binary/sdk/interface/account"
+	"github.com/scryinfo/dp/dots/binary/interface/account"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"sync"

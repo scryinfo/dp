@@ -4,14 +4,14 @@
 package scry
 
 import (
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/scryinfo/dot/dot"
-	"github.com/scryinfo/dp/dots/binary/sdk/core/chainevents"
-	"github.com/scryinfo/dp/dots/binary/sdk/core/chainoperations"
-	"github.com/scryinfo/dp/dots/binary/sdk/util/accounts"
-	"go.uber.org/zap"
-	"math/big"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/ethclient"
+    "github.com/scryinfo/dot/dot"
+    "github.com/scryinfo/dp/dots/binary/core/chainevents"
+    "github.com/scryinfo/dp/dots/binary/core/chainoperations"
+    "github.com/scryinfo/dp/dots/binary/util/accounts"
+    "go.uber.org/zap"
+    "math/big"
 )
 
 type clientImp struct {

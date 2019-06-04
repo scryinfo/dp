@@ -1,9 +1,13 @@
+// Scry Info.  All rights reserved.
+// license that can be found in the license file.
+
 package subscribe
 
 import (
     "github.com/ethereum/go-ethereum/common"
     "github.com/pkg/errors"
     "github.com/scryinfo/dot/dot"
+    "github.com/scryinfo/dp/dots/eth/event"
 )
 
 const (
@@ -11,7 +15,7 @@ const (
 )
 
 type Subscribe struct {
-    eventRepo *Repository
+    eventRepo *event.Repository
     config    subscribeConfig
 }
 
@@ -19,7 +23,7 @@ type subscribeConfig struct {
 }
 
 func (c *Subscribe) Create(l dot.Line) error {
-    c.eventRepo = NewRepository()
+    c.eventRepo = event.NewRepository()
     return nil
 }
 
@@ -57,16 +61,16 @@ func SubsTypeLive() *dot.TypeLives {
 func (c *Subscribe) Subscribe(
     clientAddr common.Address,
     eventName string,
-    eventCallback Callback,
+    eventCallback event.Callback,
 ) error {
     if eventCallback == nil || eventName == "" {
         return errors.New("couldn't subscribe event because of null eventCallback or empty event name")
     }
 
-    subscribeInfoMap := c.eventRepo.mapEventCallback[eventName]
+    subscribeInfoMap := c.eventRepo.MapEventCallback[eventName]
     if subscribeInfoMap == nil {
-        subscribeInfoMap = make(map[common.Address]Callback)
-        c.eventRepo.mapEventCallback[eventName] = subscribeInfoMap
+        subscribeInfoMap = make(map[common.Address]event.Callback)
+        c.eventRepo.MapEventCallback[eventName] = subscribeInfoMap
     }
 
     subscribeInfoMap[clientAddr] = eventCallback
@@ -82,7 +86,7 @@ func (c *Subscribe) UnSubscribe(
         return errors.New("couldn't unsubscribe event because of empty event name")
     }
 
-    subscribeInfoMap := c.eventRepo.mapEventCallback[eventName]
+    subscribeInfoMap := c.eventRepo.MapEventCallback[eventName]
     if subscribeInfoMap == nil || subscribeInfoMap[clientAddr] == nil {
         return errors.New("couldn't find corresponding event to unsubscribe:" + eventName)
     }
@@ -90,7 +94,7 @@ func (c *Subscribe) UnSubscribe(
     delete(subscribeInfoMap, clientAddr)
     if len(subscribeInfoMap) == 0 {
         subscribeInfoMap = nil
-        delete(c.eventRepo.mapEventCallback, eventName)
+        delete(c.eventRepo.MapEventCallback, eventName)
     }
 
     return nil

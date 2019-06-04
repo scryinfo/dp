@@ -4,17 +4,17 @@
 package chainevents
 
 import (
-	"errors"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/scryinfo/dot/dot"
-	events2 "github.com/scryinfo/dp/dots/binary/sdk/core/ethereum/events"
+    "errors"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/ethclient"
+    "github.com/scryinfo/dot/dot"
+    "github.com/scryinfo/dp/dots/binary/core/ethereum/events"
 )
 
 var (
 	maxChannelEventNum = 10000
 	externalEventRepo  = NewEventRepository()
-	dataChannel        = make(chan events2.Event, maxChannelEventNum)
+	dataChannel        = make(chan events.Event, maxChannelEventNum)
 	errorChannel       = make(chan error, 1)
 )
 

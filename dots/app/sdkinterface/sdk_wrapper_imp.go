@@ -4,17 +4,17 @@
 package sdkinterface
 
 import (
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/pkg/errors"
-	"github.com/scryinfo/dp/dots/app/settings"
-	sdk2 "github.com/scryinfo/dp/dots/binary/sdk"
-	chainevents2 "github.com/scryinfo/dp/dots/binary/sdk/core/chainevents"
-	chainoperations2 "github.com/scryinfo/dp/dots/binary/sdk/core/chainoperations"
-	"github.com/scryinfo/dp/dots/binary/sdk/scry"
-	accounts2 "github.com/scryinfo/dp/dots/binary/sdk/util/accounts"
-	ipfsaccess2 "github.com/scryinfo/dp/dots/binary/sdk/util/storage/ipfsaccess"
-	"math/big"
-	"os"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/pkg/errors"
+    "github.com/scryinfo/dp/dots/app/settings"
+    chainevents2 "github.com/scryinfo/dp/dots/binary/core/chainevents"
+    chainoperations2 "github.com/scryinfo/dp/dots/binary/core/chainoperations"
+    "github.com/scryinfo/dp/dots/binary/scry"
+    sdk2 "github.com/scryinfo/dp/dots/binary/sdk"
+    accounts2 "github.com/scryinfo/dp/dots/binary/util/accounts"
+    ipfsaccess2 "github.com/scryinfo/dp/dots/binary/util/storage/ipfsaccess"
+    "math/big"
+    "os"
 )
 
 type sdkWrapperImp struct {

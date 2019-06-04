@@ -5,7 +5,7 @@ package sdkinterface
 
 import (
 	"github.com/scryinfo/dp/dots/app/settings"
-	chainevents2 "github.com/scryinfo/dp/dots/binary/sdk/core/chainevents"
+	chainevents2 "github.com/scryinfo/dp/dots/binary/core/chainevents"
 	"math/big"
 )
 
