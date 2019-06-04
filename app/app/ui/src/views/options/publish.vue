@@ -49,13 +49,6 @@ export default {
         }
     },
     methods: {
-        cancelClickFunc: function () {
-            this.pubDialog = false;
-            this.$message({
-                type: "info",
-                message: "取消发布新数据"
-            });
-        },
         pubPrepare: function () {
             this.count = this.$refs.selectedProofs.files.length;
             this.pubData.details.Seller = this.$store.state.account;

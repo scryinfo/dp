@@ -597,8 +597,6 @@ func Init(
 	ethNodeAddr string,
 	protocolAddr string,
 	tokenAddr string,
-	keyServiceAddr string,
-	ipfsNodeAddr string,
 	appId string,
 ) (scry.ChainWrapper, error) {
 	settings.SetAppId(appId)
@@ -606,9 +604,7 @@ func Init(
 	contracts := getContracts(protocolAddr, tokenAddr)
 	conn, err := core.StartEngine(
 		ethNodeAddr,
-		keyServiceAddr,
-		contracts,
-		ipfsNodeAddr)
+		contracts)
 	if err != nil {
 		return nil, errors.New(startEngineFailed)
 	}

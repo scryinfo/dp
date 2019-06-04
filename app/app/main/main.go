@@ -4,7 +4,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/scryinfo/dot/dot"
 	"github.com/scryinfo/dot/dots/line"
 	app2 "github.com/scryinfo/dp/dots/app"
@@ -13,8 +12,9 @@ import (
 	sdkinterface2 "github.com/scryinfo/dp/dots/app/sdkinterface"
 	"github.com/scryinfo/dp/dots/app/settings"
 	sdk2 "github.com/scryinfo/dp/dots/binary/sdk"
-    "github.com/scryinfo/dp/dots/storage"
-    "github.com/scryinfo/scryg/sutils/ssignal"
+	"github.com/scryinfo/dp/dots/service"
+	"github.com/scryinfo/dp/dots/storage"
+	"github.com/scryinfo/scryg/sutils/ssignal"
 	"go.uber.org/zap"
 	"os"
 )
@@ -23,20 +23,22 @@ func main() {
 	l, err := line.BuildAndStart(func(l dot.Line) error {
 		//todo
         l.PreAdd(storage.IpfsTypeLive())
+        l.PreAdd(service.AccountTypeLive())
         return Init(l)
 	})
 
 	if err != nil {
-		fmt.Println(err)
+		dot.Logger().Debugln("Line init failed. ", zap.NamedError("", err))
 		return
 	}
+
+	dot.SetDefaultLine(l)
 
 	defer line.StopAndDestroy(l, true)
 
 	ssignal.WatiCtrlC(func(s os.Signal) bool {
 		return false //quit
 	})
-
 }
 
 func Init(l dot.Line) (err error) {
@@ -47,16 +49,15 @@ func Init(l dot.Line) (err error) {
 	app2.GetGapp().Connection = connection.CreateConnetion(conf.Config.WSPort, conf.Config.UIResourcesDir)
 
 	//todo
+
 	app2.GetGapp().ChainWrapper, err = sdk2.Init(
 		conf.Chain.Ethereum.EthNode,
 		conf.Chain.Contracts.ProtocolAddr,
 		conf.Chain.Contracts.TokenAddr,
-		conf.Services.Keystore,
-		conf.Services.Ipfs,
 		conf.Config.AppId,
 	)
 	if err != nil {
-		logger.Errorln("", zap.NamedError("", err))
+		logger.Errorln("SDK init failed. ", zap.NamedError("", err))
 	}
 	l.ToInjecter().ReplaceOrAddByType(app2.GetGapp().ChainWrapper)
 
@@ -70,5 +71,5 @@ func Init(l dot.Line) (err error) {
 		logger.Errorln("WebSocket Connect failed. ", zap.NamedError("", err))
 	}
 
-	return err
+	return
 }

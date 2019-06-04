@@ -11,6 +11,7 @@ import (
 	"github.com/scryinfo/dp/demo/src/sdk/settings"
 	"github.com/scryinfo/dp/demo/src/sdk/util/accounts"
 	"github.com/scryinfo/dp/demo/src/sdk/util/uuid"
+	"github.com/scryinfo/dp/dots/service"
 	rlog "github.com/sirupsen/logrus"
 	"math/big"
 )
@@ -61,7 +62,7 @@ func Publish(txParams *op.TransactParams, price *big.Int, metaDataID []byte, pro
 		}
 	}
 
-	encMetaId, err := accounts.GetAMInstance().Encrypt(metaDataID, txParams.From.String())
+	encMetaId, err := service.GetAMIns().Encrypt(metaDataID, txParams.From.String())
 	if err != nil {
 		rlog.Error("failed to encrypt meta data hash, error: ", err)
 		return "", err

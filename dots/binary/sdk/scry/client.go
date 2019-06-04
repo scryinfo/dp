@@ -7,12 +7,12 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/scryinfo/dp/dots/binary/sdk/core/chainevents"
-	"github.com/scryinfo/dp/dots/binary/sdk/util/accounts"
+	"github.com/scryinfo/dp/dots/service"
 	"math/big"
 )
 
 type Client interface {
-	Account() *accounts.Account
+	Account() *service.Account
 	SubscribeEvent(eventName string, callback chainevents.EventCallback) error
 	UnSubscribeEvent(eventName string) error
 	Authenticate(password string) (bool, error)

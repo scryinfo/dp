@@ -3,28 +3,51 @@
     "file": "log.log",
     "level": "debug"
   },
-  "dots": [],
+  "dots": [
+    {
+      "metaData": {
+        "typeId": "6763f97f-dfd2-40eb-8925-b8a031aab461"
+      },
+      "lives": [
+        {
+          "liveId": "6763f97f-dfd2-40eb-8925-b8a031aab461",
+          "json": {
+            "nodeAddr": "/ip4/127.0.0.1/tcp/5001",
+            "outDir": "C:/Users/Will"
+          }
+        }
+      ]
+    },
+    {
+      "metaData": {
+        "typeId": "cf8856e3-75aa-4ea5-b3bf-0e9eec347e56"
+      },
+      "lives": [
+        {
+          "liveId": "cf8856e3-75aa-4ea5-b3bf-0e9eec347e56",
+          "json": {
+            "nodeAddr": "localhost:48080"
+          }
+        }
+      ]
+    }
+  ],
   "app": {
     "chain": {
       "contracts": {
-        "tokenAddr": "0xfd37a44a5e107029bbd3fea5b2cc7a91947d2c88",
-        "protocolAddr": "0x7d1bd61ff767187a766bffe253a5c9fb269d4fe1",
-        "deployerKeyjson": "{\"address\":\"f6558355810f3f17e51fefcdff62682f33b7d85c\",\"crypto\":{\"cipher\":\"aes-128-ctr\",\"ciphertext\":\"93378cfeef81cadb0278951d0a29b0e0dc65da866b45a5364bba3c49a13ac504\",\"cipherparams\":{\"iv\":\"0904ea67eb59864b83c8c2817d290ce5\"},\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":262144,\"p\":1,\"r\":8,\"salt\":\"c20c01fa1fab010fd64b90ef227609e7eb72a33b0e87f6d1184be8294050e609\"},\"mac\":\"242e056f05b27d3eb0b62df2e60f5fad45dfce72d308ecc1e2b0e9d9e939e445\"},\"id\":\"cbd5686e-aad9-4636-a244-f148c359c0c9\",\"version\":3}",
+        "tokenAddr": "0x98e01b38a6d0c80d20033af9acd56feb832f93a7",
+        "protocolAddr": "0x5b989229c2728eb24938a7be9adb5ed6a9e53c9f",
+        "deployerKeyjson": "{\"address\":\"cc287aaa89e800c26e1883e924128b79a95739a7\",\"crypto\":{\"cipher\":\"aes-128-ctr\",\"ciphertext\":\"74ce3398e69debcf34222ec361cd52f26eccef40338598be3db732964126e0cc\",\"cipherparams\":{\"iv\":\"081b109f71f714d3eb3a0650ebb3f108\"},\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":262144,\"p\":1,\"r\":8,\"salt\":\"48f737e790626ae5da0e4996cd5a6f4e6d79dd5d74bad9f1a445664fd824140e\"},\"mac\":\"581ef2a59d6760ef05d72f8e77aedd58e48073b5b1eb20de06c2b20dd5ad0f2e\"},\"id\":\"29ad6e43-db54-49d3-869a-b8af50da4132\",\"version\":3}",
         "deployerPassword": "123456"
       },
       "ethereum": {
         "ethNode": "http://localhost:8545/"
       }
     },
-    "services": {
-      "ipfs": "/ip4/127.0.0.1/tcp/5001",
-      "keystore": "localhost:48080"
-    },
     "config": {
       "wsPort": "9822",
       "uiResourcesDir": "D:/GoPath/src/github.com/scryinfo/dp/app/app/ui/resources/app",
-      "appId": "Dapp",
-      "ipfsOutDir": "C:/Users/Will"
+      "appId": "Dapp"
     }
   }
 }

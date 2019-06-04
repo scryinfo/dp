@@ -9,8 +9,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/scryinfo/dot/dot"
 	chainevents2 "github.com/scryinfo/dp/dots/binary/sdk/core/chainevents"
-	accounts2 "github.com/scryinfo/dp/dots/binary/sdk/util/accounts"
-	ipfsaccess2 "github.com/scryinfo/dp/dots/binary/sdk/util/storage/ipfsaccess"
 	"go.uber.org/zap"
 )
 
@@ -21,9 +19,7 @@ type Connector struct {
 
 //start
 func StartEngine(ethNodeAddr string,
-	asServiceAddr string,
 	contracts []chainevents2.ContractInfo,
-	ipfsNodeAddr string,
 ) (*ethclient.Client, error) {
 	logger := dot.Logger()
 
@@ -33,21 +29,9 @@ func StartEngine(ethNodeAddr string,
 		}
 	}()
 
-	err := ipfsaccess2.GetIAInstance().Initialize(ipfsNodeAddr)
-	if err != nil {
-		logger.Errorln("", zap.NamedError("failed to initialize ipfs. error: ", err))
-		return nil, err
-	}
-
 	connector, err := newConnector(ethNodeAddr)
 	if err != nil {
 		logger.Errorln("", zap.NamedError("failed to initialize connector. error: ", err))
-		return nil, err
-	}
-
-	err = accounts2.GetAMInstance().Initialize(asServiceAddr)
-	if err != nil {
-		logger.Errorln("", zap.NamedError("failed to initialize account service, error:", err))
 		return nil, err
 	}
 
