@@ -7,7 +7,7 @@ import (
 	"github.com/scryinfo/dp/dots/app/connection"
 	sdkinterface2 "github.com/scryinfo/dp/dots/app/sdkinterface"
 	settings2 "github.com/scryinfo/dp/dots/app/settings"
-	"github.com/scryinfo/dp/dots/binary/sdk/scry"
+	"github.com/scryinfo/dp/dots/binary/scry"
 )
 
 var app Gapp

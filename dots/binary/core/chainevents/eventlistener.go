@@ -4,16 +4,16 @@
 package chainevents
 
 import (
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/scryinfo/dot/dot"
-	events2 "github.com/scryinfo/dp/dots/binary/sdk/core/ethereum/events"
-	"go.uber.org/zap"
-	"time"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/ethclient"
+    "github.com/scryinfo/dot/dot"
+    "github.com/scryinfo/dp/dots/binary/core/ethereum/events"
+    "go.uber.org/zap"
+    "time"
 )
 
 var (
-	builder *events2.Builder = nil
+	builder *events.Builder = nil
 )
 
 type ContractInfo struct {
@@ -23,7 +23,7 @@ type ContractInfo struct {
 }
 
 func ListenEvent(conn *ethclient.Client, contracts []ContractInfo, fromBlock uint64, interval time.Duration,
-	dataChannel chan events2.Event, errorChannel chan error) bool {
+	dataChannel chan events.Event, errorChannel chan error) bool {
 	logger := dot.Logger()
 	rv := true
 	logger.Infoln("start listening events...")
@@ -40,7 +40,7 @@ func ListenEvent(conn *ethclient.Client, contracts []ContractInfo, fromBlock uin
 		return false
 	}
 
-	builder = events2.NewScanBuilder()
+	builder = events.NewScanBuilder()
 	for _, v := range contracts {
 		builder.SetContract(common.HexToAddress(v.Address), v.Abi, v.Events...)
 	}

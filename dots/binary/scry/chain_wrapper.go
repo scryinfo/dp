@@ -6,7 +6,7 @@ package scry
 import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/scryinfo/dp/dots/binary/sdk/core/chainoperations"
+	"github.com/scryinfo/dp/dots/binary/core/chainoperations"
 	"math/big"
 )
 

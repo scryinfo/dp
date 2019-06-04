@@ -4,21 +4,21 @@
 package events
 
 import (
-	"context"
-	"encoding/binary"
-	"errors"
-	"fmt"
-	"github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethclient"
-	redo2 "github.com/scryinfo/dp/dots/binary/sdk/core/ethereum/redo"
-	"math/big"
-	"reflect"
-	"strings"
-	"time"
+    "context"
+    "encoding/binary"
+    "errors"
+    "fmt"
+    "github.com/ethereum/go-ethereum"
+    "github.com/ethereum/go-ethereum/accounts/abi"
+    "github.com/ethereum/go-ethereum/accounts/abi/bind"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/core/types"
+    "github.com/ethereum/go-ethereum/ethclient"
+    "github.com/scryinfo/dp/dots/binary/core/ethereum/redo"
+    "math/big"
+    "reflect"
+    "strings"
+    "time"
 )
 
 var (
@@ -48,7 +48,7 @@ func (evt Event) String() string {
 		evt.TxHash.Hex(),
 		evt.Address.Hex(),
 		evt.Name,
-		evt.Data.String(),
+		String(),
 	)
 }
 
@@ -118,15 +118,15 @@ func (b *Builder) SetInterval(interval time.Duration) *Builder {
 	return b
 }
 
-func (b *Builder) BuildAndRun() (*redo2.Recipet, error) {
+func (b *Builder) BuildAndRun() (*redo.Recipet, error) {
 	if err := b.Build(); err != nil {
 		return nil, err
 	}
-	var recipet *redo2.Recipet
+	var recipet *redo.Recipet
 	if b.es.GracefullExit {
-		recipet = redo2.PerformSafe(b.es.scan, b.interval)
+		recipet = redo.PerformSafe(b.es.scan, b.interval)
 	} else {
-		recipet = redo2.Perform(b.es.scan, b.interval)
+		recipet = redo.Perform(b.es.scan, b.interval)
 	}
 	return recipet, nil
 }
@@ -243,7 +243,7 @@ func (cm contractMeta) unpackTuple(v JSONObj, output []byte, args abi.Arguments)
 		if err != nil {
 			return err
 		}
-		v.Set(arg.Name, marshalledValue)
+		Set(arg.Name, marshalledValue)
 	}
 	return nil
 }
@@ -259,7 +259,7 @@ func (cm contractMeta) unpackAtomic(v JSONObj, output []byte, args abi.Arguments
 	if err != nil {
 		return err
 	}
-	v.Set(arg.Name, marshalledValue)
+	Set(arg.Name, marshalledValue)
 	return nil
 }
 
@@ -451,62 +451,62 @@ func parseTopics(out JSONObj, fields abi.Arguments, topics []common.Hash) error 
 		switch arg.Type.Kind {
 		case reflect.Bool:
 			if topics[0][common.HashLength-1] == 1 {
-				out.Set(name, true)
+				Set(name, true)
 			} else {
-				out.Set(name, false)
+				Set(name, false)
 			}
 		case reflect.Int8:
 			num := new(big.Int).SetBytes(topics[0][:])
-			out.Set(name, num.Int64())
+			Set(name, num.Int64())
 
 		case reflect.Int16:
 			num := new(big.Int).SetBytes(topics[0][:])
-			out.Set(name, num.Int64())
+			Set(name, num.Int64())
 
 		case reflect.Int32:
 			num := new(big.Int).SetBytes(topics[0][:])
-			out.Set(name, num.Int64())
+			Set(name, num.Int64())
 
 		case reflect.Int64:
 			num := new(big.Int).SetBytes(topics[0][:])
-			out.Set(name, num.Int64())
+			Set(name, num.Int64())
 
 		case reflect.Uint8:
 			num := new(big.Int).SetBytes(topics[0][:])
-			out.Set(name, uint8(num.Int64()))
+			Set(name, uint8(num.Int64()))
 
 		case reflect.Uint16:
 			num := new(big.Int).SetBytes(topics[0][:])
-			out.Set(name, uint16(num.Int64()))
+			Set(name, uint16(num.Int64()))
 
 		case reflect.Uint32:
 			num := new(big.Int).SetBytes(topics[0][:])
-			out.Set(name, uint32(num.Int64()))
+			Set(name, uint32(num.Int64()))
 
 		case reflect.Uint64:
 			num := new(big.Int).SetBytes(topics[0][:])
-			out.Set(name, num.Uint64())
+			Set(name, num.Uint64())
 
 		default:
 			// Ran out of plain primitive types, try custom types
 			switch arg.Type.Type {
 			case reflectHash: // Also covers all dynamic types
-				out.Set(name, topics[0].Hex())
+				Set(name, topics[0].Hex())
 
 			case reflectAddress:
 				var addr common.Address
 				copy(addr[:], topics[0][common.HashLength-common.AddressLength:])
-				out.Set(name, addr.Hex())
+				Set(name, addr.Hex())
 
 			case reflectBigInt:
 				num := new(big.Int).SetBytes(topics[0][:])
-				out.Set(name, num)
+				Set(name, num)
 
 			default:
 				// Ran out of custom types, try the crazies
 				switch {
 				case arg.Type.T == abi.FixedBytesTy:
-					out.Set(name, topics[0][common.HashLength-arg.Type.Size:])
+					Set(name, topics[0][common.HashLength-arg.Type.Size:])
 
 				default:
 					return fmt.Errorf("unsupported indexed type: %v", arg.Type)
@@ -573,7 +573,7 @@ func (es *eventScanner) sendData(evt Event) {
 	}
 }
 
-func (es *eventScanner) scan(ctx *redo2.RedoCtx) {
+func (es *eventScanner) scan(ctx *redo.RedoCtx) {
 	newest_bn, err := es.NewestBlockNumber()
 	if err != nil {
 		// not send this err

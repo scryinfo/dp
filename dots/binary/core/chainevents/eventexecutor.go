@@ -4,11 +4,11 @@
 package chainevents
 
 import (
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/scryinfo/dot/dot"
-	events2 "github.com/scryinfo/dp/dots/binary/sdk/core/ethereum/events"
-	settings2 "github.com/scryinfo/dp/dots/binary/sdk/settings"
-	"go.uber.org/zap"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/scryinfo/dot/dot"
+    "github.com/scryinfo/dp/dots/binary/core/ethereum/events"
+    settings2 "github.com/scryinfo/dp/dots/binary/sdk/settings"
+    "go.uber.org/zap"
 )
 
 const (
@@ -19,7 +19,7 @@ const (
 	TOKEN_EVT_APPROVAL = "Approval"
 )
 
-func ExecuteEvents(dataChannel chan events2.Event, externalEventRepo *EventRepository) {
+func ExecuteEvents(dataChannel chan events.Event, externalEventRepo *EventRepository) {
 	defer func() {
 		if er := recover(); er != nil {
 			dot.Logger().Errorln("", zap.Any("Error: failed to execute event, error: ", er))
@@ -35,7 +35,7 @@ func ExecuteEvents(dataChannel chan events2.Event, externalEventRepo *EventRepos
 	}
 }
 
-func executeEvent(event events2.Event, eventRepo *EventRepository) bool {
+func executeEvent(event events.Event, eventRepo *EventRepository) bool {
 	defer func() {
 		if er := recover(); er != nil {
 			dot.Logger().Errorln("", zap.Any("error: failed to execute event "+event.Name+" because of error: ", er))
@@ -76,7 +76,7 @@ func executeEvent(event events2.Event, eventRepo *EventRepository) bool {
 }
 
 func executeMatchedEvent(subscribeInfoMap map[common.Address]EventCallback,
-	users []common.Address, event events2.Event) {
+	users []common.Address, event events.Event) {
 	for k, v := range subscribeInfoMap {
 		if containUser(users, k) {
 			if v != nil {
@@ -86,7 +86,7 @@ func executeMatchedEvent(subscribeInfoMap map[common.Address]EventCallback,
 	}
 }
 
-func executeAllEvent(subscribeInfoMap map[common.Address]EventCallback, event events2.Event) {
+func executeAllEvent(subscribeInfoMap map[common.Address]EventCallback, event events.Event) {
 	for _, v := range subscribeInfoMap {
 		EventCallback(v)(event)
 	}

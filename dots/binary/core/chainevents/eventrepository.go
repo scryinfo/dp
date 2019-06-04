@@ -4,11 +4,11 @@
 package chainevents
 
 import (
-	"github.com/ethereum/go-ethereum/common"
-	events2 "github.com/scryinfo/dp/dots/binary/sdk/core/ethereum/events"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/scryinfo/dp/dots/binary/core/ethereum/events"
 )
 
-type EventCallback func(event events2.Event) bool
+type EventCallback func(event events.Event) bool
 
 type EventRepository struct {
 	mapEventSubscribe map[string]map[common.Address]EventCallback

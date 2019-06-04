@@ -4,17 +4,17 @@
 package chainoperations
 
 import (
-	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethclient"
-	accounts2 "github.com/scryinfo/dp/dots/binary/sdk/util/accounts"
-	"math/big"
-	"strings"
+    "context"
+    "encoding/json"
+    "errors"
+    "fmt"
+    "github.com/ethereum/go-ethereum/accounts/abi/bind"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/core/types"
+    "github.com/ethereum/go-ethereum/ethclient"
+    "github.com/scryinfo/dp/dots/binary/util/accounts"
+    "math/big"
+    "strings"
 )
 
 var (
@@ -65,7 +65,7 @@ func SignTransaction(signer types.Signer, address common.Address,
 	var sign []byte
 	var err error
 
-	sign, err = accounts2.GetAMInstance().SignTransaction(h[:], address.String(), password)
+	sign, err = accounts.GetAMInstance().SignTransaction(h[:], address.String(), password)
 	if err != nil {
 		return nil, err
 	}
