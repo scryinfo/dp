@@ -4,7 +4,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/scryinfo/dot/dot"
 	"github.com/scryinfo/dot/dots/line"
 	app2 "github.com/scryinfo/dp/dots/app"
@@ -12,9 +11,9 @@ import (
 	"github.com/scryinfo/dp/dots/app/connection/msg_handler"
 	sdkinterface2 "github.com/scryinfo/dp/dots/app/sdkinterface"
 	"github.com/scryinfo/dp/dots/app/settings"
-	sdk2 "github.com/scryinfo/dp/dots/binary/sdk"
-    "github.com/scryinfo/dp/dots/storage"
-    "github.com/scryinfo/scryg/sutils/ssignal"
+    "github.com/scryinfo/dp/dots/binary"
+	"github.com/scryinfo/dp/dots/storage"
+	"github.com/scryinfo/scryg/sutils/ssignal"
 	"go.uber.org/zap"
 	"os"
 )
@@ -23,20 +22,22 @@ func main() {
 	l, err := line.BuildAndStart(func(l dot.Line) error {
 		//todo
         l.PreAdd(storage.IpfsTypeLive())
+        l.PreAdd(binary.BinTypeLive())
         return Init(l)
 	})
 
 	if err != nil {
-		fmt.Println(err)
+		dot.Logger().Debugln("Line init failed. ", zap.NamedError("", err))
 		return
 	}
+
+	dot.SetDefaultLine(l)
 
 	defer line.StopAndDestroy(l, true)
 
 	ssignal.WatiCtrlC(func(s os.Signal) bool {
 		return false //quit
 	})
-
 }
 
 func Init(l dot.Line) (err error) {
@@ -46,18 +47,19 @@ func Init(l dot.Line) (err error) {
 	app2.GetGapp().ScryInfo = conf
 	app2.GetGapp().Connection = connection.CreateConnetion(conf.Config.WSPort, conf.Config.UIResourcesDir)
 
-	//todo
-	app2.GetGapp().ChainWrapper, err = sdk2.Init(
-		conf.Chain.Ethereum.EthNode,
-		conf.Chain.Contracts.ProtocolAddr,
-		conf.Chain.Contracts.TokenAddr,
-		conf.Services.Keystore,
-		conf.Services.Ipfs,
-		conf.Config.AppId,
-	)
-	if err != nil {
-		logger.Errorln("", zap.NamedError("", err))
-	}
+	d, err := l.ToInjecter().GetByLiveId(dot.LiveId(binary.BinLiveId))
+    if err != nil {
+        logger.Errorln("load Binary component failed.")
+        return nil
+    }
+
+    if g, ok := d.(*binary.Binary); ok {
+        app2.GetGapp().ChainWrapper = g.ChainWrapper()
+    } else {
+        logger.Errorln("load Binary component failed.")
+        return nil
+    }
+
 	l.ToInjecter().ReplaceOrAddByType(app2.GetGapp().ChainWrapper)
 
 	logger.Infoln("ChainWrapper init finished. ")
@@ -70,5 +72,5 @@ func Init(l dot.Line) (err error) {
 		logger.Errorln("WebSocket Connect failed. ", zap.NamedError("", err))
 	}
 
-	return err
+	return
 }

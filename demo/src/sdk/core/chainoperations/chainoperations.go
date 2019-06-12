@@ -96,7 +96,7 @@ func TransferEth(from common.Address,
 func transact(opts *bind.TransactOpts, to common.Address, client *ethclient.Client) (*types.Transaction, error) {
 	var err error
 
-	// Ensure a valid value field and resolve the account nonce
+	// Ensure a valid value field and resolve the interface nonce
 	value := opts.Value
 	if value == nil {
 		value = new(big.Int)
@@ -105,7 +105,7 @@ func transact(opts *bind.TransactOpts, to common.Address, client *ethclient.Clie
 	if opts.Nonce == nil {
 		nonce, err = client.PendingNonceAt(opts.Context, opts.From)
 		if err != nil {
-			return nil, fmt.Errorf("failed to retrieve account nonce: %v", err)
+			return nil, fmt.Errorf("failed to retrieve interface nonce: %v", err)
 		}
 	} else {
 		nonce = opts.Nonce.Uint64()

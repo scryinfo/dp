@@ -1,0 +1,27 @@
+{
+  "log": {
+    "file": "log.log",
+    "level": "debug"
+  },
+  "dots": [
+    {
+      "metaData": {
+        "typeId": "92fed326-2f2c-40c5-8664-107473238390"
+      },
+      "lives": [
+        {
+          "liveId": "92fed326-2f2c-40c5-8664-107473238390",
+          "json": {
+            "appId": "app",
+            "ethServiceAddr": "http://127.0.0.1:8545",
+            "keyServiceAddr": "192.168.1.7:48080",
+            "storageServiceAddr": "/ip4/127.0.0.1/tcp/5001",
+            "protocolContractAddr": "0x3c4d26e916d79fc3fc925027a79612012462f691",
+            "tokenContractAddr": "0x5c29f42d640ee25f080cdc648641e8e358459ddc"
+          }
+        }
+      ]
+    }
+  ]
+
+}

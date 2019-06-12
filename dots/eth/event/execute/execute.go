@@ -22,31 +22,14 @@ const (
 type Executor struct {
     eventChan chan event.Event
     repo      *event.Repository
-    config    executorConfig
+    appId     string
 }
 
-type executorConfig struct {
-    appId string
-}
 
 //construct dot
-func newExecutorDot(conf interface{}) (dot.Dot, error) {
+func newExecutorDot() (dot.Dot, error) {
     var err error
-    var bs []byte
-
-    if bt, ok := conf.([]byte); ok {
-        bs = bt
-    } else {
-        return nil, dot.SError.Parameter
-    }
-
-    dConf := &executorConfig{}
-    err = dot.UnMarshalConfig(bs, dConf)
-    if err != nil {
-        return nil, err
-    }
-
-    d := &Executor{config: *dConf}
+    d := &Executor{}
 
     return d, err
 }
@@ -56,7 +39,7 @@ func ExecutorTypeLive() *dot.TypeLives {
     return &dot.TypeLives{
         Meta: dot.Metadata{TypeId: ExecTypeId,
             NewDoter: func(conf interface{}) (dot dot.Dot, err error) {
-                return newExecutorDot(conf)
+                return newExecutorDot()
             }},
     }
 }
@@ -66,27 +49,22 @@ func (c *Executor) Create(l dot.Line) error {
     return nil
 }
 
-func (c *Executor) SetEventChan(ce chan event.Event)  {
-    c.eventChan = ce
-}
-
-func (c *Executor) SetSubsRepo(r *event.Repository)  {
-    c.repo = r
-}
-
-
-func (c *Executor) ExecuteEvents() {
+func (c *Executor) ExecuteEvents(ce chan event.Event, r *event.Repository, appId string) {
     defer func() {
         if er := recover(); er != nil {
             dot.Logger().Errorln("", zap.Any("Error: failed to execute event, error: ", er))
         }
     }()
 
+    c.eventChan = ce
+    c.repo = r
+    c.appId = appId
+
     for {
         select {
-        case e := <-c.eventChan:
-            dot.Logger().Debugln("event coming:" + e.String())
-            c.executeEvent(e)
+            case e := <-c.eventChan:
+                dot.Logger().Debugln("event coming:" + e.String())
+                c.executeEvent(e)
         }
     }
 }
@@ -100,12 +78,12 @@ func (c *Executor) executeEvent(e event.Event) bool {
 
     subs := c.repo.MapEventCallback[e.Name]
     if subs == nil {
-        dot.Logger().Warnln("warning: no e was executed, e:" + e.Name)
+        dot.Logger().Warnln("warning: no event was executed, event:" + e.Name)
         return false
     }
 
     seqNo := e.Data.Get(AppSeqNo)
-    if seqNo != c.config.appId && e.Name != TokenEvtApproval {
+    if seqNo != c.appId && e.Name != TokenEvtApproval {
         return true
     }
 

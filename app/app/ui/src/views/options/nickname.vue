@@ -27,7 +27,7 @@ export default {
     name: "nickname.vue",
     data () {
         return {
-            nickName: ""
+            nickName: "" // todo: limit, can not modify nickName as 42chars string start with "0x".
         }
     },
     methods: {

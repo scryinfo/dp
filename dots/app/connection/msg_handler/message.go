@@ -28,7 +28,7 @@ var (
 
 func MessageHandlerInit() {
 	app2.GetGapp().Connection.AddCallbackFunc("login.verify", loginVerify)
-	app2.GetGapp().Connection.AddCallbackFunc("create.new.account", createNewAccount)
+	app2.GetGapp().Connection.AddCallbackFunc("create.new.interface", createNewAccount)
 	app2.GetGapp().Connection.AddCallbackFunc("block.set", blockSet)
 	app2.GetGapp().Connection.AddCallbackFunc("logout", logout)
 	app2.GetGapp().Connection.AddCallbackFunc("publish", publish)

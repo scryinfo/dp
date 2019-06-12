@@ -1,7 +1,7 @@
 package storage
 
 import (
-    shell "github.com/ipfs/go-ipfs-api"
+    "github.com/ipfs/go-ipfs-api"
     "github.com/pkg/errors"
     "github.com/scryinfo/dot/dot"
     "strings"
@@ -9,6 +9,7 @@ import (
 
 const (
     IpfsTypeId = "6763f97f-dfd2-40eb-8925-b8a031aab461"
+    IPFSLiveId = "6763f97f-dfd2-40eb-8925-b8a031aab461"
 )
 
 type Ipfs struct {
@@ -17,17 +18,60 @@ type Ipfs struct {
 }
 
 type ipfsConfig struct {
-    nodeAddr string
+    NodeAddr string `json:"nodeAddr"`
+    OutDir string `json:"outDir"`
 }
 
 func (c *Ipfs) Create(l dot.Line) error {
     if c.sh == nil {
-        c.sh = shell.NewShell(c.config.nodeAddr)
+        c.sh = shell.NewShell(c.config.NodeAddr)
         if c.sh == nil {
             return errors.New("Failed to create ipfs shell.")
         }
     }
 
+    return nil
+}
+
+func GetIPFSIns() *Ipfs {
+    logger := dot.Logger()
+    l := dot.GetDefaultLine()
+    if l == nil {
+        logger.Errorln("the line do not create, do not call it")
+        return nil
+    }
+    d, err := l.ToInjecter().GetByLiveId(IPFSLiveId)
+    if err != nil {
+        logger.Errorln(err.Error())
+        return nil
+    }
+
+    if g, ok := d.(*Ipfs); ok {
+        return g
+    }
+
+    logger.Errorln("do not get the IPFS dot")
+    return nil
+}
+
+func GetIPFSConfig() *ipfsConfig {
+    logger := dot.Logger()
+    l := dot.GetDefaultLine()
+    if l == nil {
+        logger.Errorln("the line do not create, do not call it")
+        return nil
+    }
+    d, err := l.ToInjecter().GetByLiveId(IPFSLiveId)
+    if err != nil {
+        logger.Errorln(err.Error())
+        return nil
+    }
+
+    if g, ok := d.(*Ipfs); ok {
+        return &g.config
+    }
+
+    logger.Errorln("do not get the IPFS dot")
     return nil
 }
 
@@ -43,6 +87,7 @@ func newIpfsDot(conf interface{}) (dot.Dot, error) {
 
     dConf := &ipfsConfig{}
     err = dot.UnMarshalConfig(bs, dConf)
+
     if err != nil {
         return nil, err
     }

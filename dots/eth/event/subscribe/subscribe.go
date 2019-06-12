@@ -16,36 +16,21 @@ const (
 
 type Subscribe struct {
     eventRepo *event.Repository
-    config    subscribeConfig
-}
-
-type subscribeConfig struct {
 }
 
 func (c *Subscribe) Create(l dot.Line) error {
-    c.eventRepo = event.NewRepository()
     return nil
+}
+
+func (c *Subscribe) SetRepo(r *event.Repository)  {
+    c.eventRepo = r
 }
 
 //construct dot
 func newSubsDot(conf interface{}) (dot.Dot, error) {
-    var err error
-    var bs []byte
-    if bt, ok := conf.([]byte); ok {
-        bs = bt
-    } else {
-        return nil, dot.SError.Parameter
-    }
+    d := &Subscribe{}
 
-    dConf := &subscribeConfig{}
-    err = dot.UnMarshalConfig(bs, dConf)
-    if err != nil {
-        return nil, err
-    }
-
-    d := &Subscribe{config: *dConf}
-
-    return d, err
+    return d, nil
 }
 
 //Data structure needed when generating newer component
