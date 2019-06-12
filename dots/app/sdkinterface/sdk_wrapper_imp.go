@@ -4,6 +4,7 @@
 package sdkinterface
 
 import (
+<<<<<<< HEAD
     "github.com/ethereum/go-ethereum/common"
     "github.com/pkg/errors"
     "github.com/scryinfo/dp/dots/app/settings"
@@ -15,6 +16,19 @@ import (
     ipfsaccess2 "github.com/scryinfo/dp/dots/binary/util/storage/ipfsaccess"
     "math/big"
     "os"
+=======
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/pkg/errors"
+	"github.com/scryinfo/dp/dots/app/settings"
+	sdk2 "github.com/scryinfo/dp/dots/binary/sdk"
+	chainevents2 "github.com/scryinfo/dp/dots/binary/sdk/core/chainevents"
+	chainoperations2 "github.com/scryinfo/dp/dots/binary/sdk/core/chainoperations"
+	"github.com/scryinfo/dp/dots/binary/sdk/scry"
+	"github.com/scryinfo/dp/dots/service"
+	"github.com/scryinfo/dp/dots/storage"
+	"math/big"
+	"os"
+>>>>>>> 46d2d548c3933c1529a722e81e0e667abc1edd4e
 )
 
 type sdkWrapperImp struct {
@@ -92,9 +106,9 @@ func (swi *sdkWrapperImp) TransferTokenFromDeployer(token *big.Int) error {
 	return nil
 }
 func (swi *sdkWrapperImp) importAccount(keyJson string, oldPassword string, newPassword string) (scry.Client, error) {
-	address, err := accounts2.GetAMInstance().ImportAccount([]byte(keyJson), oldPassword, newPassword)
+	address, err := service.GetAMIns().ImportAccount([]byte(keyJson), oldPassword, newPassword)
 	if err != nil {
-		return nil, errors.Wrap(err, "Import account failed. ")
+		return nil, errors.Wrap(err, "Import interface failed. ")
 	}
 
 	return scry.NewScryClient(address, swi.cw), nil
@@ -213,7 +227,7 @@ func (swi *sdkWrapperImp) Buy(txId string, password string) error {
 }
 
 func (swi *sdkWrapperImp) SubmitMetaDataIdEncWithBuyer(txId string, password, seller, buyer string, metaDataIDEncSeller []byte) error {
-	metaDataIdEncWithBuyer, err := accounts2.GetAMInstance().ReEncrypt(metaDataIDEncSeller, seller, buyer, password)
+	metaDataIdEncWithBuyer, err := service.GetAMIns().ReEncrypt(metaDataIDEncSeller, seller, buyer, password)
 	if err != nil {
 		return errors.Wrap(err, "Re-encrypt meta data ID failed. ")
 	}
@@ -256,12 +270,12 @@ func (swi *sdkWrapperImp) CancelTransaction(txId, password string) error {
 func (swi *sdkWrapperImp) DecryptAndGetMetaDataFromIPFS(password string, metaDataIdEncWithBuyer []byte, buyer, extension string) (string, error) {
 	var oldFileName string
 	{
-		metaDataIDByte, err := accounts2.GetAMInstance().Decrypt(metaDataIdEncWithBuyer, buyer, password)
+		metaDataIDByte, err := service.GetAMIns().Decrypt(metaDataIdEncWithBuyer, buyer, password)
 		if err != nil {
 			return "", errors.Wrap(err, "Decrypt meta data ID encrypted with buyer failed. ")
 		}
-		outDir := swi.si.Config.IPFSOutDir
-		if err := ipfsaccess2.GetIAInstance().GetFromIPFS(string(metaDataIDByte), outDir); err != nil {
+		outDir := storage.GetIPFSConfig().OutDir
+		if err := storage.GetIPFSIns().Get(string(metaDataIDByte), outDir); err != nil {
 			return "", errors.Wrap(err, "Get meta data from IPFS failed. ")
 		}
 		oldFileName = outDir + "/" + string(metaDataIDByte)

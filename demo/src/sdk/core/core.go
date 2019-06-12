@@ -41,7 +41,7 @@ func StartEngine(ethNodeAddr string,
 
 	err = accounts.GetAMInstance().Initialize(asServiceAddr)
 	if err != nil {
-		rlog.Error("failed to initialize account service, error:", err)
+		rlog.Error("failed to initialize interface service, error:", err)
 		return nil, err
 	}
 

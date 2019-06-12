@@ -15,7 +15,7 @@ var (
 
 func init() {
 	addCallbackFunc("login.verify", loginVerify)
-	addCallbackFunc("create.new.account", createNewAccount)
+	addCallbackFunc("create.new.interface", createNewAccount)
 	addCallbackFunc("block.set", blockSet)
 	addCallbackFunc("logout", logout)
 	addCallbackFunc("publish", publish)

@@ -88,7 +88,7 @@ let acc_db = {
             cb(event.target.result);
         };
     },
-    // prepare a single remove function, for delete a account, maybe I can give out a button for user?
+    // prepare a single remove function, for delete a interface, maybe I can give out a button for user?
     remove: function (key) {
         let store = acc_db.db.transaction(acc_db.db_store_name, "readwrite").objectStore(acc_db.db_store_name);
         let request = store.delete(key);

@@ -13,6 +13,6 @@ module.exports = function(deployer, network, accounts) {
         return deployer.deploy(ScryProtocol, tokenContract.address);
     }).then (function(ptl) {
         console.log(ptl.address);
-        console.log("account:", accounts.length);
+        console.log("interface:", accounts.length);
     });
 };

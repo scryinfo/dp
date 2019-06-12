@@ -27,20 +27,7 @@ type listenerConfig struct {
 //construct dot
 func newListenerDot(conf interface{}) (dot.Dot, error) {
 	var err error
-	var bs []byte
-	if bt, ok := conf.([]byte); ok {
-		bs = bt
-	} else {
-		return nil, dot.SError.Parameter
-	}
-
-	dConf := &listenerConfig{}
-	err = dot.UnMarshalConfig(bs, dConf)
-	if err != nil {
-		return nil, err
-	}
-
-	d := &Listener{config: *dConf}
+	d := &Listener{}
 
 	return d, err
 }
@@ -59,7 +46,6 @@ func (c *Listener) Create(l dot.Line) error {
 	c.builder = NewScanBuilder()
 	return nil
 }
-
 
 
 func (c *Listener) ListenEvent(
