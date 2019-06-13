@@ -69,8 +69,12 @@ func (c *Transaction) BuildTransactOpts(txParams *TxParams) *bind.TransactOpts {
     return opts
 }
 
-func (c *Transaction) SignTransaction(signer types.Signer, address common.Address,
-    transaction *types.Transaction, password string) (*types.Transaction, error) {
+func (c *Transaction) SignTransaction(
+    signer types.Signer,
+    address common.Address,
+    transaction *types.Transaction,
+    password string,
+)(*types.Transaction, error) {
     h := signer.Hash(transaction)
 
     var sign []byte

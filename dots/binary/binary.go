@@ -101,6 +101,10 @@ func (c *Binary) Create(l dot.Line) error {
 	return nil
 }
 
+func (c *Binary) Config() binaryConfig {
+    return c.config
+}
+
 func (c *Binary) Start(ignore bool) error {
     c.Subscriber.SetRepo(c.subsRepo)
 

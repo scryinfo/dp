@@ -233,7 +233,7 @@ func (cm contractMeta) unpackTuple(v event.JSONObj, output []byte, args abi.Argu
 func (cm contractMeta) unpackAtomic(v event.JSONObj, output []byte, args abi.Arguments) error {
 	arg := args[0]
 	if arg.Indexed {
-		return fmt.Errorf("abi: attempting to unpack indexed variable into element.")
+		return fmt.Errorf("abi: attempting to unpack indexed variable into element")
 	}
 
 	marshalledValue, err := toGoType(0, arg.Type, output)
@@ -633,7 +633,7 @@ func unpackMatchedLog(out event.JSONObj, log types.Log, meta *contractMeta) (str
 			return name, meta.UnpackLogToJson(out, name, log)
 		}
 	}
-	return "", errors.New("Can't find mathed event")
+	return "", errors.New("can't find matched event")
 }
 
 func bindContract(abiStr string, address common.Address, backend bind.ContractBackend) (*bind.BoundContract, *abi.ABI, error) {
