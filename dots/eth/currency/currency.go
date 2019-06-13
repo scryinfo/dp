@@ -52,9 +52,15 @@ func (c *Currency) TransferEth(
         to common.Address,
         value *big.Int,
         client *ethclient.Client,
-    ) (*types.Transaction, error) {
+) (*types.Transaction, error) {
 
-    txParam := &transaction.TxParams{from, password, value, false}
+    txParam := &transaction.TxParams{
+        From: from,
+        Password: password,
+        Value: value,
+        Pending: false,
+    }
+
     opts := c.Tx.BuildTransactOpts(txParam)
     tx, err := c.Tx.Transact(opts, to, client)
 
