@@ -27,10 +27,18 @@ type clientImp struct {
 }
 
 func NewScryClient(publicKey string, chainWrapper ChainWrapper) Client {
-	return &clientImp{
+	c := &clientImp{
 		userAccount:  &auth.UserAccount{Addr: publicKey},
 		chainWrapper: chainWrapper,
 	}
+
+    err := dot.GetDefaultLine().ToInjecter().Inject(&c)
+    if err != nil {
+        dot.Logger().Errorln("", zap.NamedError("failed to create client, error:", err))
+        return nil
+    }
+
+    return c
 }
 
 func getAccountComponent() (*auth.Account, error) {

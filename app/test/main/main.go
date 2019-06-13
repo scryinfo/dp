@@ -73,9 +73,24 @@ func main()  {
 }
 
 func Start()  {
+    TestClient()
+
     InitUsers()
 
     StartTestingWithoutVerify()
+}
+
+func TestClient()  {
+    c := scry.NewScryClient("0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", chain)
+    rv, err := c.Authenticate("111111")
+    if err != nil {
+        fmt.Println("failed to authenticate user account, error:", err)
+        return
+    }
+
+    if !rv {
+        fmt.Println("failed to authenticate user account")
+    }
 }
 
 func InitUsers()  {
@@ -84,6 +99,7 @@ func InitUsers()  {
     if err != nil {
         panic(err)
     }
+
 
     buyer, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(10000000))
     if err != nil {
@@ -116,6 +132,12 @@ func StartTestingWithoutVerify() {
 func CreateClientWithToken(token *big.Int, eth *big.Int) (scry.Client, error) {
     client, err := scry.CreateScryClient(clientPassword, chain)
     if err != nil {
+        return nil, err
+    }
+
+    //authenticate
+    rv, err := client.Authenticate(clientPassword)
+    if !rv {
         return nil, err
     }
 
