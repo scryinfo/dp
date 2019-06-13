@@ -49,7 +49,7 @@ func Perform(once Job, duration time.Duration) *Receipt {
 	return performWork(once, duration, false)
 }
 
-// perform job with gracefull exit
+// perform job with graceful exit
 func PerformSafe(once Job, duration time.Duration) *Receipt {
 	return performWork(once, duration, true)
 }
