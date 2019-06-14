@@ -5,10 +5,12 @@ import (
     "github.com/ethereum/go-ethereum/common"
     "github.com/scryinfo/dot/dot"
     "github.com/scryinfo/dot/dots/line"
+    "github.com/scryinfo/dp/dots/app/settings"
     "github.com/scryinfo/dp/dots/binary"
     "github.com/scryinfo/dp/dots/binary/scry"
     "github.com/scryinfo/dp/dots/eth/event"
     "github.com/scryinfo/dp/dots/eth/transaction"
+    "github.com/scryinfo/dp/dots/storage"
     "github.com/scryinfo/scryg/sutils/ssignal"
     "go.uber.org/zap"
     "math/big"
@@ -41,6 +43,8 @@ func main()  {
     logger := dot.Logger()
     l, err := line.BuildAndStart(func(l dot.Line) error {
         l.PreAdd(binary.BinTypeLive()...)
+        l.PreAdd(storage.IpfsTypeLive())
+        l.PreAdd(settings.ConfTypeLive())
         return nil
     })
 
@@ -81,8 +85,8 @@ func Start()  {
 }
 
 func TestClient()  {
-    c := scry.NewScryClient("0xe0384dfcb9ba3f64231d33f18c8a930e50fb3572", chain)
-    rv, err := c.Authenticate("123456")
+    c := scry.NewScryClient("0xd280b60638bc8db9d309fa5a540ffec499f0a3e8", chain)
+    rv, err := c.Authenticate("111111")
     if err != nil {
         fmt.Println("failed to authenticate user account, error:", err)
         return
