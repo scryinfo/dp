@@ -5,9 +5,12 @@ package msg_handler
 
 import (
 	"encoding/json"
+	"github.com/scryinfo/dot/dot"
 	app2 "github.com/scryinfo/dp/dots/app"
 	"github.com/scryinfo/dp/dots/app/sdkinterface"
 	"github.com/scryinfo/dp/dots/app/settings"
+	"go.uber.org/zap"
+	"io/ioutil"
 	"math/big"
 	"time"
 )
@@ -28,7 +31,7 @@ var (
 
 func MessageHandlerInit() {
 	app2.GetGapp().Connection.AddCallbackFunc("login.verify", loginVerify)
-	app2.GetGapp().Connection.AddCallbackFunc("create.new.interface", createNewAccount)
+	app2.GetGapp().Connection.AddCallbackFunc("create.new.account", createNewAccount)
 	app2.GetGapp().Connection.AddCallbackFunc("block.set", blockSet)
 	app2.GetGapp().Connection.AddCallbackFunc("logout", logout)
 	app2.GetGapp().Connection.AddCallbackFunc("publish", publish)
@@ -44,6 +47,8 @@ func MessageHandlerInit() {
 	app2.GetGapp().Connection.AddCallbackFunc("credit", credit)
 	app2.GetGapp().Connection.AddCallbackFunc("get.eth.balance", getEthBalance)
 	app2.GetGapp().Connection.AddCallbackFunc("get.token.balance", getTokenBalance)
+	app2.GetGapp().Connection.AddCallbackFunc("acc.backup", backup)
+	app2.GetGapp().Connection.AddCallbackFunc("acc.restore", restore)
 }
 
 func loginVerify(mi *settings.MessageIn) (payload interface{}, err error) {
@@ -79,8 +84,14 @@ func blockSet(mi *settings.MessageIn) (payload interface{}, err error) {
 		onPurchase, onReadyForDownload, onClose, onRegisterAsVerifier, onVote, onVerifierDisable); err != nil {
 		return
 	}
-	sdkinterface.SetFromBlock(uint64(sid.FromBlock))
-	// when an user login success, he will get 1,000,000 tokens for test. in 'block.set' case.
+	if err = sdkinterface.SetFromBlock(uint64(sid.FromBlock)); err != nil {
+		dot.Logger().Errorln("set fromBlock failed. ", zap.NamedError("", err))
+		return
+	}
+	// when an user login success, he will get 1,000,000 eth and tokens for test. in 'block.set' case.
+	if err = app2.GetGapp().CurUser.TransferEthFromDeployer(big.NewInt(1000000)); err != nil { // for test
+		return
+	}
 	if err = app2.GetGapp().CurUser.TransferTokenFromDeployer(big.NewInt(1000000)); err != nil { // for test
 		return
 	}
@@ -281,4 +292,12 @@ func getTokenBalance(mi *settings.MessageIn) (payload interface{}, err error) {
 	payload = balance + sep + time.Now().String()
 
 	return
+}
+
+func backup(mi *settings.MessageIn) (interface{}, error) {
+	return true, ioutil.WriteFile(app2.GetGapp().ScryInfo.AccsBackupFile, mi.Payload, 0777)
+}
+
+func restore(_ *settings.MessageIn) (interface{}, error) {
+	return ioutil.ReadFile(app2.GetGapp().ScryInfo.AccsBackupFile)
 }

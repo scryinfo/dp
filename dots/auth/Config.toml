@@ -1,0 +1,8 @@
+
+[server]
+addr=["0.0.0.0"]
+port=[48080]
+
+[database]
+name="scryinfo-key-db"
+path ="D:/GoPath/src/github.com/scryinfo/dp/dots/scryinfo-lmdb"

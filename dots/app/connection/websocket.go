@@ -114,6 +114,9 @@ func (ws *WSServer) handleMessages(conn *websocket.Conn) {
 }
 
 func (ws *WSServer) SendMessage(name string, payload interface{}) error {
+	if bs, ok := payload.([]byte); ok {
+		payload = string(bs)
+	}
 	mo := settings.MessageOut{
 		Name:    name,
 		Payload: payload,

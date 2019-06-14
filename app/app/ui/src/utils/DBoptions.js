@@ -61,15 +61,13 @@ let acc_db = {
     db_index_name: "nickname",
     db: IDBDatabase,
     init: function (_this){
-        _this.$store.state.accounts = [{ address: "", fromBlock: 1, isVerifier:false}];
+        _this.$store.state.accounts = [{ address: ""}];
         let c = acc_db.db.transaction(acc_db.db_store_name,"readwrite").objectStore(acc_db.db_store_name).openCursor();
         c.onsuccess = function(event) {
             let cursor = event.target.result;
             if (cursor) {
                 _this.$store.state.accounts.push({
-                    address: cursor.value.address,
-                    fromBlock: cursor.value.fromBlock,
-                    isVerifier: cursor.value.isVerifier
+                    address: cursor.value.address
                 });
                 cursor.continue();
             }
@@ -102,7 +100,17 @@ let acc_db = {
             cb(event.target.result);
         };
     },
-    // todo: prepare a single remove function, for delete a interface, maybe I can give out a button for user?
+    readAll: function(cb) {
+        let store = acc_db.db.transaction(acc_db.db_store_name, "readwrite").objectStore(acc_db.db_store_name);
+        let request = store.getAll();
+        request.onerror = function (err) {
+            console.log(err);
+        };
+        request.onsuccess = function (event) {
+            cb(event.target.result);
+        };
+    },
+    // todo: prepare a single remove function, for delete a account, maybe I can give out a button for user?
     remove: function (key) {
         let store = acc_db.db.transaction(acc_db.db_store_name, "readwrite").objectStore(acc_db.db_store_name);
         let request = store.delete(key);

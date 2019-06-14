@@ -13,41 +13,42 @@
           "liveId": "6763f97f-dfd2-40eb-8925-b8a031aab461",
           "json": {
             "nodeAddr": "/ip4/127.0.0.1/tcp/5001",
-            "outDir": "C:/Users/Will"
+            "outDir": "C:/Users/Will/Desktop"
           }
         }
       ]
     },
     {
       "metaData": {
-        "typeId": "cf8856e3-75aa-4ea5-b3bf-0e9eec347e56"
+        "typeId": "92fed326-2f2c-40c5-8664-107473238390"
       },
       "lives": [
         {
-          "liveId": "cf8856e3-75aa-4ea5-b3bf-0e9eec347e56",
+          "liveId": "92fed326-2f2c-40c5-8664-107473238390",
           "json": {
-            "nodeAddr": "localhost:48080"
+            "appId": "Dapp demo",
+            "ethServiceAddr": "http://localhost:8545",
+            "keyServiceAddr": "localhost:48080",
+            "protocolContractAddr": "0x3c4d26e916d79fc3fc925027a79612012462f691",
+            "tokenContractAddr": "0x5c29f42d640ee25f080cdc648641e8e358459ddc"
+          }
+        }
+      ]
+    },
+    {
+      "metaData": {
+        "typeId": "1241ebcb-4b9d-498d-9749-de0e0cd7d6a2"
+      },
+      "lives": [
+        {
+          "liveId": "1241ebcb-4b9d-498d-9749-de0e0cd7d6a2",
+          "json": {
+            "wsPort": "9822",
+            "uiResourcesDir": "D:/GoPath/src/github.com/scryinfo/dp/app/app/ui/resources/app",
+            "accsBackupFile": "C:/Users/Will/Desktop/accounts.json"
           }
         }
       ]
     }
-  ],
-  "app": {
-    "chain": {
-      "contracts": {
-        "tokenAddr": "0x98e01b38a6d0c80d20033af9acd56feb832f93a7",
-        "protocolAddr": "0x5b989229c2728eb24938a7be9adb5ed6a9e53c9f",
-        "deployerKeyjson": "{\"address\":\"cc287aaa89e800c26e1883e924128b79a95739a7\",\"crypto\":{\"cipher\":\"aes-128-ctr\",\"ciphertext\":\"74ce3398e69debcf34222ec361cd52f26eccef40338598be3db732964126e0cc\",\"cipherparams\":{\"iv\":\"081b109f71f714d3eb3a0650ebb3f108\"},\"kdf\":\"scrypt\",\"kdfparams\":{\"dklen\":32,\"n\":262144,\"p\":1,\"r\":8,\"salt\":\"48f737e790626ae5da0e4996cd5a6f4e6d79dd5d74bad9f1a445664fd824140e\"},\"mac\":\"581ef2a59d6760ef05d72f8e77aedd58e48073b5b1eb20de06c2b20dd5ad0f2e\"},\"id\":\"29ad6e43-db54-49d3-869a-b8af50da4132\",\"version\":3}",
-        "deployerPassword": "123456"
-      },
-      "ethereum": {
-        "ethNode": "http://localhost:8545/"
-      }
-    },
-    "config": {
-      "wsPort": "9822",
-      "uiResourcesDir": "D:/GoPath/src/github.com/scryinfo/dp/app/app/ui/resources/app",
-      "appId": "Dapp"
-    }
-  }
+  ]
 }

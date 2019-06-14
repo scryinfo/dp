@@ -12,13 +12,8 @@ import (
 	app2 "github.com/scryinfo/dp/dots/app"
 	"github.com/scryinfo/dp/dots/app/connection"
 	"github.com/scryinfo/dp/dots/app/settings"
-<<<<<<< HEAD
-	events2 "github.com/scryinfo/dp/dots/binary/core/ethereum/events"
-	ipfsaccess2 "github.com/scryinfo/dp/dots/binary/util/storage/ipfsaccess"
-=======
-	events2 "github.com/scryinfo/dp/dots/binary/sdk/core/ethereum/events"
+	"github.com/scryinfo/dp/dots/eth/event"
 	"github.com/scryinfo/dp/dots/storage"
->>>>>>> 46d2d548c3933c1529a722e81e0e667abc1edd4e
 	"go.uber.org/zap"
 	"io/ioutil"
 	"math/big"
@@ -26,7 +21,7 @@ import (
 	"strconv"
 )
 
-func onPublish(event events2.Event) bool {
+func onPublish(event event.Event) bool {
 	var op settings.OnPublish
 	{
 		var err error
@@ -85,11 +80,11 @@ func getPubDataDetails(ipfsID string) (detailsData settings.OnPublish, err error
 	return
 }
 
-func onApprove(_ events2.Event) bool {
+func onApprove(_ event.Event) bool {
 	return true
 }
 
-func onVerifiersChosen(event events2.Event) bool {
+func onVerifiersChosen(event event.Event) bool {
 	var ovc settings.OnVerifiersChosen
 	{
 		ovc.PublishID = event.Data.Get("publishId").(string)
@@ -115,7 +110,7 @@ func onVerifiersChosen(event events2.Event) bool {
 	return true
 }
 
-func onTransactionCreate(event events2.Event) bool {
+func onTransactionCreate(event event.Event) bool {
 	var otc settings.OnTransactionCreate
 	{
 		otc.PublishID = event.Data.Get("publishId").(string)
@@ -183,7 +178,7 @@ func ipfsBytes32ToHash(ipfsb [32]byte) string {
 	return base58.Encode(byte34)
 }
 
-func onPurchase(event events2.Event) bool {
+func onPurchase(event event.Event) bool {
 	var op settings.OnPurchase
 	{
 		op.Block = event.BlockNumber
@@ -204,7 +199,7 @@ func onPurchase(event events2.Event) bool {
 	return true
 }
 
-func onReadyForDownload(event events2.Event) bool {
+func onReadyForDownload(event event.Event) bool {
 	var orfd settings.OnReadyForDownload
 	{
 		orfd.Block = event.BlockNumber
@@ -221,7 +216,7 @@ func onReadyForDownload(event events2.Event) bool {
 	return true
 }
 
-func onClose(event events2.Event) bool {
+func onClose(event event.Event) bool {
 	var oc settings.OnClose
 	{
 		oc.Block = event.BlockNumber
@@ -237,7 +232,7 @@ func onClose(event events2.Event) bool {
 	return true
 }
 
-func onRegisterAsVerifier(event events2.Event) bool {
+func onRegisterAsVerifier(event event.Event) bool {
 	var orav settings.OnRegisterAsVerifier
 	{
 		orav.Block = event.BlockNumber
@@ -250,7 +245,7 @@ func onRegisterAsVerifier(event events2.Event) bool {
 	return true
 }
 
-func onVote(event events2.Event) bool {
+func onVote(event event.Event) bool {
 	var ov settings.OnVote
 	{
 		ov.Block = event.BlockNumber
@@ -270,7 +265,7 @@ func onVote(event events2.Event) bool {
 	return true
 }
 
-func onVerifierDisable(event events2.Event) bool {
+func onVerifierDisable(event event.Event) bool {
 	var ovd settings.OnVerifierDisable
 	{
 		ovd.Block = event.BlockNumber
