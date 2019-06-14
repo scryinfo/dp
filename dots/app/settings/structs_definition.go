@@ -18,7 +18,7 @@ type MessageOut struct {
 type PresetFunc = func(*MessageIn) (interface{}, error)
 
 type AccInfo struct {
-	Account  string `json:"interface"`
+	Account  string `json:"account"`
 	Password string `json:"password"`
 }
 

@@ -17,7 +17,7 @@
 import CFT from "../templates/complex_function_template.vue";
 import SFT from "../templates/simple_function_template.vue";
 export default {
-    name: "T_Test.vue",
+    name: "t_test.vue",
     data () {
         return {
             buttonName: "A function button. ",

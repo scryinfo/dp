@@ -9,13 +9,13 @@ import TransactionBuy  from "./views/options/transactionBuy.vue";
 import TransactionSell from "./views/options/transactionSell.vue";
 import Publish         from "./views/options/publish.vue";
 import Verify          from "./views/options/verify.vue";
-// import Arbitrate       from "./views/options/Arbitrate.vue";
+// import Arbitrate       from "./views/options/t_arbitrate.vue";     // contract not implement
 import Balance         from "./views/options/balance.vue";
 import NickName        from "./views/options/nickname.vue";
 import Message         from "./views/options/message.vue";
-// import test            from "./views/options/T_Test.vue";          // for test
-// import test2           from "./views/options/T_TestTwo.vue";       // for test
-// import administrator   from "./views/options/T_Administrator.vue"; // for test
+// import test            from "./views/options/t_test.vue";          // for test
+// import test2           from "./views/options/t_test_two.vue";      // for test
+// import administrator   from "./views/options/t_administrator.vue"; // for test
 
 let routes = [
     {
@@ -34,7 +34,7 @@ let routes = [
             {path: "/ts",  component: TransactionSell, name: "我出售的数据"},
             {path: "/pd",  component: Publish,  name: "发布新数据"},
             {path: "/vf",  component: Verify,          name: "我验证的数据"},
-            // {path: "/at",  component: Arbitrate,       name: "我仲裁的数据",  hidden: true},
+            // {path: "/at",  component: Arbitrate,       name: "我仲裁的数据",  hidden: true}, // contract not implement
             {path: "/blc", component: Balance,         name: "Balance",       hidden: true},
             {path: "/ncn", component: NickName,        name: "NickName",      hidden: true},
             {path: "/msg", component: Message,         name: "Short Message", hidden: true},

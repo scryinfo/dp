@@ -4,51 +4,55 @@
 package sdkinterface
 
 import (
-<<<<<<< HEAD
-    "github.com/ethereum/go-ethereum/common"
-    "github.com/pkg/errors"
-    "github.com/scryinfo/dp/dots/app/settings"
-    chainevents2 "github.com/scryinfo/dp/dots/binary/core/chainevents"
-    chainoperations2 "github.com/scryinfo/dp/dots/binary/core/chainoperations"
-    "github.com/scryinfo/dp/dots/binary/scry"
-    sdk2 "github.com/scryinfo/dp/dots/binary/sdk"
-    accounts2 "github.com/scryinfo/dp/dots/binary/util/accounts"
-    ipfsaccess2 "github.com/scryinfo/dp/dots/binary/util/storage/ipfsaccess"
-    "math/big"
-    "os"
-=======
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
+	"github.com/scryinfo/dot/dot"
 	"github.com/scryinfo/dp/dots/app/settings"
-	sdk2 "github.com/scryinfo/dp/dots/binary/sdk"
-	chainevents2 "github.com/scryinfo/dp/dots/binary/sdk/core/chainevents"
-	chainoperations2 "github.com/scryinfo/dp/dots/binary/sdk/core/chainoperations"
-	"github.com/scryinfo/dp/dots/binary/sdk/scry"
-	"github.com/scryinfo/dp/dots/service"
+	"github.com/scryinfo/dp/dots/auth"
+	"github.com/scryinfo/dp/dots/binary"
+	"github.com/scryinfo/dp/dots/binary/scry"
+	"github.com/scryinfo/dp/dots/eth/event"
+	"github.com/scryinfo/dp/dots/eth/event/listen"
+	"github.com/scryinfo/dp/dots/eth/transaction"
 	"github.com/scryinfo/dp/dots/storage"
+	"go.uber.org/zap"
 	"math/big"
 	"os"
->>>>>>> 46d2d548c3933c1529a722e81e0e667abc1edd4e
 )
 
 type sdkWrapperImp struct {
 	curUser scry.Client
-	dp      scry.Client
+	dp      *settings.AccInfo
 	cw      scry.ChainWrapper
-	si      *settings.ScryInfo
 }
 
 var _ SDKWrapper = (*sdkWrapperImp)(nil)
 
-func CreateSDKWrapperImp(cw scry.ChainWrapper, si *settings.ScryInfo) SDKWrapper {
+func CreateSDKWrapperImp(cw scry.ChainWrapper) SDKWrapper {
 	return &sdkWrapperImp{
-		cw: cw,
-		si: si,
+		cw:   cw,
+		dp: &settings.AccInfo{
+			Account: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8",
+			Password: "111111",
+		},
 	}
 }
 
-func SetFromBlock(fromBlock uint64) {
-	sdk2.StartScan(fromBlock)
+func SetFromBlock(fromBlock uint64) error {
+	l := dot.GetDefaultLine()
+	if l == nil {
+		return errors.New("the line do not create, do not call it")
+	}
+	d, err := l.ToInjecter().GetByLiveId(listen.ListenerTypeId)
+	if err != nil {
+		dot.Logger().Errorln("get listen dot failed. ", zap.NamedError("", err))
+	}
+	if g, ok := d.(*listen.Listener); ok {
+		g.SetFromBlock(fromBlock)
+		return nil
+	}
+
+	return errors.New("do not get Listener dot")
 }
 
 func (swi *sdkWrapperImp) CreateUserWithLogin(password string) (string, error) {
@@ -59,7 +63,7 @@ func (swi *sdkWrapperImp) CreateUserWithLogin(password string) (string, error) {
 
 	swi.curUser = client
 
-	return client.Account().Address, nil
+	return client.Account().Addr, nil
 }
 
 func (swi *sdkWrapperImp) UserLogin(address string, password string) (bool, error) {
@@ -74,47 +78,44 @@ func (swi *sdkWrapperImp) UserLogin(address string, password string) (bool, erro
 	}
 	if login {
 		swi.curUser = client
+	} else {
+		return false, errors.New("Login verify failed. ")
 	}
 
 	return true, nil
 }
 
-func (swi *sdkWrapperImp) TransferTokenFromDeployer(token *big.Int) error {
-	var err error
-	if swi.dp == nil {
-		swi.dp, err = swi.importAccount(swi.si.Chain.Contracts.DeployerKeyJson,
-			swi.si.Chain.Contracts.DeployerPassword,
-			swi.si.Chain.Contracts.DeployerPassword)
-		if err != nil {
-			return errors.Wrap(err, "Deployer init failed. ")
-		}
-	}
-
+func (swi *sdkWrapperImp) TransferEthFromDeployer(eth *big.Int) error {
 	if swi.curUser == nil {
 		return errors.New("Current user is nil. ")
 	}
 
-	txParam := chainoperations2.TransactParams{
-		From:     common.HexToAddress(swi.dp.Account().Address),
-		Password: swi.si.Chain.Contracts.DeployerPassword,
+	if err := swi.curUser.TransferEthFrom(common.HexToAddress(swi.dp.Account), swi.dp.Password, eth, swi.cw.Conn()); err != nil {
+		return errors.Wrap(err, "Transfer eth from deployer failed. ")
+	}
+
+	return nil
+}
+
+func (swi *sdkWrapperImp) TransferTokenFromDeployer(token *big.Int) error {
+	if swi.curUser == nil {
+		return errors.New("Current user is nil. ")
+	}
+
+	txParam := transaction.TxParams{
+		From:     common.HexToAddress(swi.dp.Account),
+		Password: swi.dp.Password,
 		Value:    big.NewInt(0),
-		Pending:  false}
-	if err = swi.cw.TransferTokens(&txParam, common.HexToAddress(swi.curUser.Account().Address), token); err != nil {
+		Pending:  false,
+	}
+	if err := swi.cw.TransferTokens(&txParam, common.HexToAddress(swi.curUser.Account().Addr), token); err != nil {
 		return errors.Wrap(err, "Transfer token from deployer failed. ")
 	}
 
 	return nil
 }
-func (swi *sdkWrapperImp) importAccount(keyJson string, oldPassword string, newPassword string) (scry.Client, error) {
-	address, err := service.GetAMIns().ImportAccount([]byte(keyJson), oldPassword, newPassword)
-	if err != nil {
-		return nil, errors.Wrap(err, "Import interface failed. ")
-	}
 
-	return scry.NewScryClient(address, swi.cw), nil
-}
-
-func (swi *sdkWrapperImp) SubscribeEvents(eventName []string, cb ...chainevents2.EventCallback) error {
+func (swi *sdkWrapperImp) SubscribeEvents(eventName []string, cb ...event.Callback) error {
 	if swi.curUser == nil {
 		return errors.New("Current user is nil. ")
 	}
@@ -150,11 +151,12 @@ func (swi *sdkWrapperImp) PublishData(data *settings.PublishData) (string, error
 		return "", errors.New("Current user is nil. ")
 	}
 
-	txParam := chainoperations2.TransactParams{
-		From:     common.HexToAddress(swi.curUser.Account().Address),
+	txParam := transaction.TxParams{
+		From:     common.HexToAddress(swi.curUser.Account().Addr),
 		Password: data.Password,
 		Value:    big.NewInt(0),
-		Pending:  false}
+		Pending:  false,
+	}
 
 	return swi.cw.Publish(&txParam,
 		big.NewInt(int64(data.Price)),
@@ -166,7 +168,25 @@ func (swi *sdkWrapperImp) PublishData(data *settings.PublishData) (string, error
 }
 
 func (swi *sdkWrapperImp) ApproveTransferToken(password string, quantity *big.Int) error {
-	protocolAddr := common.HexToAddress(swi.si.Chain.Contracts.ProtocolAddr)
+	logger := dot.Logger()
+
+	l := dot.GetDefaultLine()
+	if l == nil {
+		logger.Errorln("the line do not create, do not call it")
+		return nil
+	}
+	d, err := l.ToInjecter().GetByLiveId(binary.BinLiveId)
+	if err != nil {
+		logger.Errorln(err.Error())
+		return nil
+	}
+	g, ok := d.(*binary.Binary)
+	if !ok {
+		logger.Errorln("do not get the IPFS dot")
+		return nil
+	}
+	protocolAddress := g.Config().ProtocolContractAddr
+	protocolAddr := common.HexToAddress(protocolAddress)
 	return swi.approveTransfer(password, protocolAddr, quantity)
 }
 
@@ -175,11 +195,12 @@ func (swi *sdkWrapperImp) approveTransfer(password string, protocolContractAddr 
 		return errors.New("Current user is nil. ")
 	}
 
-	txParam := chainoperations2.TransactParams{
-		From:     common.HexToAddress(swi.curUser.Account().Address),
+	txParam := transaction.TxParams{
+		From:     common.HexToAddress(swi.curUser.Account().Addr),
 		Password: password,
 		Value:    big.NewInt(0),
-		Pending:  false}
+		Pending:  false,
+	}
 	if err := swi.cw.ApproveTransfer(&txParam, protocolContractAddr, token); err != nil {
 		return errors.Wrap(err, "Contract transfer token from buyer failed. ")
 	}
@@ -192,11 +213,12 @@ func (swi *sdkWrapperImp) CreateTransaction(publishId string, password string, s
 		return errors.New("Current user is nil. ")
 	}
 
-	txParam := chainoperations2.TransactParams{
-		From:     common.HexToAddress(swi.curUser.Account().Address),
+	txParam := transaction.TxParams{
+		From:     common.HexToAddress(swi.curUser.Account().Addr),
 		Password: password,
 		Value:    big.NewInt(0),
-		Pending:  false}
+		Pending:  false,
+	}
 	if err := swi.cw.PrepareToBuy(&txParam, publishId, startVerify); err != nil {
 		return errors.Wrap(err, "Transaction create failed. ")
 	}
@@ -214,11 +236,12 @@ func (swi *sdkWrapperImp) Buy(txId string, password string) error {
 		return errors.New("Set to *big.Int failed. ")
 	}
 
-	txParam := chainoperations2.TransactParams{
-		From:     common.HexToAddress(swi.curUser.Account().Address),
+	txParam := transaction.TxParams{
+		From:     common.HexToAddress(swi.curUser.Account().Addr),
 		Password: password,
 		Value:    big.NewInt(0),
-		Pending:  false}
+		Pending:  false,
+	}
 	if err := swi.cw.BuyData(&txParam, tID); err != nil {
 		return errors.Wrap(err, "Buy data failed. ")
 	}
@@ -227,7 +250,7 @@ func (swi *sdkWrapperImp) Buy(txId string, password string) error {
 }
 
 func (swi *sdkWrapperImp) SubmitMetaDataIdEncWithBuyer(txId string, password, seller, buyer string, metaDataIDEncSeller []byte) error {
-	metaDataIdEncWithBuyer, err := service.GetAMIns().ReEncrypt(metaDataIDEncSeller, seller, buyer, password)
+	metaDataIdEncWithBuyer, err := auth.GetAccIns().ReEncrypt(metaDataIDEncSeller, seller, buyer, password)
 	if err != nil {
 		return errors.Wrap(err, "Re-encrypt meta data ID failed. ")
 	}
@@ -237,11 +260,12 @@ func (swi *sdkWrapperImp) SubmitMetaDataIdEncWithBuyer(txId string, password, se
 		return errors.New("Set to *big.Int failed. ")
 	}
 
-	txParam := chainoperations2.TransactParams{
-		From:     common.HexToAddress(swi.curUser.Account().Address),
+	txParam := transaction.TxParams{
+		From:     common.HexToAddress(swi.curUser.Account().Addr),
 		Password: password,
 		Value:    big.NewInt(0),
-		Pending:  false}
+		Pending:  false,
+	}
 	if err := swi.cw.SubmitMetaDataIdEncWithBuyer(&txParam, tID, metaDataIdEncWithBuyer); err != nil {
 		return errors.Wrap(err, "Submit encrypted ID with buyer failed. ")
 	}
@@ -255,11 +279,12 @@ func (swi *sdkWrapperImp) CancelTransaction(txId, password string) error {
 		return errors.New("Set to *big.Int failed. ")
 	}
 
-	txParam := chainoperations2.TransactParams{
-		From:     common.HexToAddress(swi.curUser.Account().Address),
+	txParam := transaction.TxParams{
+		From:     common.HexToAddress(swi.curUser.Account().Addr),
 		Password: password,
 		Value:    big.NewInt(0),
-		Pending:  false}
+		Pending:  false,
+	}
 	if err := swi.cw.CancelTransaction(&txParam, tID); err != nil {
 		return errors.Wrap(err, "Cancel transaction failed. ")
 	}
@@ -270,7 +295,7 @@ func (swi *sdkWrapperImp) CancelTransaction(txId, password string) error {
 func (swi *sdkWrapperImp) DecryptAndGetMetaDataFromIPFS(password string, metaDataIdEncWithBuyer []byte, buyer, extension string) (string, error) {
 	var oldFileName string
 	{
-		metaDataIDByte, err := service.GetAMIns().Decrypt(metaDataIdEncWithBuyer, buyer, password)
+		metaDataIDByte, err := auth.GetAccIns().Decrypt(metaDataIdEncWithBuyer, buyer, password)
 		if err != nil {
 			return "", errors.Wrap(err, "Decrypt meta data ID encrypted with buyer failed. ")
 		}
@@ -299,11 +324,12 @@ func (swi *sdkWrapperImp) ConfirmDataTruth(txId string, password string, truth b
 		return errors.New("Set to *big.Int failed. ")
 	}
 
-	txParam := chainoperations2.TransactParams{
-		From:     common.HexToAddress(swi.curUser.Account().Address),
+	txParam := transaction.TxParams{
+		From:     common.HexToAddress(swi.curUser.Account().Addr),
 		Password: password,
 		Value:    big.NewInt(0),
-		Pending:  false}
+		Pending:  false,
+	}
 	if err := swi.cw.ConfirmDataTruth(&txParam, tID, truth); err != nil {
 		return errors.Wrap(err, "Confirm data truth failed. ")
 	}
@@ -316,11 +342,12 @@ func (swi *sdkWrapperImp) RegisterAsVerifier(password string) error {
 		return errors.New("Current user is nil. ")
 	}
 
-	txParam := chainoperations2.TransactParams{
-		From:     common.HexToAddress(swi.curUser.Account().Address),
+	txParam := transaction.TxParams{
+		From:     common.HexToAddress(swi.curUser.Account().Addr),
 		Password: password,
 		Value:    big.NewInt(0),
-		Pending:  false}
+		Pending:  false,
+	}
 	if err := swi.cw.RegisterAsVerifier(&txParam); err != nil {
 		return errors.Wrap(err, "Register as verifier failed. ")
 	}
@@ -338,11 +365,12 @@ func (swi *sdkWrapperImp) Vote(password, txId string, judge bool, comment string
 		return errors.New("Set to *big.Int failed. ")
 	}
 
-	txParam := chainoperations2.TransactParams{
-		From:     common.HexToAddress(swi.curUser.Account().Address),
+	txParam := transaction.TxParams{
+		From:     common.HexToAddress(swi.curUser.Account().Addr),
 		Password: password,
 		Value:    big.NewInt(0),
-		Pending:  false}
+		Pending:  false,
+	}
 	if err := swi.cw.Vote(&txParam, tID, judge, comment); err != nil {
 		return errors.Wrap(err, "Vote failed. ")
 	}
@@ -360,11 +388,12 @@ func (swi *sdkWrapperImp) CreditToVerifiers(creditData *settings.CreditData) err
 		return errors.New("Set to *big.Int failed. ")
 	}
 
-	txParam := chainoperations2.TransactParams{
-		From:     common.HexToAddress(swi.curUser.Account().Address),
+	txParam := transaction.TxParams{
+		From:     common.HexToAddress(swi.curUser.Account().Addr),
 		Password: creditData.Password,
 		Value:    big.NewInt(0),
-		Pending:  false}
+		Pending:  false,
+	}
 
 	if creditData.Credit.Verifier1Revert {
 		credit := uint8(creditData.Credit.Verifier1Credit)
@@ -387,7 +416,7 @@ func (swi *sdkWrapperImp) GetEthBalance(password string) (string, error) {
 		return "", errors.New("Current user is nil. ")
 	}
 
-	balance, err := swi.cw.GetEthBalance(common.HexToAddress(swi.curUser.Account().Address))
+	balance, err := swi.curUser.GetEth(common.HexToAddress(swi.curUser.Account().Addr), swi.cw.Conn())
 	if err != nil {
 		return "", errors.Wrap(err, "Get eth balance failed. ")
 	}
@@ -400,12 +429,13 @@ func (swi *sdkWrapperImp) GetTokenBalance(password string) (string, error) {
 		return "", errors.New("Current user is nil. ")
 	}
 
-	address := common.HexToAddress(swi.curUser.Account().Address)
-	txParam := chainoperations2.TransactParams{
+	address := common.HexToAddress(swi.curUser.Account().Addr)
+	txParam := transaction.TxParams{
 		From:     address,
 		Password: password,
 		Value:    big.NewInt(0),
-		Pending:  false}
+		Pending:  false,
+	}
 	balance, err := swi.cw.GetTokenBalance(&txParam, address)
 	if err != nil {
 		return "", errors.Wrap(err, "Get token balance failed. ")

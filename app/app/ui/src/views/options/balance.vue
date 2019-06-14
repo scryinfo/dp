@@ -4,8 +4,8 @@
     <section>
         <el-row class="section-item center token-height">
             <el-col :span="21">
-                以太币余额：&nbsp;{{ ethBalance }}&nbsp;wei
-                <span class="token-time">查询时间：{{ ethTime }}</span>
+                以太币余额：&nbsp;{{ this.$store.state.balance[0].Balance }}&nbsp;wei
+                <span class="token-time">查询时间：{{ this.$store.state.balance[0].Time }}</span>
             </el-col>
             <el-col :span="3" class="section-item-right">
                 <s-f-t button-name="余额查询" @password="getEthBalance"></s-f-t>
@@ -13,8 +13,8 @@
         </el-row>
         <el-row class="section-item center token-height">
             <el-col :span="21">
-                &nbsp;token&nbsp;余额：&nbsp;{{ tokenBalance }}&nbsp;DDD
-                <span class="token-time">查询时间：{{ tokenTime }}</span>
+                &nbsp;token&nbsp;余额：&nbsp;{{ this.$store.state.balance[1].Balance }}&nbsp;DDD
+                <span class="token-time">查询时间：{{ this.$store.state.balance[1].Time }}</span>
             </el-col>
             <el-col :span="3" class="section-item-right">
                 <s-f-t button-name="余额查询" @password="getTokenBalance"></s-f-t>
@@ -30,11 +30,7 @@ export default {
     name: "balance.vue",
     data () {
         return {
-            ethBalance: "-",
-            ethTime: "-",
 
-            tokenBalance: "-",
-            tokenTime: "-"
         }
     },
     methods: {
@@ -42,8 +38,8 @@ export default {
             let _balance = this;
             connect.send({Name: "get.eth.balance", Payload: {password: pwd}}, function (payload, _this) {
                 console.log("查询以太币余额成功：", payload.split("|")[0]);
-                _balance.ethBalance = payload.split("|")[0];
-                _balance.ethTime = payload.split("|")[1];
+                _balance.$store.state.balance[0].Balance = payload.split("|")[0];
+                _balance.$store.state.balance[0].Time = payload.split("|")[1];
             }, function (payload, _this) {
                 console.log("查询以太币余额成功：", payload);
                 _this.$alert(payload, "查询以太币余额失败！", {
@@ -57,8 +53,8 @@ export default {
             let _balance = this;
             connect.send({Name: "get.token.balance", Payload: {password: pwd}}, function (payload, _this) {
                 console.log("查询token余额成功：", payload.split("|")[0]);
-                _balance.tokenBalance = payload.split("|")[0];
-                _balance.tokenTime = payload.split("|")[1];
+                _balance.$store.state.balance[1].Balance = payload.split("|")[0];
+                _balance.$store.state.balance[1].Time = payload.split("|")[1];
             }, function (payload, _this) {
                 console.log("查询token余额成功：", payload);
                 _this.$alert(payload, "查询token余额失败！", {

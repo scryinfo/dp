@@ -5,24 +5,26 @@ package sdkinterface
 
 import (
 	"github.com/scryinfo/dp/dots/app/settings"
-	chainevents2 "github.com/scryinfo/dp/dots/binary/core/chainevents"
 	"math/big"
+
+	"github.com/scryinfo/dp/dots/eth/event"
 )
 
 // wrap sdk interface call.
 type SDKWrapper interface {
-	// user management
+	// auth component
 	CreateUserWithLogin(password string) (string, error)
 	UserLogin(address string, password string) (bool, error)
 
-	// before transfer token.
+	// transfer from deployer
+	TransferEthFromDeployer(eth *big.Int) error
 	TransferTokenFromDeployer(token *big.Int) error
 
-	// 'event listen' model will call cb function preset here.
-	SubscribeEvents(eventName []string, cb ...chainevents2.EventCallback) error
+	// listen component
+	SubscribeEvents(eventName []string, cb ...event.Callback) error
 	UnsubscribeEvents(eventName []string) error
 
-	// functions
+	// app functions
 	PublishData(data *settings.PublishData) (string, error)
 	ApproveTransferToken(password string, quantity *big.Int) error
 	CreateTransaction(publishId string, password string, startVerify bool) error

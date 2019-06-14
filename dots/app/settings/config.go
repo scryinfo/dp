@@ -1,29 +1,71 @@
-// Scry Info.  All rights reserved.
-// license that can be found in the license file.
-
 package settings
 
-type ScryInfo struct {
-	Chain    Chain    `yaml:"chain",json:"chain"`
-	Config   Config   `yaml:"config",json:"config"`
-}
+import (
+	"github.com/scryinfo/dot/dot"
+)
 
-type Chain struct {
-	Contracts Contracts `yaml:"contracts",json:"contracts"`
-	Ethereum  Ethereum  `yaml:"ethereum",json:"ethereum"`
-}
-type Contracts struct {
-	TokenAddr        string `yaml:"tokenAddr",json:"tokenAddr"`
-	ProtocolAddr     string `yaml:"protocolAddr",json:"protocolAddr"`
-	DeployerKeyJson  string `yaml:"deployerKeyJson",json:"deployerKeyJson"`
-	DeployerPassword string `yaml:"deployerPassword",json:"deployerPassword"`
-}
-type Ethereum struct {
-	EthNode string `yaml:"ethNode",json:"ethNode"`
-}
+const (
+	ConfTypeId = "1241ebcb-4b9d-498d-9749-de0e0cd7d6a2"
+	ConfLiveId = "1241ebcb-4b9d-498d-9749-de0e0cd7d6a2"
+)
 
 type Config struct {
-	WSPort         string `yaml:"wsPort",json:"wsPort"`
-	UIResourcesDir string `yaml:"uiResourcesDir",json:"uiResourcesDir"`
-	AppId          string `yaml:"appId",json:"appId"`
+	WSPort string `json:"wsPort"`
+	UIResourcesDir string `json:"uiResourcesDir"`
+	AccsBackupFile string `json:"accsBackupFile"`
+}
+
+func (c *Config) Create(l dot.Line) error {
+	return nil
+}
+
+func GetConfig() *Config {
+	logger := dot.Logger()
+	l := dot.GetDefaultLine()
+	if l == nil {
+		logger.Errorln("the line do not create, do not call it")
+		return nil
+	}
+	d, err := l.ToInjecter().GetByLiveId(ConfLiveId)
+	if err != nil {
+		logger.Errorln(err.Error())
+		return nil
+	}
+
+	if g, ok := d.(*Config); ok {
+		return g
+	}
+
+	logger.Errorln("do not get the Config dot")
+	return nil
+}
+
+//construct dot
+func newConfDot(conf interface{}) (dot.Dot, error) {
+	var err error
+	var bs []byte
+	if bt, ok := conf.([]byte); ok {
+		bs = bt
+	} else {
+		return nil, dot.SError.Parameter
+	}
+
+	d := &Config{}
+	err = dot.UnMarshalConfig(bs, d)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return d, err
+}
+
+//Data structure needed when generating newer component
+func ConfTypeLive() *dot.TypeLives {
+	return &dot.TypeLives{
+		Meta: dot.Metadata{TypeId: ConfTypeId,
+			NewDoter: func(conf interface{}) (dot dot.Dot, err error) {
+				return newConfDot(conf)
+			}},
+	}
 }
