@@ -81,8 +81,8 @@ func Start()  {
 }
 
 func TestClient()  {
-    c := scry.NewScryClient("0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", chain)
-    rv, err := c.Authenticate("111111")
+    c := scry.NewScryClient("0xd280b60638bc8db9d309fa5a540ffec499f0a3e8", chain)
+    rv, err := c.Authenticate("111121")
     if err != nil {
         fmt.Println("failed to authenticate user account, error:", err)
         return
@@ -221,7 +221,12 @@ func unsubscribeAllEvents() {
 
 
 func BuyerApproveTransfer() {
-    txParam := transaction.TxParams{common.HexToAddress(buyer.Account().Addr), clientPassword, big.NewInt(0), false}
+    txParam := transaction.TxParams{
+        From: common.HexToAddress(buyer.Account().Addr),
+        Password: clientPassword,
+        Value: big.NewInt(0),
+        Pending: false,
+    }
     err := chain.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(1600))
     if err != nil {
         fmt.Println("BuyerApproveTransfer:", err)
@@ -229,8 +234,12 @@ func BuyerApproveTransfer() {
 }
 
 func PrepareToBuy(publishId string) {
-    txParam := transaction.TxParams{common.HexToAddress(buyer.Account().Addr), clientPassword,
-        big.NewInt(0), false}
+    txParam := transaction.TxParams{
+        From: common.HexToAddress(buyer.Account().Addr),
+        Password: clientPassword,
+        Value: big.NewInt(0),
+        Pending: false,
+    }
     err := chain.PrepareToBuy(&txParam, publishId, false)
     if err != nil {
         fmt.Println("failed to prepareToBuy, error:", err)
@@ -238,7 +247,13 @@ func PrepareToBuy(publishId string) {
 }
 
 func Buy(txId *big.Int) {
-    txParam := transaction.TxParams{common.HexToAddress(buyer.Account().Addr), clientPassword, big.NewInt(0), false}
+    txParam := transaction.TxParams{
+        From: common.HexToAddress(buyer.Account().Addr),
+        Password: clientPassword,
+        Value: big.NewInt(0),
+        Pending: false,
+    }
+
     err := chain.BuyData(&txParam, txId)
     if err != nil {
         fmt.Println("failed to buyData, error:", err)
@@ -246,7 +261,13 @@ func Buy(txId *big.Int) {
 }
 
 func SubmitMetaDataIdEncWithBuyer(txId *big.Int) {
-    txParam := transaction.TxParams{common.HexToAddress(seller.Account().Addr), clientPassword, big.NewInt(0), false}
+    txParam := transaction.TxParams{
+        From: common.HexToAddress(seller.Account().Addr),
+        Password: clientPassword,
+        Value: big.NewInt(0),
+        Pending: false,
+    }
+
     err := chain.SubmitMetaDataIdEncWithBuyer(&txParam, txId, metaDataIdEncWithBuyer)
     if err != nil {
         fmt.Println("failed to SubmitMetaDataIdEncWithBuyer, error:", err)
@@ -254,8 +275,12 @@ func SubmitMetaDataIdEncWithBuyer(txId *big.Int) {
 }
 
 func ConfirmDataTruth(txId *big.Int) {
-    txParam := transaction.TxParams{common.HexToAddress(buyer.Account().Addr),
-        clientPassword, big.NewInt(0), false}
+    txParam := transaction.TxParams{
+        From: common.HexToAddress(buyer.Account().Addr),
+        Password: clientPassword,
+        Value: big.NewInt(0),
+        Pending: false,
+    }
     err := chain.ConfirmDataTruth(&txParam, txId, true)
     if err != nil {
         fmt.Println("failed to ConfirmDataTruth, error:", err)

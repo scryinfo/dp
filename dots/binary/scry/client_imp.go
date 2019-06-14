@@ -34,7 +34,7 @@ func NewScryClient(publicKey string, chainWrapper ChainWrapper) Client {
 
     err := dot.GetDefaultLine().ToInjecter().Inject(&c)
     if err != nil {
-        dot.Logger().Errorln("", zap.NamedError("failed to create client, error:", err))
+        dot.Logger().Errorln("failed to create client", zap.Error(err))
         return nil
     }
 

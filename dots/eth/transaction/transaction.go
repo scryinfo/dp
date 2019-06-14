@@ -19,7 +19,13 @@ const (
 )
 
 type Transaction struct {
+    Config configTransaction
     Account *auth.Account `dot:"ca1c6ce4-182b-430a-9813-caeccf83f8ab"`
+}
+
+type configTransaction struct {
+    DefaultGasPrice *big.Int
+    DefaultGasLimit uint64
 }
 
 type TxParams struct {
@@ -27,6 +33,8 @@ type TxParams struct {
     Password string
     Value    *big.Int
     Pending  bool
+    GasPrice *big.Int
+    GasLimit uint64
 }
 
 //construct dot
@@ -53,6 +61,16 @@ func (c *Transaction) Create(l dot.Line) error {
 }
 
 func (c *Transaction) BuildTransactOpts(txParams *TxParams) *bind.TransactOpts {
+    gp := txParams.GasPrice
+    if gp == nil {
+        gp = c.Config.DefaultGasPrice
+    }
+
+    gl := txParams.GasLimit
+    if gl == 0 {
+        gl = c.Config.DefaultGasLimit
+    }
+
     opts := &bind.TransactOpts{
         From:  txParams.From,
         Nonce: nil,
