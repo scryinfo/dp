@@ -144,19 +144,16 @@ func (c *Account) AuthUserAccount(address string, password string) (bool, error)
         context.Background(),
         &authStub.AddressParameter{Password: password, Address: address},
     )
-    dot.Logger().Debugln("Node: show params 1", zap.NamedError("err", err), zap.Any("addr", addr))
     if err != nil {
         err = errors.Wrap(err, "failed to authenticate user account")
     } else if addr == nil {
         err = errors.New("failed to authenticate user account, returned address is null")
     }
-    dot.Logger().Debugln("Node: show params 2", zap.NamedError("err", err))
     if err != nil {
         dot.Logger().Errorln("failed to authenticate user account", zap.Error(err))
         return false, err
     }
 
-    dot.Logger().Debugln("Node: show params 3", zap.NamedError("err", err))
     rv := addr.Status == authStub.Status_OK
 
     return rv, nil
