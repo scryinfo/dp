@@ -5,16 +5,15 @@ import (
     "github.com/ethereum/go-ethereum/common"
     "github.com/scryinfo/dot/dot"
     "github.com/scryinfo/dot/dots/line"
-    "github.com/scryinfo/dp/dots/app/settings"
     "github.com/scryinfo/dp/dots/binary"
     "github.com/scryinfo/dp/dots/binary/scry"
     "github.com/scryinfo/dp/dots/eth/event"
     "github.com/scryinfo/dp/dots/eth/transaction"
-    "github.com/scryinfo/dp/dots/storage"
     "github.com/scryinfo/scryg/sutils/ssignal"
     "go.uber.org/zap"
     "math/big"
     "os"
+    "time"
 )
 
 var (
@@ -43,8 +42,6 @@ func main()  {
     logger := dot.Logger()
     l, err := line.BuildAndStart(func(l dot.Line) error {
         l.PreAdd(binary.BinTypeLive()...)
-        l.PreAdd(storage.IpfsTypeLive())
-        l.PreAdd(settings.ConfTypeLive())
         return nil
     })
 
@@ -80,6 +77,8 @@ func Start()  {
     TestClient()
 
     InitUsers()
+
+    time.Sleep(time.Second*60)
 
     StartTestingWithoutVerify()
 }
@@ -139,11 +138,7 @@ func CreateClientWithToken(token *big.Int, eth *big.Int) (scry.Client, error) {
         return nil, err
     }
 
-    //authenticate
-    rv, err := client.Authenticate(clientPassword)
-    if !rv {
-        return nil, err
-    }
+    dot.Logger().Debugln("Cient:" + client.Account().Addr)
 
     err = client.TransferEthFrom(
                 common.HexToAddress(suAddress),
