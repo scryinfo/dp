@@ -78,7 +78,7 @@ func Start()  {
 
     InitUsers()
 
-    time.Sleep(time.Second*60)
+    time.Sleep(time.Second*30)
 
     StartTestingWithoutVerify()
 }
@@ -138,7 +138,7 @@ func CreateClientWithToken(token *big.Int, eth *big.Int) (scry.Client, error) {
         return nil, err
     }
 
-    dot.Logger().Debugln("Cient:" + client.Account().Addr)
+    dot.Logger().Debugln("client:" + client.Account().Addr)
 
     err = client.TransferEthFrom(
                 common.HexToAddress(suAddress),
