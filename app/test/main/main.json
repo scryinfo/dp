@@ -21,6 +21,20 @@
           }
         }
       ]
+    },
+    {
+      "metaData": {
+        "typeId": "a3e1a88e-f84e-4285-b5ff-54a16fdcd44c"
+      },
+      "lives": [
+        {
+          "liveId": "a3e1a88e-f84e-4285-b5ff-54a16fdcd44c",
+          "json": {
+            "gasPrice": 1,
+            "gasLimit": 3000000
+          }
+        }
+      ]
     }
   ]
 

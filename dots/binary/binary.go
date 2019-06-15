@@ -128,8 +128,6 @@ func (c *Binary) Start(ignore bool) error {
         return errors.New(initAuthServiceFailed)
     }
 
-
-
 	return nil
 }
 
