@@ -17,6 +17,10 @@ let utils = {
         connect.addCallbackFunc("onVote", presetFunc.onVote);
         connect.addCallbackFunc("onVerifierDisable", presetFunc.onVerifierDisable);
     },
+    setDefaultBalance: function (_this) {
+        _this.$store.state.balance[0] = { Balance: "-", Time: "-"};
+        _this.$store.state.balance[1] = { Balance: "-", Time: "-"};
+    },
     vote: function (_this, payload) {
         console.log("验证者验证事件回调：", payload);
         _this.$notify({

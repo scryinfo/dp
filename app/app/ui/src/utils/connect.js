@@ -15,7 +15,9 @@ let connect = {
         connect.ws.onmessage = function (evt) {
             console.log(evt.data);
             let obj = JSON.parse(evt.data);
-            connect.map[obj.Name](obj.Payload, _this);
+            setTimeout(function () {
+                connect.map[obj.Name](obj.Payload, _this);
+            }, 500);
         };
         connect.ws.onclose = function (evt) {
             console.log("connection onclose. ", evt);
