@@ -88,7 +88,7 @@ func (m *Receipt) Concat(others ...*Receipt) *CombiRecipt {
 
 type CombiRecipt struct {
 	recipets []*Receipt
-	alldone  chan struct{}
+	allDone  chan struct{}
 	once     *sync.Once
 }
 
@@ -107,7 +107,7 @@ func NewCombiRecipt(list ...*Receipt) *CombiRecipt {
 	}
 	return &CombiRecipt{
 		recipets: list,
-		alldone:  make(chan struct{}, 1),
+		allDone:  make(chan struct{}, 1),
 		once:     new(sync.Once),
 	}
 }
@@ -131,8 +131,8 @@ func (cr *CombiRecipt) WaitChan() <-chan struct{} {
 			for _, r := range cr.recipets {
 				r.Wait()
 			}
-			close(cr.alldone)
+			close(cr.allDone)
 		}()
 	})
-	return cr.alldone
+	return cr.allDone
 }

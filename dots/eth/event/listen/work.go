@@ -4,12 +4,12 @@
 package listen
 
 import (
-	"log"
-	"os"
-	"os/signal"
-	"runtime"
-	"syscall"
-	"time"
+    "github.com/scryinfo/dot/dot"
+    "go.uber.org/zap"
+    "os"
+    "os/signal"
+    "syscall"
+    "time"
 )
 
 type Job func(*RedoCtx)
@@ -44,7 +44,7 @@ func WrapFunc(work func()) Job {
 	}
 }
 
-// perform job without gracefull exit
+// perform job without graceful exit
 func Perform(once Job, duration time.Duration) *Receipt {
 	return performWork(once, duration, false)
 }
@@ -58,41 +58,43 @@ func performWork(once Job, duration time.Duration, catchSignal bool) *Receipt {
 	onceFunc := func(ctx *RedoCtx) {
 		defer func() {
 			if r := recover(); r != nil {
-				buf := make([]byte, 1<<16)
-				runtime.Stack(buf, false)
-				log.Printf("panic occur:%+v\nstacktrace:%s\n", r, string(buf))
+				dot.Logger().Errorln("failed to perform work, panic error", zap.Stack("onceFunc"))
 			}
 		}()
 		once(ctx)
 	}
-	recipet := newRecipet()
-	recipet.catchSignal = catchSignal
+
+	r := newRecipet()
+	r.catchSignal = catchSignal
+
 	go func(m *Receipt) {
 		if catchSignal {
-			batchCatchSignals(recipet.sigChan)
+			batchCatchSignals(r.sigChan)
 		}
-		pls_exit := m.requestStopChan()
+
+		plsExit := m.requestStopChan()
 		for {
 			ctx := newCtx(duration)
 			onceFunc(ctx)
+
 			if ctx.stopRedo {
 				m.Stop()
 			}
 
 			select {
-			case <-pls_exit:
+			case <-plsExit:
 				m.closeChannels()
 				return
-			case <-recipet.sigChan:
-				signal.Stop(recipet.sigChan)
+			case <-r.sigChan:
+				signal.Stop(r.sigChan)
 				m.stopWithRequest(StopSys)
 				m.closeChannels()
 				return
 			case <-time.After(ctx.delayBeforeNextLoop):
 			}
 		}
-	}(recipet)
-	return recipet
+	}(r)
+	return r
 }
 
 func batchCatchSignals(sigchan chan os.Signal) {
