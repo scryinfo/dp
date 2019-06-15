@@ -18,11 +18,8 @@ const (
 
 type Listener struct {
 	builder *Builder
-	config  listenerConfig
 }
 
-type listenerConfig struct {
-}
 
 //construct dot
 func newListenerDot(conf interface{}) (dot.Dot, error) {
@@ -61,7 +58,7 @@ func (c *Listener) ListenEvent(
 
 	defer func() {
 		if er := recover(); er != nil {
-			logger.Errorln("", zap.Any("Failed to listen event. error:", er))
+			logger.Errorln("failed to listen event, panic error", zap.Any("", er))
 		}
 	}()
 
@@ -82,7 +79,7 @@ func (c *Listener) ListenEvent(
 		SetInterval(interval).
 		BuildAndRun()
 	if err != nil {
-		logger.Errorln("", zap.NamedError("failed to listen to events.", err))
+		logger.Errorln("failed to listen to events", zap.Error(err))
 		return false
 	}
 
@@ -95,6 +92,6 @@ func (c *Listener) SetFromBlock(from uint64) {
 	if c.builder != nil {
 		c.builder.SetFrom(from)
 	} else {
-		dot.Logger().Warnln("Failed to set from block because of nil builder.")
+		dot.Logger().Warnln("failed to set from block because of null builder")
 	}
 }

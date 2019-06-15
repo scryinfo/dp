@@ -13,6 +13,7 @@ import (
     "go.uber.org/zap"
     "math/big"
     "os"
+    "time"
 )
 
 var (
@@ -77,6 +78,8 @@ func Start()  {
 
     InitUsers()
 
+    time.Sleep(time.Second*60)
+
     StartTestingWithoutVerify()
 }
 
@@ -135,11 +138,7 @@ func CreateClientWithToken(token *big.Int, eth *big.Int) (scry.Client, error) {
         return nil, err
     }
 
-    //authenticate
-    rv, err := client.Authenticate(clientPassword)
-    if !rv {
-        return nil, err
-    }
+    dot.Logger().Debugln("Cient:" + client.Account().Addr)
 
     err = client.TransferEthFrom(
                 common.HexToAddress(suAddress),

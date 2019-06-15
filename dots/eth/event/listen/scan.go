@@ -50,17 +50,21 @@ func (b *Builder) SetClient(conn *ethclient.Client) *Builder {
 }
 
 // set addr to address(0) e.g.common.Address{} to filter any contracts with same abi
-func (b *Builder) SetContract(addr common.Address, abi_str string, evt_names ...string) *Builder {
+func (b *Builder) SetContract(
+    addr common.Address,
+    abiStr string,
+    evtNames ...string,
+) *Builder {
 	b.es.Contracts[strings.ToLower(addr.Hex())] = contractMeta{
 		contract: addr,
-		abiStr:   abi_str,
-		evtNames: evt_names,
+		abiStr:   abiStr,
+		evtNames: evtNames,
 	}
 	return b
 }
 
 func (b *Builder) SetGracefulExit(yes bool) *Builder {
-	b.es.GracefullExit = yes
+	b.es.GracefulExit = yes
 	return b
 }
 
@@ -89,7 +93,10 @@ func (b *Builder) SetProgressChan(pc chan<- Progress) *Builder {
 	return b
 }
 
-func (b *Builder) SetDataChan(dataCh chan<- event.Event, errChan chan<- error) *Builder {
+func (b *Builder) SetDataChan(
+    dataCh chan<- event.Event,
+    errChan chan<- error,
+) *Builder {
 	b.es.DataChan, b.es.ErrChan = dataCh, errChan
 	return b
 }
@@ -104,7 +111,7 @@ func (b *Builder) BuildAndRun() (*Receipt, error) {
 		return nil, err
 	}
 	var recipet *Receipt
-	if b.es.GracefullExit {
+	if b.es.GracefulExit {
 		recipet = PerformSafe(b.es.scan, b.interval)
 	} else {
 		recipet = Perform(b.es.scan, b.interval)
@@ -522,16 +529,16 @@ func (cm contractMap) GetMeta(addr common.Address) (contractMeta, bool) {
 }
 
 type eventScanner struct {
-	conn          *ethclient.Client
-	Contracts     contractMap
-	From          uint64
-	StepLength    uint64
-	To            uint64
-	DataChan      chan<- event.Event
-	ErrChan       chan<- error
-	ProgressChan  chan<- Progress
-	GracefullExit bool
-	marginBlock   uint64
+	conn         *ethclient.Client
+	Contracts    contractMap
+	From         uint64
+	StepLength   uint64
+	To           uint64
+	DataChan     chan<- event.Event
+	ErrChan      chan<- error
+	ProgressChan chan<- Progress
+	GracefulExit bool
+	marginBlock  uint64
 }
 
 func (es *eventScanner) NewestBlockNumber() (uint64, error) {

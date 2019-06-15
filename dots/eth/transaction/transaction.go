@@ -15,7 +15,7 @@ import (
 
 const (
     TxTypeId       = "a3e1a88e-f84e-4285-b5ff-54a16fdcd44c"
-    DefaultGasLimit = 21000
+    DefaultGasLimit = 3000000
 )
 
 type Transaction struct {
@@ -24,8 +24,8 @@ type Transaction struct {
 }
 
 type configTransaction struct {
-    DefaultGasPrice *big.Int
-    DefaultGasLimit uint64
+    DefaultGasPrice *big.Int `json:"gasPrice"`
+    DefaultGasLimit uint64   `json:"gasLimit"`
 }
 
 type TxParams struct {
@@ -39,7 +39,21 @@ type TxParams struct {
 
 //construct dot
 func newTxDot(conf interface{}) (dot.Dot, error) {
-    d := &Transaction{}
+    var err error
+    var bs []byte
+    if bt, ok := conf.([]byte); ok {
+        bs = bt
+    } else {
+        return nil, dot.SError.Parameter
+    }
+
+    dConf := &configTransaction{}
+    err = dot.UnMarshalConfig(bs, dConf)
+    if err != nil {
+        return nil, err
+    }
+
+    d := &Transaction{Config: *dConf}
     return d, nil
 }
 
@@ -68,7 +82,11 @@ func (c *Transaction) BuildTransactOpts(txParams *TxParams) *bind.TransactOpts {
 
     gl := txParams.GasLimit
     if gl == 0 {
-        gl = c.Config.DefaultGasLimit
+        if c.Config.DefaultGasLimit == 0 {
+            gl = DefaultGasLimit
+        } else {
+            gl = c.Config.DefaultGasLimit
+        }
     }
 
     opts := &bind.TransactOpts{
@@ -79,8 +97,8 @@ func (c *Transaction) BuildTransactOpts(txParams *TxParams) *bind.TransactOpts {
             return c.SignTransaction(signer, address, transaction, txParams.Password)
         },
         Value:    txParams.Value,
-        GasPrice: big.NewInt(0),
-        GasLimit: 3000000,
+        GasPrice: gp,
+        GasLimit: gl,
         Context:  context.Background(),
     }
 
