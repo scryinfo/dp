@@ -47,7 +47,6 @@ type binaryConfig struct {
     AppId                string   `json:"appId"`
     EthSrvAddr           string   `json:"ethServiceAddr"`
     KeySrvAddr           string   `json:"keyServiceAddr"`
-    StorageSrvAddr       string   `json:"storageServiceAddr"`
     ProtocolContractAddr string   `json:"protocolContractAddr"`
     TokenContractAddr    string   `json:"tokenContractAddr"`
 
