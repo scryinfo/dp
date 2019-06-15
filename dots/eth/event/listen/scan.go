@@ -14,6 +14,7 @@ import (
     "github.com/ethereum/go-ethereum/common"
     "github.com/ethereum/go-ethereum/core/types"
     "github.com/ethereum/go-ethereum/ethclient"
+    "github.com/scryinfo/dot/dot"
     "github.com/scryinfo/dp/dots/eth/event"
     "math/big"
     "reflect"
@@ -121,9 +122,11 @@ func (b *Builder) BuildAndRun() (*Receipt, error) {
 
 func (b *Builder) Build() error {
 	if b.es.DataChan == nil {
+	    dot.Logger().Errorln("data channel should not be empty")
 		return errors.New("data channel should not be empty")
 	}
 	if b.es.conn == nil {
+	    dot.Logger().Errorln("no eth client")
 		return errors.New("no eth client")
 	}
 	if len(b.es.Contracts) == 0 {
@@ -193,18 +196,18 @@ func (cm contractMeta) UnpackLogToJson(out event.JSONObj, event string, log type
 
 func (cm contractMeta) Unpack(v event.JSONObj, name string, output []byte) (err error) {
 	if len(output) == 0 {
-		return fmt.Errorf("abi: unmarshalling empty output")
+		return errors.New("abi: unmarshalling empty output")
 	}
 
 	if method, ok := cm.abi.Methods[name]; ok {
 		if len(output)%32 != 0 {
-			return fmt.Errorf("abi: improperly formatted output")
+			return errors.New("abi: improperly formatted output")
 		}
 		return cm.UnpackArgs(v, output, method.Outputs)
 	} else if event, ok := cm.abi.Events[name]; ok {
 		return cm.UnpackArgs(v, output, event.Inputs)
 	}
-	return fmt.Errorf("abi: could not locate named method or event")
+	return errors.New("abi: could not locate named method or event")
 }
 
 func (cm contractMeta) UnpackArgs(v event.JSONObj, data []byte, args abi.Arguments) error {
@@ -227,11 +230,11 @@ func (cm contractMeta) unpackTuple(v event.JSONObj, output []byte, args abi.Argu
 			continue
 		}
 		i++
-		marshalledValue, err := toGoType((i+j)*32, arg.Type, output)
+		marshaledValue, err := toGoType((i+j)*32, arg.Type, output)
 		if err != nil {
 			return err
 		}
-		v.Set(arg.Name, marshalledValue)
+		v.Set(arg.Name, marshaledValue)
 	}
 	return nil
 }
@@ -240,14 +243,14 @@ func (cm contractMeta) unpackTuple(v event.JSONObj, output []byte, args abi.Argu
 func (cm contractMeta) unpackAtomic(v event.JSONObj, output []byte, args abi.Arguments) error {
 	arg := args[0]
 	if arg.Indexed {
-		return fmt.Errorf("abi: attempting to unpack indexed variable into element")
+		return errors.New("abi: attempting to unpack indexed variable into element")
 	}
 
-	marshalledValue, err := toGoType(0, arg.Type, output)
+	marshaledValue, err := toGoType(0, arg.Type, output)
 	if err != nil {
 		return err
 	}
-	v.Set(arg.Name, marshalledValue)
+	v.Set(arg.Name, marshaledValue)
 	return nil
 }
 
@@ -358,7 +361,7 @@ func readFunctionType(t abi.Type, word []byte) (funcTy [24]byte, err error) {
 // through reflection, creates a fixed array to be read from
 func readFixedBytes(t abi.Type, word []byte) (interface{}, error) {
 	if t.T != abi.FixedBytesTy {
-		return nil, fmt.Errorf("abi: invalid type in call to make fixed byte array")
+		return nil, errors.New("abi: invalid type in call to make fixed byte array")
 	}
 	// convert
 	array := reflect.New(t.Type).Elem()
@@ -404,7 +407,7 @@ func forEachUnpack(t abi.Type, output []byte, start, size int) (interface{}, err
 		// declare our array
 		refSlice = reflect.New(t.Type).Elem()
 	} else {
-		return nil, fmt.Errorf("abi: invalid type in array/slice unpacking stage")
+		return nil, errors.New("abi: invalid type in array/slice unpacking stage")
 	}
 
 	for i, j := start, 0; j*32 < len(slice); i, j = i+32, j+1 {
