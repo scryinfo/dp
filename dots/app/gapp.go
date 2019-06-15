@@ -15,9 +15,8 @@ var app Gapp
 //todo decrease the number of global variables
 type Gapp struct {
 	ChainWrapper scry.ChainWrapper
-	Deployer     scry.Client
 	CurUser      sdkinterface2.SDKWrapper
-	ScryInfo     *settings2.ScryInfo
+	ScryInfo     *settings2.Config
 	Connection   *connection.WSServer
 }
 

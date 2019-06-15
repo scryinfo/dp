@@ -48,3 +48,4 @@ nohup.out
 /services/binary_s/main/main.exe
 /go.sum
 /app/test/main/main
+node_modules/

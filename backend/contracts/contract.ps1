@@ -18,7 +18,7 @@ echo "|-> * truffle migrate prepared. "
 echo ""
 Start-Sleep -Milliseconds 1000
 
-Start-Transcript "migrate.log" -Append -Force
+Start-Transcript "migrate.log" -Force
 truffle migrate --network geth
 Stop-Transcript 
 echo "|-> * truffle migrate finished. "

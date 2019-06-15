@@ -34,10 +34,21 @@ let state = {
     //  primary key: address.
 
     account: "",
-    nickname: {
-        type: String,
-        default: "用户昵称加载中..."
-    },
+    nickname: "用户昵称加载中...",
+
+    balance: [
+        // balance[0]: eth
+        {
+            Balance: "-",
+            Time: "-"
+        },
+        // balance[1]: scry token
+        {
+            Balance: "-",
+            Time: "-"
+        }
+    ]
+
 };
 
 let Store = new Vuex.Store({
