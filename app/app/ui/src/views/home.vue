@@ -69,11 +69,13 @@ export default {
         },
         logout: function () {
             db_options.userDBClose();
+            let _home = this;
             connect.send({Name:"logout", Payload: ""}, function (payload, _this) {
                 connect.cleanMap();
+                utils.setDefaultBalance(_home);
                 setTimeout(function () {
                     _this.$router.push("/");
-                }, 1000);
+                }, 500);
             }, function (payload, _this) {
                 console.log("退出登录失败：", payload);
                 _this.$alert(payload, "退出登录失败！", {
@@ -85,6 +87,9 @@ export default {
         }
     },
     created() {
+        utils.init();
+        db_options.utilsDBInit(this);
+        db_options.userDBInit(this.$route.params.acc);
         let _home = this;
         acc_db.read(this.$route.params.acc, function (accInstance) {
             _home.$store.state.account = accInstance.address;
@@ -103,9 +108,6 @@ export default {
                 });
             });
         });
-        utils.init();
-        db_options.utilsDBInit(this);
-        db_options.userDBInit(this.$route.params.acc);
     }
 }
 </script>
