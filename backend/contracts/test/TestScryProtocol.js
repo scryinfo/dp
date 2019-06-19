@@ -1,7 +1,7 @@
 // Scry Info.  All rights reserved.
 // license that can be found in the license file.
 
-let scryProtocol = artifacts.require("./ScryProtocol.sol");
+let scryProtocol = artifacts.require("./ScryProtocol_old.sol");
 let scryToken = artifacts.require("./ScryToken.sol");
 
 let ptl, ste;
