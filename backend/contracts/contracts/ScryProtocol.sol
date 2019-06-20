@@ -1,14 +1,12 @@
 pragma solidity ^0.4.24;
 
-import {common} from "./lib/common.sol";
-import {transaction} from "./lib/transaction.sol";
+import "./lib/common.sol";
+import "./lib/transaction.sol";
 import "./lib/verification.sol";
 
 import "./ScryToken.sol";
 
 contract ScryProtocol {
-    using verification for *;
-
     common.PublishedData private publishedData;
     common.TransactionData private txData;
     common.VoteData private voteData;
@@ -32,15 +30,15 @@ contract ScryProtocol {
     }
 
     function registerAsVerifier(string seqNo) external {
-        verifiers.register(conf, seqNo, token);
+        verification.register(verifiers, conf, seqNo, token);
     }
 
     function vote(string seqNo, uint txId, bool judge, string comments) external {
-        verifiers.vote(txData, voteData, seqNo, txId, judge, comments, token);
+        verification.vote(verifiers, txData, voteData, seqNo, txId, judge, comments, token);
     }
 
     function creditsToVerifier(string seqNo, uint256 txId, uint8 verifierIndex, uint8 credit) external {
-        verifiers.creditsToVerifier(publishedData, txData, conf, seqNo, txId, verifierIndex, credit);
+        verification.creditsToVerifier(verifiers, publishedData, txData, conf, seqNo, txId, verifierIndex, credit);
     }
 
     function publishDataInfo(string seqNo, string publishId, uint256 price, bytes metaDataIdEncSeller,
