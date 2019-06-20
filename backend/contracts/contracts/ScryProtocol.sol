@@ -8,9 +8,9 @@ import "./ScryToken.sol";
 
 contract ScryProtocol {
     using verification for common.Verifiers;
-
-    common.PublishedData publishedData;
-    common.TransactionData transactionData;
+    
+    common.PublishedData private publishedData;
+    common.TransactionData private txData;
     common.VoteData voteData;
 
     common.Verifiers verifiers;
@@ -23,6 +23,7 @@ contract ScryProtocol {
     event VerifiersChosen(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, common.TransactionState state, address[] users);
     event Vote(string seqNo, uint256 transactionId, bool judge, string comments, common.TransactionState state, uint8 index, address[] users);
     event VerifierDisable(string seqNo, address verifier, address[] users);
+
 
     constructor (address _token) public {
         require(_token != 0x0);
@@ -78,5 +79,25 @@ contract ScryProtocol {
         address[] memory users = new address[](1);
         users[0] = txItem.buyer;
         emit Vote(seqNo, txId, judge, comments, txItem.state, index+1, users);
+    }
+
+    function publishDataInfo(string seqNo, string publishId, uint256 price, bytes metaDataIdEncSeller,
+        bytes32[] proofDataIds, string descDataId, bool supportVerify) external {
+
+    }
+
+    function createTransaction(string seqNo, string publishId, bool startVerify) external {
+
+    }
+
+    function buyData(string seqNo, uint256 txId) external {
+
+    }
+
+    function cancelTransaction(string seqNo, uint256 txId) external {
+
+    }
+
+    function submitMetaDataIdEncWithBuyer(string seqNo, uint256 txId, bytes encryptedMetaDataId) external {
     }
 }
