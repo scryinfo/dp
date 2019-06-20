@@ -57,8 +57,7 @@ contract ScryProtocol {
     function createTransaction(string seqNo, string publishId, bool startVerify) external {
         //get verifiers if verification needed
         address[] memory verifiersChosen;
-        bool needVerify = transaction.needVerification(publishedData, publishId, startVerify);
-        if (needVerify) {
+        if ( transaction.needVerification(publishedData, publishId, startVerify) ) {
             verifiersChosen = new address[](conf.verifierNum);
             verifiersChosen = verification.chooseVerifiers(verifiers, conf);
         }
@@ -77,13 +76,29 @@ contract ScryProtocol {
     }
 
     function buyData(string seqNo, uint256 txId) external {
-
+        transaction.buy(
+            publishedData,
+            txData,
+            seqNo,
+            txId
+        );
     }
 
     function cancelTransaction(string seqNo, uint256 txId) external {
-
+        transaction.cancelTransaction(
+            txData,
+            seqNo,
+            txId,
+            token
+        );
     }
 
     function submitMetaDataIdEncWithBuyer(string seqNo, uint256 txId, bytes encryptedMetaDataId) external {
+        transaction.submitMetaDataIdEncByBuyer(
+            txData,
+            seqNo,
+            txId,
+            encryptedMetaDataId
+        );
     }
 }
