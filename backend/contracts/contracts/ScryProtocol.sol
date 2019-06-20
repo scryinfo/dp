@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
-import "./lib/common.sol";
-import "./lib/transaction.sol";
+import {common} from "./lib/common.sol";
+import {transaction} from "./lib/transaction.sol";
 import "./lib/verification.sol";
 
 import "./ScryToken.sol";
@@ -11,10 +11,10 @@ contract ScryProtocol {
     
     common.PublishedData private publishedData;
     common.TransactionData private txData;
-    common.VoteData voteData;
+    common.VoteData private voteData;
 
-    common.Verifiers verifiers;
-    common.Configuration conf;
+    common.Verifiers private verifiers;
+    common.Configuration private conf;
 
     address owner         = 0x0;
     ERC20   token;
@@ -82,12 +82,39 @@ contract ScryProtocol {
     }
 
     function publishDataInfo(string seqNo, string publishId, uint256 price, bytes metaDataIdEncSeller,
-        bytes32[] proofDataIds, string descDataId, bool supportVerify) external {
-
+        bytes32[] proofDataIds, string descDataId, bool supportVerify) public {
+        transaction.publishDataInfo(
+            publishedData,
+            seqNo,
+            publishId,
+            price,
+            metaDataIdEncSeller,
+            proofDataIds,
+            descDataId,
+            supportVerify
+        );
     }
 
     function createTransaction(string seqNo, string publishId, bool startVerify) external {
+        //get verifiers if verification needed
+        address[] memory verifiersChosen;
+        bool needVerify = transaction.needVerification(publishedData, publishId, startVerify);
+        if (needVerify) {
+            verifiersChosen = new address[](conf.verifierNum);
+            verifiersChosen = verification.chooseVerifiers(verifiers, conf);
+        }
 
+        //create tx
+        transaction.createTransaction(
+            publishedData,
+            txData,
+            conf,
+            verifiersChosen,
+            seqNo,
+            publishId,
+            startVerify,
+            token
+        );
     }
 
     function buyData(string seqNo, uint256 txId) external {
