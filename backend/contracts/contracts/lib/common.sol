@@ -57,10 +57,10 @@ library common {
 
     struct Verifiers {
         Verifier[] list;
+        uint8 validVerifierCount;
     }
 
     struct Configuration {
-        uint8 validVerifierCount;
         uint8 verifierNum;
         uint256 verifierDepositToken;
         uint256 verifierBonus;

@@ -11,7 +11,7 @@ let Verification = artifacts.require("./lib/verification.sol");
 let tokenContract;
 module.exports = function(deployer, network, accounts) {
     deployer.deploy(Common);
-    deployer.link(Common, [Transaction, Verification,ScryProtocol]);
+    deployer.link(Common, [Transaction, Verification, ScryProtocol]);
 
     deployer.deploy(Transaction);
     deployer.link(Transaction, ScryProtocol);

@@ -68,9 +68,9 @@ export default {
             supportVerify: false,
             confirmData: false,
             verifier1Revert: false,
-            verifier1Credit: 0,
+            verifier1Credit: 5,
             verifier2Revert: false,
-            verifier2Credit: 0
+            verifier2Credit: 5
         }
     },
     methods: {
