@@ -1,13 +1,14 @@
 pragma solidity ^0.4.24;
 
-import {common} from "./lib/common.sol";
-import {transaction} from "./lib/transaction.sol";
+import "./lib/common.sol";
+import "./lib/transaction.sol";
 import "./lib/verification.sol";
-
 import "./ScryToken.sol";
 
 contract ScryProtocol {
     using verification for *;
+    using common for *;
+    using transaction for *;
 
     common.PublishedData private publishedData;
     common.TransactionData private txData;
@@ -102,6 +103,17 @@ contract ScryProtocol {
             seqNo,
             txId,
             encryptedMetaDataId
+        );
+    }
+
+    function confirmDataTruth(string seqNo, uint256 txId, bool truth) external {
+        transaction.confirmDataTruth(
+            publishedData,
+            txData,
+            seqNo,
+            txId,
+            truth,
+            token
         );
     }
 }
