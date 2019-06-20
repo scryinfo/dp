@@ -22,7 +22,8 @@ module.exports = {
 	  development: {
 		  host: '127.0.0.1',
 		  port: '7545',
-		  network_id: '*'
+		  network_id: '*',
+		  gas: 100000000 // 10 eth
 	  },
 
 	  geth: {
@@ -31,4 +32,11 @@ module.exports = {
 		  network_id: '*'
 	  }
   }
+
+  // solc: {
+  //     optimizer: {
+  //         enabled: true,
+  //         runs: 200
+  //     }
+  // }
 };
