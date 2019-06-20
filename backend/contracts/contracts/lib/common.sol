@@ -62,11 +62,13 @@ library common {
 
     struct Configuration {
         uint8 verifierNum;
-        uint256 verifierDepositToken;
         uint256 verifierBonus;
+        uint256 verifierDepositToken;
+
         uint8 creditLow;
         uint8 creditHigh;
         uint8 creditThreshold;
+
         uint256 transactionSeq;
         uint256 encryptedIdLen;
     }
