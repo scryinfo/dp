@@ -33,15 +33,15 @@ contract ScryProtocol {
     }
 
     function registerAsVerifier(string seqNo) external {
-        verifiers.register(conf, seqNo, token);
+        verification.register(verifiers, conf, seqNo, token);
     }
 
     function vote(string seqNo, uint txId, bool judge, string comments) external {
-        verifiers.vote(txData, voteData, seqNo, txId, judge, comments, token);
+        verification.vote(verifiers, txData, voteData, seqNo, txId, judge, comments, token);
     }
 
     function creditsToVerifier(string seqNo, uint256 txId, uint8 verifierIndex, uint8 credit) external {
-        verifiers.creditsToVerifier(publishedData, txData, conf, seqNo, txId, verifierIndex, credit);
+        verification.creditsToVerifier(verifiers, publishedData, txData, conf, seqNo, txId, verifierIndex, credit);
     }
 
     function publishDataInfo(string seqNo, string publishId, uint256 price, bytes metaDataIdEncSeller,
