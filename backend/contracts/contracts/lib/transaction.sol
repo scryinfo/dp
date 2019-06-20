@@ -20,7 +20,7 @@ library transaction {
         bytes32[] proofDataIds,
         string descDataId,
         bool supportVerify
-    ) public {
+    ) external {
         address[] memory users = new address[](1);
         users[0] = address(0x00);
 
@@ -41,11 +41,29 @@ library transaction {
         emit DataPublish(seqNo, publishId, price, descDataId, supportVerify, users);
     }
 
+    function needVerification(
+        common.PublishedData storage pubData,
+        string publishId,
+        bool startVerify
+    ) external returns (bool) {
+        common.DataInfoPublished storage data = pubData.map[publishId];
+        require(data.used, "Publish data does not exist");
+
+        return needVerification(data, startVerify);
+    }
+
+    function needVerification(
+        common.DataInfoPublished storage pubItem,
+        bool startVerify
+    ) public returns (bool) {
+        return pubItem.supportVerify && startVerify;
+    }
+
     function createTransaction(
         common.PublishedData storage pubData,
         common.TransactionData storage txData,
         common.Configuration storage conf,
-        address[] storage verifiers,
+        address[] verifiers,
         string seqNo,
         string publishId,
         bool startVerify,
@@ -56,7 +74,7 @@ library transaction {
         require(verifiers.length == conf.verifierNum, "Invalid number of verifiers");
 
         uint256 fee = data.price;
-        bool needVerify = data.supportVerify && startVerify;
+        bool needVerify = needVerification(data, startVerify);
         if (needVerify) {
             fee += conf.verifierBonus * conf.verifierNum;
         }
