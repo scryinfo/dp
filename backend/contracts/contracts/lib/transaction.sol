@@ -45,7 +45,7 @@ library transaction {
         common.PublishedData storage pubData,
         string publishId,
         bool startVerify
-    ) external returns (bool) {
+    ) external view returns (bool) {
         common.DataInfoPublished storage data = pubData.map[publishId];
         require(data.used, "Publish data does not exist");
 
@@ -55,7 +55,7 @@ library transaction {
     function needVerification(
         common.DataInfoPublished storage pubItem,
         bool startVerify
-    ) public returns (bool) {
+    ) public view returns (bool) {
         return pubItem.supportVerify && startVerify;
     }
 
@@ -186,7 +186,7 @@ library transaction {
         }
     }
 
-    function submitMetaDataIdEncWithBuyer(
+    function submitMetaDataIdEncByBuyer(
         common.TransactionData storage txData,
         string seqNo,
         uint256 txId,
