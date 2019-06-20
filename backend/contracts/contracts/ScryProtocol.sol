@@ -25,19 +25,22 @@ contract ScryProtocol {
         owner = msg.sender;
         token = ERC20(_token);
 
-        // todo: conf init
+        //the first element used for empty usage
+        verifiers.list[verifiers.list.length++] = common.Verifier(0x00, 0, 0, 0, false);
+
+        conf = common.Configuration(2, 300, 10000, 0, 5, 2, 0, 32);
     }
 
     function registerAsVerifier(string seqNo) external {
-
+        verifiers.register(conf, seqNo, token);
     }
 
     function vote(string seqNo, uint txId, bool judge, string comments) external {
-
+        verifiers.vote(txData, voteData, seqNo, txId, judge, comments, token);
     }
 
     function creditsToVerifier(string seqNo, uint256 txId, uint8 verifierIndex, uint8 credit) external {
-
+        verifiers.creditsToVerifier(publishedData, txData, conf, seqNo, txId, verifierIndex, credit);
     }
 
     function publishDataInfo(string seqNo, string publishId, uint256 price, bytes metaDataIdEncSeller,

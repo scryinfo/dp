@@ -9,7 +9,7 @@ library verification {
     event Vote(string seqNo, uint256 transactionId, bool judge, string comments, common.TransactionState state, uint8 index, address[] users);
     event VerifierDisable(string seqNo, address verifier, address[] users);
 
-    function registerAsVerifier(
+    function register(
         common.Verifiers storage self,
         common.Configuration storage conf,
         string seqNo,
@@ -33,22 +33,22 @@ library verification {
     }
 
     function vote(
-        common.TransactionData storage self,
+        common.Verifiers storage self,
+        common.TransactionData storage txData,
         common.VoteData storage voteData,
-        common.Verifiers storage verifiers,
         string seqNo,
         uint txId,
         bool judge,
         string comments,
         ERC20 token) external {
 
-        common.TransactionItem storage txItem = self.map[txId];
+        common.TransactionItem storage txItem = txData.map[txId];
         require(txItem.used, "Transaction does not exist");
         require(txItem.state == common.TransactionState.Created || txItem.state == common.TransactionState.Voted, "Invalid transaction state");
 
         bool valid;
         uint8 index;
-        common.Verifier storage verifier = getVerifier(verifiers, msg.sender);
+        common.Verifier storage verifier = getVerifier(self, msg.sender);
         (valid, index) = verifierValid(verifier, txItem.verifiers);
         require(valid, "Invalid verifier");
 
@@ -66,9 +66,9 @@ library verification {
     }
 
     function creditsToVerifier(
-        common.PublishedData storage self,
+        common.Verifiers storage self,
+        common.PublishedData storage pubData,
         common.TransactionData storage txData,
-        common.Verifiers storage verifiers,
         common.Configuration storage conf,
         string seqNo,
         uint256 txId,
@@ -81,10 +81,10 @@ library verification {
         common.TransactionItem storage txItem = txData.map[txId];
         require(txItem.used, "Transaction does not exist");
 
-        common.Verifier storage verifier = getVerifier(verifiers, txItem.verifiers[verifierIndex]);
+        common.Verifier storage verifier = getVerifier(self, txItem.verifiers[verifierIndex]);
         require(verifier.addr != 0x00, "Verifier does not exist");
 
-        common.DataInfoPublished storage data = self.map[txItem.publishId];
+        common.DataInfoPublished storage data = pubData.map[txItem.publishId];
         require(data.used, "Publish data does not exist");
         require(txItem.needVerify, "Transaction can't verify");
 
@@ -104,15 +104,15 @@ library verification {
         if (verifier.credits <= conf.creditThreshold) {
             verifier.enable = false;
             verifier.deposit = 0;
-            verifiers.validVerifierCount--;
-            require(verifiers.validVerifierCount >= 1, "Invalid verifier count");
+            self.validVerifierCount--;
+            require(self.validVerifierCount >= 1, "Invalid verifier count");
 
             emit VerifierDisable(seqNo, verifier.addr, users);
         }
     }
 
 
-    function chooseVerifiers(common.Verifiers storage self, common.Configuration storage conf) public returns (address[] memory) {
+    function chooseVerifiers(common.Verifiers storage self, common.Configuration storage conf) internal view returns (address[] memory) {
         uint256 len = self.list.length;
         address[] memory chosenVerifiers = new address[](conf.verifierNum);
 
@@ -133,7 +133,7 @@ library verification {
         return chosenVerifiers;
     }
 
-    function addressExist(address[] addrArray, address addr) internal view returns (bool exist) {
+    function addressExist(address[] addrArray, address addr) internal pure returns (bool exist) {
         for (uint8 i = 0; i < addrArray.length; i++) {
             if (addr == addrArray[i]) {
                 exist = true;
