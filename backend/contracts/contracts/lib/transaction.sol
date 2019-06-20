@@ -207,4 +207,55 @@ library transaction {
         users[0] = txItem.buyer;
         emit ReadyForDownload(seqNo, txId, txItem.meteDataIdEncBuyer, txItem.state, 1, users);
     }
+
+    function confirmDataTruth(
+        common.PublishedData storage pubData,
+        common.TransactionData storage txData,
+        string seqNo,
+        uint256 txId,
+        bool truth,
+        ERC20 token
+    ) external {
+        //validate
+        common.TransactionItem storage txItem = txData.map[txId];
+        require(txItem.used, "Transaction does not exist");
+        require(txItem.buyer == msg.sender, "Invalid buyer");
+
+        common.DataInfoPublished storage data = pubData.map[txItem.publishId];
+        require(data.used, "Publish data does not exist");
+
+        require(txItem.state == common.TransactionState.ReadyForDownload, "Invalid transaction state");
+        if (!txItem.needVerify) {
+            if(truth) {
+                payToSeller(txItem, data, token);
+            }
+
+            closeTransaction(txItem, seqNo, txId);
+        } else {
+            if (truth) {
+                payToSeller(txItem, data, token);
+                closeTransaction(txItem, seqNo, txId);
+            } else {
+                // arbitrate.
+                closeTransaction(txItem, seqNo, txId);
+            }
+        }
+    }
+
+    function payToSeller(
+        common.TransactionItem storage txItem,
+        common.DataInfoPublished storage data,
+        ERC20 token
+    ) internal {
+        if (txItem.buyerDeposit >= data.price) {
+            txItem.buyerDeposit -= data.price;
+
+            if (!token.transfer(data.seller, data.price)) {
+                txItem.buyerDeposit += data.price;
+                require(false, "Failed to pay to seller");
+            }
+        } else {
+            require(false, "Low deposit value for paying to seller");
+        }
+    }
 }
