@@ -43,15 +43,16 @@ contract('ScryProtocol', async accounts => {
         assert(checkEvent("Approval", r), "no Approval event watched");
 
         r = await ptl.createTransaction("seqno3",  "publishId", true, {from: buyer});
-        //assert(checkEvent("VerifiersChosen", r), "failed to watch event VerifiersChosen");
+        assert(checkEvent("VerifiersChosen", r), "failed to watch event VerifiersChosen");
         assert(checkEvent("TransactionCreate", r), "failed to watch event TransactionCreate");
 
         verifierSelected = getEventField("VerifiersChosen", r, "users");
-        txId = getEventField("TransactionCreate", r, "transactionId");
+        console.log("verifiers:", verifierSelected);
 
+        txId = getEventField("TransactionCreate", r, "transactionId");
         console.log("txId:", txId);
 
-        r = await ptl.vote("seqNo4", txId, true, "comments from verifier1", {from: verifierSelected});
+        r = await ptl.vote("seqNo4", txId, true, "comments from verifier1", {from: verifierSelected[0]});
         assert(checkEvent("Vote", r), "failed to watch event Vote");
 
         r = await ptl.buyData("seqNo5", txId, {from: buyer});
