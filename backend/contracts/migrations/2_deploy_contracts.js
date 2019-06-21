@@ -4,9 +4,9 @@
 let ScryToken = artifacts.require("./ScryToken.sol");
 let ScryProtocol = artifacts.require("./ScryProtocol.sol");
 
-let Common = artifacts.require("./lib/common.sol");
-let Transaction = artifacts.require("./lib/transaction.sol");
-let Verification = artifacts.require("./lib/verification.sol");
+ let Common = artifacts.require("./lib/common.sol");
+ let Transaction = artifacts.require("./lib/transaction.sol");
+ let Verification = artifacts.require("./lib/verification.sol");
 
 let tokenContract;
 module.exports = function(deployer, network, accounts) {

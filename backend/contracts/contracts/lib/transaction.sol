@@ -5,11 +5,11 @@ import "../ScryToken.sol";
 
 library transaction {
     event DataPublish(string seqNo, string publishId, uint256 price, string despDataId, bool supportVerify, address[] users);
-    event TransactionCreate(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool needVerify, common.TransactionState state, address[] users);
-    event Buy(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, common.TransactionState state, address buyer, uint8 index, address[] users);
-    event TransactionClose(string seqNo, uint256 transactionId, common.TransactionState state, uint8 index, address[] users);
-    event VerifiersChosen(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, common.TransactionState state, address[] users);
-    event ReadyForDownload(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, common.TransactionState state, uint8 index, address[] users);
+    event TransactionCreate(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool needVerify, uint state, address[] users);
+    event Buy(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, uint state, address buyer, uint8 index, address[] users);
+    event TransactionClose(string seqNo, uint256 transactionId, uint state, uint8 index, address[] users);
+    event VerifiersChosen(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, uint state, address[] users);
+    event ReadyForDownload(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, uint state, uint8 index, address[] users);
 
     function publishDataInfo(
         common.PublishedData storage self,
@@ -83,18 +83,19 @@ library transaction {
         require(token.transferFrom(msg.sender, address(this), fee), "Failed to transfer token from caller");
 
         uint txId = getTransactionId(conf);
-        bytes memory metaDataIdEncryptedData = new bytes(conf.encryptedIdLen);
         bool[] memory creditGiven;
         address[] memory users = new address[](1);
+
         if (needVerify) {
             for (uint8 i = 0; i < conf.verifierNum; i++) {
                 users[0] = verifiers[i];
-                emit VerifiersChosen(seqNo, txId, publishId, data.proofDataIds, common.TransactionState.Created, users);
+                emit VerifiersChosen(seqNo, txId, publishId, data.proofDataIds, uint(common.TransactionState.Created), users);
             }
 
             creditGiven = new bool[](conf.verifierNum);
         }
 
+        bytes memory metaDataIdEncryptedData = new bytes(conf.encryptedIdLen);
         txData.map[txId] = common.TransactionItem(
             common.TransactionState.Created,
             msg.sender,
@@ -111,7 +112,7 @@ library transaction {
         );
 
         users[0] = msg.sender;
-        emit TransactionCreate(seqNo, txId, publishId, data.proofDataIds, needVerify, common.TransactionState.Created, users);
+        emit TransactionCreate(seqNo, txId, publishId, data.proofDataIds, needVerify, uint(common.TransactionState.Created), users);
     }
 
     function getTransactionId(common.Configuration storage conf) internal returns(uint) {
@@ -138,10 +139,10 @@ library transaction {
 
         address[] memory users = new address[](1);
         users[0] = txItem.seller;
-        emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, txItem.state, txItem.buyer, 0, users);
+        emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, uint(txItem.state), txItem.buyer, 0, users);
 
         users[0] = msg.sender;
-        emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, txItem.state, txItem.buyer, 1, users);
+        emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, uint(txItem.state), txItem.buyer, 1, users);
     }
 
     function cancelTransaction(
@@ -170,10 +171,10 @@ library transaction {
 
         address[] memory users = new address[](1);
         users[0] = txItem.seller;
-        emit TransactionClose(seqNo, txId, txItem.state, 0, users);
+        emit TransactionClose(seqNo, txId, uint(txItem.state), 0, users);
 
         users[0] = txItem.buyer;
-        emit TransactionClose(seqNo, txId, txItem.state, 1, users);
+        emit TransactionClose(seqNo, txId, uint(txItem.state), 1, users);
     }
 
     function revertToBuyer(common.TransactionItem storage txItem, ERC20 token) internal {
@@ -202,10 +203,10 @@ library transaction {
 
         address[] memory users = new address[](1);
         users[0] = txItem.seller;
-        emit ReadyForDownload(seqNo, txId, txItem.meteDataIdEncBuyer, txItem.state, 0, users);
+        emit ReadyForDownload(seqNo, txId, txItem.meteDataIdEncBuyer, uint(txItem.state), 0, users);
 
         users[0] = txItem.buyer;
-        emit ReadyForDownload(seqNo, txId, txItem.meteDataIdEncBuyer, txItem.state, 1, users);
+        emit ReadyForDownload(seqNo, txId, txItem.meteDataIdEncBuyer, uint(txItem.state), 1, users);
     }
 
     function confirmDataTruth(
