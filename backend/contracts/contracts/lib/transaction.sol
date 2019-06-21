@@ -49,10 +49,10 @@ library transaction {
         common.DataInfoPublished storage data = pubData.map[publishId];
         require(data.used, "Publish data does not exist");
 
-        return needVerification2(data, startVerify);
+        return needVerification(data, startVerify);
     }
 
-    function needVerification2(
+    function needVerification(
         common.DataInfoPublished storage pubItem,
         bool startVerify
     ) public view returns (bool) {
@@ -71,11 +71,11 @@ library transaction {
     ) public {
         common.DataInfoPublished storage data = pubData.map[publishId];
         require(data.used, "Publish data does not exist");
-        require(verifiers.length == conf.verifierNum, "Invalid number of verifiers");
 
         uint256 fee = data.price;
-        bool needVerify = needVerification2(data, startVerify);
+        bool needVerify = needVerification(data, startVerify);
         if (needVerify) {
+            require(verifiers.length == conf.verifierNum, "Invalid number of verifiers");
             fee += conf.verifierBonus * conf.verifierNum;
         }
 
