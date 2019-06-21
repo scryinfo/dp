@@ -5,15 +5,14 @@ import "../ScryToken.sol";
 
 library verification {
     event RegisterVerifier(string seqNo, address[] users);
-    event VerifiersChosen(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, common.TransactionState state, address[] users);
-    event Vote(string seqNo, uint256 transactionId, bool judge, string comments, common.TransactionState state, uint8 index, address[] users);
+    event Vote(string seqNo, uint256 transactionId, bool judge, string comments, uint state, uint8 index, address[] users);
     event VerifierDisable(string seqNo, address verifier, address[] users);
 
     function register(
         common.Verifiers storage self,
         common.Configuration storage conf,
         string seqNo,
-        ERC20 token) external {
+        ERC20 token) public {
 
         common.Verifier storage v = getVerifier(self, msg.sender);
         require( v.addr == 0x00, "Address already registered");
@@ -40,7 +39,7 @@ library verification {
         uint txId,
         bool judge,
         string comments,
-        ERC20 token) external {
+        ERC20 token) public {
 
         common.TransactionItem storage txItem = txData.map[txId];
         require(txItem.used, "Transaction does not exist");
@@ -62,7 +61,7 @@ library verification {
 
         address[] memory users = new address[](1);
         users[0] = txItem.buyer;
-        emit Vote(seqNo, txId, judge, comments, txItem.state, index+1, users);
+        emit Vote(seqNo, txId, judge, comments, uint(txItem.state), index+1, users);
     }
 
     function creditsToVerifier(
@@ -73,7 +72,7 @@ library verification {
         string seqNo,
         uint256 txId,
         uint8 verifierIndex,
-        uint8 credit) external {
+        uint8 credit) public {
 
         //validate
         require(credit >= conf.creditLow && credit <= conf.creditHigh, "0 <= credit <= 5 is valid");
