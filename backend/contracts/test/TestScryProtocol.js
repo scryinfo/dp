@@ -15,8 +15,7 @@ contract('ScryProtocol', async accounts => {
     });
 
     it("Normal procedure with verifier", async () => {
-        await timeout(30000);
-        console.log("starting publish ");
+        await timeout(3000);
         let r = await ptl.publishDataInfo("seqno", "publishId", 1000, "0", ["1", "2"], "2", true, {from: seller});
         assert(checkEvent("DataPublish", r), "failed to watch event DataPublish");
 
@@ -43,7 +42,7 @@ contract('ScryProtocol', async accounts => {
         assert(checkEvent("Approval", r), "no Approval event watched");
 
         r = await ptl.createTransaction("seqno3",  "publishId", true, {from: buyer});
-        //assert(checkEvent("VerifiersChosen", r), "failed to watch event VerifiersChosen");
+        assert(checkEvent("VerifiersChosen", r), "failed to watch event VerifiersChosen");
         assert(checkEvent("TransactionCreate", r), "failed to watch event TransactionCreate");
 
         verifierSelected = getEventField("VerifiersChosen", r, "users");
@@ -52,6 +51,7 @@ contract('ScryProtocol', async accounts => {
         console.log("txId:", txId);
 
         r = await ptl.vote("seqNo4", txId, true, "comments from verifier1", {from: verifierSelected});
+console.log("Node: verifiers vote", r);
         assert(checkEvent("Vote", r), "failed to watch event Vote");
 
         r = await ptl.buyData("seqNo5", txId, {from: buyer});
@@ -157,7 +157,6 @@ contract('ScryProtocol', async accounts => {
 });
 
 function checkEvent(eventName, receipt) {
-    console.log(" event:", eventName, "receipt:", receipt);
     for (let i = 0; i < receipt.logs.length; i++) {
 
         let log = receipt.logs[i];
