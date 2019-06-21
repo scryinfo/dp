@@ -20,7 +20,7 @@ library transaction {
         bytes32[] proofDataIds,
         string descDataId,
         bool supportVerify
-    ) external {
+    ) public {
         address[] memory users = new address[](1);
         users[0] = address(0x00);
 
@@ -45,14 +45,14 @@ library transaction {
         common.PublishedData storage pubData,
         string publishId,
         bool startVerify
-    ) external view returns (bool) {
+    ) public view returns (bool) {
         common.DataInfoPublished storage data = pubData.map[publishId];
         require(data.used, "Publish data does not exist");
 
-        return needVerification(data, startVerify);
+        return needVerification2(data, startVerify);
     }
 
-    function needVerification(
+    function needVerification2(
         common.DataInfoPublished storage pubItem,
         bool startVerify
     ) public view returns (bool) {
@@ -74,7 +74,7 @@ library transaction {
         require(verifiers.length == conf.verifierNum, "Invalid number of verifiers");
 
         uint256 fee = data.price;
-        bool needVerify = needVerification(data, startVerify);
+        bool needVerify = needVerification2(data, startVerify);
         if (needVerify) {
             fee += conf.verifierBonus * conf.verifierNum;
         }
@@ -125,7 +125,7 @@ library transaction {
         common.TransactionData storage txData,
         string seqNo,
         uint256 txId
-    ) external {
+    ) public {
         common.TransactionItem storage txItem = txData.map[txId];
         require(txItem.used, "Transaction does not exist");
         require(txItem.buyer == msg.sender, "Invalid buyer");
@@ -150,7 +150,7 @@ library transaction {
         string seqNo,
         uint256 txId,
         ERC20 token
-) external {
+) public {
         common.TransactionItem storage txItem = txData.map[txId];
         require(txItem.used, "Transaction does not exist");
         require(txItem.buyer == msg.sender, "Invalid cancel operator");
@@ -192,7 +192,7 @@ library transaction {
         string seqNo,
         uint256 txId,
         bytes encryptedMetaDataId
-    ) external {
+    ) public {
         common.TransactionItem storage txItem = txData.map[txId];
         require(txItem.used, "Transaction does not exist");
         require(txItem.seller == msg.sender, "Invalid seller");
