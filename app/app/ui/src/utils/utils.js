@@ -447,38 +447,6 @@ let presetFunc = {
                     });
                 });
             });
-        } else {
-            txVerifier_db.read(payload.TransactionID, function (txDetailsOnRFD) {
-                txVerifier_db.write({
-                    Title: txDetailsOnRFD.Title,
-                    Price: txDetailsOnRFD.Price,
-                    Keys: txDetailsOnRFD.Keys,
-                    Description: txDetailsOnRFD.Description,
-                    Buyer: txDetailsOnRFD.Buyer,
-                    Seller: txDetailsOnRFD.Seller,
-                    State: payload.TxState, // -
-                    SupportVerify: txDetailsOnRFD.SupportVerify,
-                    StartVerify: txDetailsOnRFD.StartVerify,
-                    MetaDataExtension: txDetailsOnRFD.MetaDataExtension,
-                    ProofDataExtensions: txDetailsOnRFD.ProofDataExtensions,
-                    MetaDataIDEncWithSeller: txDetailsOnRFD.MetaDataIDEncWithSeller,
-                    MetaDataIDEncWithBuyer: payload.MetaDataIdEncWithBuyer, // -
-                    Verifier1Response: txDetailsOnRFD.Verifier1Response,
-                    Verifier2Response: txDetailsOnRFD.Verifier2Response,
-                    PublishID: txDetailsOnRFD.PublishID,
-                    TransactionID: txDetailsOnRFD.TransactionID
-                }, function () {
-                    txVerifier_db.init(_this);
-                    acc_db.read(_this.$store.state.account, function (accInstance) {
-                        acc_db.write({
-                            address: accInstance.address,
-                            nickname: accInstance.nickname,
-                            fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
-                            isVerifier: accInstance.isVerifier
-                        });
-                    });
-                });
-            });
         }
     },
     onClose: function (payload, _this) {
