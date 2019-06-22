@@ -5,7 +5,7 @@ import "../ScryToken.sol";
 
 library verification {
     event RegisterVerifier(string seqNo, address[] users);
-    event Vote(string seqNo, uint256 transactionId, bool judge, string comments, uint state, uint8 index, address[] users);
+    event Vote(string seqNo, uint256 transactionId, bool judge, string comments, uint8 state, uint8 index, address[] users);
     event VerifierDisable(string seqNo, address verifier, address[] users);
 
     function register(
@@ -35,6 +35,7 @@ library verification {
         common.Verifiers storage self,
         common.TransactionData storage txData,
         common.VoteData storage voteData,
+        common.Configuration storage conf,
         string seqNo,
         uint txId,
         bool judge,
@@ -52,7 +53,7 @@ library verification {
         require(valid, "Invalid verifier");
 
         if (!voteData.map[txId][msg.sender].used) {
-            payToVerifier(txItem, verifier.addr, token);
+            payToVerifier(txItem, conf, verifier.addr, token);
         }
         voteData.map[txId][msg.sender] = common.VoteResult(judge, comments, true);
 
@@ -61,7 +62,10 @@ library verification {
 
         address[] memory users = new address[](1);
         users[0] = txItem.buyer;
-        emit Vote(seqNo, txId, judge, comments, uint(txItem.state), index+1, users);
+        emit Vote(seqNo, txId, judge, comments, uint8(txItem.state), index+1, users);
+
+        users[0] = msg.sender;
+        emit Vote(seqNo, txId, judge, comments, uint8(txItem.state), 0, users);
     }
 
     function creditsToVerifier(
@@ -147,20 +151,20 @@ library verification {
         bool exist;
         uint8 index;
 
-        (exist, index) = getVerifierIndex(v.addr, arr);
+        (exist, index) = addressIndex(arr, v.addr);
         return (v.enable && exist, index);
     }
 
     function verifierExist(address addr, address[] arr) pure internal returns (bool) {
         bool exist;
-        (exist, ) = getVerifierIndex(addr, arr);
+        (exist, ) = addressIndex(arr, addr);
 
         return exist;
     }
 
-    function getVerifierIndex(address verifier, address[] arrayVerifier) pure internal returns (bool, uint8) {
-        for (uint8 i = 0; i < arrayVerifier.length; i++) {
-            if (arrayVerifier[i] == verifier) {
+    function addressIndex(address[] addrArray, address addr) pure internal returns (bool, uint8) {
+        for (uint8 i = 0; i < addrArray.length; i++) {
+            if (addrArray[i] == addr) {
                 return (true, i);
             }
         }
@@ -168,12 +172,12 @@ library verification {
         return (false, 0);
     }
 
-    function payToVerifier(common.TransactionItem storage txItem, address verifier, ERC20 token) internal {
-        if (txItem.buyerDeposit >= txItem.verifierBonus) {
-            txItem.buyerDeposit -= txItem.verifierBonus;
+    function payToVerifier(common.TransactionItem storage txItem, common.Configuration storage conf, address verifier, ERC20 token) internal {
+        if (txItem.buyerDeposit >= conf.verifierBonus) {
+            txItem.buyerDeposit -= conf.verifierBonus;
 
-            if (!token.transfer(verifier, txItem.verifierBonus)) {
-                txItem.buyerDeposit += txItem.verifierBonus;
+            if (!token.transfer(verifier, conf.verifierBonus)) {
+                txItem.buyerDeposit += conf.verifierBonus;
                 require(false, "Failed to pay to verifier");
             }
         } else {
@@ -189,5 +193,91 @@ library verification {
         }
 
         return self.list[0];
+    }
+
+    function chooseArbitrators(common.Verifiers storage self, common.Configuration storage conf, address[] vs) internal view returns (address[] memory) {
+        uint256[] memory shortlistIndex = new uint256[](self.list.length - conf.verifierNum);
+        uint256 count;
+
+        for (uint256 i = 0;i < self.list.length;i++) {
+            common.Verifier storage a = self.list[i];
+            if (arbitratorValid(a, conf, vs)) {
+                shortlistIndex[count] = i;
+                count++;
+            }
+        }
+        require(count >= conf.arbitratorNum, "No enough arbitrators");
+
+        uint256 shortlistLen = count;
+
+        address[] memory shortlist = new address[](count);
+        while (count > 0) {
+            count--;
+            shortlist[count] = self.list[shortlistIndex[count]].addr;
+        }
+
+        address[] memory chosenArbitrators = new address[](conf.arbitratorNum);
+        for (i = 0;i < conf.arbitratorNum;i++) {
+            uint256 index = uint256(keccak256(abi.encodePacked(now, msg.sender))) % shortlistLen;
+            address ad = shortlist[index];
+            while (addressExist(chosenArbitrators, ad)) {
+                ad = shortlist[(++index) % shortlistLen];
+            }
+            chosenArbitrators[i] = ad;
+        }
+
+        return chosenArbitrators;
+    }
+
+    function arbitratorValid(common.Verifier storage a, common.Configuration storage conf, address[] vs) internal view returns (bool) {
+        bool notVerifier = true;
+        for (uint8 i = 0;i < vs.length;i++) {
+            if (a.addr == vs[i]) {
+                notVerifier = false;
+                break;
+            }
+        }
+        return notVerifier && a.enable && (a.credits >= conf.arbitrateCredit);
+    }
+
+    function arbitrate(common.TransactionData storage txData, common.ArbitratorData storage abData,
+        common.Configuration storage conf, uint256 txId, bool judge, ERC20 token) internal {
+        common.TransactionItem storage txItem = txData.map[txId];
+        require(txItem.used, "Transaction does not exist");
+
+        bool exist;
+        uint8 index;
+        (exist, index) = addressIndex(txItem.arbitrators, msg.sender);
+        require(exist, "Invalid arbitrator");
+
+        require(!abData.map[txId][index].used, "Address already arbitrated");
+
+        payToArbitrator(txItem, conf, msg.sender, token);
+        abData.map[txId][index] = common.ArbitratorResult(msg.sender, judge, true);
+    }
+
+    function arbitrateFinished(common.ArbitratorData storage abData, common.Configuration storage conf, uint256 txId) internal returns (bool) {
+        bool finish = true;
+        for (uint8 i = 0; i < conf.arbitratorNum; i++) {
+            if (!abData.map[txId][i].used) {
+                finish = false;
+                break;
+            }
+        }
+
+        return finish;
+    }
+
+    function payToArbitrator(common.TransactionItem storage txItem, common.Configuration storage conf, address arbitrator, ERC20 token) internal {
+        if (txItem.buyerDeposit >= conf.arbitratorBonus) {
+            txItem.buyerDeposit -= conf.arbitratorBonus;
+
+            if (!token.transfer(arbitrator, conf.arbitratorBonus)) {
+                txItem.buyerDeposit += conf.arbitratorBonus;
+                require(false, "Failed to pay to verifier");
+            }
+        } else {
+            require(false, "Low deposit value for paying to verifier");
+        }
     }
 }
