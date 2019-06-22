@@ -159,10 +159,9 @@ contract('ScryProtocol', async accounts => {
 });
 
 function checkEvent(eventName, receipt) {
+    console.log("event:", eventName, " receipt:", receipt);
     for (let i = 0; i < receipt.logs.length; i++) {
-
         let log = receipt.logs[i];
-
         if (log.event === eventName) {
             console.log("Event " + eventName + " watched");
             return true

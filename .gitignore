@@ -49,3 +49,4 @@ nohup.out
 /go.sum
 /app/test/main/main
 node_modules/
+/services/auth_s/account_server

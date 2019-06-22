@@ -6,9 +6,10 @@ import "./lib/verification.sol";
 import "./ScryToken.sol";
 
 contract ScryProtocol {
+    common.DataSet private dataSet;
+
     common.PublishedData private publishedData;
     common.TransactionData private txData;
-
     common.VoteData private voteData;
     common.ArbitratorData private arbitratorData;
 
@@ -27,7 +28,7 @@ contract ScryProtocol {
         //the first element used for empty usage
         verifiers.list[verifiers.list.length++] = common.Verifier(0x00, 0, 0, 0, false);
 
-        conf = common.Configuration(2, 10000, 300, 1, 0, 500, 0, 5, 2, 0, 32); // simple arbitrate params for test
+        dataSet.conf = common.Configuration(2, 10000, 300, 1, 0, 500, 0, 5, 2, 0, 32); // simple arbitrate params for test
     }
 
     function registerAsVerifier(string seqNo) external {
@@ -52,7 +53,7 @@ contract ScryProtocol {
     function publishDataInfo(string seqNo, string publishId, uint256 price, bytes metaDataIdEncSeller,
         bytes32[] proofDataIds, string descDataId, bool supportVerify) public {
         transaction.publishDataInfo(
-            publishedData,
+            dataSet,
             seqNo,
             publishId,
             price,
@@ -67,19 +68,17 @@ contract ScryProtocol {
         //get verifiers if verification needed
         address[] memory verifiersChosen;
         address[] memory arbitratorsChosen;
-        if ( transaction.needVerification(publishedData, publishId, startVerify) ) {
-            verifiersChosen = new address[](conf.verifierNum);
-            verifiersChosen = verification.chooseVerifiers(verifiers, conf);
+        if ( transaction.needVerification(dataSet, publishId, startVerify) ) {
+            verifiersChosen = new address[](dataSet.conf.verifierNum);
+            verifiersChosen = verification.chooseVerifiers(verifiers, dataSet.conf);
 
-            arbitratorsChosen = new address[](conf.arbitratorNum);
+            arbitratorsChosen = new address[](dataSet.conf.arbitratorNum);
             arbitratorsChosen = verification.chooseArbitrators(verifiers, conf, verifiersChosen);
         }
 
         //create tx
         transaction.createTransaction(
-            publishedData,
-            txData,
-            conf,
+            dataSet,
             verifiersChosen,
             arbitratorsChosen,
             seqNo,
@@ -91,8 +90,7 @@ contract ScryProtocol {
 
     function buyData(string seqNo, uint256 txId) external {
         transaction.buy(
-            publishedData,
-            txData,
+            dataSet,
             seqNo,
             txId
         );
@@ -100,7 +98,7 @@ contract ScryProtocol {
 
     function cancelTransaction(string seqNo, uint256 txId) external {
         transaction.cancelTransaction(
-            txData,
+            dataSet,
             seqNo,
             txId,
             token
@@ -109,7 +107,7 @@ contract ScryProtocol {
 
     function submitMetaDataIdEncWithBuyer(string seqNo, uint256 txId, bytes encryptedMetaDataId) external {
         transaction.submitMetaDataIdEncByBuyer(
-            txData,
+            dataSet,
             seqNo,
             txId,
             encryptedMetaDataId
@@ -118,9 +116,7 @@ contract ScryProtocol {
 
     function confirmDataTruth(string seqNo, uint256 txId, bool truth) external {
         transaction.confirmDataTruth(
-            publishedData,
-            txData,
-            conf,
+            dataSet,
             seqNo,
             txId,
             truth,

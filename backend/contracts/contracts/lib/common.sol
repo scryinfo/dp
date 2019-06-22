@@ -1,6 +1,15 @@
 pragma solidity ^0.4.24;
 
 library common {
+    struct DataSet {
+        PublishedData pubData;
+        TransactionData txData;
+        VoteData voteData;
+        ArbitratorData arbitratorData;
+        Verifiers verifiers;
+        Configuration conf;
+    }
+
     enum TransactionState {Begin, Created, Voted, Buying, ReadyForDownload, Closed}
 
     struct DataInfoPublished {
@@ -19,7 +28,7 @@ library common {
         address buyer;
         address seller;
         address[] verifiers;
-        bool[] creditGived;
+        bool[] creditGiven;
         address[] arbitrators;
         string publishId;
         bytes meteDataIdEncBuyer;
