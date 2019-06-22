@@ -19,7 +19,7 @@ library common {
         address buyer;
         address seller;
         address[] verifiers;
-        bool[] creditGived;
+        bool[] creditGiven;
         address[] arbitrators;
         string publishId;
         bytes meteDataIdEncBuyer;

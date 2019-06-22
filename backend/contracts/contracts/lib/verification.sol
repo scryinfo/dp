@@ -58,7 +58,7 @@ library verification {
         voteData.map[txId][msg.sender] = common.VoteResult(judge, comments, true);
 
         txItem.state = common.TransactionState.Voted;
-        txItem.creditGived[index] = false;
+        txItem.creditGiven[index] = false;
 
         address[] memory users = new address[](1);
         users[0] = txItem.buyer;
@@ -95,11 +95,11 @@ library verification {
         uint256 index;
         (valid, index) = verifierValid(verifier, txItem.verifiers);
         require(valid, "Invalid verifier");
-        require(!txItem.creditGived[index], "This verifier is credited");
+        require(!txItem.creditGiven[index], "This verifier is credited");
 
         verifier.credits = (uint8)((verifier.credits * verifier.creditTimes + credit)/(verifier.creditTimes+1));
         verifier.creditTimes++;
-        txItem.creditGived[index] = true;
+        txItem.creditGiven[index] = true;
 
         address[] memory users = new address[](1);
         users[0] = address(0x00);
