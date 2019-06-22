@@ -6,13 +6,11 @@ import "./lib/verification.sol";
 import "./ScryToken.sol";
 
 contract ScryProtocol {
-    using verification for *;
-    using common for *;
-    using transaction for *;
-
     common.PublishedData private publishedData;
     common.TransactionData private txData;
+
     common.VoteData private voteData;
+    common.ArbitratorData private arbitratorData;
 
     common.Verifiers private verifiers;
     common.Configuration private conf;
@@ -29,7 +27,7 @@ contract ScryProtocol {
         //the first element used for empty usage
         verifiers.list[verifiers.list.length++] = common.Verifier(0x00, 0, 0, 0, false);
 
-        conf = common.Configuration(2, 300, 10000, 0, 5, 2, 0, 32);
+        conf = common.Configuration(2, 10000, 300, 1, 0, 500, 0, 5, 2, 0, 32); // simple arbitrate params for test
     }
 
     function registerAsVerifier(string seqNo) external {
@@ -37,11 +35,18 @@ contract ScryProtocol {
     }
 
     function vote(string seqNo, uint txId, bool judge, string comments) external {
-        verification.vote(verifiers, txData, voteData, seqNo, txId, judge, comments, token);
+        verification.vote(verifiers, txData, voteData, conf, seqNo, txId, judge, comments, token);
     }
 
     function creditsToVerifier(string seqNo, uint256 txId, uint8 verifierIndex, uint8 credit) external {
         verification.creditsToVerifier(verifiers, publishedData, txData, conf, seqNo, txId, verifierIndex, credit);
+    }
+
+    function arbitrate(string seqNo, uint txId, bool judge) external {
+        verification.arbitrate(txData, arbitratorData, conf, txId, judge, token);
+        if (verification.arbitrateFinished(arbitratorData, conf, txId)) {
+            transaction.arbitrateResult(publishedData, txData, arbitratorData, conf, seqNo, txId, token);
+        }
     }
 
     function publishDataInfo(string seqNo, string publishId, uint256 price, bytes metaDataIdEncSeller,
@@ -61,9 +66,13 @@ contract ScryProtocol {
     function createTransaction(string seqNo, string publishId, bool startVerify) external {
         //get verifiers if verification needed
         address[] memory verifiersChosen;
+        address[] memory arbitratorsChosen;
         if ( transaction.needVerification(publishedData, publishId, startVerify) ) {
             verifiersChosen = new address[](conf.verifierNum);
             verifiersChosen = verification.chooseVerifiers(verifiers, conf);
+
+            arbitratorsChosen = new address[](conf.arbitratorNum);
+            arbitratorsChosen = verification.chooseArbitrators(verifiers, conf, verifiersChosen);
         }
 
         //create tx
@@ -72,6 +81,7 @@ contract ScryProtocol {
             txData,
             conf,
             verifiersChosen,
+            arbitratorsChosen,
             seqNo,
             publishId,
             startVerify,
@@ -110,6 +120,7 @@ contract ScryProtocol {
         transaction.confirmDataTruth(
             publishedData,
             txData,
+            conf,
             seqNo,
             txId,
             truth,
