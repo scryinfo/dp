@@ -23,8 +23,7 @@ var (
     verifier2               scry.Client = nil
     verifier3               scry.Client = nil
 
-    protocolContractAddr                           = "0x3c4d26e916d79fc3fc925027a79612012462f691"
-    tokenContractAddr                              = "0x5c29f42d640ee25f080cdc648641e8e358459ddc"
+    protocolContractAddr                           = "0x8af6e28777f52bd97cc1b2b534d6b7601ea0afc7"
     clientPassword                                 = "888888"
     suAddress                                      = "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8"
     suPassword                                     = "111111"
