@@ -114,8 +114,8 @@ library verification {
         }
     }
 
-
     function chooseVerifiers(common.Verifiers storage self, common.Configuration storage conf) internal view returns (address[] memory) {
+        require(self.validVerifierCount > conf.verifierNum, "No enough valid verifiers");
         uint256 len = self.list.length;
         address[] memory chosenVerifiers = new address[](conf.verifierNum);
 
@@ -206,7 +206,7 @@ library verification {
                 count++;
             }
         }
-        require(count >= conf.arbitratorNum, "No enough arbitrators");
+        require(count > conf.arbitratorNum, "No enough valid arbitrators");
 
         uint256 shortlistLen = count;
 
