@@ -5,7 +5,7 @@ let scryProtocol = artifacts.require("./ScryProtocol.sol");
 let scryToken = artifacts.require("./ScryToken.sol");
 
 let ptl, ste;
-let deployer, seller, buyer, verifier1, verifier2, verifier3, verifierSelected;
+let deployer, seller, buyer, verifier1, verifier2, verifier3, verifier4, verifierSelected, arbitratorSelected;
 let publishId, txId, password;
 contract('ScryProtocol', async accounts => {
 
@@ -38,6 +38,12 @@ contract('ScryProtocol', async accounts => {
         r = await ptl.registerAsVerifier("seqno1", {from: verifier3});
         assert(checkEvent("RegisterVerifier", r), "failed to watch event RegisterVerifier");
 
+        r = await ste.approve(ptl.address, 10000, {from: verifier4});
+        assert(checkEvent("Approval", r), "no Approval event watched");
+
+        r = await ptl.registerAsVerifier("seqno1", {from: verifier4});
+        assert(checkEvent("RegisterVerifier", r), "failed to watch event RegisterVerifier");
+
         r = await ste.approve(ptl.address, 1600, {from: buyer});
         assert(checkEvent("Approval", r), "no Approval event watched");
 
@@ -46,14 +52,12 @@ contract('ScryProtocol', async accounts => {
         assert(checkEvent("TransactionCreate", r), "failed to watch event TransactionCreate");
 
         verifierSelected = getEventField("VerifiersChosen", r, "users");
-        console.log("verifiers:", verifierSelected);
+        console.log("> verifiers:", verifierSelected);
 
         txId = getEventField("TransactionCreate", r, "transactionId");
-        console.log("txId:", txId);
+        console.log("> txId:", txId);
 
-        r = await ptl.vote("seqNo4", txId, true, "comments from verifier1", {from: verifierSelected[0]});
-        console.log("Node: verifiers vote", r);
-
+        r = await ptl.vote("seqNo4", txId, true, "comments from verifier1", {from: verifierSelected});
         assert(checkEvent("Vote", r), "failed to watch event Vote");
 
         r = await ptl.buyData("seqNo5", txId, {from: buyer});
@@ -63,9 +67,17 @@ contract('ScryProtocol', async accounts => {
         assert(checkEvent("ReadyForDownload", r), "failed to watch event ReadyForDownload");
 
         r = await ptl.confirmDataTruth("seqNO7", txId, true, {from: buyer});
+        assert(checkEvent("ArbitrationBegin", r), "failed to watch event ArbitrationBegin");
+
+        arbitratorSelected = getEventField("ArbitrationBegin", r, "users");
+        console.log("> arbitrators:", arbitratorSelected);
+
+        r = await ptl.arbitrate("seqN08", txId, true, {from: arbitratorSelected});
+        assert(checkEvent("ArbitrationResult", r), "failed to watch event ArbitrationResult");
+
         assert(checkEvent("TransactionClose", r), "failed to watch event TransactionClose");
 
-        r = await ptl.creditsToVerifier("seqNO8", txId, 0, 1, {from: buyer});
+        r = await ptl.creditsToVerifier("seqNO9", txId, 0, 1, {from: buyer});
         assert(checkEvent("VerifierDisable", r), "failed to watch event VerifierDisable");
     });
 
@@ -73,16 +85,17 @@ contract('ScryProtocol', async accounts => {
         return new Promise(function() {
             scryToken.deployed().then(function (instance) {
                 ste = instance;
-                console.log("ste:", ste.address);
+                console.log("> ste:", ste.address);
                 ste.transfer(seller, 10000);
                 ste.transfer(buyer, 30000);
                 ste.transfer(verifier1, 13000);
                 ste.transfer(verifier2, 13000);
                 ste.transfer(verifier3, 13000);
+                ste.transfer(verifier4, 13000);
             }).then(function() {
                 scryProtocol.deployed().then(function (instance) {
                     ptl = instance;
-                    console.log("ptl:", ptl.address);
+                    console.log("> ptl:", ptl.address);
                 })
             })
         })
@@ -145,6 +158,18 @@ contract('ScryProtocol', async accounts => {
         web3.eth.sendTransaction({
             from: deployer,
             to: verifier3,
+            value: 1672197500000000000
+        }, function(err, transactionHash) {
+            if (err) {
+                console.log(transactionHash, "error", err);
+            }
+        });
+
+        verifier4 = web3.personal.newAccount(password);
+        web3.personal.unlockAccount(verifier4, password);
+        web3.eth.sendTransaction({
+            from: deployer,
+            to: verifier4,
             value: 1672197500000000000
         }, function(err, transactionHash) {
             if (err) {
