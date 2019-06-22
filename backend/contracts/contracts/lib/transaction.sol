@@ -14,7 +14,7 @@ library transaction {
     event ArbitrationResult(string seqNo, uint256 transactionId, bool judge, uint8 identify, address[] users);
 
     function publishDataInfo(
-        common.PublishedData storage self,
+        common.DataSet storage ds,
         string seqNo,
         string publishId,
         uint256 price,
@@ -26,10 +26,10 @@ library transaction {
         address[] memory users = new address[](1);
         users[0] = address(0x00);
 
-        common.DataInfoPublished storage data = self.map[publishId];
+        common.DataInfoPublished storage data = ds.pubData.map[publishId];
         require(!data.used, "Duplicate publish id");
 
-        self.map[publishId] = common.DataInfoPublished(
+        ds.pubData.map[publishId] = common.DataInfoPublished(
             price,
             metaDataIdEncSeller,
             proofDataIds,
@@ -44,27 +44,18 @@ library transaction {
     }
 
     function needVerification(
-        common.PublishedData storage pubData,
+        common.DataSet storage ds,
         string publishId,
         bool startVerify
-    ) external view returns (bool) {
-        common.DataInfoPublished storage data = pubData.map[publishId];
-        require(data.used, "Publish data does not exist");
+    ) public view returns (bool) {
+        common.DataInfoPublished storage pubItem = ds.pubData.map[publishId];
+        require(pubItem.used, "Publish data does not exist");
 
-        return needVerification(data, startVerify);
-    }
-
-    function needVerification(
-        common.DataInfoPublished storage pubItem,
-        bool startVerify
-    ) internal view returns (bool) {
         return pubItem.supportVerify && startVerify;
     }
 
     function createTransaction(
-        common.PublishedData storage pubData,
-        common.TransactionData storage txData,
-        common.Configuration storage conf,
+        common.DataSet storage ds,
         address[] verifiers,
         address[] arbitrators,
         string seqNo,
@@ -72,71 +63,157 @@ library transaction {
         bool startVerify,
         ERC20 token
     ) external {
-        common.DataInfoPublished storage data = pubData.map[publishId];
+        common.DataInfoPublished storage data = ds.pubData.map[publishId];
         require(data.used, "Publish data does not exist");
 
-        uint256 fee = data.price;
-        bool needVerify = needVerification(data, startVerify);
+        bool needVerify;
+        uint256 fee;
+        (needVerify, fee) = prepareToCreateTx(ds, publishId, verifiers.length, startVerify);
+
+        buyerDeposit(token, fee);
+
         if (needVerify) {
-            require(verifiers.length == conf.verifierNum, "Invalid number of verifiers");
-            fee += conf.verifierBonus * conf.verifierNum;
+            createTxWithVerify(ds, verifiers, arbitrators, seqNo, publishId, fee);
+        } else {
+            createTxWithoutVerify(ds, seqNo, publishId, fee);
         }
 
-        require((token.balanceOf(msg.sender)) >= fee, "No enough balance");
-        require(token.transferFrom(msg.sender, address(this), fee), "Failed to transfer token from caller");
+    }
 
-        uint txId = getTransactionId(conf);
-        bool[] memory creditGiven;
+    function prepareToCreateTx(
+        common.DataSet storage ds,
+        string publishId,
+        uint256 verifiersLength,
+        bool startVerify
+    ) internal view returns (bool, uint256) {
+        bool needVerify = needVerification(ds, publishId, startVerify);
+        if (needVerify) {
+            require(verifiersLength == ds.conf.verifierNum, "Invalid number of verifiers");
+        }
+
+        uint256 fee = getFee(ds, publishId, needVerify);
+
+        return (needVerify, fee);
+    }
+
+    function createTxWithVerify(
+        common.DataSet storage ds,
+        address[] verifiers,
+        address[] arbitrators,
+        string seqNo,
+        string publishId,
+        uint256 fee
+    ) internal {
+        uint256 txId = getTransactionId(ds);
+        common.DataInfoPublished storage pubItem = ds.pubData.map[publishId];
+        bytes32[] storage proofIds = pubItem.proofDataIds;
+
         address[] memory users = new address[](1);
-
-        if (needVerify) {
-            for (uint8 i = 0; i < conf.verifierNum; i++) {
-                users[0] = verifiers[i];
-                emit VerifiersChosen(seqNo, txId, publishId, data.proofDataIds, uint8(common.TransactionState.Created), users);
-            }
-
-            creditGiven = new bool[](conf.verifierNum);
+        for (uint8 i = 0; i < ds.conf.verifierNum; i++) {
+            users[0] = verifiers[i];
+            emit VerifiersChosen(seqNo, txId, publishId, proofIds, uint8(common.TransactionState.Created), users);
         }
 
-        bytes memory metaDataIdEncryptedData = new bytes(conf.encryptedIdLen);
-        txData.map[txId] = common.TransactionItem(
+        bool[] memory creditGiven = new bool[](ds.conf.verifierNum);
+
+        bytes memory metaDataIdEncryptedData = new bytes(ds.conf.encryptedIdLen);
+        ds.txData.map[txId] = common.TransactionItem(
             common.TransactionState.Created,
             msg.sender,
-            data.seller,
+            pubItem.seller,
             verifiers,
             creditGiven,
             arbitrators,
             publishId,
             metaDataIdEncryptedData,
-            data.metaDataIdEncSeller,
+            pubItem.metaDataIdEncSeller,
             metaDataIdEncryptedData,
             fee,
-            conf.verifierBonus,
-            conf.arbitratorBonus,
-            needVerify,
+            ds.conf.verifierBonus,
+            ds.conf.arbitratorBonus,
+            true,
             true
         );
 
         users[0] = msg.sender;
-        emit TransactionCreate(seqNo, txId, publishId, data.proofDataIds, needVerify, uint8(common.TransactionState.Created), users);
+        emit TransactionCreate(seqNo, txId, publishId, proofIds, true, uint8(common.TransactionState.Created), users);
     }
 
-    function getTransactionId(common.Configuration storage conf) internal returns(uint) {
-        return conf.transactionSeq++;
+    function createTxWithoutVerify(
+        common.DataSet storage ds,
+        string seqNo,
+        string publishId,
+        uint256 fee
+    ) internal {
+        uint256 txId = getTransactionId(ds);
+        common.DataInfoPublished storage pubItem = ds.pubData.map[publishId];
+        bytes32[] storage proofIds = pubItem.proofDataIds;
+
+        address[] memory fills;
+        bytes memory magic;
+        address[] memory users = new address[](1);
+        bool[] memory creditGiven;
+        bytes memory metaDataIdEncryptedData = new bytes(ds.conf.encryptedIdLen);
+
+        ds.txData.map[txId] = common.TransactionItem(
+            common.TransactionState.Created,
+            msg.sender,
+            pubItem.seller,
+            fills,
+            creditGiven,
+            fills,
+            publishId,
+            metaDataIdEncryptedData,
+            pubItem.metaDataIdEncSeller,
+            magic,
+            fee,
+            0,
+            0,
+            false,
+            true
+        );
+
+        users[0] = msg.sender;
+        emit TransactionCreate(seqNo, txId, publishId, proofIds, true, uint8(common.TransactionState.Created), users);
+    }
+
+    function buyerDeposit(
+        ERC20 token,
+        uint256 fee
+    ) internal {
+        require((token.balanceOf(msg.sender)) >= fee, "No enough balance");
+        require(token.transferFrom(msg.sender, address(this), fee), "Failed to transfer token from caller");
+    }
+
+    function getFee(
+        common.DataSet storage ds,
+        string publishId,
+        bool needVerify
+    ) internal view returns (uint256) {
+        uint256 fee = ds.pubData.map[publishId].price;
+        if (needVerify) {
+            fee += ds.conf.verifierBonus * ds.conf.verifierNum;
+        }
+
+        return fee;
+    }
+
+
+    function getTransactionId(common.DataSet storage ds) internal returns(uint) {
+        return ds.conf.transactionSeq++;
     }
 
 
     function buy(
-        common.PublishedData storage pubData,
-        common.TransactionData storage txData,
+        common.DataSet storage ds,
         string seqNo,
         uint256 txId
     ) external {
-        common.TransactionItem storage txItem = txData.map[txId];
+        common.TransactionItem storage txItem = ds.txData.map[txId];
         require(txItem.used, "Transaction does not exist");
         require(txItem.buyer == msg.sender, "Invalid buyer");
 
-        common.DataInfoPublished storage data = pubData.map[txItem.publishId];
+        common.DataInfoPublished storage data = ds.pubData.map[txItem.publishId];
         require(data.used, "Publish data does not exist");
 
         //buyer can decide to buy even though no verifier response
@@ -157,12 +234,12 @@ library transaction {
     }
 
     function cancelTransaction(
-        common.TransactionData storage txData,
+        common.DataSet storage ds,
         string seqNo,
         uint256 txId,
         ERC20 token
 ) external {
-        common.TransactionItem storage txItem = txData.map[txId];
+        common.TransactionItem storage txItem = ds.txData.map[txId];
         require(txItem.used, "Transaction does not exist");
         require(txItem.buyer == msg.sender, "Invalid cancel operator");
 
@@ -204,12 +281,12 @@ library transaction {
     }
 
     function submitMetaDataIdEncByBuyer(
-        common.TransactionData storage txData,
+        common.DataSet storage ds,
         string seqNo,
         uint256 txId,
         bytes encryptedMetaDataId
     ) public {
-        common.TransactionItem storage txItem = txData.map[txId];
+        common.TransactionItem storage txItem = ds.txData.map[txId];
         require(txItem.used, "Transaction does not exist");
         require(txItem.seller == msg.sender, "Invalid seller");
         require(txItem.state == common.TransactionState.Buying, "Invalid transaction state");
@@ -226,20 +303,18 @@ library transaction {
     }
 
     function confirmDataTruth(
-        common.PublishedData storage pubData,
-        common.TransactionData storage txData,
-        common.Configuration storage conf,
+        common.DataSet storage ds,
         string seqNo,
         uint256 txId,
         bool truth,
         ERC20 token
     ) external {
         //validate
-        common.TransactionItem storage txItem = txData.map[txId];
+        common.TransactionItem storage txItem = ds.txData.map[txId];
         require(txItem.used, "Transaction does not exist");
         require(txItem.buyer == msg.sender, "Invalid buyer");
 
-        common.DataInfoPublished storage data = pubData.map[txItem.publishId];
+        common.DataInfoPublished storage data = ds.pubData.map[txItem.publishId];
         require(data.used, "Publish data does not exist");
 
         require(txItem.state == common.TransactionState.ReadyForDownload, "Invalid transaction state");
@@ -255,7 +330,7 @@ library transaction {
                 closeTransaction(txItem, seqNo, txId);
             } else {
                 address[] memory users = new address[](1);
-                for (uint8 i = 0; i < conf.arbitratorNum; i++) {
+                for (uint8 i = 0; i < ds.conf.arbitratorNum; i++) {
                     users[0] = txItem.arbitrators[i];
                     emit ArbitrationBegin(seqNo, txId, txItem.publishId, data.proofDataIds, txItem.metaDataIdEncArbitrator, users);
                 }
