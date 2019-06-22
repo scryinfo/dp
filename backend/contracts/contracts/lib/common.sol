@@ -20,11 +20,14 @@ library common {
         address seller;
         address[] verifiers;
         bool[] creditGived;
+        address[] arbitrators;
         string publishId;
         bytes meteDataIdEncBuyer;
         bytes metaDataIdEncSeller;
+        bytes metaDataIdEncArbitrator;
         uint256 buyerDeposit;
         uint256 verifierBonus;
+        uint256 arbitratorBonus;
         bool needVerify;
         bool used;
     }
@@ -43,6 +46,12 @@ library common {
         bool used;
     }
 
+    struct ArbitratorResult {
+        address addr;
+        bool judge;
+        bool used;
+    }
+
     struct PublishedData {
         mapping (string => DataInfoPublished) map;
     }
@@ -55,6 +64,10 @@ library common {
         mapping (uint256 => mapping(address => VoteResult)) map;
     }
 
+    struct ArbitratorData {
+        mapping (uint256 => mapping(uint8 => ArbitratorResult)) map;
+    }
+
     struct Verifiers {
         Verifier[] list;
         uint8 validVerifierCount;
@@ -62,8 +75,12 @@ library common {
 
     struct Configuration {
         uint8 verifierNum;
-        uint256 verifierBonus;
         uint256 verifierDepositToken;
+        uint256 verifierBonus;
+
+        uint8 arbitratorNum;
+        uint8 arbitrateCredit;
+        uint256 arbitratorBonus;
 
         uint8 creditLow;
         uint8 creditHigh;

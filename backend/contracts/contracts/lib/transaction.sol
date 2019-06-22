@@ -10,6 +10,8 @@ library transaction {
     event TransactionClose(string seqNo, uint256 transactionId, uint8 state, uint8 index, address[] users);
     event VerifiersChosen(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, uint8 state, address[] users);
     event ReadyForDownload(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, uint8 state, uint8 index, address[] users);
+    event ArbitrationBegin(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bytes metaDataIdEncArbitrator, address[] users);
+    event ArbitrationResult(string seqNo, uint256 transactionId, bool judge, uint8 identify, address[] users);
 
     function publishDataInfo(
         common.PublishedData storage self,
@@ -45,7 +47,7 @@ library transaction {
         common.PublishedData storage pubData,
         string publishId,
         bool startVerify
-    ) public view returns (bool) {
+    ) external view returns (bool) {
         common.DataInfoPublished storage data = pubData.map[publishId];
         require(data.used, "Publish data does not exist");
 
@@ -55,7 +57,7 @@ library transaction {
     function needVerification(
         common.DataInfoPublished storage pubItem,
         bool startVerify
-    ) public view returns (bool) {
+    ) internal view returns (bool) {
         return pubItem.supportVerify && startVerify;
     }
 
@@ -64,11 +66,12 @@ library transaction {
         common.TransactionData storage txData,
         common.Configuration storage conf,
         address[] verifiers,
+        address[] arbitrators,
         string seqNo,
         string publishId,
         bool startVerify,
         ERC20 token
-    ) public {
+    ) external {
         common.DataInfoPublished storage data = pubData.map[publishId];
         require(data.used, "Publish data does not exist");
 
@@ -102,11 +105,14 @@ library transaction {
             data.seller,
             verifiers,
             creditGiven,
+            arbitrators,
             publishId,
             metaDataIdEncryptedData,
             data.metaDataIdEncSeller,
+            metaDataIdEncryptedData,
             fee,
             conf.verifierBonus,
+            conf.arbitratorBonus,
             needVerify,
             true
         );
@@ -125,7 +131,7 @@ library transaction {
         common.TransactionData storage txData,
         string seqNo,
         uint256 txId
-    ) public {
+    ) external {
         common.TransactionItem storage txItem = txData.map[txId];
         require(txItem.used, "Transaction does not exist");
         require(txItem.buyer == msg.sender, "Invalid buyer");
@@ -143,6 +149,11 @@ library transaction {
 
         users[0] = msg.sender;
         emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, uint8(txItem.state), txItem.buyer, 1, users);
+
+        for (uint8 i = 0; i < txItem.verifiers.length; i++) {
+            users[0] = txItem.verifiers[i];
+            emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, uint8(txItem.state), txItem.buyer, 2, users);
+        }
     }
 
     function cancelTransaction(
@@ -175,6 +186,11 @@ library transaction {
 
         users[0] = txItem.buyer;
         emit TransactionClose(seqNo, txId, uint8(txItem.state), 1, users);
+
+        for (uint8 i = 0; i < txItem.verifiers.length; i++) {
+            users[0] = txItem.verifiers[i];
+            emit TransactionClose(seqNo, txId, uint8(txItem.state), 2, users);
+        }
     }
 
     function revertToBuyer(common.TransactionItem storage txItem, ERC20 token) internal {
@@ -212,6 +228,7 @@ library transaction {
     function confirmDataTruth(
         common.PublishedData storage pubData,
         common.TransactionData storage txData,
+        common.Configuration storage conf,
         string seqNo,
         uint256 txId,
         bool truth,
@@ -237,10 +254,40 @@ library transaction {
                 payToSeller(txItem, data, token);
                 closeTransaction(txItem, seqNo, txId);
             } else {
-                // arbitrate.
-                closeTransaction(txItem, seqNo, txId);
+                address[] memory users = new address[](1);
+                for (uint8 i = 0; i < conf.arbitratorNum; i++) {
+                    users[0] = txItem.arbitrators[i];
+                    emit ArbitrationBegin(seqNo, txId, txItem.publishId, data.proofDataIds, txItem.metaDataIdEncArbitrator, users);
+                }
             }
         }
+    }
+
+    function arbitrateResult(common.PublishedData storage pubData, common.TransactionData storage txData, common.ArbitratorData storage abData,
+        common.Configuration storage conf, string seqNo, uint256 txId, ERC20 token) {
+        uint8 truth;
+        for (uint8 i = 0;i < conf.arbitratorNum;i++) {
+            if (abData.map[txId][i].judge) {
+                truth++;
+            }
+        }
+
+        bool result;
+        common.TransactionItem storage txItem = txData.map[txId];
+        if (!(truth >= (conf.arbitratorNum+1)/2)) {
+            revertToBuyer(txItem, token);
+        }else {
+            common.DataInfoPublished storage data = pubData.map[txItem.publishId];
+            payToSeller(txItem, data, token);
+            result = true;
+        }
+
+        address[] memory users = new address[](1);
+        users[0] = txItem.seller;
+        emit ArbitrationResult(seqNo, txId, result, 0, users);
+
+        users[1] = txItem.buyer;
+        emit ArbitrationResult(seqNo, txId, result, 1, users);
     }
 
     function payToSeller(
