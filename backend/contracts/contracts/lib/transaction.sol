@@ -288,6 +288,8 @@ library transaction {
 
         users[1] = txItem.buyer;
         emit ArbitrationResult(seqNo, txId, result, 1, users);
+
+        closeTransaction(txItem, seqNo, txId);
     }
 
     function payToSeller(
