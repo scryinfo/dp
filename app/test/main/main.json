@@ -16,8 +16,8 @@
             "ethServiceAddr": "http://127.0.0.1:8545",
             "keyServiceAddr": "localhost:48080",
             "storageServiceAddr": "/ip4/127.0.0.1/tcp/5001",
-            "protocolContractAddr": "0x3c4d26e916d79fc3fc925027a79612012462f691",
-            "tokenContractAddr": "0x5c29f42d640ee25f080cdc648641e8e358459ddc"
+            "protocolContractAddr": "0x8af6e28777f52bd97cc1b2b534d6b7601ea0afc7",
+            "tokenContractAddr": "0x8502a7f05d9e14cf6c86d04913b1ec0062398eff"
           }
         }
       ]
