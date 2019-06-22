@@ -38,6 +38,12 @@ contract('ScryProtocol', async accounts => {
         r = await ptl.registerAsVerifier("seqno1", {from: verifier3});
         assert(checkEvent("RegisterVerifier", r), "failed to watch event RegisterVerifier");
 
+        r = await ste.approve(ptl.address, 10000, {from: verifier4});
+        assert(checkEvent("Approval", r), "no Approval event watched");
+
+        r = await ptl.registerAsVerifier("seqno1", {from: verifier4});
+        assert(checkEvent("RegisterVerifier", r), "failed to watch event RegisterVerifier");
+
         r = await ste.approve(ptl.address, 1600, {from: buyer});
         assert(checkEvent("Approval", r), "no Approval event watched");
 
