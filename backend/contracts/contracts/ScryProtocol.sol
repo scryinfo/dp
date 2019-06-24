@@ -8,14 +8,6 @@ import "./ScryToken.sol";
 contract ScryProtocol {
     common.DataSet private dataSet;
 
-    common.PublishedData private publishedData;
-    common.TransactionData private txData;
-    common.VoteData private voteData;
-    common.ArbitratorData private arbitratorData;
-
-    common.Verifiers private verifiers;
-    common.Configuration private conf;
-
     address owner         = 0x0;
     ERC20   token;
 
@@ -26,27 +18,27 @@ contract ScryProtocol {
         token = ERC20(_token);
 
         //the first element used for empty usage
-        verifiers.list[verifiers.list.length++] = common.Verifier(0x00, 0, 0, 0, false);
+        dataSet.verifiers.list[dataSet.verifiers.list.length++] = common.Verifier(0x00, 0, 0, 0, false);
 
         dataSet.conf = common.Configuration(2, 10000, 300, 1, 0, 500, 0, 5, 2, 0, 32); // simple arbitrate params for test
     }
 
     function registerAsVerifier(string seqNo) external {
-        verification.register(verifiers, conf, seqNo, token);
+        verification.register(dataSet, seqNo, token);
     }
 
     function vote(string seqNo, uint txId, bool judge, string comments) external {
-        verification.vote(verifiers, txData, voteData, conf, seqNo, txId, judge, comments, token);
+        verification.vote(dataSet, seqNo, txId, judge, comments, token);
     }
 
     function creditsToVerifier(string seqNo, uint256 txId, uint8 verifierIndex, uint8 credit) external {
-        verification.creditsToVerifier(verifiers, publishedData, txData, conf, seqNo, txId, verifierIndex, credit);
+        verification.creditsToVerifier(dataSet, seqNo, txId, verifierIndex, credit);
     }
 
     function arbitrate(string seqNo, uint txId, bool judge) external {
-        verification.arbitrate(txData, arbitratorData, conf, txId, judge, token);
-        if (verification.arbitrateFinished(arbitratorData, conf, txId)) {
-            transaction.arbitrateResult(publishedData, txData, arbitratorData, conf, seqNo, txId, token);
+        verification.arbitrate(dataSet, txId, judge, token);
+        if (verification.arbitrateFinished(dataSet, txId)) {
+            transaction.arbitrateResult(dataSet, seqNo, txId, token);
         }
     }
 
@@ -70,10 +62,10 @@ contract ScryProtocol {
         address[] memory arbitratorsChosen;
         if ( transaction.needVerification(dataSet, publishId, startVerify) ) {
             verifiersChosen = new address[](dataSet.conf.verifierNum);
-            verifiersChosen = verification.chooseVerifiers(verifiers, dataSet.conf);
+            verifiersChosen = verification.chooseVerifiers(dataSet);
 
             arbitratorsChosen = new address[](dataSet.conf.arbitratorNum);
-            arbitratorsChosen = verification.chooseArbitrators(verifiers, conf, verifiersChosen);
+            arbitratorsChosen = verification.chooseArbitrators(dataSet, verifiersChosen);
         }
 
         //create tx

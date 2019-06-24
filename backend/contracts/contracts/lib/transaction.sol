@@ -192,7 +192,7 @@ library transaction {
     ) internal view returns (uint256) {
         uint256 fee = ds.pubData.map[publishId].price;
         if (needVerify) {
-            fee += ds.conf.verifierBonus * ds.conf.verifierNum;
+            fee += ds.conf.verifierBonus * ds.conf.verifierNum + ds.conf.arbitratorBonus * ds.conf.arbitratorNum;
         }
 
         return fee;
@@ -238,7 +238,7 @@ library transaction {
         string seqNo,
         uint256 txId,
         ERC20 token
-) external {
+    ) external {
         common.TransactionItem storage txItem = ds.txData.map[txId];
         require(txItem.used, "Transaction does not exist");
         require(txItem.buyer == msg.sender, "Invalid cancel operator");
@@ -338,21 +338,20 @@ library transaction {
         }
     }
 
-    function arbitrateResult(common.PublishedData storage pubData, common.TransactionData storage txData, common.ArbitratorData storage abData,
-        common.Configuration storage conf, string seqNo, uint256 txId, ERC20 token) {
+    function arbitrateResult(common.DataSet storage ds, string seqNo, uint256 txId, ERC20 token) internal {
         uint8 truth;
-        for (uint8 i = 0;i < conf.arbitratorNum;i++) {
-            if (abData.map[txId][i].judge) {
+        for (uint8 i = 0;i < ds.conf.arbitratorNum;i++) {
+            if (ds.arbitratorData.map[txId][i].judge) {
                 truth++;
             }
         }
 
         bool result;
-        common.TransactionItem storage txItem = txData.map[txId];
-        if (!(truth >= (conf.arbitratorNum+1)/2)) {
+        common.TransactionItem storage txItem = ds.txData.map[txId];
+        if (!(truth >= (ds.conf.arbitratorNum+1)/2)) {
             revertToBuyer(txItem, token);
         }else {
-            common.DataInfoPublished storage data = pubData.map[txItem.publishId];
+            common.DataInfoPublished storage data = ds.pubData.map[txItem.publishId];
             payToSeller(txItem, data, token);
             result = true;
         }
@@ -361,7 +360,7 @@ library transaction {
         users[0] = txItem.seller;
         emit ArbitrationResult(seqNo, txId, result, 0, users);
 
-        users[1] = txItem.buyer;
+        users[0] = txItem.buyer;
         emit ArbitrationResult(seqNo, txId, result, 1, users);
 
         closeTransaction(txItem, seqNo, txId);

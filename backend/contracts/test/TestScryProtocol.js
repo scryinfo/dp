@@ -44,7 +44,7 @@ contract('ScryProtocol', async accounts => {
         r = await ptl.registerAsVerifier("seqno1", {from: verifier4});
         assert(checkEvent("RegisterVerifier", r), "failed to watch event RegisterVerifier");
 
-        r = await ste.approve(ptl.address, 1600, {from: buyer});
+        r = await ste.approve(ptl.address, 2100, {from: buyer});
         assert(checkEvent("Approval", r), "no Approval event watched");
 
         r = await ptl.createTransaction("seqno3",  "publishId", true, {from: buyer});
@@ -57,7 +57,7 @@ contract('ScryProtocol', async accounts => {
         txId = getEventField("TransactionCreate", r, "transactionId");
         console.log("> txId:", txId);
 
-        r = await ptl.vote("seqNo4", txId, true, "comments from verifier1", {from: verifierSelected});
+        r = await ptl.vote("seqNo4", txId, true, "comments from verifier1", {from: verifierSelected[0]});
         assert(checkEvent("Vote", r), "failed to watch event Vote");
 
         r = await ptl.buyData("seqNo5", txId, {from: buyer});
@@ -66,7 +66,7 @@ contract('ScryProtocol', async accounts => {
         r = await ptl.submitMetaDataIdEncWithBuyer("seqNo6", txId, "0", {from: seller});
         assert(checkEvent("ReadyForDownload", r), "failed to watch event ReadyForDownload");
 
-        r = await ptl.confirmDataTruth("seqNO7", txId, true, {from: buyer});
+        r = await ptl.confirmDataTruth("seqNO7", txId, false, {from: buyer});
         assert(checkEvent("ArbitrationBegin", r), "failed to watch event ArbitrationBegin");
 
         arbitratorSelected = getEventField("ArbitrationBegin", r, "users");
@@ -87,7 +87,7 @@ contract('ScryProtocol', async accounts => {
                 ste = instance;
                 console.log("> ste:", ste.address);
                 ste.transfer(seller, 10000);
-                ste.transfer(buyer, 30000);
+                ste.transfer(buyer, 40000);
                 ste.transfer(verifier1, 13000);
                 ste.transfer(verifier2, 13000);
                 ste.transfer(verifier3, 13000);
@@ -184,7 +184,7 @@ contract('ScryProtocol', async accounts => {
 });
 
 function checkEvent(eventName, receipt) {
-    console.log("event:", eventName, " receipt:", receipt);
+    // console.log("event:", eventName, " receipt:", receipt);
     for (let i = 0; i < receipt.logs.length; i++) {
         let log = receipt.logs[i];
         if (log.event === eventName) {
