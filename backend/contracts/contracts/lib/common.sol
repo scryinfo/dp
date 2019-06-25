@@ -17,7 +17,7 @@ library common {
         bytes metaDataIdEncSeller;
         bytes32[] proofDataIds;
         uint256 numberOfProof;
-        string despDataId;
+        string descDataId;
         address seller;
         bool supportVerify;
         bool used;
