@@ -22,7 +22,7 @@ library transaction {
         bytes32[] proofDataIds,
         string descDataId,
         bool supportVerify
-    ) public {
+    ) external {
         address[] memory users = new address[](1);
         users[0] = address(0x00);
 
@@ -47,10 +47,17 @@ library transaction {
         common.DataSet storage ds,
         string publishId,
         bool startVerify
-    ) public view returns (bool) {
+    ) external view returns (bool) {
         common.DataInfoPublished storage pubItem = ds.pubData.map[publishId];
-        require(pubItem.used, "Publish data does not exist");
 
+        return needVerification(pubItem, startVerify);
+    }
+
+    function needVerification(
+        common.DataInfoPublished storage pubItem,
+        bool startVerify
+    ) internal view returns (bool) {
+        require(pubItem.used, "Publish data does not exist");
         return pubItem.supportVerify && startVerify;
     }
 
@@ -86,7 +93,8 @@ library transaction {
         uint256 verifiersLength,
         bool startVerify
     ) internal view returns (bool, uint256) {
-        bool needVerify = needVerification(ds, publishId, startVerify);
+        common.DataInfoPublished storage pubItem = ds.pubData.map[publishId];
+        bool needVerify = needVerification(pubItem, startVerify);
         if (needVerify) {
             require(verifiersLength == ds.conf.verifierNum, "Invalid number of verifiers");
         }
@@ -285,7 +293,7 @@ library transaction {
         string seqNo,
         uint256 txId,
         bytes encryptedMetaDataId
-    ) public {
+    ) external {
         common.TransactionItem storage txItem = ds.txData.map[txId];
         require(txItem.used, "Transaction does not exist");
         require(txItem.seller == msg.sender, "Invalid seller");

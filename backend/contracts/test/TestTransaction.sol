@@ -8,7 +8,7 @@ import "../contracts/lib/common.sol";
 contract TestTransaction {
     common.DataSet ds;
 
-    function testPublishDataInfo() {
+    function testPublishDataInfo() public {
         string memory seqNo = "seqNo";
         string memory publishId = "publishId";
         uint256 price = 1000;
@@ -27,5 +27,24 @@ contract TestTransaction {
         Assert.equal(data.seller, tx.origin, "data should be correct");
         Assert.equal(data.used, true, "data should be correct");
         Assert.equal(data.price, price, "data should be correct");
+
+        bool r = address(this).call(abi.encodePacked(this.publishTwiceWithSamePublishId.selector));
+        Assert.isFalse(r, "A same publish id should not publish twice");
     }
+
+    function publishTwiceWithSamePublishId() public {
+        string memory seqNo = "";
+        string memory publishId = "publishId";
+        uint256 price = 1;
+        bytes memory metaDataIdEncSeller = "";
+        bytes32[] memory proofDataIds = new bytes32[](2);
+        proofDataIds[0] = "";
+        proofDataIds[1] = "";
+        string memory desc = "";
+        bool supportVerify = false;
+
+        transaction.publishDataInfo(ds, seqNo, publishId, price, metaDataIdEncSeller, proofDataIds, desc, supportVerify);
+    }
+
+
 }
