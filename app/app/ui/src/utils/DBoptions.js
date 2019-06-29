@@ -282,28 +282,30 @@ let txVerifier_db = {
         c.onsuccess = function (event) {
             let cursor = event.target.result;
             if (cursor) {
-                _this.$store.state.transactionverifier.push({
-                    Title: cursor.value.Title,
-                    Price: cursor.value.Price,
-                    Keys: cursor.value.Keys,
-                    Description: cursor.value.Description,
-                    Buyer: cursor.value.Buyer,
-                    Seller: cursor.value.Seller,
-                    State: cursor.value.State,
-                    SupportVerify: cursor.value.SupportVerify,
-                    StartVerify: cursor.value.StartVerify,
-                    MetaDataExtension: cursor.value.MetaDataExtension,
-                    ProofDataExtensions: cursor.value.ProofDataExtensions,
-                    MetaDataIDEncWithSeller: cursor.value.MetaDataIDEncWithSeller,
-                    MetaDataIDEncWithBuyer: cursor.value.MetaDataIDEncWithBuyer,
-                    Verifier1: cursor.value.Verifier1,
-                    Verifier2: cursor.value.Verifier2,
-                    Verifier1Response: cursor.value.Verifier1Response,
-                    Verifier2Response: cursor.value.Verifier2Response,
-                    ArbitrateResult: cursor.value.ArbitrateResult,
-                    PublishID: cursor.value.PublishID,
-                    TransactionID: cursor.value.TransactionID
-                });
+                if (cursor.value.State === "Created" || cursor.value.State === "Voted") {
+                    _this.$store.state.transactionverifier.push({
+                        Title: cursor.value.Title,
+                        Price: cursor.value.Price,
+                        Keys: cursor.value.Keys,
+                        Description: cursor.value.Description,
+                        Buyer: cursor.value.Buyer,
+                        Seller: cursor.value.Seller,
+                        State: cursor.value.State,
+                        SupportVerify: cursor.value.SupportVerify,
+                        StartVerify: cursor.value.StartVerify,
+                        MetaDataExtension: cursor.value.MetaDataExtension,
+                        ProofDataExtensions: cursor.value.ProofDataExtensions,
+                        MetaDataIDEncWithSeller: cursor.value.MetaDataIDEncWithSeller,
+                        MetaDataIDEncWithBuyer: cursor.value.MetaDataIDEncWithBuyer,
+                        Verifier1: cursor.value.Verifier1,
+                        Verifier2: cursor.value.Verifier2,
+                        Verifier1Response: cursor.value.Verifier1Response,
+                        Verifier2Response: cursor.value.Verifier2Response,
+                        ArbitrateResult: cursor.value.ArbitrateResult,
+                        PublishID: cursor.value.PublishID,
+                        TransactionID: cursor.value.TransactionID
+                    });
+                }
                 cursor.continue();
             }
         };
