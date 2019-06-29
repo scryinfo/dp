@@ -32,6 +32,7 @@ contract TestTransaction {
         Assert.isFalse(r, "A same publish id should not publish twice");
     }
 
+    //pr practice comment
     function publishTwiceWithSamePublishId() public {
         string memory seqNo = "";
         string memory publishId = "publishId";
