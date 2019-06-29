@@ -13,85 +13,85 @@ import (
 )
 
 const (
-	ListenerTypeId = "9ff2cb44-e73a-4a53-add4-3166954983d7"
+    ListenerTypeId = "9ff2cb44-e73a-4a53-add4-3166954983d7"
 )
 
 type Listener struct {
-	builder *Builder
+    builder *Builder
 }
 
 
 //construct dot
 func newListenerDot(conf interface{}) (dot.Dot, error) {
-	var err error
-	d := &Listener{}
+    var err error
+    d := &Listener{}
 
-	return d, err
+    return d, err
 }
 
 //Data structure needed when generating newer component
 func ListenerTypeLive() *dot.TypeLives {
-	return &dot.TypeLives{
-		Meta: dot.Metadata{TypeId: ListenerTypeId,
-			NewDoter: func(conf interface{}) (dot dot.Dot, err error) {
-				return newListenerDot(conf)
-			}},
-	}
+    return &dot.TypeLives{
+        Meta: dot.Metadata{TypeId: ListenerTypeId,
+            NewDoter: func(conf interface{}) (dot dot.Dot, err error) {
+                return newListenerDot(conf)
+            }},
+    }
 }
 
 func (c *Listener) Create(l dot.Line) error {
-	c.builder = NewScanBuilder()
-	return nil
+    c.builder = NewScanBuilder()
+    return nil
 }
 
 
 func (c *Listener) ListenEvent(
-	conn *ethclient.Client,
-	contracts []event.ContractInfo,
-	fromBlock uint64,
-	interval time.Duration,
-	dataChannel chan event.Event,
-	errorChannel chan error,
+    conn *ethclient.Client,
+    contracts []event.ContractInfo,
+    fromBlock uint64,
+    interval time.Duration,
+    dataChannel chan event.Event,
+    errorChannel chan error,
 ) bool {
-	logger := dot.Logger()
-	logger.Infoln("start listening events...")
+    logger := dot.Logger()
+    logger.Infoln("start listening events...")
 
-	defer func() {
-		if er := recover(); er != nil {
-			logger.Errorln("failed to listen event, panic error", zap.Any("", er))
-		}
-	}()
+    defer func() {
+        if er := recover(); er != nil {
+            logger.Errorln("failed to listen event, panic error", zap.Any("", er))
+        }
+    }()
 
-	if len(contracts) == 0 {
-		logger.Errorln("invalid contracts parameter")
-		return false
-	}
+    if len(contracts) == 0 {
+        logger.Errorln("invalid contracts parameter")
+        return false
+    }
 
-	for _, v := range contracts {
-		c.builder.SetContract(common.HexToAddress(v.Address), v.Abi, v.Events...)
-	}
+    for _, v := range contracts {
+        c.builder.SetContract(common.HexToAddress(v.Address), v.Abi, v.Events...)
+    }
 
-	r, err := c.builder.SetClient(conn).
-		SetFrom(fromBlock).
-		SetTo(0).
-		SetGracefulExit(true).
-		SetDataChan(dataChannel, errorChannel).
-		SetInterval(interval).
-		BuildAndRun()
-	if err != nil {
-		logger.Errorln("failed to listen to events", zap.Error(err))
-		return false
-	}
+    r, err := c.builder.SetClient(conn).
+        SetFrom(fromBlock).
+        SetTo(0).
+        SetGracefulExit(true).
+        SetDataChan(dataChannel, errorChannel).
+        SetInterval(interval).
+        BuildAndRun()
+    if err != nil {
+        logger.Errorln("failed to listen to events", zap.Error(err))
+        return false
+    }
 
-	r.WaitChan()
+    r.WaitChan()
 
-	return true
+    return true
 }
 
 func (c *Listener) SetFromBlock(from uint64) {
-	if c.builder != nil {
-		c.builder.SetFrom(from)
-	} else {
-		dot.Logger().Warnln("failed to set from block because of null builder")
-	}
+    if c.builder != nil {
+        c.builder.SetFrom(from)
+    } else {
+        dot.Logger().Warnln("failed to set from block because of null builder")
+    }
 }
