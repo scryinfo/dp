@@ -33,7 +33,7 @@ library common {
         string publishId;
         bytes meteDataIdEncBuyer;
         bytes metaDataIdEncSeller;
-        bytes metaDataIdEncArbitrator;
+        bytes[] metaDataIdEncArbitrators;
         uint256 buyerDeposit;
         uint256 verifierBonus;
         uint256 arbitratorBonus;

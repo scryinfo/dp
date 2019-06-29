@@ -171,7 +171,7 @@ func getAndRenameProofFiles(ipfsIDs [][32]byte, extensions []string) ([]string, 
 }
 func ipfsBytes32ToHash(ipfsb [32]byte) string {
 	byte34 := make([]byte, 34)
-	// todo: if ipfs change encrypt algorithm, byte 18 and 32 will change together.
+	// if ipfs change encrypt algorithm, byte 18 and 32 will change together.
 	copy(byte34[:2], []byte{byte(18), byte(32)})
 	copy(byte34[2:], ipfsb[:])
 
@@ -187,9 +187,6 @@ func onPurchase(event event.Event) bool {
 		op.PublishID = event.Data.Get("publishId").(string)
 		op.UserIndex = strconv.Itoa(int(event.Data.Get("index").(uint8)))
 		op.TxState = setTxState(event.Data.Get("state").(uint8))
-
-		// temp
-		op.Buyer = event.Data.Get("buyer").(common.Address).String()
 	}
 
 	if err := app2.GetGapp().Connection.SendMessage("onPurchase", op); err != nil {
