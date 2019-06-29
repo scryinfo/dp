@@ -6,7 +6,7 @@ import "../ScryToken.sol";
 library transaction {
     event DataPublish(string seqNo, string publishId, uint256 price, string despDataId, bool supportVerify, address[] users);
     event TransactionCreate(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool needVerify, uint8 state, address[] users);
-    event Buy(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, uint8 state, address buyer, uint8 index, address[] users);
+    event Buy(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, uint8 state, uint8 index, address[] users);
     event TransactionClose(string seqNo, uint256 transactionId, uint8 state, uint8 index, address[] users);
     event VerifiersChosen(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, uint8 state, address[] users);
     event ReadyForDownload(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, uint8 state, uint8 index, address[] users);
@@ -125,6 +125,7 @@ library transaction {
         bool[] memory creditGiven = new bool[](ds.conf.verifierNum);
 
         bytes memory metaDataIdEncryptedData = new bytes(ds.conf.encryptedIdLen);
+        bytes[] memory metaDataIdsEnc = new bytes[](ds.conf.arbitratorNum);
         ds.txData.map[txId] = common.TransactionItem(
             common.TransactionState.Created,
             msg.sender,
@@ -135,7 +136,7 @@ library transaction {
             publishId,
             metaDataIdEncryptedData,
             pubItem.metaDataIdEncSeller,
-            metaDataIdEncryptedData,
+            metaDataIdsEnc,
             fee,
             ds.conf.verifierBonus,
             ds.conf.arbitratorBonus,
@@ -158,10 +159,10 @@ library transaction {
         bytes32[] storage proofIds = pubItem.proofDataIds;
 
         address[] memory fills;
-        bytes memory magic;
         address[] memory users = new address[](1);
         bool[] memory creditGiven;
         bytes memory metaDataIdEncryptedData = new bytes(ds.conf.encryptedIdLen);
+        bytes[] memory magic = new bytes[](ds.conf.arbitratorNum);
 
         ds.txData.map[txId] = common.TransactionItem(
             common.TransactionState.Created,
@@ -190,7 +191,7 @@ library transaction {
         uint256 fee
     ) internal {
         require((token.balanceOf(msg.sender)) >= fee, "No enough balance");
-        require(token.transferFrom(msg.sender, address(this), fee), "Failed to transfer token from caller");
+        require(token.transferFrom(msg.sender, address(this), fee), "Buyer pay deposit failed");
     }
 
     function getFee(
@@ -230,14 +231,14 @@ library transaction {
 
         address[] memory users = new address[](1);
         users[0] = txItem.seller;
-        emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, uint8(txItem.state), txItem.buyer, 0, users);
+        emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, uint8(txItem.state), 0, users);
 
         users[0] = msg.sender;
-        emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, uint8(txItem.state), txItem.buyer, 1, users);
+        emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, uint8(txItem.state), 1, users);
 
         for (uint8 i = 0; i < txItem.verifiers.length; i++) {
             users[0] = txItem.verifiers[i];
-            emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, uint8(txItem.state), txItem.buyer, 2, users);
+            emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, uint8(txItem.state), 2, users);
         }
     }
 
@@ -284,22 +285,26 @@ library transaction {
 
         if (!token.transfer(txItem.buyer, deposit)) {
             txItem.buyerDeposit = deposit;
-            require(false, "Failed to revert to buyer his token");
+            require(false, "Failed to revert buyer his token");
         }
     }
 
-    function submitMetaDataIdEncByBuyer(
+    function reEncryptMetaDataIdFromSeller(
         common.DataSet storage ds,
         string seqNo,
         uint256 txId,
-        bytes encryptedMetaDataId
+        bytes encryptedMetaDataIdWithBuyer,
+        bytes encryptedMetaDataIdWithArbitrators
     ) external {
         common.TransactionItem storage txItem = ds.txData.map[txId];
         require(txItem.used, "Transaction does not exist");
         require(txItem.seller == msg.sender, "Invalid seller");
         require(txItem.state == common.TransactionState.Buying, "Invalid transaction state");
 
-        txItem.meteDataIdEncBuyer = encryptedMetaDataId;
+        txItem.meteDataIdEncBuyer = encryptedMetaDataIdWithBuyer;
+
+        deserializeAndSave(txItem, encryptedMetaDataIdWithArbitrators, ds.conf.arbitratorNum);
+
         txItem.state = common.TransactionState.ReadyForDownload;
 
         address[] memory users = new address[](1);
@@ -308,6 +313,23 @@ library transaction {
 
         users[0] = txItem.buyer;
         emit ReadyForDownload(seqNo, txId, txItem.meteDataIdEncBuyer, uint8(txItem.state), 1, users);
+    }
+
+    function deserializeAndSave(common.TransactionItem storage txItem, bytes encIds, uint8 num) internal {
+        require(encIds.length % num == 0, "Invalid Ids length");
+
+        bytes[] memory ids = new bytes[](num);
+        uint256 idLen = encIds.length / num;
+
+        for (uint8 i = 0; i < num; i++) {
+            bytes memory id = new bytes(idLen);
+            for (uint256 count = 0; count < idLen; count++) {
+                id[count] = encIds[i*idLen + count];
+            }
+            ids[i] = id;
+        }
+
+        txItem.metaDataIdEncArbitrators = ids;
     }
 
     function confirmDataTruth(
@@ -340,7 +362,7 @@ library transaction {
                 address[] memory users = new address[](1);
                 for (uint8 i = 0; i < ds.conf.arbitratorNum; i++) {
                     users[0] = txItem.arbitrators[i];
-                    emit ArbitrationBegin(seqNo, txId, txItem.publishId, data.proofDataIds, txItem.metaDataIdEncArbitrator, users);
+                    emit ArbitrationBegin(seqNo, txId, txItem.publishId, data.proofDataIds, txItem.metaDataIdEncArbitrators[i], users);
                 }
             }
         }
@@ -387,7 +409,23 @@ library transaction {
                 require(false, "Failed to pay to seller");
             }
         } else {
-            require(false, "Low deposit value for paying to seller");
+            require(false, "No enough deposit for seller");
         }
+    }
+
+    function getBuyerAddrInDesignatedTx(common.DataSet storage ds, uint256 txId) internal view returns (address) {
+        common.TransactionItem memory txItem = ds.txData.map[txId];
+        require(msg.sender == txItem.seller, "Invalid caller");
+        require(txItem.state == common.TransactionState.Buying, "Invalid transaction state");
+
+        return txItem.buyer;
+    }
+
+    function getArbitratorsAddrsInDesignatedTx(common.DataSet storage ds, uint256 txId) internal view returns (address[]) {
+        common.TransactionItem memory txItem = ds.txData.map[txId];
+        require(msg.sender == txItem.seller, "Invalid caller");
+        require(txItem.state == common.TransactionState.Buying, "Invalid transaction state");
+
+        return txItem.arbitrators;
     }
 }

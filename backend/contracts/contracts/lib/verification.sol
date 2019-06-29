@@ -90,7 +90,7 @@ library verification {
         }
     }
 
-    function chooseVerifiers(common.DataSet storage ds) internal view returns (address[] memory) {
+    function chooseVerifiers(common.DataSet storage ds, address seller) internal view returns (address[] memory) {
         require(ds.verifiers.validVerifierCount > ds.conf.verifierNum, "No enough valid verifiers");
         uint256 len = ds.verifiers.list.length;
         address[] memory chosenVerifiers = new address[](ds.conf.verifierNum);
@@ -101,7 +101,7 @@ library verification {
 
             //loop if invalid verifier was chosen until get valid verifier
             address vb = v.addr;
-            while (!v.enable || addressExist(chosenVerifiers, v.addr)) {
+            while (!v.enable || addressExist(chosenVerifiers, v.addr) || vb == seller || vb == msg.sender) {
                 v = ds.verifiers.list[(++index) % len];
                 require(v.addr != vb, "Disordered verifiers");
             }
@@ -157,7 +157,7 @@ library verification {
                 require(false, "Failed to pay to verifier");
             }
         } else {
-            require(false, "Low deposit value for paying to verifier");
+            require(false, "No enough deposit for verifier");
         }
     }
 
@@ -171,13 +171,13 @@ library verification {
         return self.list[0];
     }
 
-    function chooseArbitrators(common.DataSet storage ds, address[] vs) internal view returns (address[] memory) {
+    function chooseArbitrators(common.DataSet storage ds, address[] vs, address seller) internal view returns (address[] memory) {
         uint256[] memory shortlistIndex = new uint256[](ds.verifiers.list.length - ds.conf.verifierNum);
         uint256 count;
 
         for (uint256 i = 0;i < ds.verifiers.list.length;i++) {
             common.Verifier storage a = ds.verifiers.list[i];
-            if (arbitratorValid(a, ds.conf, vs)) {
+            if (arbitratorValid(a, ds.conf, vs) && a.addr != seller && a.addr != msg.sender) {
                 shortlistIndex[count] = i;
                 count++;
             }
@@ -224,7 +224,6 @@ library verification {
         uint8 index;
         (exist, index) = addressIndex(txItem.arbitrators, msg.sender);
         require(exist, "Invalid arbitrator");
-
         require(!ds.arbitratorData.map[txId][index].used, "Address already arbitrated");
 
         payToArbitrator(txItem, ds.conf, msg.sender, token);
@@ -252,7 +251,7 @@ library verification {
                 require(false, "Failed to pay to verifier");
             }
         } else {
-            require(false, "Low deposit value for paying to arbitrator");
+            require(false, "No enough deposit for arbitrator");
         }
     }
 }

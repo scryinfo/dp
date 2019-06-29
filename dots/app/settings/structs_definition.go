@@ -101,7 +101,6 @@ type OnPurchase struct {
 	MetaDataIdEncWithSeller []byte
 	TxState                 string
 	UserIndex               string
-	Buyer                   string // temp
 	Block                   uint64
 }
 
