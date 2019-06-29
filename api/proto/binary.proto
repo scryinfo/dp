@@ -1,2 +1,154 @@
-
 syntax = "proto3";
+
+package api;
+option go_package = "github.com/scryinfo/dp/api/go_out/api";
+
+service BinaryService {
+    //receive events by creating a server stream channel
+    rpc RecvEvents(ClientInfo) returns (stream Event) {}
+
+    //publish
+    rpc Publish(PublishParams) returns (PublishResult) {}
+
+    //prepare to buy
+    rpc PrepareToBuy(PrepareParams) returns (Result) {}
+
+    //buy
+    rpc BuyData(BuyParams) returns (Result) {}
+
+    //cancel transaction
+    rpc CancelTransaction(CancelTxParams) returns (Result) {}
+
+    //submit encoded meta data id
+    rpc SubmitMetaDataIdEncWithBuyer(SubmitMetaDataIdParams) returns (Result) {}
+
+    //confirm data truth
+    rpc ConfirmDataTruth(DataConfirmParams) returns (Result) {}
+
+    //approve transfer
+    rpc ApproveTransfer(ApproveTransferParams) returns (Result) {}
+
+    //vote
+    rpc Vote(VoteParams) returns (Result) {}
+
+    //register as verifier
+    rpc RegisterAsVerifier(RegisterVerifierParams) returns (Result) {}
+
+    //credits to verifier
+    rpc CreditsToVerifier(CreditVerifierParams) returns (Result) {}
+
+    //transfer tokens
+    rpc TransferTokens(TransferTokenParams) returns (Result) {}
+
+    //get token balance
+    rpc GetTokenBalance(TokenBalanceParams) returns (TokenBalanceResult) {}
+}
+
+message ClientInfo {
+    string address = 1;
+    string password = 2;
+}
+
+message Event {
+    uint64 blockNumber = 1;
+    string txHash = 2;
+    string address = 3;
+    string name = 4;
+    string jsonData = 5;
+}
+
+message TxParams {
+    string from = 1;
+    string password = 2;
+    uint64 value = 3;
+    bool pending = 4;
+    uint64 gasPrice = 5;
+    uint64 gasLimit = 6;
+}
+
+message PublishParams {
+    TxParams txParam = 1;
+    uint64 price = 2;
+    bytes metaDataID = 3;
+    repeated string proofDataIDs = 4;
+    int64 proofNum = 5;
+    string detailsID = 6;
+    bool supportVerify = 7;
+}
+
+message PublishResult{
+    string publishId = 1;
+    Result result = 2;
+}
+
+message PrepareParams {
+    TxParams txParams = 1;
+    string publishId = 2;
+    bool startVerify = 3;
+}
+
+message Result {
+    string errorMsg = 1;
+}
+
+message BuyParams {
+    TxParams txParams = 1;
+    uint64 txId = 2;
+}
+
+message CancelTxParams {
+    TxParams txParams = 1;
+    uint64 txId = 2;
+}
+
+message SubmitMetaDataIdParams {
+    TxParams txParams = 1;
+    uint64 txId = 2;
+    repeated bytes encryptMetaDataId = 3;
+}
+
+message DataConfirmParams {
+    TxParams txParams = 1;
+    uint64 txId = 2;
+    bool truth = 3;
+}
+
+message ApproveTransferParams {
+    TxParams txParams = 1;
+    string spenderAddr = 2;
+    uint64 value = 3;
+}
+
+message VoteParams {
+    TxParams txParams = 1;
+    uint64 txId = 2;
+    bool judge = 3;
+    string comments = 4;
+}
+
+message RegisterVerifierParams {
+    TxParams txParams = 1;
+}
+
+message CreditVerifierParams {
+    TxParams txParams = 1;
+    uint64 txId = 2;
+    uint32 index = 3;
+    uint32 credit = 4;
+}
+
+message TransferTokenParams {
+    TxParams txParams = 1;
+    string to = 2;
+    uint64 value = 3;
+}
+
+message TokenBalanceParams {
+    TxParams txParams = 1;
+    string owner = 2;
+}
+
+message TokenBalanceResult {
+    uint64 balance = 1;
+    Result result = 2;
+}
