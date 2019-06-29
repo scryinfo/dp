@@ -72,7 +72,7 @@ contract('ScryProtocol', async accounts => {
         arbitratorSelected = getEventField("ArbitrationBegin", r, "users");
         console.log("> arbitrators:", arbitratorSelected);
 
-        r = await ptl.arbitrate("seqN08", txId, true, {from: arbitratorSelected});
+        r = await ptl.arbitrate("seqN08", txId, true, {from: arbitratorSelected[0]});
         assert(checkEvent("ArbitrationResult", r), "failed to watch event ArbitrationResult");
 
         assert(checkEvent("TransactionClose", r), "failed to watch event TransactionClose");
@@ -184,7 +184,7 @@ contract('ScryProtocol', async accounts => {
 });
 
 function checkEvent(eventName, receipt) {
-    // console.log("event:", eventName, " receipt:", receipt);
+    //console.log("event:", eventName, " receipt:", receipt);
     for (let i = 0; i < receipt.logs.length; i++) {
         let log = receipt.logs[i];
         if (log.event === eventName) {
