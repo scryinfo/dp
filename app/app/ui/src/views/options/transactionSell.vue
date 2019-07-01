@@ -37,7 +37,7 @@ export default {
     name: "transactionSell.vue",
     data () {
         return {
-            selectedTx: {},  // {tID: "", Buyer: "", Seller: "", MetaDataIDEncWithSeller: "", pID: ""}
+            selectedTx: {},  // {tID: "", Seller: "", MetaDataIDEncWithSeller: "", pID: ""}
             curPage: 1,
             pageSize: 6,
             total: 0,
@@ -50,7 +50,6 @@ export default {
         currentChange: function (curRow) {
             this.selectedTx = {
                 TransactionID: curRow.TransactionID,
-                Buyer: curRow.Buyer,
                 Seller: curRow.Seller,
                 PublishID: curRow.PublishID,
                 MetaDataIDEncWithSeller: curRow.MetaDataIDEncWithSeller // WSConnect between go and js buy not show out to user.

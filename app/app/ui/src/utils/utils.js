@@ -16,6 +16,8 @@ let utils = {
         connect.addCallbackFunc("onRegisterVerifier", presetFunc.onRegisterVerifier);
         connect.addCallbackFunc("onVote", presetFunc.onVote);
         connect.addCallbackFunc("onVerifierDisable", presetFunc.onVerifierDisable);
+        connect.addCallbackFunc("onArbitrationBegin", presetFunc.onArbitrationBegin);
+        connect.addCallbackFunc("onArbitrationResult", presetFunc.onArbitrationResult);
     },
     setDefaultBalance: function (_this) {
         _this.$store.state.balance[0] = { Balance: "-", Time: "-"};
@@ -148,7 +150,7 @@ let utils = {
                 });
             });
         }
-    },
+    }
 };
 
 let presetFunc = {
@@ -285,7 +287,7 @@ let presetFunc = {
                     Price: dataDetails.Price,
                     Keys: dataDetails.Keys,
                     Description: dataDetails.Description,
-                    Buyer: dataDetails.Buyer,
+                    Buyer: "",
                     Seller: dataDetails.Seller,
                     State: payload.TxState, // -
                     SupportVerify: dataDetails.SupportVerify,
@@ -594,6 +596,12 @@ let presetFunc = {
                 isVerifier: false
             });
         });
+    },
+    onArbitrationBegin: function (payload, _this) {
+
+    },
+    onArbitrationResult: function (payload, _this) {
+
     }
 };
 

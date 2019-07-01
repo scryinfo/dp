@@ -99,8 +99,8 @@ contract ScryProtocol {
         );
     }
 
-    function reEncryptMetaDataIdFromSeller(string seqNo, uint256 txId, bytes encryptedMetaDataId, bytes encryptedMetaDataIds) external {
-        transaction.reEncryptMetaDataIdFromSeller(
+    function reEncryptMetaDataIdBySeller(string seqNo, uint256 txId, bytes encryptedMetaDataId, bytes encryptedMetaDataIds) external {
+        transaction.reEncryptMetaDataIdBySeller(
             dataSet,
             seqNo,
             txId,
@@ -123,7 +123,7 @@ contract ScryProtocol {
         return transaction.getBuyerAddrInDesignatedTx(dataSet, txId);
     }
 
-    function getArbitrators(uint256 txId) external view  returns (address[]) {
+    function getArbitrators(uint256 txId) external view returns (address[]) {
         return transaction.getArbitratorsAddrsInDesignatedTx(dataSet, txId);
     }
 }

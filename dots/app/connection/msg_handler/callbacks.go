@@ -275,6 +275,48 @@ func onVerifierDisable(event event.Event) bool {
 	return true
 }
 
+func onArbitrationBegin(event event.Event) bool {
+	var oab settings.OnArbitrationBegin
+	{
+		oab.PublishId = event.Data.Get("publishId").(string)
+		if err := app2.GetGapp().Connection.SendMessage("onProofFilesExtensions", oab.PublishId); err != nil {
+			dot.Logger().Errorln("", zap.NamedError("onProofFilesExtensions"+connection.EventSendFailed, err))
+		}
+
+		oab.TransactionId = event.Data.Get("transactionId").(*big.Int).String()
+		oab.MetaDataIdEncArbitrator = event.Data.Get("metaDataIdEncArbitrator").([]byte)
+		oab.Block = event.BlockNumber
+
+		extensions := <-extChan
+		var err error
+		if oab.ProofFileNames, err = getAndRenameProofFiles(event.Data.Get("proofIds").([][32]uint8), extensions); err != nil {
+			dot.Logger().Errorln("", zap.NamedError("Node - onVC.callback: get and rename proof files failed. ", err))
+		}
+	}
+
+	if err := app2.GetGapp().Connection.SendMessage("onArbitrationBegin", oab); err != nil {
+		dot.Logger().Errorln("", zap.NamedError("onArbitrationBegin"+connection.EventSendFailed, err))
+	}
+
+	return true
+}
+
+func onArbitrationResult(event event.Event) bool {
+	var oar settings.OnArbitrationResult
+	{
+		oar.TransactionId = event.Data.Get("transactionId").(*big.Int).String()
+		oar.ArbitrateResult = setArbitrateResult(event.Data.Get("judge").(bool))
+		oar.User = strconv.Itoa(int(event.Data.Get("identify").(uint8)))
+		oar.Block = event.BlockNumber
+	}
+
+	if err := app2.GetGapp().Connection.SendMessage("onArbitrationResult", oar); err != nil {
+		dot.Logger().Errorln("", zap.NamedError("onArbitrationResult"+connection.EventSendFailed, err))
+	}
+
+	return true
+}
+
 func setTxState(state byte) (str string) {
 	switch state {
 	case 1:
@@ -302,4 +344,15 @@ func setJudge(judge bool) (str string) {
 	}
 
 	return
+}
+
+func setArbitrateResult(result bool) string {
+	str := "Arbitrate Result: "
+	if result {
+		str += "true. "
+	} else {
+		str += "false. "
+	}
+
+	return str
 }
