@@ -29,7 +29,7 @@ type SDKWrapper interface {
 	ApproveTransferToken(password string, quantity *big.Int) error
 	CreateTransaction(publishId string, password string, startVerify bool) error
 	Buy(txId string, password string) error
-	SubmitMetaDataIdEncWithBuyer(txId string, password, seller, buyer string, metaDataIDEncSeller []byte) error
+	ReEncryptMetaDataIdFromSeller(txId string, password, seller string, metaDataIDEncSeller []byte) error
 	CancelTransaction(txId, password string) error
 	DecryptAndGetMetaDataFromIPFS(password string, metaDataIdEncWithBuyer []byte, buyer, extension string) (string, error)
 	ConfirmDataTruth(txId string, password string, truth bool) error

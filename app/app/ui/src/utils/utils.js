@@ -285,7 +285,7 @@ let presetFunc = {
                     Price: dataDetails.Price,
                     Keys: dataDetails.Keys,
                     Description: dataDetails.Description,
-                    Buyer: dataDetails.Buyer,
+                    Buyer: "",
                     Seller: dataDetails.Seller,
                     State: payload.TxState, // -
                     SupportVerify: dataDetails.SupportVerify,

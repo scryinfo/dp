@@ -266,9 +266,10 @@ func SubmitMetaDataIdEncWithBuyer(txId *big.Int) {
         Pending: false,
     }
 
-    err := chain.SubmitMetaDataIdEncWithBuyer(&txParam, txId, metaDataIdEncWithBuyer)
+    var metaDataIdsEncWithArbitrators []byte
+    err := chain.ReEncryptMetaDataIdFromSeller(&txParam, txId, metaDataIdEncWithBuyer, metaDataIdsEncWithArbitrators)
     if err != nil {
-        fmt.Println("failed to SubmitMetaDataIdEncWithBuyer, error:", err)
+        fmt.Println("failed to ReEncryptMetaDataIdFromSeller, error:", err)
     }
 }
 

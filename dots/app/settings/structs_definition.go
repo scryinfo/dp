@@ -110,7 +110,6 @@ type ReEncryptData struct {
 }
 type SelectedTxRED struct {
 	TransactionID           string `json:"TransactionID"`
-	Buyer                   string `json:"Buyer"`
 	Seller                  string `json:"Seller"`
 	MetaDataIDEncWithSeller []byte `json:"MetaDataIDEncWithSeller"`
 }

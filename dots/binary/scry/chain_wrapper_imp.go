@@ -26,6 +26,8 @@ type chainWrapperImp struct {
     appId    string
 }
 
+var _ ChainWrapper = (*chainWrapperImp)(nil)
+
 func NewChainWrapper(protocolContractAddress common.Address,
     tokenContractAddress common.Address,
     clientConn *ethclient.Client,
@@ -56,7 +58,7 @@ func NewChainWrapper(protocolContractAddress common.Address,
 }
 
 func (c *chainWrapperImp) Conn() *ethclient.Client {
-    return c.conn
+   return c.conn
 }
 
 func (c *chainWrapperImp) Publish(txParams *tx.TxParams, price *big.Int, metaDataID []byte,
@@ -156,10 +158,10 @@ func (c *chainWrapperImp) CancelTransaction(txParams *tx.TxParams, txId *big.Int
     return err
 }
 
-func (c *chainWrapperImp) SubmitMetaDataIdEncWithBuyer(txParams *tx.TxParams, txId *big.Int, encyptedMetaDataId []byte) error {
-    t, err := c.protocol.SubmitMetaDataIdEncWithBuyer(c.Tx.BuildTransactOpts(txParams), c.appId, txId, encyptedMetaDataId)
+func (c *chainWrapperImp) ReEncryptMetaDataIdFromSeller(txParams *tx.TxParams, txId *big.Int, encyptedMetaDataId []byte, encryptedMetaDataIds []byte) error {
+    t, err := c.protocol.ReEncryptMetaDataIdFromSeller(c.Tx.BuildTransactOpts(txParams), c.appId, txId, encyptedMetaDataId, encryptedMetaDataIds)
     if err == nil {
-        dot.Logger().Debugln("SubmitMetaDataIdEncWithBuyer: tx hash:" + t.Hash().String(), zap.Binary(" tx data:", t.Data()))
+        dot.Logger().Debugln("ReEncryptMetaDataIdFromSeller: tx hash:" + t.Hash().String(), zap.Binary(" tx data:", t.Data()))
     }
 
     return err
@@ -209,6 +211,39 @@ func (c *chainWrapperImp) CreditsToVerifier(txParams *tx.TxParams, txId *big.Int
     }
 
     return err
+}
+
+func (c *chainWrapperImp) Arbitrate(txParams *tx.TxParams, txId *big.Int, judge bool) error {
+    t, err := c.protocol.Arbitrate(c.Tx.BuildTransactOpts(txParams), c.appId, txId, judge)
+    if err == nil {
+        dot.Logger().Debugln("Arbitrate: tx hash:" + t.Hash().String(), zap.Binary(" tx data:", t.Data()))
+    }
+
+    return err
+}
+
+func (c *chainWrapperImp) GetBuyer(txParams *tx.TxParams, txId *big.Int) (string, error) {
+    buyer, err := c.protocol.GetBuyer(c.Tx.BuildCallOpts(txParams), txId)
+    if err == nil {
+        dot.Logger().Debugln("Get buyer, buyer:" + buyer.String())
+    }
+
+    return buyer.String(), err
+}
+
+func (c *chainWrapperImp) GetArbitrators(txParams *tx.TxParams, txId *big.Int) ([]string, error) {
+    arbitratorsAddrs, err := c.protocol.GetArbitrators(c.Tx.BuildCallOpts(txParams), txId)
+
+    var arbitrators = make([]string, len(arbitratorsAddrs))
+    for i := 0; i < len(arbitratorsAddrs); i++ {
+        arbitrators[i] = arbitratorsAddrs[i].String()
+    }
+
+    if err == nil {
+        dot.Logger().Debugln("Get arbitrator:", zap.Strings("arbitrators", arbitrators))
+    }
+
+    return arbitrators, err
 }
 
 func (c *chainWrapperImp) TransferTokens(txParams *tx.TxParams, to common.Address, value *big.Int) error {

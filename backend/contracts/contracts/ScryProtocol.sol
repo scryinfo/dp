@@ -123,7 +123,7 @@ contract ScryProtocol {
         return transaction.getBuyerAddrInDesignatedTx(dataSet, txId);
     }
 
-    function getArbitrators(uint256 txId) external view  returns (address[]) {
+    function getArbitrators(uint256 txId) external view returns (address[]) {
         return transaction.getArbitratorsAddrsInDesignatedTx(dataSet, txId);
     }
 }

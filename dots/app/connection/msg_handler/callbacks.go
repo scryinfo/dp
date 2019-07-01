@@ -275,6 +275,16 @@ func onVerifierDisable(event event.Event) bool {
 	return true
 }
 
+func onArbitrationBegin(event event.Event) bool {
+
+	return true
+}
+
+func onArbitrationResult(event event.Event) bool {
+
+	return true
+}
+
 func setTxState(state byte) (str string) {
 	switch state {
 	case 1:
@@ -302,4 +312,15 @@ func setJudge(judge bool) (str string) {
 	}
 
 	return
+}
+
+func setArbitrateResult(result bool) string {
+	str := "Arbitrate Result: "
+	if result {
+		str += "true. "
+	} else {
+		str += "false. "
+	}
+
+	return str
 }
