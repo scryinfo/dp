@@ -17,12 +17,17 @@ type ChainWrapper interface {
     PrepareToBuy(txParams *tx.TxParams, publishId string, startVerify bool) error
     BuyData(txParams *tx.TxParams, txId *big.Int) error
     CancelTransaction(txParams *tx.TxParams, txId *big.Int) error
-    SubmitMetaDataIdEncWithBuyer(txParams *tx.TxParams, txId *big.Int, encyptedMetaDataId []byte) error
+    ReEncryptMetaDataIdBySeller(txParams *tx.TxParams, txId *big.Int, encIdWithBuyer []byte, encIdsWithArbitrators []byte) error
     ConfirmDataTruth(txParams *tx.TxParams, txId *big.Int, truth bool) error
     ApproveTransfer(txParams *tx.TxParams, spender common.Address, value *big.Int) error
     Vote(txParams *tx.TxParams, txId *big.Int, judge bool, comments string) error
     RegisterAsVerifier(txParams *tx.TxParams) error
     CreditsToVerifier(txParams *tx.TxParams, txId *big.Int, index uint8, credit uint8) error
+    Arbitrate(txParams *tx.TxParams, txId *big.Int, judge bool) error
+
+    GetBuyer(txParams *tx.TxParams, txId *big.Int) (string, error)
+    GetArbitrators(txParams *tx.TxParams, txId *big.Int) ([]string, error)
+
     TransferTokens(txParams *tx.TxParams, to common.Address, value *big.Int) error
     GetTokenBalance(txParams *tx.TxParams, owner common.Address) (*big.Int, error)
 }

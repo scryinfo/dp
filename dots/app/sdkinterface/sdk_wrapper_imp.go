@@ -66,7 +66,7 @@ func (swi *sdkWrapperImp) CreateUserWithLogin(password string) (string, error) {
 	return client.Account().Addr, nil
 }
 
-func (swi *sdkWrapperImp) UserLogin(address string, password string) (bool, error) {
+func (swi *sdkWrapperImp) UserLogin(address, password string) (bool, error) {
 	var client scry.Client
 	if client = scry.NewScryClient(address, swi.cw); client == nil {
 		return false, errors.New("Call NewScryClient failed. ")
@@ -208,7 +208,7 @@ func (swi *sdkWrapperImp) approveTransfer(password string, protocolContractAddr 
 	return nil
 }
 
-func (swi *sdkWrapperImp) CreateTransaction(publishId string, password string, startVerify bool) error {
+func (swi *sdkWrapperImp) CreateTransaction(publishId, password string, startVerify bool) error {
 	if swi.curUser == nil {
 		return errors.New("Current user is nil. ")
 	}
@@ -226,7 +226,7 @@ func (swi *sdkWrapperImp) CreateTransaction(publishId string, password string, s
 	return nil
 }
 
-func (swi *sdkWrapperImp) Buy(txId string, password string) error {
+func (swi *sdkWrapperImp) Buy(txId, password string) error {
 	if swi.curUser == nil {
 		return errors.New("Current user is nil. ")
 	}
@@ -249,16 +249,15 @@ func (swi *sdkWrapperImp) Buy(txId string, password string) error {
 	return nil
 }
 
-func (swi *sdkWrapperImp) SubmitMetaDataIdEncWithBuyer(txId string, password, seller, buyer string, metaDataIDEncSeller []byte) error {
-	metaDataIdEncWithBuyer, err := auth.GetAccIns().ReEncrypt(metaDataIDEncSeller, seller, buyer, password)
-	if err != nil {
-		return errors.Wrap(err, "Re-encrypt meta data ID failed. ")
-	}
+func (swi *sdkWrapperImp) ReEncryptMetaDataIdBySeller(txId, password, seller string, metaDataIDEncSeller []byte) error {
+	var (
+		buyer string
+		arbitrators []string
+		metaDataIdEncWithBuyer []byte
+		metaDataIdsEncWithArbitrators []byte
 
-	tID, ok := new(big.Int).SetString(txId, 10)
-	if !ok {
-		return errors.New("Set to *big.Int failed. ")
-	}
+		err error
+	)
 
 	txParam := transaction.TxParams{
 		From:     common.HexToAddress(swi.curUser.Account().Addr),
@@ -266,7 +265,30 @@ func (swi *sdkWrapperImp) SubmitMetaDataIdEncWithBuyer(txId string, password, se
 		Value:    big.NewInt(0),
 		Pending:  false,
 	}
-	if err := swi.cw.SubmitMetaDataIdEncWithBuyer(&txParam, tID, metaDataIdEncWithBuyer); err != nil {
+	tID, ok := new(big.Int).SetString(txId, 10)
+	if !ok {
+		return errors.New("Set to *big.Int failed. ")
+	}
+
+	if buyer, err = swi.cw.GetBuyer(&txParam, tID); err != nil {
+		return errors.Wrap(err, "Get buyer address failed. ")
+	}
+	if metaDataIdEncWithBuyer, err = auth.GetAccIns().ReEncrypt(metaDataIDEncSeller, seller, buyer, password); err != nil {
+		return errors.Wrap(err, "Re-encrypt meta data ID failed. ")
+	}
+
+	if arbitrators, err = swi.cw.GetArbitrators(&txParam, tID); err != nil {
+		return errors.Wrap(err, "Get arbitrators addresses failed. ")
+	}
+	for i := 0; i < len(arbitrators); i++ {
+		var bs []byte
+		if bs, err = auth.GetAccIns().ReEncrypt(metaDataIDEncSeller, seller, arbitrators[i], password); err != nil {
+			return errors.Wrap(err, "Re-encrypt meta data ID failed. ")
+		}
+		metaDataIdsEncWithArbitrators = append(metaDataIdsEncWithArbitrators, bs...)
+	}
+
+	if err := swi.cw.ReEncryptMetaDataIdBySeller(&txParam, tID, metaDataIdEncWithBuyer, metaDataIdsEncWithArbitrators); err != nil {
 		return errors.Wrap(err, "Submit encrypted ID with buyer failed. ")
 	}
 

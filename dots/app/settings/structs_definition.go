@@ -110,7 +110,6 @@ type ReEncryptData struct {
 }
 type SelectedTxRED struct {
 	TransactionID           string `json:"TransactionID"`
-	Buyer                   string `json:"Buyer"`
 	Seller                  string `json:"Seller"`
 	MetaDataIDEncWithSeller []byte `json:"MetaDataIDEncWithSeller"`
 }
@@ -190,6 +189,21 @@ type Credit struct {
 }
 
 type OnVerifierDisable struct {
+	Block uint64
+}
+
+type OnArbitrationBegin struct {
+	TransactionId string
+	PublishId string
+	ProofFileNames []string
+	MetaDataIdEncArbitrator []byte
+	Block uint64
+}
+
+type OnArbitrationResult struct {
+	TransactionId string
+	ArbitrateResult string
+	User string
 	Block uint64
 }
 

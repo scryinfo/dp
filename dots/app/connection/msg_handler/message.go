@@ -24,9 +24,21 @@ const (
 )
 
 var (
-	extChan   = make(chan []string, 3)
-	eventName = []string{"DataPublish", "Approval", "VerifiersChosen", "TransactionCreate", "Buy", "ReadyForDownload", "TransactionClose",
-		"RegisterVerifier", "Vote", "VerifierDisable"}
+	extChan   = make(chan []string, 4)
+	eventName = []string{
+		"Approval",
+		"DataPublish",
+		"VerifiersChosen",
+		"TransactionCreate",
+		"Buy",
+		"ReadyForDownload",
+		"TransactionClose",
+		"RegisterVerifier",
+		"Vote",
+		"VerifierDisable",
+		"ArbitrationBegin",
+		"ArbitrationResult",
+	}
 )
 
 func MessageHandlerInit() {
@@ -45,6 +57,7 @@ func MessageHandlerInit() {
 	app2.GetGapp().Connection.AddCallbackFunc("register", register)
 	app2.GetGapp().Connection.AddCallbackFunc("verify", verify)
 	app2.GetGapp().Connection.AddCallbackFunc("credit", credit)
+	// arbitrate
 	app2.GetGapp().Connection.AddCallbackFunc("get.eth.balance", getEthBalance)
 	app2.GetGapp().Connection.AddCallbackFunc("get.token.balance", getTokenBalance)
 	app2.GetGapp().Connection.AddCallbackFunc("acc.backup", backup)
@@ -80,8 +93,8 @@ func blockSet(mi *settings.MessageIn) (payload interface{}, err error) {
 	if err = json.Unmarshal(mi.Payload, &sid); err != nil {
 		return
 	}
-	if err = app2.GetGapp().CurUser.SubscribeEvents(eventName, onPublish, onApprove, onVerifiersChosen, onTransactionCreate,
-		onPurchase, onReadyForDownload, onClose, onRegisterAsVerifier, onVote, onVerifierDisable); err != nil {
+	if err = app2.GetGapp().CurUser.SubscribeEvents(eventName, onApprove, onPublish, onVerifiersChosen, onTransactionCreate, onPurchase, onReadyForDownload,
+		onClose, onRegisterAsVerifier, onVote, onVerifierDisable, onArbitrationBegin, onArbitrationResult); err != nil {
 		return
 	}
 	if err = sdkinterface.SetFromBlock(uint64(sid.FromBlock)); err != nil {
@@ -172,8 +185,8 @@ func reEncrypt(mi *settings.MessageIn) (payload interface{}, err error) {
 	if err = json.Unmarshal(mi.Payload, &re); err != nil {
 		return
 	}
-	if err = app2.GetGapp().CurUser.SubmitMetaDataIdEncWithBuyer(re.SelectedTx.TransactionID, re.Password, re.SelectedTx.Seller,
-		re.SelectedTx.Buyer, re.SelectedTx.MetaDataIDEncWithSeller); err != nil {
+	if err = app2.GetGapp().CurUser.ReEncryptMetaDataIdBySeller(re.SelectedTx.TransactionID, re.Password, re.SelectedTx.Seller,
+		re.SelectedTx.MetaDataIDEncWithSeller); err != nil {
 		return
 	}
 	payload = true

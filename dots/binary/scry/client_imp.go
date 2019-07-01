@@ -26,6 +26,8 @@ type clientImp struct {
     Acct         *auth.Account        `dot:"ca1c6ce4-182b-430a-9813-caeccf83f8ab"`
 }
 
+var _ Client = (*clientImp)(nil)
+
 func NewScryClient(publicKey string, chainWrapper ChainWrapper) Client {
 	c := &clientImp{
 		userAccount:  &auth.UserAccount{Addr: publicKey},

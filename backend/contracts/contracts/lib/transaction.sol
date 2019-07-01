@@ -289,7 +289,7 @@ library transaction {
         }
     }
 
-    function reEncryptMetaDataIdFromSeller(
+    function reEncryptMetaDataIdBySeller(
         common.DataSet storage ds,
         string seqNo,
         uint256 txId,
@@ -357,6 +357,7 @@ library transaction {
         } else {
             if (truth) {
                 payToSeller(txItem, data, token);
+                revertToBuyer(txItem, token);
                 closeTransaction(txItem, seqNo, txId);
             } else {
                 address[] memory users = new address[](1);
@@ -378,13 +379,13 @@ library transaction {
 
         bool result;
         common.TransactionItem storage txItem = ds.txData.map[txId];
-        if (!(truth >= (ds.conf.arbitratorNum+1)/2)) {
-            revertToBuyer(txItem, token);
-        }else {
+        if (truth >= (ds.conf.arbitratorNum+1)/2) {
             common.DataInfoPublished storage data = ds.pubData.map[txItem.publishId];
             payToSeller(txItem, data, token);
             result = true;
         }
+
+        revertToBuyer(txItem, token);
 
         address[] memory users = new address[](1);
         users[0] = txItem.seller;
