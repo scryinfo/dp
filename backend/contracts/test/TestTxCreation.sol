@@ -7,10 +7,8 @@ import "../contracts/lib/common.sol";
 
 contract TestTxCreation {
     common.DataSet ds;
-    ERC20 token = ERC20(DeployedAddresses.ScryToken());
 
     function beforeAll() {
-
     }
 
     function makePublishData() {
