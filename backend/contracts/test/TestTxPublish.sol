@@ -7,7 +7,6 @@ import "../contracts/lib/common.sol";
 
 contract TestTxPublish {
     common.DataSet ds;
-    ERC20 token;
 
     function testPublishDataInfo() public {
         delete ds;
