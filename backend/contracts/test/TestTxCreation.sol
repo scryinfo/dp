@@ -8,12 +8,8 @@ import "../contracts/lib/common.sol";
 contract TestTxCreation {
     common.DataSet ds;
 
-    function beforeAll() {
-    }
-
-    function makePublishData() {
+    function makePublishData() internal {
         string memory publishId = "pid";
-        string memory seqNo = "";
         uint256 price = 1;
         bytes memory metaDataIdEncSeller = "";
         bytes32[] memory proofDataIds = new bytes32[](2);
@@ -49,7 +45,6 @@ contract TestTxCreation {
         arbitrators[0] = 0x03;
         arbitrators[1] = 0x04;
 
-        bool startVerify = true;
         string memory seqNo = "seq no";
         uint256 fee = 10000;
 
