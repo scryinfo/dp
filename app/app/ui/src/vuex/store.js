@@ -14,20 +14,23 @@ let state = {
     //     MetaDataExtension: "", ProofDataExtensions: []}  
     //  primary key: PublishID.
 
-    transactionbuy: [],
+    transactionsell: [],
     // {Title: "", Price: 0, Keys: "", Description: "", Buyer: "", Seller: "", State: "", SupportVerify: false, StartVerify: false,
-    //     MetaDataExtension: "", ProofDataExtensions: [], MetaDataIDEncWithSeller: "", MetaDataIDEncWithBuyer: "",
-    //     Verifier1Response: "", Verifier2Response: "", pID: "", tID: ""}
+    //     MetaDataExtension: "", ProofDataExtensions: [], MetaDataIDEncWithSeller: "", MetaDataIDEncWithBuyer: "", MetaDataIDEncWithArbitrator: "",
+    //     Verifier1Response: "", Verifier2Response: "", ArbitrateResult: "", pID: "", tID: ""}
     //
-    // transaction's data dictionary = [datalist] + {Buyer, State, StartVerify, MetaDataIDEncWithSeller, MetaDataIDEncWithBuyer,
-    //     Verifier1Response, Verifier2Response, tID} = 9 + 8 = 17
+    // transaction's data dictionary = [datalist] + {Buyer, State, StartVerify, MetaDataIDEncWithSeller, MetaDataIDEncWithBuyer, MetaDataIDEncWithArbitrator,
+    //     Verifier1Response, Verifier2Response, ArbitrateResult, tID} = 9 + 10 = 19
     //  primary key: TransactionID.
 
-    transactionsell: [],
-    // the same as txb, all tx arrays use the same database.
+    transactionbuy: [],
+    // the same as txs, all tx arrays use the same database.
     
     transactionverifier: [],
-    // the same as txb, all tx arrays use the same database.
+    // the same as txs, all tx arrays use the same database.
+
+    transactionarbitrator: [],
+    // the same as txs, all tx arrays use the same database.
     
     accounts: [],
     // {address: "", nickname: "", fromBlock: 0(uint64), isVerifier: false}

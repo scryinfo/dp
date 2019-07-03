@@ -179,7 +179,7 @@ func (c *chainWrapperImp) Arbitrate(txParams *tx.TxParams, txId *big.Int, judge 
 func (c *chainWrapperImp) GetBuyer(txParams *tx.TxParams, txId *big.Int) (string, error) {
     buyer, err := c.protocol.GetBuyer(c.Tx.BuildCallOpts(txParams), txId)
     if err == nil {
-        dot.Logger().Debugln("Get buyer, buyer:" + buyer.String())
+        dot.Logger().Debugln("Get buyer, buyer: " + buyer.String())
     }
 
     return buyer.String(), err

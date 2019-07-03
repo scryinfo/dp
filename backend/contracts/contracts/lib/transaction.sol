@@ -183,7 +183,7 @@ library transaction {
         );
 
         users[0] = msg.sender;
-        emit TransactionCreate(seqNo, txId, publishId, proofIds, true, uint8(common.TransactionState.Created), users);
+        emit TransactionCreate(seqNo, txId, publishId, proofIds, false, uint8(common.TransactionState.Created), users);
     }
 
     function buyerDeposit(

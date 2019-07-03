@@ -1,4 +1,4 @@
-import {acc_db, dl_db, txBuyer_db, txSeller_db, txVerifier_db} from "./DBoptions";
+import {acc_db, dl_db, txBuyer_db, txSeller_db, txVerifier_db, txArbitrator_db} from "./DBoptions";
 import {connect} from "./connect";
 
 let utils = {
@@ -217,8 +217,10 @@ let presetFunc = {
                 ProofDataExtensions: dataDetails.ProofDataExtensions,
                 MetaDataIDEncWithSeller: "",
                 MetaDataIDEncWithBuyer: "",
+                MetaDataIDEncWithArbitrator: "",
                 Verifier1Response: "",
                 Verifier2Response: "",
+                ArbitrateResult: "",
                 PublishID: dataDetails.PublishID,
                 TransactionID: payload.TransactionID    // keyPath
             }, function () {
@@ -256,8 +258,10 @@ let presetFunc = {
                 ProofDataExtensions: dataDetails.ProofDataExtensions,
                 MetaDataIDEncWithSeller: "",
                 MetaDataIDEncWithBuyer: "",
+                MetaDataIDEncWithArbitrator: "",
                 Verifier1Response: "",
                 Verifier2Response: "",
+                ArbitrateResult: "",
                 PublishID: dataDetails.PublishID,
                 TransactionID: payload.TransactionID    // keyPath
             }, function () {
@@ -296,8 +300,10 @@ let presetFunc = {
                     ProofDataExtensions: dataDetails.ProofDataExtensions,
                     MetaDataIDEncWithSeller: payload.MetaDataIdEncWithSeller, // -
                     MetaDataIDEncWithBuyer: "",
+                    MetaDataIDEncWithArbitrator: "",
                     Verifier1Response: "",
                     Verifier2Response: "",
+                    ArbitrateResult: "",
                     PublishID: dataDetails.PublishID,
                     TransactionID: payload.TransactionID // keyPath
                 },function () {
@@ -328,8 +334,10 @@ let presetFunc = {
                     ProofDataExtensions: txDetailsOnPurchase.ProofDataExtensions,
                     MetaDataIDEncWithSeller: payload.MetaDataIdEncWithSeller, // -
                     MetaDataIDEncWithBuyer: txDetailsOnPurchase.MetaDataIDEncWithBuyer,
+                    MetaDataIDEncWithArbitrator: txDetailsOnPurchase.MetaDataIDEncWithArbitrator,
                     Verifier1Response: txDetailsOnPurchase.Verifier1Response,
                     Verifier2Response: txDetailsOnPurchase.Verifier2Response,
+                    ArbitrateResult: txDetailsOnPurchase.ArbitrateResult,
                     PublishID: txDetailsOnPurchase.PublishID,
                     TransactionID: txDetailsOnPurchase.TransactionID // keyPath
                 },function () {
@@ -360,8 +368,10 @@ let presetFunc = {
                     ProofDataExtensions: txDetailsOnPurchase.ProofDataExtensions,
                     MetaDataIDEncWithSeller: payload.MetaDataIdEncWithSeller, // -
                     MetaDataIDEncWithBuyer: txDetailsOnPurchase.MetaDataIDEncWithBuyer,
+                    MetaDataIDEncWithArbitrator: txDetailsOnPurchase.MetaDataIDEncWithArbitrator,
                     Verifier1Response: txDetailsOnPurchase.Verifier1Response,
                     Verifier2Response: txDetailsOnPurchase.Verifier2Response,
+                    ArbitrateResult: txDetailsOnPurchase.ArbitrateResult,
                     PublishID: txDetailsOnPurchase.PublishID,
                     TransactionID: txDetailsOnPurchase.TransactionID // keyPath
                 },function () {
@@ -401,8 +411,10 @@ let presetFunc = {
                     ProofDataExtensions: txDetailsOnRFD.ProofDataExtensions,
                     MetaDataIDEncWithSeller: txDetailsOnRFD.MetaDataIDEncWithSeller,
                     MetaDataIDEncWithBuyer: payload.MetaDataIdEncWithBuyer, // -
+                    MetaDataIDEncWithArbitrator: txDetailsOnRFD.MetaDataIDEncWithArbitrator,
                     Verifier1Response: txDetailsOnRFD.Verifier1Response,
                     Verifier2Response: txDetailsOnRFD.Verifier2Response,
+                    ArbitrateResult: txDetailsOnRFD.ArbitrateResult,
                     PublishID: txDetailsOnRFD.PublishID,
                     TransactionID: txDetailsOnRFD.TransactionID
                 }, function () {
@@ -433,8 +445,10 @@ let presetFunc = {
                     ProofDataExtensions: txDetailsOnRFD.ProofDataExtensions,
                     MetaDataIDEncWithSeller: txDetailsOnRFD.MetaDataIDEncWithSeller,
                     MetaDataIDEncWithBuyer: payload.MetaDataIdEncWithBuyer, // -
+                    MetaDataIDEncWithArbitrator: txDetailsOnRFD.MetaDataIDEncWithArbitrator,
                     Verifier1Response: txDetailsOnRFD.Verifier1Response,
                     Verifier2Response: txDetailsOnRFD.Verifier2Response,
+                    ArbitrateResult: txDetailsOnRFD.ArbitrateResult,
                     PublishID: txDetailsOnRFD.PublishID,
                     TransactionID: txDetailsOnRFD.TransactionID
                 }, function () {
@@ -474,8 +488,10 @@ let presetFunc = {
                     ProofDataExtensions: txDetailsOnC.ProofDataExtensions,
                     MetaDataIDEncWithSeller: txDetailsOnC.MetaDataIDEncWithSeller,
                     MetaDataIDEncWithBuyer: txDetailsOnC.MetaDataIDEncWithBuyer,
+                    MetaDataIDEncWithArbitrator: txDetailsOnC.MetaDataIDEncWithArbitrator,
                     Verifier1Response: txDetailsOnC.Verifier1Response,
                     Verifier2Response: txDetailsOnC.Verifier2Response,
+                    ArbitrateResult: txDetailsOnC.ArbitrateResult,
                     PublishID: txDetailsOnC.PublishID,
                     TransactionID: txDetailsOnC.TransactionID
                 }, function () {
@@ -506,8 +522,10 @@ let presetFunc = {
                     ProofDataExtensions: txDetailsOnC.ProofDataExtensions,
                     MetaDataIDEncWithSeller: txDetailsOnC.MetaDataIDEncWithSeller,
                     MetaDataIDEncWithBuyer: txDetailsOnC.MetaDataIDEncWithBuyer,
+                    MetaDataIDEncWithArbitrator: txDetailsOnC.MetaDataIDEncWithArbitrator,
                     Verifier1Response: txDetailsOnC.Verifier1Response,
                     Verifier2Response: txDetailsOnC.Verifier2Response,
+                    ArbitrateResult: txDetailsOnC.ArbitrateResult,
                     PublishID: txDetailsOnC.PublishID,
                     TransactionID: txDetailsOnC.TransactionID
                 }, function () {
@@ -538,8 +556,10 @@ let presetFunc = {
                     ProofDataExtensions: txDetailsOnC.ProofDataExtensions,
                     MetaDataIDEncWithSeller: txDetailsOnC.MetaDataIDEncWithSeller,
                     MetaDataIDEncWithBuyer: txDetailsOnC.MetaDataIDEncWithBuyer,
+                    MetaDataIDEncWithArbitrator: txDetailsOnC.MetaDataIDEncWithArbitrator,
                     Verifier1Response: txDetailsOnC.Verifier1Response,
                     Verifier2Response: txDetailsOnC.Verifier2Response,
+                    ArbitrateResult: txDetailsOnC.ArbitrateResult,
                     PublishID: txDetailsOnC.PublishID,
                     TransactionID: txDetailsOnC.TransactionID
                 }, function () {
@@ -598,10 +618,122 @@ let presetFunc = {
         });
     },
     onArbitrationBegin: function (payload, _this) {
-
+        console.log("仲裁开始事件回调：", payload);
+        _this.$notify({
+            title: "仲裁开始事件回调：",
+            message: payload,
+            position: "top-left"
+        });
+        dl_db.read(payload.PublishId, function (dataDetails) {
+            txArbitrator_db.write({
+                Title: dataDetails.Title,
+                Price: dataDetails.Price,
+                Keys: dataDetails.Keys,
+                Description: dataDetails.Description,
+                Buyer: "",
+                Seller: dataDetails.Seller,
+                State: "ReadyForDownload", // - !
+                SupportVerify: dataDetails.SupportVerify,
+                StartVerify: true, // - !
+                MetaDataExtension: dataDetails.MetaDataExtension,
+                ProofDataExtensions: dataDetails.ProofDataExtensions,
+                MetaDataIDEncWithSeller: "",
+                MetaDataIDEncWithBuyer: "",
+                MetaDataIDEncWithArbitrator: payload.MetaDataIdEncWithArbitrator,
+                Verifier1Response: "",
+                Verifier2Response: "",
+                ArbitrateResult: "",
+                PublishID: dataDetails.PublishID,
+                TransactionID: payload.TransactionId    // keyPath
+            }, function () {
+                txArbitrator_db.init(_this);
+            });
+        });
+        acc_db.read(_this.$store.state.account, function (accInstance) {
+            acc_db.write({
+                address: accInstance.address,
+                nickname: accInstance.nickname,
+                fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
+                isVerifier: accInstance.isVerifier
+            });
+        });
     },
     onArbitrationResult: function (payload, _this) {
-
+        console.log("仲裁结果事件回调：", payload);
+        _this.$notify({
+            title: "仲裁结果事件回调：",
+            message: payload,
+            position: "top-left"
+        });
+        if (payload.User === "0") {
+            txSeller_db.read(payload.TransactionId, function (txDetailsOAR) {
+                txSeller_db.write({
+                    Title: txDetailsOAR.Title,
+                    Price: txDetailsOAR.Price,
+                    Keys: txDetailsOAR.Keys,
+                    Description: txDetailsOAR.Description,
+                    Buyer: txDetailsOAR.Buyer,
+                    Seller: txDetailsOAR.Seller,
+                    State: txDetailsOAR.State,
+                    SupportVerify: txDetailsOAR.SupportVerify,
+                    StartVerify: txDetailsOAR.StartVerify,
+                    MetaDataExtension: txDetailsOAR.MetaDataExtension,
+                    ProofDataExtensions: txDetailsOAR.ProofDataExtensions,
+                    MetaDataIDEncWithSeller: txDetailsOAR.MetaDataIDEncWithSeller,
+                    MetaDataIDEncWithBuyer: txDetailsOAR.MetaDataIDEncWithBuyer,
+                    MetaDataIDEncWithArbitrator: txDetailsOAR.MetaDataIDEncWithArbitrator,
+                    Verifier1Response: txDetailsOAR.Verifier1Response,
+                    Verifier2Response: txDetailsOAR.Verifier2Response,
+                    ArbitrateResult: payload.ArbitrateResult, // -
+                    PublishID: txDetailsOAR.PublishID,
+                    TransactionID: txDetailsOAR.TransactionID // keyPath
+                },function () {
+                    txSeller_db.init(_this);
+                    acc_db.read(_this.$store.state.account, function (accInstance) {
+                        acc_db.write({
+                            address: accInstance.address,
+                            nickname: accInstance.nickname,
+                            fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
+                            isVerifier: accInstance.isVerifier
+                        });
+                    });
+                });
+            });
+        } else if (payload.User === "1") {
+            txBuyer_db.read(payload.TransactionId, function (txDetailsOAR) {
+                txBuyer_db.write({
+                    Title: txDetailsOAR.Title,
+                    Price: txDetailsOAR.Price,
+                    Keys: txDetailsOAR.Keys,
+                    Description: txDetailsOAR.Description,
+                    Buyer: txDetailsOAR.Buyer,
+                    Seller: txDetailsOAR.Seller,
+                    State: txDetailsOAR.State,
+                    SupportVerify: txDetailsOAR.SupportVerify,
+                    StartVerify: txDetailsOAR.StartVerify,
+                    MetaDataExtension: txDetailsOAR.MetaDataExtension,
+                    ProofDataExtensions: txDetailsOAR.ProofDataExtensions,
+                    MetaDataIDEncWithSeller: txDetailsOAR.MetaDataIDEncWithSeller,
+                    MetaDataIDEncWithBuyer: txDetailsOAR.MetaDataIDEncWithBuyer,
+                    MetaDataIDEncWithArbitrator: txDetailsOAR.MetaDataIDEncWithArbitrator,
+                    Verifier1Response: txDetailsOAR.Verifier1Response,
+                    Verifier2Response: txDetailsOAR.Verifier2Response,
+                    ArbitrateResult: payload.ArbitrateResult, // -
+                    PublishID: txDetailsOAR.PublishID,
+                    TransactionID: txDetailsOAR.TransactionID // keyPath
+                },function () {
+                    txBuyer_db.init(_this);
+                    acc_db.read(_this.$store.state.account, function (accInstance) {
+                        acc_db.write({
+                            address: accInstance.address,
+                            nickname: accInstance.nickname,
+                            fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
+                            isVerifier: accInstance.isVerifier
+                        });
+                    });
+                });
+            });
+        }
     }
 };
 

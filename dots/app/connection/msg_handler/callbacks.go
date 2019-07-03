@@ -50,7 +50,7 @@ func getPubDataDetails(ipfsID string) (detailsData settings.OnPublish, err error
 
 	var fileName string
 	{
-		outDir := storage.GetIPFSConfig().OutDir
+		outDir := settings.GetConfig().IPFSOutDir
 		if err = storage.GetIPFSIns().Get(ipfsID, outDir); err != nil {
 			return
 		}
@@ -151,7 +151,7 @@ func getAndRenameProofFiles(ipfsIDs [][32]byte, extensions []string) ([]string, 
 
 	var proofs = make([]string, len(ipfsIDs))
 
-	outDir := storage.GetIPFSConfig().OutDir
+	outDir := settings.GetConfig().IPFSOutDir
 	for i := 0; i < len(ipfsIDs); i++ {
 		ipfsID := ipfsBytes32ToHash(ipfsIDs[i])
 		if err := storage.GetIPFSIns().Get(ipfsID, outDir); err != nil {
@@ -284,7 +284,7 @@ func onArbitrationBegin(event event.Event) bool {
 		}
 
 		oab.TransactionId = event.Data.Get("transactionId").(*big.Int).String()
-		oab.MetaDataIdEncArbitrator = event.Data.Get("metaDataIdEncArbitrator").([]byte)
+		oab.MetaDataIdEncWithArbitrator = event.Data.Get("metaDataIdEncArbitrator").([]byte)
 		oab.Block = event.BlockNumber
 
 		extensions := <-extChan
