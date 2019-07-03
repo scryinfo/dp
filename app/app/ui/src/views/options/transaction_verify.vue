@@ -12,7 +12,7 @@
                 <c-f-t button-name="验证数据" dialog-title="验证数据：" @password="Vote">
                     <p>是否建议购买：</p>
                     <p><el-switch v-model="verify.suggestion" active-text="是" inactive-text="否"></el-switch></p>
-                    <el-input v-model="verify.comment" placeholder="评论" clearable></el-input>
+                    <p><el-input v-model="verify.comment" placeholder="评论" clearable></el-input></p>
                 </c-f-t>
             </el-col>
             <el-col :span="3" class="section-item">
@@ -39,7 +39,7 @@ import {acc_db, txVerifier_db} from "../../utils/DBoptions";
 import SFT from "../templates/simple_function_template.vue";
 import CFT from "../templates/complex_function_template.vue";
 export default {
-    name: "verify.vue",
+    name: "transaction_verify.vue",
     data () {
         return {
             selectedTx: "",     // txID: ""

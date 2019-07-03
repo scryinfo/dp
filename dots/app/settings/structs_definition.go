@@ -188,16 +188,25 @@ type Credit struct {
 	Verifier2Credit float64 `json:"verifier2Credit"`
 }
 
+type ArbitrateData struct {
+	Password string `json:"password"`
+	SelectedTx SelectedTxAD `json:"tID"`
+	ArbitrateResult bool `json:"arbitrateResult"`
+}
+type SelectedTxAD struct {
+	TransactionId string `json:"TransactionID"`
+}
+
 type OnVerifierDisable struct {
 	Block uint64
 }
 
 type OnArbitrationBegin struct {
-	TransactionId string
-	PublishId string
-	ProofFileNames []string
-	MetaDataIdEncArbitrator []byte
-	Block uint64
+	TransactionId               string
+	PublishId                   string
+	ProofFileNames              []string
+	MetaDataIdEncWithArbitrator []byte
+	Block                       uint64
 }
 
 type OnArbitrationResult struct {

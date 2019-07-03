@@ -12,7 +12,6 @@ import (
 	sdkinterface2 "github.com/scryinfo/dp/dots/app/sdkinterface"
 	"github.com/scryinfo/dp/dots/app/settings"
 	"github.com/scryinfo/dp/dots/binary"
-	"github.com/scryinfo/dp/dots/storage"
 	"github.com/scryinfo/scryg/sutils/ssignal"
 	"go.uber.org/zap"
 	"os"
@@ -22,7 +21,6 @@ func main() {
 	l, err := line.BuildAndStart(func(l dot.Line) error {
 		//todo
 		l.PreAdd(binary.BinTypeLive()...)
-		l.PreAdd(storage.IpfsTypeLive())
 		l.PreAdd(settings.ConfTypeLive())
 		return nil
 	})

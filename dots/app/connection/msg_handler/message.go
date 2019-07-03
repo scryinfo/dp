@@ -20,6 +20,9 @@ const (
 	verifierBonus          = 300
 	registerAsVerifierCost = 10000
 
+	arbitratorNum = 1
+	arbitratorBonus = 500
+
 	sep = "|"
 )
 
@@ -57,7 +60,7 @@ func MessageHandlerInit() {
 	app2.GetGapp().Connection.AddCallbackFunc("register", register)
 	app2.GetGapp().Connection.AddCallbackFunc("verify", verify)
 	app2.GetGapp().Connection.AddCallbackFunc("credit", credit)
-	// arbitrate
+	app2.GetGapp().Connection.AddCallbackFunc("arbitrate", arbitrate)
 	app2.GetGapp().Connection.AddCallbackFunc("get.eth.balance", getEthBalance)
 	app2.GetGapp().Connection.AddCallbackFunc("get.token.balance", getTokenBalance)
 	app2.GetGapp().Connection.AddCallbackFunc("acc.backup", backup)
@@ -101,11 +104,11 @@ func blockSet(mi *settings.MessageIn) (payload interface{}, err error) {
 		dot.Logger().Errorln("set fromBlock failed. ", zap.NamedError("", err))
 		return
 	}
-	// when an user login success, he will get 1,000,000 eth and tokens for test. in 'block.set' case.
-	if err = app2.GetGapp().CurUser.TransferEthFromDeployer(big.NewInt(1000000)); err != nil { // for test
+	// when an user login success, he will get 10,000,000 eth and tokens for test. in 'block.set' case.
+	if err = app2.GetGapp().CurUser.TransferEthFromDeployer(big.NewInt(10000000)); err != nil { // for test
 		return
 	}
-	if err = app2.GetGapp().CurUser.TransferTokenFromDeployer(big.NewInt(1000000)); err != nil { // for test
+	if err = app2.GetGapp().CurUser.TransferTokenFromDeployer(big.NewInt(10000000)); err != nil { // for test
 		return
 	}
 	payload = true
@@ -142,7 +145,7 @@ func buy(mi *settings.MessageIn) (payload interface{}, err error) {
 
 	fee := int64(bd.SelectedData.Price)
 	if bd.StartVerify {
-		fee += int64(verifierNum * verifierBonus)
+		fee += int64(verifierNum * verifierBonus) + int64(arbitratorNum * arbitratorBonus)
 	}
 	if err = app2.GetGapp().CurUser.ApproveTransferToken(bd.Password, big.NewInt(fee)); err != nil {
 		return
@@ -268,6 +271,19 @@ func credit(mi *settings.MessageIn) (payload interface{}, err error) {
 		return
 	}
 	if err = app2.GetGapp().CurUser.CreditToVerifiers(&cd); err != nil {
+		return
+	}
+	payload = true
+
+	return
+}
+
+func arbitrate(mi *settings.MessageIn) (payload interface{}, err error) {
+	var ad settings.ArbitrateData
+	if err = json.Unmarshal(mi.Payload, &ad); err != nil {
+		return
+	}
+	if err = app2.GetGapp().CurUser.Arbitrate(ad.Password, ad.SelectedTx.TransactionId, ad.ArbitrateResult); err != nil {
 		return
 	}
 	payload = true

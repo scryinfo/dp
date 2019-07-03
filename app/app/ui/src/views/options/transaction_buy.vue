@@ -10,16 +10,16 @@
                    :pre-params="[this.selectedTx.SupportVerify]" @pre="confirmPre">
                 <p v-if="supportVerify">判断原始数据真实性，如果你认为原始数据是假的，我们将为你启动仲裁流程：</p>
                 <p v-if="!supportVerify">判断原始数据真实性，点击“输入密码”按钮完成交易。</p>
-                <el-switch v-model="confirmData" active-text="真" inactive-text="假"></el-switch>
+                <p><el-switch v-model="confirmData" active-text="真" inactive-text="假"></el-switch></p>
             </c-f-t>
             <c-f-t button-name="评价验证者" dialog-title="评价验证者：" @password="credit" @pre="creditPre"
                    :pre-params="[this.selectedTx.Verifier1Response !== '', this.selectedTx.Verifier2Response !== '']">
                 <p>验证者1:</p>
-                <el-slider v-model="verifier1Credit" max="5" v-if="verifier1Revert" show-input></el-slider>
-                <span v-if="!verifier1Revert">交易未进入验证流程或验证者未回复</span>
+                <p><el-slider v-model="verifier1Credit" max="5" v-if="verifier1Revert" show-input></el-slider>
+                <span v-if="!verifier1Revert">交易未进入验证流程或验证者未回复</span></p>
                 <p>验证者2:</p>
-                <el-slider v-model="verifier2Credit" max="5" v-if="verifier2Revert" show-input></el-slider>
-                <span v-if="!verifier2Revert">交易未进入验证流程或验证者未回复</span>
+                <p><el-slider v-model="verifier2Credit" max="5" v-if="verifier2Revert" show-input></el-slider>
+                <span v-if="!verifier2Revert">交易未进入验证流程或验证者未回复</span></p>
             </c-f-t>
         </el-col>
         <el-col :span="3" class="section-item section-item-right">
@@ -38,6 +38,7 @@
                     <el-form-item label="状态"><span>{{ props.row.State }}</span></el-form-item>
                     <el-form-item label="验证者回复1"><span>{{ props.row.Verifier1Response }}</span></el-form-item>
                     <el-form-item label="验证者回复2"><span>{{ props.row.Verifier2Response }}</span></el-form-item>
+                    <el-form-item label="仲裁结果"><span>{{ props.row.ArbitrateResult }}</span></el-form-item>
                 </el-form>
             </el-table-column>
             <el-table-column prop="Title" label="标题" show-overflow-tooltip></el-table-column>
@@ -56,7 +57,7 @@ import {txBuyer_db} from "../../utils/DBoptions"
 import SFT from "../templates/simple_function_template.vue"
 import CFT from "../templates/complex_function_template.vue"
 export default {
-    name: "transactionBuy.vue",
+    name: "transaction_buy.vue",
     data () {
         return {
             selectedTx: {},  // {tID: "", User: "", MetaDataIDEncrypt: "", MetaDataExtension: "",
@@ -136,8 +137,7 @@ export default {
             this.supportVerify = array[0];
         },
         confirm: function (pwd) {
-            connect.send({Name:"confirm", Payload:{password: pwd, tID: this.selectedTx, confirmData: this.confirmData}},
-            function (payload, _this) {
+            connect.send({Name:"confirm", Payload:{password: pwd, tID: this.selectedTx, confirmData: this.confirmData}}, function (payload, _this) {
                 _this.supportVerify = false;
                 console.log("确认数据成功", payload);
             }, function (payload, _this) {

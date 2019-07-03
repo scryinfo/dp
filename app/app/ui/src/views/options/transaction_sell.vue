@@ -18,6 +18,9 @@
                     <el-form-item label="标签"><span>{{ props.row.Keys }}</span></el-form-item>
                     <el-form-item label="描述"><span>{{ props.row.Description }}</span></el-form-item>
                     <el-form-item label="状态"><span>{{ props.row.State }}</span></el-form-item>
+                    <el-form-item label="验证者回复1"><span>{{ props.row.Verifier1Response }}</span></el-form-item>
+                    <el-form-item label="验证者回复2"><span>{{ props.row.Verifier2Response }}</span></el-form-item>
+                    <el-form-item label="仲裁结果"><span>{{ props.row.ArbitrateResult }}</span></el-form-item>
                 </el-form>
             </el-table-column>
             <el-table-column prop="Title" label="标题" show-overflow-tooltip></el-table-column>
@@ -34,7 +37,7 @@ import {connect} from "../../utils/connect";
 import {txSeller_db} from "../../utils/DBoptions";
 import SFT from "../templates/simple_function_template.vue";
 export default {
-    name: "transactionSell.vue",
+    name: "transaction_sell.vue",
     data () {
         return {
             selectedTx: {},  // {tID: "", Seller: "", MetaDataIDEncWithSeller: "", pID: ""}

@@ -314,14 +314,14 @@ func (swi *sdkWrapperImp) CancelTransaction(txId, password string) error {
 	return nil
 }
 
-func (swi *sdkWrapperImp) DecryptAndGetMetaDataFromIPFS(password string, metaDataIdEncWithBuyer []byte, buyer, extension string) (string, error) {
+func (swi *sdkWrapperImp) DecryptAndGetMetaDataFromIPFS(password string, encryptedMetaDataId []byte, address, extension string) (string, error) {
 	var oldFileName string
 	{
-		metaDataIDByte, err := auth.GetAccIns().Decrypt(metaDataIdEncWithBuyer, buyer, password)
+		metaDataIDByte, err := auth.GetAccIns().Decrypt(encryptedMetaDataId, address, password)
 		if err != nil {
-			return "", errors.Wrap(err, "Decrypt meta data ID encrypted with buyer failed. ")
+			return "", errors.Wrap(err, "Decrypt encrypted meta data ID failed. ")
 		}
-		outDir := storage.GetIPFSConfig().OutDir
+		outDir := settings.GetConfig().IPFSOutDir
 		if err := storage.GetIPFSIns().Get(string(metaDataIDByte), outDir); err != nil {
 			return "", errors.Wrap(err, "Get meta data from IPFS failed. ")
 		}
@@ -428,6 +428,29 @@ func (swi *sdkWrapperImp) CreditToVerifiers(creditData *settings.CreditData) err
 		if err := swi.cw.CreditsToVerifier(&txParam, tID, 1, credit); err != nil {
 			return errors.Wrap(err, "Credit verifier2 failed. ")
 		}
+	}
+
+	return nil
+}
+
+func (swi *sdkWrapperImp) Arbitrate(password, txId string, judge bool) error {
+	if swi.curUser == nil {
+		return errors.New("Current user is nil. ")
+	}
+
+	tID, ok := new(big.Int).SetString(txId, 10)
+	if !ok {
+		return errors.New("Set to *big.Int failed. ")
+	}
+
+	txParam := transaction.TxParams{
+		From:     common.HexToAddress(swi.curUser.Account().Addr),
+		Password: password,
+		Value:    big.NewInt(0),
+		Pending:  false,
+	}
+	if err := swi.cw.Arbitrate(&txParam, tID, judge); err != nil {
+		return errors.Wrap(err, "Arbitrate failed. ")
 	}
 
 	return nil

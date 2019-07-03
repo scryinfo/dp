@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import {dl_db, acc_db, txBuyer_db, txSeller_db, txVerifier_db, db_options} from "../../utils/DBoptions.js";
+import {dl_db, acc_db, txBuyer_db, txSeller_db, txVerifier_db, txArbitrator_db, db_options} from "../../utils/DBoptions.js";
 export default {
     name: "t_administrator.vue",
     data () {
@@ -51,6 +51,7 @@ export default {
             txBuyer_db.init(this);
             txSeller_db.init(this);
             txVerifier_db.init(this);
+            txArbitrator_db.init(this);
             console.log("交易列表初始化完成");
         },
         testTxDBsConnect: function () {
@@ -63,7 +64,6 @@ export default {
             console.log(result)
         },
         resetTxDBs: function () {
-            let _this = this
             let c = acc_db.db.transaction(acc_db.db_store_name,"readwrite").objectStore(acc_db.db_store_name).openCursor();
             c.onsuccess = function (evt) {
                 let cursor = evt.target.result;
