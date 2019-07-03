@@ -5,10 +5,12 @@ import "truffle/DeployedAddresses.sol";
 import "../contracts/lib/transaction.sol";
 import "../contracts/lib/common.sol";
 
-contract TestTransaction {
+contract TestTxPublish {
     common.DataSet ds;
 
     function testPublishDataInfo() public {
+        delete ds;
+
         string memory seqNo = "seqNo";
         string memory publishId = "publishId";
         uint256 price = 1000;
@@ -29,10 +31,9 @@ contract TestTransaction {
         Assert.equal(data.price, price, "data should be correct");
 
         bool r = address(this).call(abi.encodePacked(this.publishTwiceWithSamePublishId.selector));
-        Assert.isFalse(r, "A same publish id should not publish twice");
+        Assert.isFalse(r, "a same publish id should not publish twice");
     }
 
-    //pr practice comment
     function publishTwiceWithSamePublishId() public {
         string memory seqNo = "";
         string memory publishId = "publishId";
