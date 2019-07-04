@@ -10,9 +10,9 @@ const (
 )
 
 type Config struct {
-	WSPort string `json:"wsPort"`
+	WSPort         string `json:"wsPort"`
 	UIResourcesDir string `json:"uiResourcesDir"`
-	IPFSOutDir string `json:"IPFSOutDir"`
+	IPFSOutDir     string `json:"IPFSOutDir"`
 	AccsBackupFile string `json:"accsBackupFile"`
 }
 

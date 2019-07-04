@@ -35,7 +35,7 @@ func onPublish(event event.Event) bool {
 	}
 
 	if err := app2.GetGapp().Connection.SendMessage("onPublish", op); err != nil {
-		dot.Logger().Errorln("", zap.NamedError("onPublish"+ connection.EventSendFailed, err))
+		dot.Logger().Errorln("", zap.NamedError("onPublish"+connection.EventSendFailed, err))
 	}
 
 	return true
