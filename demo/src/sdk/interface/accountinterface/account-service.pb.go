@@ -444,7 +444,7 @@ func (c *keyServiceClient) ImportKeystore(ctx context.Context, in *ImportParamet
 
 // KeyServiceServer is the server API for KeyService service.
 type KeyServiceServer interface {
-	//Generate address 
+	//Generate address
 	GenerateAddress(context.Context, *AddressParameter) (*AddressInfo, error)
 	//Proof address
 	VerifyAddress(context.Context, *AddressParameter) (*AddressInfo, error)

@@ -1,7 +1,7 @@
 package event
 
 type ContractInfo struct {
-    Address string
-    Abi     string
-    Events  []string
+	Address string
+	Abi     string
+	Events  []string
 }

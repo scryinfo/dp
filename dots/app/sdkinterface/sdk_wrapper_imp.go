@@ -26,13 +26,14 @@ type sdkWrapperImp struct {
 	cw      scry.ChainWrapper
 }
 
+// check if 'sdkWrapperImp' implements 'SDKWrapper' interface.
 var _ SDKWrapper = (*sdkWrapperImp)(nil)
 
 func CreateSDKWrapperImp(cw scry.ChainWrapper) SDKWrapper {
 	return &sdkWrapperImp{
-		cw:   cw,
+		cw: cw,
 		dp: &settings.AccInfo{
-			Account: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8",
+			Account:  "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8",
 			Password: "111111",
 		},
 	}
@@ -251,9 +252,9 @@ func (swi *sdkWrapperImp) Buy(txId, password string) error {
 
 func (swi *sdkWrapperImp) ReEncryptMetaDataIdBySeller(txId, password, seller string, metaDataIDEncSeller []byte) error {
 	var (
-		buyer string
-		arbitrators []string
-		metaDataIdEncWithBuyer []byte
+		buyer                         string
+		arbitrators                   []string
+		metaDataIdEncWithBuyer        []byte
 		metaDataIdsEncWithArbitrators []byte
 
 		err error

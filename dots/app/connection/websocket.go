@@ -50,7 +50,7 @@ func (ws *WSServer) start() error {
 
 	dot.Logger().Infoln("> Listening at http://127.0.0.1:" + ws.port)
 
-	go func()  {
+	go func() {
 		if err := http.ListenAndServe(":"+ws.port, nil); err != nil {
 			dot.Logger().Errorln("Listen and Server failed. ", zap.NamedError("", err))
 		}

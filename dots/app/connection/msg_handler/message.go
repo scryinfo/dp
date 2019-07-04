@@ -20,7 +20,7 @@ const (
 	verifierBonus          = 300
 	registerAsVerifierCost = 10000
 
-	arbitratorNum = 1
+	arbitratorNum   = 1
 	arbitratorBonus = 500
 
 	sep = "|"
@@ -145,7 +145,7 @@ func buy(mi *settings.MessageIn) (payload interface{}, err error) {
 
 	fee := int64(bd.SelectedData.Price)
 	if bd.StartVerify {
-		fee += int64(verifierNum * verifierBonus) + int64(arbitratorNum * arbitratorBonus)
+		fee += int64(verifierNum*verifierBonus) + int64(arbitratorNum*arbitratorBonus)
 	}
 	if err = app2.GetGapp().CurUser.ApproveTransferToken(bd.Password, big.NewInt(fee)); err != nil {
 		return

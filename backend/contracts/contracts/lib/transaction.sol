@@ -252,7 +252,8 @@ library transaction {
         require(txItem.used, "Transaction does not exist");
         require(txItem.buyer == msg.sender, "Invalid cancel operator");
 
-        require(txItem.state == common.TransactionState.Created || txItem.state == common.TransactionState.Voted ||
+        require(txItem.state == common.TransactionState.Created ||
+        txItem.state == common.TransactionState.Voted ||
         txItem.state == common.TransactionState.Buying, "Invalid transaction state");
 
         revertToBuyer(txItem, token);
@@ -283,9 +284,11 @@ library transaction {
         uint256 deposit = txItem.buyerDeposit;
         txItem.buyerDeposit = 0;
 
-        if (!token.transfer(txItem.buyer, deposit)) {
-            txItem.buyerDeposit = deposit;
-            require(false, "Failed to revert buyer his token");
+        if (deposit > 0) {
+            if (!token.transfer(txItem.buyer, deposit)) {
+                txItem.buyerDeposit = deposit;
+                require(false, "Failed to revert buyer his token");
+            }
         }
     }
 

@@ -73,12 +73,15 @@ let acc_db = {
             }
         };
     },
-    write: function (params) {
+    write: function (params, cb) {
         let store = acc_db.db.transaction(acc_db.db_store_name, "readwrite").objectStore(acc_db.db_store_name);
         let request = store.put(params);
         request.onerror = function(err){
             console.log(err);
         };
+        request.onsuccess = function() {
+            cb();
+        }
     },
     read: function (addr, cb) {
         let store = acc_db.db.transaction(acc_db.db_store_name, "readwrite").objectStore(acc_db.db_store_name);

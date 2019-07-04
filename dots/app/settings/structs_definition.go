@@ -189,9 +189,9 @@ type Credit struct {
 }
 
 type ArbitrateData struct {
-	Password string `json:"password"`
-	SelectedTx SelectedTxAD `json:"tID"`
-	ArbitrateResult bool `json:"arbitrateResult"`
+	Password        string       `json:"password"`
+	SelectedTx      SelectedTxAD `json:"tID"`
+	ArbitrateResult bool         `json:"arbitrateResult"`
 }
 type SelectedTxAD struct {
 	TransactionId string `json:"TransactionID"`
@@ -210,10 +210,10 @@ type OnArbitrationBegin struct {
 }
 
 type OnArbitrationResult struct {
-	TransactionId string
+	TransactionId   string
 	ArbitrateResult string
-	User string
-	Block uint64
+	User            string
+	Block           uint64
 }
 
 type Balance struct {

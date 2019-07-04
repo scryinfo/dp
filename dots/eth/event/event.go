@@ -4,30 +4,30 @@
 package event
 
 import (
-    "fmt"
-    "github.com/ethereum/go-ethereum/common"
+	"fmt"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 type Event struct {
-    BlockNumber uint64
-    TxHash      common.Hash
-    Address     common.Address
-    Name        string
-    Data        JSONObj
+	BlockNumber uint64
+	TxHash      common.Hash
+	Address     common.Address
+	Name        string
+	Data        JSONObj
 }
 
 type Progress struct {
-    From uint64
-    To   uint64
+	From uint64
+	To   uint64
 }
 
 func (evt Event) String() string {
-    return fmt.Sprintf(
-        `block: %v,tx: %s,address: %s,event: %s,data: %s`,
-        evt.BlockNumber,
-        evt.TxHash.Hex(),
-        evt.Address.Hex(),
-        evt.Name,
-        evt.Data.String(),
-    )
+	return fmt.Sprintf(
+		`block: %v,tx: %s,address: %s,event: %s,data: %s`,
+		evt.BlockNumber,
+		evt.TxHash.Hex(),
+		evt.Address.Hex(),
+		evt.Name,
+		evt.Data.String(),
+	)
 }
