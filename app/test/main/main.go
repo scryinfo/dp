@@ -17,18 +17,18 @@ import (
 )
 
 var (
-    seller                  scry.Client = nil
-    buyer                   scry.Client = nil
-    verifier1               scry.Client = nil
-    verifier2               scry.Client = nil
-    verifier3               scry.Client = nil
+    seller    scry.Client = nil
+    buyer     scry.Client = nil
+    verifier1 scry.Client = nil
+    verifier2 scry.Client = nil
+    verifier3 scry.Client = nil
 
-    protocolContractAddr                           = "0x8af6e28777f52bd97cc1b2b534d6b7601ea0afc7"
-    clientPassword                                 = "888888"
-    suAddress                                      = "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8"
-    suPassword                                     = "111111"
+    protocolContractAddr = "0x8af6e28777f52bd97cc1b2b534d6b7601ea0afc7"
+    clientPassword       = "888888"
+    suAddress            = "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8"
+    suPassword           = "111111"
 
-    bin *binary.Binary = nil
+    bin   *binary.Binary    = nil
     chain scry.ChainWrapper = nil
 
     publishId                        = ""
@@ -37,7 +37,7 @@ var (
     metaDataIdEncWithBuyer  []byte
 )
 
-func main()  {
+func main() {
     logger := dot.Logger()
     l, err := line.BuildAndStart(func(l dot.Line) error {
         l.PreAdd(binary.BinTypeLive()...)
@@ -56,10 +56,9 @@ func main()  {
         logger.Errorln("load Binary component failed.")
     }
 
-    
     if bin, ok := d.(*binary.Binary); !ok {
         logger.Errorln("load Binary component failed.", zap.Any("d", d))
-    }  else {
+    } else {
         chain = bin.ChainWrapper()
     }
 
@@ -72,17 +71,17 @@ func main()  {
     })
 }
 
-func Start()  {
+func Start() {
     TestClient()
 
     InitUsers()
 
-    time.Sleep(time.Second*30)
+    time.Sleep(time.Second * 30)
 
     StartTestingWithoutVerify()
 }
 
-func TestClient()  {
+func TestClient() {
     c := scry.NewScryClient("0xd280b60638bc8db9d309fa5a540ffec499f0a3e8", chain)
     rv, err := c.Authenticate("111111")
     if err != nil {
@@ -95,13 +94,12 @@ func TestClient()  {
     }
 }
 
-func InitUsers()  {
+func InitUsers() {
     var err error
     seller, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(10000000))
     if err != nil {
         panic(err)
     }
-
 
     buyer, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(10000000))
     if err != nil {
@@ -124,7 +122,6 @@ func InitUsers()  {
     }
 }
 
-
 func StartTestingWithoutVerify() {
     unsubscribeAllEvents()
     subscribeAllEvents()
@@ -140,26 +137,26 @@ func CreateClientWithToken(token *big.Int, eth *big.Int) (scry.Client, error) {
     dot.Logger().Debugln("client:" + client.Account().Addr)
 
     err = client.TransferEthFrom(
-                common.HexToAddress(suAddress),
-                suPassword,
-                eth,
-                chain.Conn(),
-            )
+        common.HexToAddress(suAddress),
+        suPassword,
+        eth,
+        chain.Conn(),
+    )
     if err != nil {
         return nil, err
     }
 
     txParam := transaction.TxParams{
-        From: common.HexToAddress(suAddress),
+        From:     common.HexToAddress(suAddress),
         Password: suPassword,
-        Value: big.NewInt(0),
-        Pending: false,
+        Value:    big.NewInt(0),
+        Pending:  false,
     }
     err = chain.TransferTokens(
-            &txParam,
-            common.HexToAddress(client.Account().Addr),
-            token,
-        )
+        &txParam,
+        common.HexToAddress(client.Account().Addr),
+        token,
+    )
     if err != nil {
         return nil, err
     }
@@ -174,10 +171,10 @@ func SellerPublishData() {
     despData := "QmQXqZdEwXnWgKpfJmUVaACuVar9R7vpBxtZgddQMTa2UN"
 
     txParam := transaction.TxParams{
-        From: common.HexToAddress(seller.Account().Addr),
+        From:     common.HexToAddress(seller.Account().Addr),
         Password: clientPassword,
-        Value: big.NewInt(0),
-        Pending: false,
+        Value:    big.NewInt(0),
+        Pending:  false,
     }
 
     var err error
@@ -217,13 +214,12 @@ func unsubscribeAllEvents() {
     buyer.UnSubscribeEvent("TransactionClose")
 }
 
-
 func BuyerApproveTransfer() {
     txParam := transaction.TxParams{
-        From: common.HexToAddress(buyer.Account().Addr),
+        From:     common.HexToAddress(buyer.Account().Addr),
         Password: clientPassword,
-        Value: big.NewInt(0),
-        Pending: false,
+        Value:    big.NewInt(0),
+        Pending:  false,
     }
     err := chain.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(1600))
     if err != nil {
@@ -233,10 +229,10 @@ func BuyerApproveTransfer() {
 
 func PrepareToBuy(publishId string) {
     txParam := transaction.TxParams{
-        From: common.HexToAddress(buyer.Account().Addr),
+        From:     common.HexToAddress(buyer.Account().Addr),
         Password: clientPassword,
-        Value: big.NewInt(0),
-        Pending: false,
+        Value:    big.NewInt(0),
+        Pending:  false,
     }
     err := chain.PrepareToBuy(&txParam, publishId, false)
     if err != nil {
@@ -246,10 +242,10 @@ func PrepareToBuy(publishId string) {
 
 func Buy(txId *big.Int) {
     txParam := transaction.TxParams{
-        From: common.HexToAddress(buyer.Account().Addr),
+        From:     common.HexToAddress(buyer.Account().Addr),
         Password: clientPassword,
-        Value: big.NewInt(0),
-        Pending: false,
+        Value:    big.NewInt(0),
+        Pending:  false,
     }
 
     err := chain.BuyData(&txParam, txId)
@@ -260,13 +256,13 @@ func Buy(txId *big.Int) {
 
 func SubmitMetaDataIdEncWithBuyer(txId *big.Int) {
     txParam := transaction.TxParams{
-        From: common.HexToAddress(seller.Account().Addr),
+        From:     common.HexToAddress(seller.Account().Addr),
         Password: clientPassword,
-        Value: big.NewInt(0),
-        Pending: false,
+        Value:    big.NewInt(0),
+        Pending:  false,
     }
 
-    err := chain.SubmitMetaDataIdEncWithBuyer(&txParam, txId, metaDataIdEncWithBuyer)
+    err := chain.ReEncryptMetaDataIdBySeller(&txParam, txId, metaDataIdEncWithBuyer, metaDataIdEncWithBuyer)
     if err != nil {
         fmt.Println("failed to SubmitMetaDataIdEncWithBuyer, error:", err)
     }
@@ -274,10 +270,10 @@ func SubmitMetaDataIdEncWithBuyer(txId *big.Int) {
 
 func ConfirmDataTruth(txId *big.Int) {
     txParam := transaction.TxParams{
-        From: common.HexToAddress(buyer.Account().Addr),
+        From:     common.HexToAddress(buyer.Account().Addr),
         Password: clientPassword,
-        Value: big.NewInt(0),
-        Pending: false,
+        Value:    big.NewInt(0),
+        Pending:  false,
     }
     err := chain.ConfirmDataTruth(&txParam, txId, true)
     if err != nil {

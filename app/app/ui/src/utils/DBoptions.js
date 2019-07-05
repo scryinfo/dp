@@ -26,14 +26,11 @@ let dl_db = {
             }
         };
     },
-    write: function (params, cb) {
+    write: function (params) {
         let store = dl_db.db.transaction(dl_db.db_store_name, "readwrite").objectStore(dl_db.db_store_name);
         let request = store.put(params);
         request.onerror = function(err){
             console.log(err);
-        };
-        request.onsuccess = function () {
-            cb();
         };
     },
     read: function (key, cb) {
@@ -110,7 +107,6 @@ let acc_db = {
             cb(event.target.result);
         };
     },
-    // todo: prepare a single remove function, for delete a account, maybe I can give out a button for user?
     remove: function (key) {
         let store = acc_db.db.transaction(acc_db.db_store_name, "readwrite").objectStore(acc_db.db_store_name);
         let request = store.delete(key);
@@ -118,7 +114,6 @@ let acc_db = {
             console.log(err);
         };
     },
-    // todo: Administrator function: reset acc_db when chain restart anyhow.
     reset: function () {
         let store = acc_db.db.transaction(acc_db.db_store_name,"readwrite").objectStore(acc_db.db_store_name);
         let c = store.openCursor();
@@ -127,79 +122,12 @@ let acc_db = {
             if (cursor) {
                 store.put({
                     address: cursor.value.address,
+                    nickname: cursor.value.address,
                     fromBlock: 1,
                     isVerifier: false
                 });
                 cursor.continue();
             }
-        };
-    }
-};
-
-let txBuyer_db = {
-    db_name: "",
-    db_store_name: "tx_buy",
-    db: IDBDatabase,
-    init: function (_this) {
-        _this.$store.state.transactionbuy = [];
-        let c = txBuyer_db.db.transaction(txBuyer_db.db_store_name, "readwrite").objectStore(txBuyer_db.db_store_name).openCursor();
-        c.onsuccess = function (event) {
-            let cursor = event.target.result;
-            if (cursor) {
-                _this.$store.state.transactionbuy.push({
-                    Title: cursor.value.Title,
-                    Price: cursor.value.Price,
-                    Keys: cursor.value.Keys,
-                    Description: cursor.value.Description,
-                    Buyer: cursor.value.Buyer,
-                    Seller: cursor.value.Seller,
-                    State: cursor.value.State,
-                    SupportVerify: cursor.value.SupportVerify,
-                    StartVerify: cursor.value.StartVerify,
-                    MetaDataExtension: cursor.value.MetaDataExtension,
-                    ProofDataExtensions: cursor.value.ProofDataExtensions,
-                    MetaDataIDEncWithSeller: cursor.value.MetaDataIDEncWithSeller,
-                    MetaDataIDEncWithBuyer: cursor.value.MetaDataIDEncWithBuyer,
-                    Verifier1: cursor.value.Verifier1,
-                    Verifier2: cursor.value.Verifier2,
-                    Verifier1Response: cursor.value.Verifier1Response,
-                    Verifier2Response: cursor.value.Verifier2Response,
-                    ArbitrateResult: cursor.value.ArbitrateResult,
-                    PublishID: cursor.value.PublishID,
-                    TransactionID: cursor.value.TransactionID
-                });
-                cursor.continue();
-            }
-        };
-    },
-    write: function (params, cb) {
-        let store = txBuyer_db.db.transaction(txBuyer_db.db_store_name, "readwrite").objectStore(txBuyer_db.db_store_name);
-        let request = store.put(params);
-        request.onerror = function(err){
-            console.log(err);
-        };
-        request.onsuccess = function() {
-            cb();
-        };
-    },
-    read: function (key, cb) {
-        let store = txBuyer_db.db.transaction(txBuyer_db.db_store_name, "readwrite").objectStore(txBuyer_db.db_store_name);
-        let request = store.get(key);
-        request.onerror = function (err) {
-            console.log(err);
-        };
-        request.onsuccess = function (event) {
-            cb(event.target.result);
-        };
-    },
-    closeDB: function () {
-        txBuyer_db.db.close();
-    },
-    reset: function () {
-        let store = txBuyer_db.db.transaction(txBuyer_db.db_store_name,"readwrite").objectStore(txBuyer_db.db_store_name);
-        let request = store.clear();
-        request.onerror = function (err) {
-            console.log(err);
         };
     }
 };
@@ -228,8 +156,7 @@ let txSeller_db = {
                     ProofDataExtensions: cursor.value.ProofDataExtensions,
                     MetaDataIDEncWithSeller: cursor.value.MetaDataIDEncWithSeller,
                     MetaDataIDEncWithBuyer: cursor.value.MetaDataIDEncWithBuyer,
-                    Verifier1: cursor.value.Verifier1,
-                    Verifier2: cursor.value.Verifier2,
+                    MetaDataIDEncWithArbitrator: cursor.value.MetaDataIDEncWithArbitrator,
                     Verifier1Response: cursor.value.Verifier1Response,
                     Verifier2Response: cursor.value.Verifier2Response,
                     ArbitrateResult: cursor.value.ArbitrateResult,
@@ -272,6 +199,73 @@ let txSeller_db = {
     }
 };
 
+let txBuyer_db = {
+    db_name: "",
+    db_store_name: "tx_buy",
+    db: IDBDatabase,
+    init: function (_this) {
+        _this.$store.state.transactionbuy = [];
+        let c = txBuyer_db.db.transaction(txBuyer_db.db_store_name, "readwrite").objectStore(txBuyer_db.db_store_name).openCursor();
+        c.onsuccess = function (event) {
+            let cursor = event.target.result;
+            if (cursor) {
+                _this.$store.state.transactionbuy.push({
+                    Title: cursor.value.Title,
+                    Price: cursor.value.Price,
+                    Keys: cursor.value.Keys,
+                    Description: cursor.value.Description,
+                    Buyer: cursor.value.Buyer,
+                    Seller: cursor.value.Seller,
+                    State: cursor.value.State,
+                    SupportVerify: cursor.value.SupportVerify,
+                    StartVerify: cursor.value.StartVerify,
+                    MetaDataExtension: cursor.value.MetaDataExtension,
+                    ProofDataExtensions: cursor.value.ProofDataExtensions,
+                    MetaDataIDEncWithSeller: cursor.value.MetaDataIDEncWithSeller,
+                    MetaDataIDEncWithBuyer: cursor.value.MetaDataIDEncWithBuyer,
+                    MetaDataIDEncWithArbitrator: cursor.value.MetaDataIDEncWithArbitrator,
+                    Verifier1Response: cursor.value.Verifier1Response,
+                    Verifier2Response: cursor.value.Verifier2Response,
+                    ArbitrateResult: cursor.value.ArbitrateResult,
+                    PublishID: cursor.value.PublishID,
+                    TransactionID: cursor.value.TransactionID
+                });
+                cursor.continue();
+            }
+        };
+    },
+    write: function (params, cb) {
+        let store = txBuyer_db.db.transaction(txBuyer_db.db_store_name, "readwrite").objectStore(txBuyer_db.db_store_name);
+        let request = store.put(params);
+        request.onerror = function(err){
+            console.log(err);
+        };
+        request.onsuccess = function() {
+            cb();
+        };
+    },
+    read: function (key, cb) {
+        let store = txBuyer_db.db.transaction(txBuyer_db.db_store_name, "readwrite").objectStore(txBuyer_db.db_store_name);
+        let request = store.get(key);
+        request.onerror = function (err) {
+            console.log(err);
+        };
+        request.onsuccess = function (event) {
+            cb(event.target.result);
+        };
+    },
+    closeDB: function () {
+        txBuyer_db.db.close();
+    },
+    reset: function () {
+        let store = txBuyer_db.db.transaction(txBuyer_db.db_store_name,"readwrite").objectStore(txBuyer_db.db_store_name);
+        let request = store.clear();
+        request.onerror = function (err) {
+            console.log(err);
+        };
+    }
+};
+
 let txVerifier_db = {
     db_name: "",
     db_store_name: "tx_verifier",
@@ -297,8 +291,7 @@ let txVerifier_db = {
                         ProofDataExtensions: cursor.value.ProofDataExtensions,
                         MetaDataIDEncWithSeller: cursor.value.MetaDataIDEncWithSeller,
                         MetaDataIDEncWithBuyer: cursor.value.MetaDataIDEncWithBuyer,
-                        Verifier1: cursor.value.Verifier1,
-                        Verifier2: cursor.value.Verifier2,
+                        MetaDataIDEncWithArbitrator: cursor.value.MetaDataIDEncWithArbitrator,
                         Verifier1Response: cursor.value.Verifier1Response,
                         Verifier2Response: cursor.value.Verifier2Response,
                         ArbitrateResult: cursor.value.ArbitrateResult,
@@ -342,6 +335,75 @@ let txVerifier_db = {
     }
 };
 
+let txArbitrator_db = {
+    db_name: "",
+    db_store_name: "tx_arbitrator",
+    db: IDBDatabase,
+    init: function (_this) {
+        _this.$store.state.transactionarbitrator = [];
+        let c = txArbitrator_db.db.transaction(txArbitrator_db.db_store_name, "readwrite").objectStore(txArbitrator_db.db_store_name).openCursor();
+        c.onsuccess = function (event) {
+            let cursor = event.target.result;
+            if (cursor) {
+                if (cursor.value.State === "ReadyForDownload") {
+                    _this.$store.state.transactionarbitrator.push({
+                        Title: cursor.value.Title,
+                        Price: cursor.value.Price,
+                        Keys: cursor.value.Keys,
+                        Description: cursor.value.Description,
+                        Buyer: cursor.value.Buyer,
+                        Seller: cursor.value.Seller,
+                        State: cursor.value.State,
+                        SupportVerify: cursor.value.SupportVerify,
+                        StartVerify: cursor.value.StartVerify,
+                        MetaDataExtension: cursor.value.MetaDataExtension,
+                        ProofDataExtensions: cursor.value.ProofDataExtensions,
+                        MetaDataIDEncWithSeller: cursor.value.MetaDataIDEncWithSeller,
+                        MetaDataIDEncWithBuyer: cursor.value.MetaDataIDEncWithBuyer,
+                        MetaDataIDEncWithArbitrator: cursor.value.MetaDataIDEncWithArbitrator,
+                        Verifier1Response: cursor.value.Verifier1Response,
+                        Verifier2Response: cursor.value.Verifier2Response,
+                        ArbitrateResult: cursor.value.ArbitrateResult,
+                        PublishID: cursor.value.PublishID,
+                        TransactionID: cursor.value.TransactionID
+                    });
+                }
+                cursor.continue();
+            }
+        };
+    },
+    write: function (params, cb) {
+        let store = txArbitrator_db.db.transaction(txArbitrator_db.db_store_name, "readwrite").objectStore(txArbitrator_db.db_store_name);
+        let request = store.put(params);
+        request.onerror = function(err){
+            console.log(err);
+        };
+        request.onsuccess = function() {
+            cb();
+        };
+    },
+    read: function (key, cb) {
+        let store = txArbitrator_db.db.transaction(txArbitrator_db.db_store_name, "readwrite").objectStore(txArbitrator_db.db_store_name);
+        let request = store.get(key);
+        request.onerror = function (err) {
+            console.log(err);
+        };
+        request.onsuccess = function (event) {
+            cb(event.target.result);
+        };
+    },
+    closeDB: function () {
+        txArbitrator_db.db.close();
+    },
+    reset: function () {
+        let store = txArbitrator_db.db.transaction(txArbitrator_db.db_store_name,"readwrite").objectStore(txArbitrator_db.db_store_name);
+        let request = store.clear();
+        request.onerror = function (err) {
+            console.log(err);
+        };
+    }
+};
+
 let db_options = {
     utilsDBInit: function (_this) {
         let request = indexedDB.open("Utils", 1);
@@ -363,37 +425,43 @@ let db_options = {
         txBuyer_db.db_name = address;
         txSeller_db.db_name = address;
         txVerifier_db.db_name = address;
+        txArbitrator_db.db_name = address;
         let request = indexedDB.open(address, 1);
         request.onupgradeneeded = function (event) {
             txBuyer_db.db = event.target.result;
             txSeller_db.db = event.target.result;
             txVerifier_db.db = event.target.result;
+            txArbitrator_db.db = event.target.result;
             event.target.result.createObjectStore(txBuyer_db.db_store_name, {keyPath: "TransactionID"});
             event.target.result.createObjectStore(txSeller_db.db_store_name, {keyPath: "TransactionID"});
             event.target.result.createObjectStore(txVerifier_db.db_store_name, {keyPath: "TransactionID"});
+            event.target.result.createObjectStore(txArbitrator_db.db_store_name, {keyPath: "TransactionID"});
         };
         request.onsuccess = function (event) {
             txBuyer_db.db = event.target.result;
             txSeller_db.db = event.target.result;
             txVerifier_db.db = event.target.result;
+            txArbitrator_db.db = event.target.result;
         };
         request.onerror = function (err) {
-            console.log("数据库打开/创建失败，错误代码： ", err);
+            console.log("数据库创建/打开失败，错误代码： ", err);
         };
     },
     txDBsDataUpdate: function (_this) {
         txBuyer_db.init(_this);
         txSeller_db.init(_this);
         txVerifier_db.init(_this);
+        txArbitrator_db.init(_this);
     },
     userDBClose: function () {
         txBuyer_db.closeDB();
         txSeller_db.closeDB();
         txVerifier_db.closeDB();
+        txArbitrator_db.closeDB();
     },
     deleteDB: function (db_name) {
         window.indexedDB.deleteDatabase(db_name);
     }
 };
 
-export {db_options, dl_db, acc_db, txBuyer_db, txSeller_db, txVerifier_db};
+export {db_options, dl_db, acc_db, txBuyer_db, txSeller_db, txVerifier_db, txArbitrator_db};

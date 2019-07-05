@@ -63,7 +63,7 @@ contract('ScryProtocol', async accounts => {
         r = await ptl.buyData("seqNo5", txId, {from: buyer});
         assert(checkEvent("Buy", r), "failed to watch event Buy");
 
-        r = await ptl.reEncryptMetaDataIdFromSeller("seqNo6", txId, "0", "0", {from: seller});
+        r = await ptl.reEncryptMetaDataIdBySeller("seqNo6", txId, "0", "0", {from: seller});
         assert(checkEvent("ReadyForDownload", r), "failed to watch event ReadyForDownload");
 
         r = await ptl.confirmDataTruth("seqNO7", txId, false, {from: buyer});

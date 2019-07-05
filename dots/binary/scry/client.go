@@ -9,7 +9,6 @@ import (
     "github.com/scryinfo/dp/dots/auth"
     "github.com/scryinfo/dp/dots/eth/event"
     "math/big"
-
 )
 
 type Client interface {

@@ -25,7 +25,6 @@ type Executor struct {
     appId     string
 }
 
-
 //construct dot
 func newExecutorDot() (dot.Dot, error) {
     var err error
@@ -44,7 +43,6 @@ func ExecutorTypeLive() *dot.TypeLives {
     }
 }
 
-
 func (c *Executor) Create(l dot.Line) error {
     return nil
 }
@@ -62,9 +60,9 @@ func (c *Executor) ExecuteEvents(ce chan event.Event, r *event.Repository, appId
 
     for {
         select {
-            case e := <-c.eventChan:
-                dot.Logger().Debugln("event coming:" + e.String())
-                c.executeEvent(e)
+        case e := <-c.eventChan:
+            dot.Logger().Debugln("event coming:" + e.String())
+            c.executeEvent(e)
         }
     }
 }
@@ -110,9 +108,9 @@ func (c *Executor) executeEvent(e event.Event) bool {
 }
 
 func (c *Executor) executeMatchedEvent(
-        sim map[common.Address]event.Callback,
-        users []common.Address, e event.Event,
-    ) {
+    sim map[common.Address]event.Callback,
+    users []common.Address, e event.Event,
+) {
     for k, v := range sim {
         if c.containUser(users, k) {
             if v != nil {
@@ -123,9 +121,9 @@ func (c *Executor) executeMatchedEvent(
 }
 
 func (c *Executor) executeAllEvent(
-        sim map[common.Address]event.Callback,
-        e event.Event,
-    ) {
+    sim map[common.Address]event.Callback,
+    e event.Event,
+) {
     for _, v := range sim {
         event.Callback(v)(e)
     }

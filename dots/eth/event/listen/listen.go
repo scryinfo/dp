@@ -20,7 +20,6 @@ type Listener struct {
     builder *Builder
 }
 
-
 //construct dot
 func newListenerDot(conf interface{}) (dot.Dot, error) {
     var err error
@@ -43,7 +42,6 @@ func (c *Listener) Create(l dot.Line) error {
     c.builder = NewScanBuilder()
     return nil
 }
-
 
 func (c *Listener) ListenEvent(
     conn *ethclient.Client,

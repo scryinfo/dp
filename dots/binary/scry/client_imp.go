@@ -17,20 +17,22 @@ import (
     "math/big"
 )
 
-
 type clientImp struct {
-	userAccount  *auth.UserAccount
-	chainWrapper ChainWrapper
-	Subscriber   *subscribe.Subscribe `dot:"5535a065-0d90-46f4-9776-26630676c4c5"`
-	Currency     *curr.Currency       `dot:"f76a1aac-ff18-479b-9d51-0166a858bec9"`
+    userAccount  *auth.UserAccount
+    chainWrapper ChainWrapper
+    Subscriber   *subscribe.Subscribe `dot:"5535a065-0d90-46f4-9776-26630676c4c5"`
+    Currency     *curr.Currency       `dot:"f76a1aac-ff18-479b-9d51-0166a858bec9"`
     Acct         *auth.Account        `dot:"ca1c6ce4-182b-430a-9813-caeccf83f8ab"`
 }
 
+// check if 'clientImp' implements 'Client' interface.
+var _ Client = (*clientImp)(nil)
+
 func NewScryClient(publicKey string, chainWrapper ChainWrapper) Client {
-	c := &clientImp{
-		userAccount:  &auth.UserAccount{Addr: publicKey},
-		chainWrapper: chainWrapper,
-	}
+    c := &clientImp{
+        userAccount:  &auth.UserAccount{Addr: publicKey},
+        chainWrapper: chainWrapper,
+    }
 
     err := dot.GetDefaultLine().ToInjecter().Inject(&c)
     if err != nil {
@@ -64,13 +66,13 @@ func CreateScryClient(password string, chainWrapper ChainWrapper) (Client, error
         return nil, err
     }
 
-	ua, err := a.CreateUserAccount(password)
-	if err != nil {
-		dot.Logger().Errorln("", zap.NamedError("failed to create client, error:", err))
-		return nil, err
-	}
+    ua, err := a.CreateUserAccount(password)
+    if err != nil {
+        dot.Logger().Errorln("", zap.NamedError("failed to create client, error:", err))
+        return nil, err
+    }
 
-	c := &clientImp{
+    c := &clientImp{
         userAccount:  ua,
         chainWrapper: chainWrapper,
     }
@@ -81,48 +83,48 @@ func CreateScryClient(password string, chainWrapper ChainWrapper) (Client, error
         return nil, err
     }
 
-	return c, nil
+    return c, nil
 }
 
 func (c *clientImp) Account() *auth.UserAccount {
-	return c.userAccount
+    return c.userAccount
 }
 
 func (c *clientImp) SubscribeEvent(eventName string, callback event.Callback) error {
-	return c.Subscriber.Subscribe(common.HexToAddress(c.Account().Addr), eventName, callback)
+    return c.Subscriber.Subscribe(common.HexToAddress(c.Account().Addr), eventName, callback)
 }
 
 func (c *clientImp) UnSubscribeEvent(eventName string) error {
-	return c.Subscriber.UnSubscribe(common.HexToAddress(c.Account().Addr), eventName)
+    return c.Subscriber.UnSubscribe(common.HexToAddress(c.Account().Addr), eventName)
 }
 
 func (c *clientImp) Authenticate(password string) (bool, error) {
-	return c.Acct.AuthUserAccount(c.Account().Addr, password)
+    return c.Acct.AuthUserAccount(c.Account().Addr, password)
 }
 
 func (c *clientImp) TransferEthFrom(from common.Address, password string, value *big.Int, ec *ethclient.Client) error {
-	tx, err := c.Currency.TransferEth(from, password, common.HexToAddress(c.Account().Addr), value, ec)
-	if err == nil {
-		dot.Logger().Debugln("transferEthFrom: " + tx.Hash().String() + string(tx.Data()))
-	}
+    tx, err := c.Currency.TransferEth(from, password, common.HexToAddress(c.Account().Addr), value, ec)
+    if err == nil {
+        dot.Logger().Debugln("transferEthFrom: " + tx.Hash().String() + string(tx.Data()))
+    }
 
-	return err
+    return err
 }
 
 func (c *clientImp) TransferTokenFrom(from common.Address, password string, value *big.Int) error {
-	txParam := &transaction.TxParams{From: from, Password: password, Value: value}
-	return c.chainWrapper.TransferTokens(txParam,
-		common.HexToAddress(c.Account().Addr),
-		value)
+    txParam := &transaction.TxParams{From: from, Password: password, Value: value}
+    return c.chainWrapper.TransferTokens(txParam,
+        common.HexToAddress(c.Account().Addr),
+        value)
 }
 
 func (c *clientImp) GetEth(owner common.Address, ec *ethclient.Client) (*big.Int, error) {
-	return c.Currency.GetEthBalance(owner, ec)
+    return c.Currency.GetEthBalance(owner, ec)
 }
 
 func (c *clientImp) GetToken(owner common.Address) (*big.Int, error) {
-	from := common.HexToAddress(c.Account().Addr)
-	txParam := &transaction.TxParams{From: from, Pending: true}
+    from := common.HexToAddress(c.Account().Addr)
+    txParam := &transaction.TxParams{From: from, Pending: true}
 
-	return c.chainWrapper.GetTokenBalance(txParam, owner)
+    return c.chainWrapper.GetTokenBalance(txParam, owner)
 }

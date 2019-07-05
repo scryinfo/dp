@@ -51,7 +51,7 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/rjeczalik/notify v0.9.2 // indirect
 	github.com/rs/cors v1.6.0 // indirect
-	github.com/scryinfo/dot v0.1.3-0.20190608074314-65b2e6ed7785
+	github.com/scryinfo/dot v0.1.3-0.20190629072158-fdccd5af998d
 	github.com/scryinfo/scryg v0.1.3-0.20190608053141-a292b801bfd6
 	github.com/sirupsen/logrus v1.4.2
 	github.com/syndtr/goleveldb v1.0.0 // indirect
