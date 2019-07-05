@@ -71,7 +71,7 @@ export default {
             db_options.userDBClose();
             let _home = this;
             connect.send({Name:"logout", Payload: ""}, function (payload, _this) {
-                connect.cleanMap();
+                connect.cleanFuncMap();
                 utils.setDefaultBalance(_home);
                 setTimeout(function () {
                     _this.$router.push("/");

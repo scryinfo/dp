@@ -2,9 +2,6 @@ import {acc_db, dl_db, txBuyer_db, txSeller_db, txVerifier_db, txArbitrator_db} 
 import {connect} from "./connect";
 
 let utils = {
-    voteMutex: true,
-    voteWait: 0,
-    voteParams: [],
     init: function () {
         connect.addCallbackFunc("onPublish", presetFunc.onPublish);
         connect.addCallbackFunc("onProofFilesExtensions", presetFunc.onProofFilesExtensions);
@@ -22,134 +19,6 @@ let utils = {
     setDefaultBalance: function (_this) {
         _this.$store.state.balance[0] = { Balance: "-", Time: "-"};
         _this.$store.state.balance[1] = { Balance: "-", Time: "-"};
-    },
-    vote: function (_this, payload) {
-        console.log("验证者验证事件回调：", payload);
-        _this.$notify({
-            title: "验证者验证事件回调：",
-            message: payload,
-            position: "top-left"
-        });
-        if (payload.VerifierIndex === "0") {
-            txVerifier_db.read(payload.TransactionID, function (txDetailsOnV) {
-                txVerifier_db.write({
-                    Title: txDetailsOnV.Title,
-                    Price: txDetailsOnV.Price,
-                    Keys: txDetailsOnV.Keys,
-                    Description: txDetailsOnV.Description,
-                    Buyer: txDetailsOnV.Buyer,
-                    Seller: txDetailsOnV.Seller,
-                    State: payload.TxState, // -
-                    SupportVerify: txDetailsOnV.SupportVerify,
-                    StartVerify: txDetailsOnV.StartVerify,
-                    MetaDataExtension: txDetailsOnV.MetaDataExtension,
-                    ProofDataExtensions: txDetailsOnV.ProofDataExtensions,
-                    MetaDataIDEncWithSeller: txDetailsOnV.MetaDataIDEncWithSeller,
-                    MetaDataIDEncWithBuyer: txDetailsOnV.MetaDataIDEncWithBuyer,
-                    MetaDataIDEncWithArbitrator: txDetailsOnV.MetaDataIDEncWithArbitrator,
-                    Verifier1Response: payload.VerifierResponse, // -
-                    Verifier2Response: txDetailsOnV.Verifier2Response,
-                    ArbitrateResult: txDetailsOnV.ArbitrateResult,
-                    PublishID: txDetailsOnV.PublishID,
-                    TransactionID: txDetailsOnV.TransactionID
-                }, function () {
-                    txVerifier_db.init(_this);
-                    utils.voteMutex = true;
-                    if (utils.voteWait > 0) {
-                        utils.voteWait--;
-                        utils.vote(_this, utils.voteParams.shift());
-                    }
-                    acc_db.read(_this.$store.state.account, function (accInstance) {
-                        acc_db.write({
-                            address: accInstance.address,
-                            nickname: accInstance.nickname,
-                            fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
-                            isVerifier: accInstance.isVerifier
-                        });
-                    });
-                });
-            });
-        }
-        if (payload.VerifierIndex === "1") {
-            txBuyer_db.read(payload.TransactionID, function (txDetailsOnV) {
-                txBuyer_db.write({
-                    Title: txDetailsOnV.Title,
-                    Price: txDetailsOnV.Price,
-                    Keys: txDetailsOnV.Keys,
-                    Description: txDetailsOnV.Description,
-                    Buyer: txDetailsOnV.Buyer,
-                    Seller: txDetailsOnV.Seller,
-                    State: payload.TxState, // -
-                    SupportVerify: txDetailsOnV.SupportVerify,
-                    StartVerify: txDetailsOnV.StartVerify,
-                    MetaDataExtension: txDetailsOnV.MetaDataExtension,
-                    ProofDataExtensions: txDetailsOnV.ProofDataExtensions,
-                    MetaDataIDEncWithSeller: txDetailsOnV.MetaDataIDEncWithSeller,
-                    MetaDataIDEncWithBuyer: txDetailsOnV.MetaDataIDEncWithBuyer,
-                    MetaDataIDEncWithArbitrator: txDetailsOnV.MetaDataIDEncWithArbitrator,
-                    Verifier1Response: payload.VerifierResponse, // -
-                    Verifier2Response: txDetailsOnV.Verifier2Response,
-                    ArbitrateResult: txDetailsOnV.ArbitrateResult,
-                    PublishID: txDetailsOnV.PublishID,
-                    TransactionID: txDetailsOnV.TransactionID
-                }, function () {
-                    txBuyer_db.init(_this);
-                    utils.voteMutex = true;
-                    if (utils.voteWait > 0) {
-                        utils.voteWait--;
-                        utils.vote(_this, utils.voteParams.shift());
-                    }
-                    acc_db.read(_this.$store.state.account, function (accInstance) {
-                        acc_db.write({
-                            address: accInstance.address,
-                            nickname: accInstance.nickname,
-                            fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
-                            isVerifier: accInstance.isVerifier
-                        });
-                    });
-                });
-            });
-        }
-        if (payload.VerifierIndex === "2") {
-            txBuyer_db.read(payload.TransactionID, function (txDetailsOnV) {
-                txBuyer_db.write({
-                    Title: txDetailsOnV.Title,
-                    Price: txDetailsOnV.Price,
-                    Keys: txDetailsOnV.Keys,
-                    Description: txDetailsOnV.Description,
-                    Buyer: txDetailsOnV.Buyer,
-                    Seller: txDetailsOnV.Seller,
-                    State: payload.TxState, // -
-                    SupportVerify: txDetailsOnV.SupportVerify,
-                    StartVerify: txDetailsOnV.StartVerify,
-                    MetaDataExtension: txDetailsOnV.MetaDataExtension,
-                    ProofDataExtensions: txDetailsOnV.ProofDataExtensions,
-                    MetaDataIDEncWithSeller: txDetailsOnV.MetaDataIDEncWithSeller,
-                    MetaDataIDEncWithBuyer: txDetailsOnV.MetaDataIDEncWithBuyer,
-                    MetaDataIDEncWithArbitrator: txDetailsOnV.MetaDataIDEncWithArbitrator,
-                    Verifier1Response: txDetailsOnV.Verifier1Response,
-                    Verifier2Response: payload.VerifierResponse, // -
-                    ArbitrateResult: txDetailsOnV.ArbitrateResult,
-                    PublishID: txDetailsOnV.PublishID,
-                    TransactionID: txDetailsOnV.TransactionID
-                }, function () {
-                    txBuyer_db.init(_this);
-                    utils.voteMutex = true;
-                    if (utils.voteWait > 0) {
-                        utils.voteWait--;
-                        utils.vote(_this, utils.voteParams.shift());
-                    }
-                    acc_db.read(_this.$store.state.account, function (accInstance) {
-                        acc_db.write({
-                            address: accInstance.address,
-                            nickname: accInstance.nickname,
-                            fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
-                            isVerifier: accInstance.isVerifier
-                        });
-                    });
-                });
-            });
-        }
     }
 };
 
@@ -593,12 +462,116 @@ let presetFunc = {
         });
     },
     onVote: function (payload, _this) {
-        if (utils.voteMutex === true) {
-            utils.voteMutex = false;
-            utils.vote(_this, payload);
-        } else {
-            utils.voteWait++;
-            utils.voteParams.push(payload);
+        console.log("验证者验证事件回调：", payload);
+        _this.$notify({
+            title: "验证者验证事件回调：",
+            message: payload,
+            position: "top-left"
+        });
+        if (payload.VerifierIndex === "0") {
+            txVerifier_db.read(payload.TransactionID, function (txDetailsOnV) {
+                txVerifier_db.write({
+                    Title: txDetailsOnV.Title,
+                    Price: txDetailsOnV.Price,
+                    Keys: txDetailsOnV.Keys,
+                    Description: txDetailsOnV.Description,
+                    Buyer: txDetailsOnV.Buyer,
+                    Seller: txDetailsOnV.Seller,
+                    State: payload.TxState, // -
+                    SupportVerify: txDetailsOnV.SupportVerify,
+                    StartVerify: txDetailsOnV.StartVerify,
+                    MetaDataExtension: txDetailsOnV.MetaDataExtension,
+                    ProofDataExtensions: txDetailsOnV.ProofDataExtensions,
+                    MetaDataIDEncWithSeller: txDetailsOnV.MetaDataIDEncWithSeller,
+                    MetaDataIDEncWithBuyer: txDetailsOnV.MetaDataIDEncWithBuyer,
+                    MetaDataIDEncWithArbitrator: txDetailsOnV.MetaDataIDEncWithArbitrator,
+                    Verifier1Response: payload.VerifierResponse, // -
+                    Verifier2Response: txDetailsOnV.Verifier2Response,
+                    ArbitrateResult: txDetailsOnV.ArbitrateResult,
+                    PublishID: txDetailsOnV.PublishID,
+                    TransactionID: txDetailsOnV.TransactionID
+                }, function () {
+                    txVerifier_db.init(_this);
+                    acc_db.read(_this.$store.state.account, function (accInstance) {
+                        acc_db.write({
+                            address: accInstance.address,
+                            nickname: accInstance.nickname,
+                            fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
+                            isVerifier: accInstance.isVerifier
+                        });
+                    });
+                });
+            });
+        }
+        if (payload.VerifierIndex === "1") {
+            txBuyer_db.read(payload.TransactionID, function (txDetailsOnV) {
+                txBuyer_db.write({
+                    Title: txDetailsOnV.Title,
+                    Price: txDetailsOnV.Price,
+                    Keys: txDetailsOnV.Keys,
+                    Description: txDetailsOnV.Description,
+                    Buyer: txDetailsOnV.Buyer,
+                    Seller: txDetailsOnV.Seller,
+                    State: payload.TxState, // -
+                    SupportVerify: txDetailsOnV.SupportVerify,
+                    StartVerify: txDetailsOnV.StartVerify,
+                    MetaDataExtension: txDetailsOnV.MetaDataExtension,
+                    ProofDataExtensions: txDetailsOnV.ProofDataExtensions,
+                    MetaDataIDEncWithSeller: txDetailsOnV.MetaDataIDEncWithSeller,
+                    MetaDataIDEncWithBuyer: txDetailsOnV.MetaDataIDEncWithBuyer,
+                    MetaDataIDEncWithArbitrator: txDetailsOnV.MetaDataIDEncWithArbitrator,
+                    Verifier1Response: payload.VerifierResponse, // -
+                    Verifier2Response: txDetailsOnV.Verifier2Response,
+                    ArbitrateResult: txDetailsOnV.ArbitrateResult,
+                    PublishID: txDetailsOnV.PublishID,
+                    TransactionID: txDetailsOnV.TransactionID
+                }, function () {
+                    txBuyer_db.init(_this);
+                    acc_db.read(_this.$store.state.account, function (accInstance) {
+                        acc_db.write({
+                            address: accInstance.address,
+                            nickname: accInstance.nickname,
+                            fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
+                            isVerifier: accInstance.isVerifier
+                        });
+                    });
+                });
+            });
+        }
+        if (payload.VerifierIndex === "2") {
+            txBuyer_db.read(payload.TransactionID, function (txDetailsOnV) {
+                txBuyer_db.write({
+                    Title: txDetailsOnV.Title,
+                    Price: txDetailsOnV.Price,
+                    Keys: txDetailsOnV.Keys,
+                    Description: txDetailsOnV.Description,
+                    Buyer: txDetailsOnV.Buyer,
+                    Seller: txDetailsOnV.Seller,
+                    State: payload.TxState, // -
+                    SupportVerify: txDetailsOnV.SupportVerify,
+                    StartVerify: txDetailsOnV.StartVerify,
+                    MetaDataExtension: txDetailsOnV.MetaDataExtension,
+                    ProofDataExtensions: txDetailsOnV.ProofDataExtensions,
+                    MetaDataIDEncWithSeller: txDetailsOnV.MetaDataIDEncWithSeller,
+                    MetaDataIDEncWithBuyer: txDetailsOnV.MetaDataIDEncWithBuyer,
+                    MetaDataIDEncWithArbitrator: txDetailsOnV.MetaDataIDEncWithArbitrator,
+                    Verifier1Response: txDetailsOnV.Verifier1Response,
+                    Verifier2Response: payload.VerifierResponse, // -
+                    ArbitrateResult: txDetailsOnV.ArbitrateResult,
+                    PublishID: txDetailsOnV.PublishID,
+                    TransactionID: txDetailsOnV.TransactionID
+                }, function () {
+                    txBuyer_db.init(_this);
+                    acc_db.read(_this.$store.state.account, function (accInstance) {
+                        acc_db.write({
+                            address: accInstance.address,
+                            nickname: accInstance.nickname,
+                            fromBlock: Math.max(accInstance.fromBlock, payload.Block + 1),
+                            isVerifier: accInstance.isVerifier
+                        });
+                    });
+                });
+            });
         }
     },
     onVerifierDisable: function (payload, _this) {

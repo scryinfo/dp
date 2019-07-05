@@ -4,7 +4,7 @@
 package storage
 
 type Storage interface {
-	Init(nodeAddr string) error
-	Save(value []byte) (string, error)
-	Get(key string, outDir string) error
+    Init(nodeAddr string) error
+    Save(value []byte) (string, error)
+    Get(key string, outDir string) error
 }

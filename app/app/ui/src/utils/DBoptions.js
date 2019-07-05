@@ -26,14 +26,11 @@ let dl_db = {
             }
         };
     },
-    write: function (params, cb) {
+    write: function (params) {
         let store = dl_db.db.transaction(dl_db.db_store_name, "readwrite").objectStore(dl_db.db_store_name);
         let request = store.put(params);
         request.onerror = function(err){
             console.log(err);
-        };
-        request.onsuccess = function () {
-            cb();
         };
     },
     read: function (key, cb) {
@@ -73,15 +70,12 @@ let acc_db = {
             }
         };
     },
-    write: function (params, cb) {
+    write: function (params) {
         let store = acc_db.db.transaction(acc_db.db_store_name, "readwrite").objectStore(acc_db.db_store_name);
         let request = store.put(params);
         request.onerror = function(err){
             console.log(err);
         };
-        request.onsuccess = function() {
-            cb();
-        }
     },
     read: function (addr, cb) {
         let store = acc_db.db.transaction(acc_db.db_store_name, "readwrite").objectStore(acc_db.db_store_name);
@@ -113,7 +107,6 @@ let acc_db = {
             cb(event.target.result);
         };
     },
-    // todo: prepare a single remove function, for delete a account, maybe I can give out a button for user?
     remove: function (key) {
         let store = acc_db.db.transaction(acc_db.db_store_name, "readwrite").objectStore(acc_db.db_store_name);
         let request = store.delete(key);
