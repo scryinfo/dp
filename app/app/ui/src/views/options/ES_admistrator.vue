@@ -2,10 +2,9 @@
 <!-- license that can be found in the license file.-->
 
 <template>
-    <!-- 管理员功能，提供一些便捷功能供测试使用，正式版本删除本文件或删除相关路由设置。 -->
+    <!-- 管理员功能，提供一些便捷功能供测试使用，正式版本当做彩蛋随项目赠送。 -->
+    <!-- ps: 彩蛋[cai dan] colorful egg? -> extra scene :) -->
     <section class="administrator">
-        <el-col :span="24" class="administrator">
-            管理员功能，提供一些便捷功能供测试使用，正式版本删除本文件或删除相关路由设置。</el-col>
         <el-col :span="24" class="section-item">
             <el-button size="mini" type="primary" @click="welcome">Welcome</el-button></el-col>
         <el-col :span="24" class="section-item">
@@ -22,7 +21,7 @@
 <script>
 import {dl_db, acc_db, txBuyer_db, txSeller_db, txVerifier_db, txArbitrator_db, db_options} from "../../utils/DBoptions.js";
 export default {
-    name: "t_administrator.vue",
+    name: "ES_administrator.vue",
     data () {
         return {
 
@@ -31,8 +30,8 @@ export default {
     methods: {
         welcome: function () {
             this.$notify({
-                title: "通知: ",
-                message: "欢迎使用我的程序！ ^_^ ",
+                title: "彩蛋: ",
+                message: "谢谢你使用我的程序！ :)  ",
                 position: "top-left"
             });
             acc_db.init(this);
