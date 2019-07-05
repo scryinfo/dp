@@ -14,7 +14,7 @@ const (
 )
 
 type Account struct {
-    cn *grpc.ClientConn
+    cn     *grpc.ClientConn
     client authStub.KeyServiceClient
 }
 
@@ -52,10 +52,10 @@ func newAccountDot(_ interface{}) (dot.Dot, error) {
 //Data structure needed when generating newer component
 func AccountTypeLive() *dot.TypeLives {
     return &dot.TypeLives{
-            Meta: dot.Metadata{TypeId: AccountTypeId, NewDoter: func(conf interface{}) (dot.Dot, error) {
-                return newAccountDot(conf)
-            },
-       },
+        Meta: dot.Metadata{TypeId: AccountTypeId, NewDoter: func(conf interface{}) (dot.Dot, error) {
+            return newAccountDot(conf)
+        },
+        },
     }
 }
 
@@ -76,7 +76,6 @@ func (c *Account) Destroy(ignore bool) error {
 
     return nil
 }
-
 
 func (c *Account) Initialize(authServiceAddr string) error {
     var err error
@@ -159,7 +158,6 @@ func (c *Account) AuthUserAccount(address string, password string) (bool, error)
     return rv, nil
 }
 
-
 func (c *Account) Encrypt(
     plainText []byte,
     address string,
@@ -175,6 +173,9 @@ func (c *Account) Encrypt(
     }
 
     in := authStub.CipherParameter{Message: plainText, Address: address}
+
+    dot.Logger().Debugln("Node: show encrypt params. ", zap.Any("in", in))
+
     out, err := c.client.ContentEncrypt(context.Background(), &in)
     if err != nil {
         err = errors.Wrap(err, "failed to encrypt data")
@@ -212,6 +213,9 @@ func (c *Account) Decrypt(
         Address:  address,
         Password: password,
     }
+
+    dot.Logger().Debugln("Node: show decrypt params. ", zap.Any("in", in))
+
     out, err := c.client.ContentDecrypt(context.Background(), &in)
     if err != nil {
         err = errors.Wrap(err, "failed to decrypt data")

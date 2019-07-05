@@ -78,6 +78,7 @@ export default {
         },
         setProofIDs: function () {
             this.IDs.proofDataIDs = [];
+            this.pubData.details.ProofDataExtensions = [];
             let _this = this;
             let proofs = this.$refs.selectedProofs.files;
             for (let i=0;i<proofs.length;i++) {

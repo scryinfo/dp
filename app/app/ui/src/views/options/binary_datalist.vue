@@ -59,9 +59,7 @@ export default {
             dl_db.init(this);
         },
         buy: function (pwd) {
-            let sv = this.startVerify;
-            this.startVerify = false;
-            connect.send({Name:"buy",Payload:{password: pwd, startVerify: sv, pID: this.selectedData}}, function (payload, _this) {
+            connect.send({Name:"buy",Payload:{password: pwd, startVerify: this.startVerify, pID: this.selectedData}}, function (payload, _this) {
                 console.log("预购买成功", payload);
             }, function (payload, _this) {
                 console.log("预购买失败：", payload);

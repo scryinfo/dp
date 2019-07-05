@@ -183,7 +183,7 @@ library transaction {
         );
 
         users[0] = msg.sender;
-        emit TransactionCreate(seqNo, txId, publishId, proofIds, true, uint8(common.TransactionState.Created), users);
+        emit TransactionCreate(seqNo, txId, publishId, proofIds, false, uint8(common.TransactionState.Created), users);
     }
 
     function buyerDeposit(
@@ -252,7 +252,8 @@ library transaction {
         require(txItem.used, "Transaction does not exist");
         require(txItem.buyer == msg.sender, "Invalid cancel operator");
 
-        require(txItem.state == common.TransactionState.Created || txItem.state == common.TransactionState.Voted ||
+        require(txItem.state == common.TransactionState.Created ||
+        txItem.state == common.TransactionState.Voted ||
         txItem.state == common.TransactionState.Buying, "Invalid transaction state");
 
         revertToBuyer(txItem, token);
@@ -283,13 +284,15 @@ library transaction {
         uint256 deposit = txItem.buyerDeposit;
         txItem.buyerDeposit = 0;
 
-        if (!token.transfer(txItem.buyer, deposit)) {
-            txItem.buyerDeposit = deposit;
-            require(false, "Failed to revert buyer his token");
+        if (deposit > 0) {
+            if (!token.transfer(txItem.buyer, deposit)) {
+                txItem.buyerDeposit = deposit;
+                require(false, "Failed to revert buyer his token");
+            }
         }
     }
 
-    function reEncryptMetaDataIdFromSeller(
+    function reEncryptMetaDataIdBySeller(
         common.DataSet storage ds,
         string seqNo,
         uint256 txId,
@@ -357,6 +360,7 @@ library transaction {
         } else {
             if (truth) {
                 payToSeller(txItem, data, token);
+                revertToBuyer(txItem, token);
                 closeTransaction(txItem, seqNo, txId);
             } else {
                 address[] memory users = new address[](1);
@@ -378,13 +382,13 @@ library transaction {
 
         bool result;
         common.TransactionItem storage txItem = ds.txData.map[txId];
-        if (!(truth >= (ds.conf.arbitratorNum+1)/2)) {
-            revertToBuyer(txItem, token);
-        }else {
+        if (truth >= (ds.conf.arbitratorNum+1)/2) {
             common.DataInfoPublished storage data = ds.pubData.map[txItem.publishId];
             payToSeller(txItem, data, token);
             result = true;
         }
+
+        revertToBuyer(txItem, token);
 
         address[] memory users = new address[](1);
         users[0] = txItem.seller;

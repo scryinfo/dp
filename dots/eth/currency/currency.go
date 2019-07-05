@@ -10,9 +10,8 @@ import (
     "math/big"
 )
 
-
 const (
-    CurrTypeId       = "f76a1aac-ff18-479b-9d51-0166a858bec9"
+    CurrTypeId = "f76a1aac-ff18-479b-9d51-0166a858bec9"
 )
 
 type Currency struct {
@@ -35,7 +34,6 @@ func CurrTypeLive() []*dot.TypeLives {
                     return newCurrDot(conf)
                 }},
         },
-
     }
 
     t = append(t, transaction.TxTypeLive()...)
@@ -47,18 +45,18 @@ func (c *Currency) Create(l dot.Line) error {
 }
 
 func (c *Currency) TransferEth(
-        from common.Address,
-        password string,
-        to common.Address,
-        value *big.Int,
-        client *ethclient.Client,
+    from common.Address,
+    password string,
+    to common.Address,
+    value *big.Int,
+    client *ethclient.Client,
 ) (*types.Transaction, error) {
 
     txParam := &transaction.TxParams{
-        From: from,
+        From:     from,
         Password: password,
-        Value: value,
-        Pending: false,
+        Value:    value,
+        Pending:  false,
     }
 
     opts := c.Tx.BuildTransactOpts(txParam)
@@ -68,8 +66,8 @@ func (c *Currency) TransferEth(
 }
 
 func (c *Currency) GetEthBalance(
-        owner common.Address,
-        client *ethclient.Client,
-    ) (*big.Int, error) {
+    owner common.Address,
+    client *ethclient.Client,
+) (*big.Int, error) {
     return client.BalanceAt(context.Background(), owner, nil)
 }

@@ -26,6 +26,9 @@ type chainWrapperImp struct {
     appId    string
 }
 
+// check if 'chainWrapperImp' implements 'ChainWrapper' interface.
+var _ ChainWrapper = (*chainWrapperImp)(nil)
+
 func NewChainWrapper(protocolContractAddress common.Address,
     tokenContractAddress common.Address,
     clientConn *ethclient.Client,
@@ -95,7 +98,7 @@ func (c *chainWrapperImp) Publish(txParams *tx.TxParams, price *big.Int, metaDat
         return "", err
     }
 
-    logger.Debugln("publish Tx: tx hash:" + t.Hash().String(), zap.Binary(" tx data:", t.Data()))
+    logger.Debugln("publish Tx: tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
 
     return publishId, nil
 }
@@ -132,7 +135,7 @@ func (c *chainWrapperImp) PrepareToBuy(txParams *tx.TxParams, publishId string, 
 
     t, err := c.protocol.CreateTransaction(c.Tx.BuildTransactOpts(txParams), c.appId, publishId, startVerify)
     if err == nil {
-        dot.Logger().Debugln("CreateTransaction: tx hash:" + t.Hash().String(), zap.Binary(" tx data:", t.Data()))
+        dot.Logger().Debugln("CreateTransaction: tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
     }
 
     return err
@@ -141,7 +144,7 @@ func (c *chainWrapperImp) PrepareToBuy(txParams *tx.TxParams, publishId string, 
 func (c *chainWrapperImp) BuyData(txParams *tx.TxParams, txId *big.Int) error {
     t, err := c.protocol.BuyData(c.Tx.BuildTransactOpts(txParams), c.appId, txId)
     if err == nil {
-        dot.Logger().Debugln("BuyData: tx hash:" + t.Hash().String(), zap.Binary(" tx data:", t.Data()))
+        dot.Logger().Debugln("BuyData: tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
     }
 
     return err
@@ -150,25 +153,58 @@ func (c *chainWrapperImp) BuyData(txParams *tx.TxParams, txId *big.Int) error {
 func (c *chainWrapperImp) CancelTransaction(txParams *tx.TxParams, txId *big.Int) error {
     t, err := c.protocol.CancelTransaction(c.Tx.BuildTransactOpts(txParams), c.appId, txId)
     if err == nil {
-        dot.Logger().Debugln("CancelTransaction tx hash:" + t.Hash().String(), zap.Binary(" tx data:", t.Data()))
+        dot.Logger().Debugln("CancelTransaction tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
     }
 
     return err
 }
 
-func (c *chainWrapperImp) SubmitMetaDataIdEncWithBuyer(txParams *tx.TxParams, txId *big.Int, encyptedMetaDataId []byte) error {
-    t, err := c.protocol.SubmitMetaDataIdEncWithBuyer(c.Tx.BuildTransactOpts(txParams), c.appId, txId, encyptedMetaDataId)
+func (c *chainWrapperImp) ReEncryptMetaDataIdBySeller(txParams *tx.TxParams, txId *big.Int, encIdWithBuyer []byte, encIdsWithArbitrators []byte) error {
+    t, err := c.protocol.ReEncryptMetaDataIdBySeller(c.Tx.BuildTransactOpts(txParams), c.appId, txId, encIdWithBuyer, encIdsWithArbitrators)
     if err == nil {
-        dot.Logger().Debugln("SubmitMetaDataIdEncWithBuyer: tx hash:" + t.Hash().String(), zap.Binary(" tx data:", t.Data()))
+        dot.Logger().Debugln("ReEncryptMetaDataIdBySeller: tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
     }
 
     return err
+}
+
+func (c *chainWrapperImp) Arbitrate(txParams *tx.TxParams, txId *big.Int, judge bool) error {
+    t, err := c.protocol.Arbitrate(c.Tx.BuildTransactOpts(txParams), c.appId, txId, judge)
+    if err == nil {
+        dot.Logger().Debugln("Arbitrate: tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
+    }
+
+    return err
+}
+
+func (c *chainWrapperImp) GetBuyer(txParams *tx.TxParams, txId *big.Int) (string, error) {
+    buyer, err := c.protocol.GetBuyer(c.Tx.BuildCallOpts(txParams), txId)
+    if err == nil {
+        dot.Logger().Debugln("Get buyer, buyer: " + buyer.String())
+    }
+
+    return buyer.String(), err
+}
+
+func (c *chainWrapperImp) GetArbitrators(txParams *tx.TxParams, txId *big.Int) ([]string, error) {
+    arbitratorsAddrs, err := c.protocol.GetArbitrators(c.Tx.BuildCallOpts(txParams), txId)
+
+    var arbitrators = make([]string, len(arbitratorsAddrs))
+    for i := 0; i < len(arbitratorsAddrs); i++ {
+        arbitrators[i] = arbitratorsAddrs[i].String()
+    }
+
+    if err == nil {
+        dot.Logger().Debugln("Get arbitrator:", zap.Strings("arbitrators", arbitrators))
+    }
+
+    return arbitrators, err
 }
 
 func (c *chainWrapperImp) ConfirmDataTruth(txParams *tx.TxParams, txId *big.Int, truth bool) error {
     t, err := c.protocol.ConfirmDataTruth(c.Tx.BuildTransactOpts(txParams), c.appId, txId, truth)
     if err == nil {
-        dot.Logger().Debugln("ConfirmDataTruth: tx hash:" + t.Hash().String(), zap.Binary(" tx data:", t.Data()))
+        dot.Logger().Debugln("ConfirmDataTruth: tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
     }
 
     return err
@@ -177,7 +213,7 @@ func (c *chainWrapperImp) ConfirmDataTruth(txParams *tx.TxParams, txId *big.Int,
 func (c *chainWrapperImp) ApproveTransfer(txParams *tx.TxParams, spender common.Address, value *big.Int) error {
     t, err := c.token.Approve(c.Tx.BuildTransactOpts(txParams), spender, value)
     if err == nil {
-        dot.Logger().Debugln("ApproveTransfer: tx hash:" + t.Hash().String(), zap.Binary(" tx data:", t.Data()))
+        dot.Logger().Debugln("ApproveTransfer: tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
     }
 
     return err
@@ -186,7 +222,7 @@ func (c *chainWrapperImp) ApproveTransfer(txParams *tx.TxParams, spender common.
 func (c *chainWrapperImp) Vote(txParams *tx.TxParams, txId *big.Int, judge bool, comments string) error {
     t, err := c.protocol.Vote(c.Tx.BuildTransactOpts(txParams), c.appId, txId, judge, comments)
     if err == nil {
-        dot.Logger().Debugln("Vote: tx hash:" + t.Hash().String(), zap.Binary(" tx data:", t.Data()))
+        dot.Logger().Debugln("Vote: tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
 
     }
 
@@ -196,7 +232,7 @@ func (c *chainWrapperImp) Vote(txParams *tx.TxParams, txId *big.Int, judge bool,
 func (c *chainWrapperImp) RegisterAsVerifier(txParams *tx.TxParams) error {
     t, err := c.protocol.RegisterAsVerifier(c.Tx.BuildTransactOpts(txParams), c.appId)
     if err == nil {
-        dot.Logger().Debugln("RegisterAsVerifier: tx hash:" + t.Hash().String(), zap.Binary(" tx data:", t.Data()))
+        dot.Logger().Debugln("RegisterAsVerifier: tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
     }
 
     return err
@@ -205,7 +241,7 @@ func (c *chainWrapperImp) RegisterAsVerifier(txParams *tx.TxParams) error {
 func (c *chainWrapperImp) CreditsToVerifier(txParams *tx.TxParams, txId *big.Int, index uint8, credit uint8) error {
     t, err := c.protocol.CreditsToVerifier(c.Tx.BuildTransactOpts(txParams), c.appId, txId, index, credit)
     if err == nil {
-        dot.Logger().Debugln("CreditsToVerifier: tx hash:" + t.Hash().String(), zap.Binary(" tx data:", t.Data()))
+        dot.Logger().Debugln("CreditsToVerifier: tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
     }
 
     return err
@@ -214,7 +250,7 @@ func (c *chainWrapperImp) CreditsToVerifier(txParams *tx.TxParams, txId *big.Int
 func (c *chainWrapperImp) TransferTokens(txParams *tx.TxParams, to common.Address, value *big.Int) error {
     t, err := c.token.Transfer(c.Tx.BuildTransactOpts(txParams), to, value)
     if err == nil {
-        dot.Logger().Debugln("TransferTokens: tx hash:" + t.Hash().String(), zap.Binary(" tx data:", t.Data()))
+        dot.Logger().Debugln("TransferTokens: tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
     }
 
     return err
@@ -223,4 +259,3 @@ func (c *chainWrapperImp) TransferTokens(txParams *tx.TxParams, to common.Addres
 func (c *chainWrapperImp) GetTokenBalance(txParams *tx.TxParams, owner common.Address) (*big.Int, error) {
     return c.token.BalanceOf(c.Tx.BuildCallOpts(txParams), owner)
 }
-

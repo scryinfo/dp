@@ -2,7 +2,7 @@
 <!-- license that can be found in the license file.-->
 <template>
     <p class="page-container">
-        <span class="page-text">404 :&nbsp;&nbsp;&nbsp;WALLPAGE NOT FOUND.<br/><br/>
+        <span class="page-text">404 :&nbsp;&nbsp;&nbsp;WEBPAGE NOT FOUND.<br/><br/>
             Redirect to login page after {{ count }} seconds.</span>
     </p>
 </template>

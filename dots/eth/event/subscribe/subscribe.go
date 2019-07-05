@@ -22,7 +22,7 @@ func (c *Subscribe) Create(l dot.Line) error {
     return nil
 }
 
-func (c *Subscribe) SetRepo(r *event.Repository)  {
+func (c *Subscribe) SetRepo(r *event.Repository) {
     c.eventRepo = r
 }
 

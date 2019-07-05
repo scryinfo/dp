@@ -14,12 +14,12 @@ import (
 )
 
 const (
-    TxTypeId       = "a3e1a88e-f84e-4285-b5ff-54a16fdcd44c"
+    TxTypeId        = "a3e1a88e-f84e-4285-b5ff-54a16fdcd44c"
     DefaultGasLimit = 3000000
 )
 
 type Transaction struct {
-    Config configTransaction
+    Config  configTransaction
     Account *auth.Account `dot:"ca1c6ce4-182b-430a-9813-caeccf83f8ab"`
 }
 
@@ -59,7 +59,7 @@ func newTxDot(conf interface{}) (dot.Dot, error) {
 
 //Data structure needed when generating newer component
 func TxTypeLive() []*dot.TypeLives {
-    return []*dot.TypeLives {
+    return []*dot.TypeLives{
         &dot.TypeLives{
             Meta: dot.Metadata{TypeId: TxTypeId,
                 NewDoter: func(conf interface{}) (dot dot.Dot, err error) {
@@ -110,7 +110,7 @@ func (c *Transaction) SignTransaction(
     address common.Address,
     transaction *types.Transaction,
     password string,
-)(*types.Transaction, error) {
+) (*types.Transaction, error) {
     h := signer.Hash(transaction)
 
     var sign []byte
@@ -136,10 +136,10 @@ func (c *Transaction) BuildCallOpts(txParams *TxParams) *bind.CallOpts {
 }
 
 func (c *Transaction) Transact(
-        opts *bind.TransactOpts,
-        to common.Address,
-        client *ethclient.Client,
-    ) (*types.Transaction, error) {
+    opts *bind.TransactOpts,
+    to common.Address,
+    client *ethclient.Client,
+) (*types.Transaction, error) {
     var err error
 
     // Ensure a valid value field and resolve the interface nonce

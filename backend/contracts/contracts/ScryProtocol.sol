@@ -11,6 +11,18 @@ contract ScryProtocol {
     address owner         = 0x0;
     ERC20   token;
 
+    event DataPublish(string seqNo, string publishId, uint256 price, string despDataId, bool supportVerify, address[] users);
+    event TransactionCreate(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool needVerify, uint8 state, address[] users);
+    event Buy(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, uint8 state, uint8 index, address[] users);
+    event TransactionClose(string seqNo, uint256 transactionId, uint8 state, uint8 index, address[] users);
+    event VerifiersChosen(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, uint8 state, address[] users);
+    event ReadyForDownload(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, uint8 state, uint8 index, address[] users);
+    event ArbitrationBegin(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bytes metaDataIdEncArbitrator, address[] users);
+    event ArbitrationResult(string seqNo, uint256 transactionId, bool judge, uint8 identify, address[] users);
+    event RegisterVerifier(string seqNo, address[] users);
+    event Vote(string seqNo, uint256 transactionId, bool judge, string comments, uint8 state, uint8 index, address[] users);
+    event VerifierDisable(string seqNo, address verifier, address[] users);
+
     constructor (address _token) public {
         require(_token != 0x0);
 
@@ -99,8 +111,8 @@ contract ScryProtocol {
         );
     }
 
-    function reEncryptMetaDataIdFromSeller(string seqNo, uint256 txId, bytes encryptedMetaDataId, bytes encryptedMetaDataIds) external {
-        transaction.reEncryptMetaDataIdFromSeller(
+    function reEncryptMetaDataIdBySeller(string seqNo, uint256 txId, bytes encryptedMetaDataId, bytes encryptedMetaDataIds) external {
+        transaction.reEncryptMetaDataIdBySeller(
             dataSet,
             seqNo,
             txId,
@@ -123,7 +135,7 @@ contract ScryProtocol {
         return transaction.getBuyerAddrInDesignatedTx(dataSet, txId);
     }
 
-    function getArbitrators(uint256 txId) external view  returns (address[]) {
+    function getArbitrators(uint256 txId) external view returns (address[]) {
         return transaction.getArbitratorsAddrsInDesignatedTx(dataSet, txId);
     }
 }

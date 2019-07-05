@@ -18,6 +18,9 @@
                     <el-form-item label="标签"><span>{{ props.row.Keys }}</span></el-form-item>
                     <el-form-item label="描述"><span>{{ props.row.Description }}</span></el-form-item>
                     <el-form-item label="状态"><span>{{ props.row.State }}</span></el-form-item>
+                    <el-form-item label="验证者回复1"><span>{{ props.row.Verifier1Response }}</span></el-form-item>
+                    <el-form-item label="验证者回复2"><span>{{ props.row.Verifier2Response }}</span></el-form-item>
+                    <el-form-item label="仲裁结果"><span>{{ props.row.ArbitrateResult }}</span></el-form-item>
                 </el-form>
             </el-table-column>
             <el-table-column prop="Title" label="标题" show-overflow-tooltip></el-table-column>
@@ -34,10 +37,10 @@ import {connect} from "../../utils/connect";
 import {txSeller_db} from "../../utils/DBoptions";
 import SFT from "../templates/simple_function_template.vue";
 export default {
-    name: "transactionSell.vue",
+    name: "transaction_sell.vue",
     data () {
         return {
-            selectedTx: {},  // {tID: "", Buyer: "", Seller: "", MetaDataIDEncWithSeller: "", pID: ""}
+            selectedTx: {},  // {tID: "", Seller: "", MetaDataIDEncWithSeller: "", pID: ""}
             curPage: 1,
             pageSize: 6,
             total: 0,
@@ -50,7 +53,6 @@ export default {
         currentChange: function (curRow) {
             this.selectedTx = {
                 TransactionID: curRow.TransactionID,
-                Buyer: curRow.Buyer,
                 Seller: curRow.Seller,
                 PublishID: curRow.PublishID,
                 MetaDataIDEncWithSeller: curRow.MetaDataIDEncWithSeller // WSConnect between go and js buy not show out to user.
