@@ -18,7 +18,7 @@
 첫 단계는 dp / app / app / ui 디렉토리에서 ** webpackUI.ps1 ** 스크립트 파일을 실행해야 한다.
 webpack결과 분석 보고 관련 디스플레이의 여부는 ui/config/index.js에 있는 *bundleAnalyzerReport*로 제어할 수 있다.  
 ### app 실행 파일 작성
-dp/app/app/main의 디렉토리에서 go build를 성공적으로 실행하게 되면 엔트런스 파일”**main.exe**”이 생성된다.	
+dp/app/app/main의 디렉토리에서 go build를 성공적으로 실행하게 되면 엔트런스 파일”**main.exe**”이 생성된다.    
 ## 오퍼레이션
 ### 오퍼레이션 환경
 - ipfs 클라이언트 (0.4.20)ㄴ

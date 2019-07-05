@@ -7,11 +7,11 @@ import "github.com/scryinfo/dp/dots/app/settings"
 
 // define what a type of connection should implement.
 type Connection interface {
-	Connect() error
+    Connect() error
 
-	// send message.
-	SendMessage(name string, payload interface{}) error
+    // send message.
+    SendMessage(name string, payload interface{}) error
 
-	// preset function to handle message.
-	AddCallbackFunc(name string, presetFunc settings.PresetFunc)
+    // preset function to handle message.
+    AddCallbackFunc(name string, presetFunc settings.PresetFunc)
 }
