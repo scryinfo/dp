@@ -59,13 +59,13 @@ library verification {
 
         common.TransactionItem storage txItem = ds.txData.map[txId];
         require(txItem.used, "Transaction does not exist");
-
-        common.Verifier storage verifier = getVerifier(ds.verifiers, txItem.verifiers[verifierIndex]);
-        require(verifier.addr != 0x00, "Verifier does not exist");
+        require(txItem.needVerify, "Transaction can't verify");
 
         common.DataInfoPublished storage data = ds.pubData.map[txItem.publishId];
         require(data.used, "Publish data does not exist");
-        require(txItem.needVerify, "Transaction can't verify");
+
+        common.Verifier storage verifier = getVerifier(ds.verifiers, txItem.verifiers[verifierIndex]);
+        require(verifier.addr != 0x00, "Verifier does not exist");
 
         bool valid;
         uint256 index;
