@@ -15,7 +15,7 @@ contract('ScryProtocol', async accounts => {
     });
 
     it("Normal procedure with verifier", async () => {
-        await timeout(3000);
+        await timeout(1000);
         let r = await ptl.publishDataInfo("seqno", "publishId", 1000, "0", ["1", "2"], "2", true, {from: seller});
         assert(checkEvent("DataPublish", r), "failed to watch event DataPublish");
 

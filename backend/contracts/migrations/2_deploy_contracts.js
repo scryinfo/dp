@@ -4,9 +4,9 @@
 let ScryToken = artifacts.require("./ScryToken.sol");
 let ScryProtocol = artifacts.require("./ScryProtocol.sol");
 
- let Common = artifacts.require("./lib/common.sol");
- let Transaction = artifacts.require("./lib/transaction.sol");
- let Verification = artifacts.require("./lib/verification.sol");
+let Common = artifacts.require("./lib/common.sol");
+let Transaction = artifacts.require("./lib/transaction.sol");
+let Verification = artifacts.require("./lib/verification.sol");
 
 let tokenContract;
 module.exports = function(deployer, network, accounts) {
@@ -20,11 +20,11 @@ module.exports = function(deployer, network, accounts) {
 
     deployer.deploy(ScryToken).then(function(instance) {
         tokenContract = instance;
-        console.log(tokenContract.address);
+        console.log("> token: ", tokenContract.address);
 
         return deployer.deploy(ScryProtocol, tokenContract.address);
     }).then (function(ptl) {
-        console.log(ptl.address);
-        console.log("account:", accounts.length);
+        console.log("> protocol: ", ptl.address);
+        console.log("> account: ", accounts.length);
     });
 };
