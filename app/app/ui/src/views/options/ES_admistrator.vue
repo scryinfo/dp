@@ -36,11 +36,11 @@ export default {
             });
             acc_db.init(this);
         },
-        resetChain: function () {
+        resetChain: async function () {
             dl_db.reset();
             acc_db.reset();
-            this.resetTxDBs();
-            console.log("重置命令已接收");
+            await this.resetTxDBs();
+            console.log("已重置app全部数据");
         },
         initDL: function () {
             dl_db.init(this);
