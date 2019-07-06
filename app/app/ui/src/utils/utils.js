@@ -19,6 +19,9 @@ let utils = {
     setDefaultBalance: function (_this) {
         _this.$store.state.balance[0] = { Balance: "-", Time: "-"};
         _this.$store.state.balance[1] = { Balance: "-", Time: "-"};
+    },
+    timeout: function (ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 };
 
