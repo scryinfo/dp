@@ -113,10 +113,10 @@ contract TestVfCredit {
 
     function makeVerifierData() internal {
         ds.verifiers.list.push(common.Verifier(0x00, 0, 0, 0, false));
-        ds.verifiers.list.push(common.Verifier(verifier1, 13000, 3, 10, true));
-        ds.verifiers.list.push(common.Verifier(verifier2, 10300, 3, 1, true));
+        ds.verifiers.list.push(common.Verifier(verifier1, 10000, 3, 10, true));
+        ds.verifiers.list.push(common.Verifier(verifier2, 10000, 3, 1, true));
         ds.verifiers.list.push(common.Verifier(0x0001, 10000, 0, 0, true));
-        ds.verifiers.list.push(common.Verifier(arbitrator1, 13000, 5, 10, true));
+        ds.verifiers.list.push(common.Verifier(arbitrator1, 10000, 5, 10, true));
         ds.verifiers.validVerifierCount = 4;
     }
 }

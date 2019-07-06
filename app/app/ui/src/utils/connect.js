@@ -1,12 +1,13 @@
 // Scry Info.  All rights reserved.
 // license that can be found in the license file.
 
+import {utils} from "./utils.js";
+
 let connect = {
     ws: WebSocket,
     ipfs: require("ipfs-http-client")({host: 'localhost', port: '5001', protocol: 'http'}),
     map: {},
     msgMutex: true,
-    msgWait: 0,
     msgParams: [],
     WSConnect: function (_this) {
         // url: 'http://127.0.0.1:9822/#/'
@@ -37,14 +38,13 @@ let connect = {
         if (connect.msgMutex) {
             connect.msgMutex = false;
             await connect.map[obj.Name](obj.Payload, _this);
+            await utils.timeout(100);
             connect.msgMutex = true;
-            if (connect.msgWait > 0) {
+            if (connect.msgParams.length > 0) {
                 connect.msgHandle(connect.msgParams.shift(), _this);
-                connect.msgWait--;
             }
         } else {
             connect.msgParams.push(obj);
-            connect.msgWait++;
         }
     },
     send: function (obj, cbs, cbf) {
