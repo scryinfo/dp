@@ -1,3 +1,6 @@
+// Scry Info.  All rights reserved.
+// license that can be found in the license file.
+
 // Code generated - DO NOT EDIT.
 // This file is a generated binding and any manual changes will be lost.
 
