@@ -10,7 +10,7 @@ library verification {
 
     function register(common.DataSet storage ds, string seqNo, ERC20 token) public {
         common.Verifier storage v = getVerifier(ds.verifiers, msg.sender);
-        require( v.addr == 0x00, "Address already registered");
+        require(v.addr == 0x00, "Address already registered");
 
         //deposit
         if (ds.conf.verifierDepositToken > 0) {
@@ -59,7 +59,7 @@ library verification {
 
         common.TransactionItem storage txItem = ds.txData.map[txId];
         require(txItem.used, "Transaction does not exist");
-        require(txItem.needVerify, "Transaction can't verify");
+        require(txItem.needVerify, "Transaction does not enter the verification process");
 
         common.DataInfoPublished storage data = ds.pubData.map[txItem.publishId];
         require(data.used, "Publish data does not exist");
