@@ -10,7 +10,7 @@ import (
     "github.com/ethereum/go-ethereum/ethclient"
     "github.com/scryinfo/dot/dot"
     "github.com/scryinfo/dp/dots/auth"
-    "github.com/scryinfo/dp/dots/binary/stub/contract"
+    contract2 "github.com/scryinfo/dp/dots/binary/stub/contract"
     tx "github.com/scryinfo/dp/dots/eth/transaction"
     "github.com/scryinfo/dp/util"
     "go.uber.org/zap"
@@ -19,8 +19,8 @@ import (
 
 type chainWrapperImp struct {
     conn     *ethclient.Client
-    protocol *contract.ScryProtocol
-    token    *contract.ScryToken
+    protocol *contract2.ScryProtocol
+    token    *contract2.ScryToken
     Tx       *tx.Transaction `dot:"a3e1a88e-f84e-4285-b5ff-54a16fdcd44c"`
     Account  *auth.Account   `dot:"ca1c6ce4-182b-430a-9813-caeccf83f8ab"`
     appId    string
@@ -37,13 +37,13 @@ func NewChainWrapper(protocolContractAddress common.Address,
     var err error = nil
     c := &chainWrapperImp{}
 
-    c.protocol, err = contract.NewScryProtocol(protocolContractAddress, clientConn)
+    c.protocol, err = contract2.NewScryProtocol(protocolContractAddress, clientConn)
     if err != nil {
         dot.Logger().Errorln("", zap.NamedError("failed to initialize protocol contract interface wrapper.", err))
         return nil, err
     }
 
-    c.token, err = contract.NewScryToken(tokenContractAddress, clientConn)
+    c.token, err = contract2.NewScryToken(tokenContractAddress, clientConn)
     if err != nil {
         dot.Logger().Errorln("", zap.NamedError("failed to initialize token contract interface wrapper.", err))
         return nil, err
@@ -63,7 +63,7 @@ func (c *chainWrapperImp) Conn() *ethclient.Client {
 }
 
 func (c *chainWrapperImp) Publish(txParams *tx.TxParams, price *big.Int, metaDataID []byte,
-    proofDataIDs []string, proofNum int, detailsID string, supportVerify bool) (string, error) {
+    proofDataIDs []string, proofNum int32, detailsID string, supportVerify bool) (string, error) {
     logger := dot.Logger()
 
     defer func() {
@@ -77,7 +77,7 @@ func (c *chainWrapperImp) Publish(txParams *tx.TxParams, price *big.Int, metaDat
 
     pdIDs := make([][32]byte, proofNum)
     var err error = nil
-    for i := 0; i < proofNum; i++ {
+    for i := int32(0); i < proofNum; i++ {
         pdIDs[i], err = ipfsHashToBytes32(proofDataIDs[i])
         if err != nil {
             logger.Errorln("failed to convert ipfs hash to bytes32")

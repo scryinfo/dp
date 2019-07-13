@@ -6,7 +6,7 @@ import (
     "github.com/scryinfo/dot/dot"
     "github.com/scryinfo/dot/dots/line"
     "github.com/scryinfo/dp/dots/binary"
-    "github.com/scryinfo/dp/dots/binary/scry"
+    scry2 "github.com/scryinfo/dp/dots/binary/scry"
     "github.com/scryinfo/dp/dots/eth/event"
     "github.com/scryinfo/dp/dots/eth/transaction"
     "github.com/scryinfo/scryg/sutils/ssignal"
@@ -17,19 +17,19 @@ import (
 )
 
 var (
-    seller    scry.Client = nil
-    buyer     scry.Client = nil
-    verifier1 scry.Client = nil
-    verifier2 scry.Client = nil
-    verifier3 scry.Client = nil
+    seller    scry2.Client = nil
+    buyer     scry2.Client = nil
+    verifier1 scry2.Client = nil
+    verifier2 scry2.Client = nil
+    verifier3 scry2.Client = nil
 
     protocolContractAddr = "0x8af6e28777f52bd97cc1b2b534d6b7601ea0afc7"
     clientPassword       = "888888"
     suAddress            = "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8"
     suPassword           = "111111"
 
-    bin   *binary.Binary    = nil
-    chain scry.ChainWrapper = nil
+    bin   *binary.Binary     = nil
+    chain scry2.ChainWrapper = nil
 
     publishId                        = ""
     txId                    *big.Int = big.NewInt(0)
@@ -82,7 +82,7 @@ func Start() {
 }
 
 func TestClient() {
-    c := scry.NewScryClient("0xd280b60638bc8db9d309fa5a540ffec499f0a3e8", chain)
+    c := scry2.NewScryClient("0xd280b60638bc8db9d309fa5a540ffec499f0a3e8", chain)
     rv, err := c.Authenticate("111111")
     if err != nil {
         fmt.Println("failed to authenticate user account, error:", err)
@@ -128,8 +128,8 @@ func StartTestingWithoutVerify() {
     SellerPublishData()
 }
 
-func CreateClientWithToken(token *big.Int, eth *big.Int) (scry.Client, error) {
-    client, err := scry.CreateScryClient(clientPassword, chain)
+func CreateClientWithToken(token *big.Int, eth *big.Int) (scry2.Client, error) {
+    client, err := scry2.CreateScryClient(clientPassword, chain)
     if err != nil {
         return nil, err
     }
