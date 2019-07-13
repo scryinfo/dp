@@ -1,7 +1,6 @@
 syntax = "proto3";
 
 package api;
-option go_package = "github.com/scryinfo/dp/api/go_out/api";
 
 enum Status {
     OK = 0;

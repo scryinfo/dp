@@ -12,7 +12,6 @@ import (
     curr "github.com/scryinfo/dp/dots/eth/currency"
     "github.com/scryinfo/dp/dots/eth/event"
     "github.com/scryinfo/dp/dots/eth/event/subscribe"
-    "github.com/scryinfo/dp/dots/eth/transaction"
     "go.uber.org/zap"
     "math/big"
 )
@@ -28,9 +27,14 @@ type clientImp struct {
 // check if 'clientImp' implements 'Client' interface.
 var _ Client = (*clientImp)(nil)
 
-func NewScryClient(publicKey string, chainWrapper ChainWrapper) Client {
+func NewScryClient(address string, chainWrapper ChainWrapper) Client {
+    if address == "" {
+        dot.Logger().Errorln("failed to create client: empty address")
+        return nil
+    }
+
     c := &clientImp{
-        userAccount:  &auth.UserAccount{Addr: publicKey},
+        userAccount:  &auth.UserAccount{Addr: address},
         chainWrapper: chainWrapper,
     }
 
@@ -111,20 +115,7 @@ func (c *clientImp) TransferEthFrom(from common.Address, password string, value 
     return err
 }
 
-func (c *clientImp) TransferTokenFrom(from common.Address, password string, value *big.Int) error {
-    txParam := &transaction.TxParams{From: from, Password: password, Value: value}
-    return c.chainWrapper.TransferTokens(txParam,
-        common.HexToAddress(c.Account().Addr),
-        value)
-}
-
 func (c *clientImp) GetEth(owner common.Address, ec *ethclient.Client) (*big.Int, error) {
     return c.Currency.GetEthBalance(owner, ec)
 }
 
-func (c *clientImp) GetToken(owner common.Address) (*big.Int, error) {
-    from := common.HexToAddress(c.Account().Addr)
-    txParam := &transaction.TxParams{From: from, Pending: true}
-
-    return c.chainWrapper.GetTokenBalance(txParam, owner)
-}
