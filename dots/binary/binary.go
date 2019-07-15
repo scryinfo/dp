@@ -16,6 +16,7 @@ import (
     "github.com/scryinfo/dp/dots/eth/event/execute"
     "github.com/scryinfo/dp/dots/eth/event/listen"
     "github.com/scryinfo/dp/dots/eth/event/subscribe"
+    "github.com/scryinfo/dp/dots/grpc"
     "github.com/scryinfo/dp/dots/storage"
     "go.uber.org/zap"
 )
@@ -34,7 +35,7 @@ const (
 
 type Binary struct {
     chainWrapper scry.ChainWrapper
-    config       binaryConfig
+    config       BinaryConfig
     contracts    []event.ContractInfo
     subsRepo     *event.Repository
     dataChannel  chan event.Event
@@ -44,9 +45,10 @@ type Binary struct {
     Account      *auth.Account        `dot:""`
     Storage      *storage.Ipfs        `dot:""`
     Subscriber   *subscribe.Subscribe `dot:""`
+    Grpc         *grpc.BinaryGrpcServer `dot:""`
 }
 
-type binaryConfig struct {
+type BinaryConfig struct {
     AppId                string `json:"appId"`
     EthSrvAddr           string `json:"ethServiceAddr"`
     KeySrvAddr           string `json:"keyServiceAddr"`
@@ -65,7 +67,7 @@ func newBinaryDot(conf interface{}) (dot.Dot, error) {
         return nil, dot.SError.Parameter
     }
 
-    dConf := &binaryConfig{}
+    dConf := &BinaryConfig{}
     err = dot.UnMarshalConfig(bs, dConf)
     if err != nil {
         return nil, err
@@ -92,6 +94,7 @@ func BinTypeLive() []*dot.TypeLives {
     }
 
     t = append(t, currency.CurrTypeLive()...)
+    t = append(t, grpc.BinaryGrpcServerTypeLive()...)
     return t
 }
 
@@ -104,7 +107,7 @@ func (c *Binary) Create(l dot.Line) error {
     return nil
 }
 
-func (c *Binary) Config() binaryConfig {
+func (c *Binary) Config() BinaryConfig {
     return c.config
 }
 
@@ -135,6 +138,8 @@ func (c *Binary) Start(ignore bool) error {
     if err != nil {
         return errors.New(initStorageServiceFailed)
     }
+
+    c.Grpc.SetChainWrapper(c.chainWrapper)
 
     return nil
 }
