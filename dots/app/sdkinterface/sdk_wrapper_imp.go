@@ -10,7 +10,7 @@ import (
     "github.com/scryinfo/dp/dots/app/settings"
     "github.com/scryinfo/dp/dots/auth"
     "github.com/scryinfo/dp/dots/binary"
-    "github.com/scryinfo/dp/dots/binary/scry"
+    scry2 "github.com/scryinfo/dp/dots/binary/scry"
     "github.com/scryinfo/dp/dots/eth/event"
     "github.com/scryinfo/dp/dots/eth/event/listen"
     "github.com/scryinfo/dp/dots/eth/transaction"
@@ -21,15 +21,15 @@ import (
 )
 
 type sdkWrapperImp struct {
-    curUser scry.Client
+    curUser scry2.Client
     dp      *settings.AccInfo
-    cw      scry.ChainWrapper
+    cw      scry2.ChainWrapper
 }
 
 // check if 'sdkWrapperImp' implements 'SDKWrapper' interface.
 var _ SDKWrapper = (*sdkWrapperImp)(nil)
 
-func CreateSDKWrapperImp(cw scry.ChainWrapper) SDKWrapper {
+func CreateSDKWrapperImp(cw scry2.ChainWrapper) SDKWrapper {
     return &sdkWrapperImp{
         cw: cw,
         dp: &settings.AccInfo{
@@ -57,7 +57,7 @@ func SetFromBlock(fromBlock uint64) error {
 }
 
 func (swi *sdkWrapperImp) CreateUserWithLogin(password string) (string, error) {
-    client, err := scry.CreateScryClient(password, swi.cw)
+    client, err := scry2.CreateScryClient(password, swi.cw)
     if err != nil {
         return "", errors.Wrap(err, "Create new user failed. ")
     }
@@ -68,8 +68,8 @@ func (swi *sdkWrapperImp) CreateUserWithLogin(password string) (string, error) {
 }
 
 func (swi *sdkWrapperImp) UserLogin(address, password string) (bool, error) {
-    var client scry.Client
-    if client = scry.NewScryClient(address, swi.cw); client == nil {
+    var client scry2.Client
+    if client = scry2.NewScryClient(address, swi.cw); client == nil {
         return false, errors.New("Call NewScryClient failed. ")
     }
 

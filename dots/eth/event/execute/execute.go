@@ -50,7 +50,7 @@ func (c *Executor) Create(l dot.Line) error {
 func (c *Executor) ExecuteEvents(ce chan event.Event, r *event.Repository, appId string) {
     defer func() {
         if er := recover(); er != nil {
-            dot.Logger().Errorln("", zap.Any("Error: failed to execute event, error: ", er))
+            dot.Logger().Errorln("Executor::ExecuteEvents", zap.Any("Error: failed to execute event, error: ", er))
         }
     }()
 

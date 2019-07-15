@@ -13,7 +13,7 @@ import (
 type ChainWrapper interface {
     Conn() *ethclient.Client
     Publish(txParams *tx.TxParams, price *big.Int, metaDataID []byte, proofDataIDs []string,
-        proofNum int, detailsID string, supportVerify bool) (string, error)
+        proofNum int32, detailsID string, supportVerify bool) (string, error)
     PrepareToBuy(txParams *tx.TxParams, publishId string, startVerify bool) error
     BuyData(txParams *tx.TxParams, txId *big.Int) error
     CancelTransaction(txParams *tx.TxParams, txId *big.Int) error
