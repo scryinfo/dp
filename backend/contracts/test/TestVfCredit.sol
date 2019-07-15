@@ -44,7 +44,7 @@ contract TestVfCredit {
         common.Verifier memory v1 = verification.getVerifier(ds.verifiers, verifier1);
         common.Verifier memory v2 = verification.getVerifier(ds.verifiers, verifier2);
         
-        Assert.equal(v1.deposit, 13000, "verifier1 deposit unexpected");
+        Assert.equal(v1.deposit, 10000, "verifier1 deposit unexpected");
         Assert.equal(uint(v1.credits), uint(3), "verifier1 credits unexpected");
         Assert.equal(v1.creditTimes, 11, "verifier1 creditTimes unexpected");
         Assert.equal(v1.enable, true, "verifier1 enable unexpected");

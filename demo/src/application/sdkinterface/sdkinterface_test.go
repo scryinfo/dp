@@ -1,3 +1,6 @@
+// Scry Info.  All rights reserved.
+// license that can be found in the license file.
+
 /**
     Author: Scry R&D
     Date  : 2019.4.28
