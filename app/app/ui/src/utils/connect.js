@@ -12,6 +12,7 @@ let connect = {
     WSConnect: function (_this) {
         // url: 'http://127.0.0.1:9822/#/'
         let port = window.location.href.split(":")[2].split("/")[0];
+
         connect.ws = new WebSocket("ws://127.0.0.1:"+ port + "/ws", "ws");
         connect.ws.onopen = function (evt) {
             console.log("connection onopen. ", evt);
