@@ -164,12 +164,6 @@ func (c *chainWrapperImp) ReEncryptMetaDataId(
     txId *big.Int,
     encodedData []byte,
 ) error {
-    ac, err := getAccountComponent()
-    if err != nil {
-       dot.Logger().Errorln("chainWrapperImp::ReEncryptMetaDataId", zap.Error(err))
-       return err
-    }
-
     buyer, err := c.protocol.GetBuyer(c.Tx.BuildCallOpts(txParams), txId)
     if err != nil {
         dot.Logger().Errorln("chainWrapperImp::ReEncryptMetaDataId", zap.Error(err))
@@ -182,7 +176,7 @@ func (c *chainWrapperImp) ReEncryptMetaDataId(
         return errors.New(e)
     }
 
-    edb, err := ac.ReEncrypt(encodedData, txParams.From.String(), buyer.String(), txParams.Password)
+    edb, err := c.Account.ReEncrypt(encodedData, txParams.From.String(), buyer.String(), txParams.Password)
     if err != nil {
         dot.Logger().Errorln("chainWrapperImp::ReEncryptMetaDataId", zap.Error(err))
         return err
@@ -198,7 +192,7 @@ func (c *chainWrapperImp) ReEncryptMetaDataId(
             return errors.New(e)
         }
 
-        eda, err := ac.ReEncrypt(encodedData, txParams.From.String(), ab.String(), txParams.Password)
+        eda, err := c.Account.ReEncrypt(encodedData, txParams.From.String(), ab.String(), txParams.Password)
         if err != nil {
             dot.Logger().Errorln("chainWrapperImp::ReEncryptMetaDataId", zap.Error(err))
             return err
