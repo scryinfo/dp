@@ -24,8 +24,8 @@ service BinaryService {
     //cancel transaction
     rpc CancelTransaction(CancelTxParams) returns (Result) {}
 
-    //submit encoded meta data id
-    rpc SubmitMetaDataIdEncWithBuyer(SubmitMetaDataIdParams) returns (Result) {}
+    //decrypt with seller private key, then encrypt with buyer public key and arbitrators public key
+    rpc ReEncryptMetaDataId(ReEncryptDataParams) returns (Result) {}
 
     //confirm data truth
     rpc ConfirmDataTruth(DataConfirmParams) returns (Result) {}
@@ -92,11 +92,8 @@ message ClientInfo {
 }
 
 message Event {
-    uint64 blockNumber = 1;
-    string txHash = 2;
-    string address = 3;
-    string name = 4;
-    string jsonData = 5;
+    int64 time = 1;
+    string jsonData = 2;
 }
 
 message TxParams {
@@ -136,23 +133,24 @@ message Result {
 
 message BuyParams {
     TxParams txParam  = 1;
-    uint64 txId = 2;
+    int64 txId = 2;
 }
 
 message CancelTxParams {
     TxParams txParam  = 1;
-    uint64 txId = 2;
+    int64 txId = 2;
 }
 
-message SubmitMetaDataIdParams {
+message ReEncryptDataParams {
     TxParams txParam  = 1;
-    uint64 txId = 2;
-    repeated bytes encryptMetaDataId = 3;
+    int64 txId = 2;
+    bytes encodedDataWithSeller = 3;
 }
+
 
 message DataConfirmParams {
     TxParams txParam  = 1;
-    uint64 txId = 2;
+    int64 txId = 2;
     bool truth = 3;
 }
 
@@ -164,7 +162,7 @@ message ApproveTransferParams {
 
 message VoteParams {
     TxParams txParam  = 1;
-    uint64 txId = 2;
+    int64 txId = 2;
     bool judge = 3;
     string comments = 4;
 }
@@ -175,7 +173,7 @@ message RegisterVerifierParams {
 
 message CreditVerifierParams {
     TxParams txParam  = 1;
-    uint64 txId = 2;
+    int64 txId = 2;
     uint32 index = 3;
     uint32 credit = 4;
 }
@@ -198,5 +196,5 @@ message TokenBalanceResult {
 
 message SubscribeInfo {
     string address = 1;
-    string event = 2;
+    repeated string event = 2;
 }

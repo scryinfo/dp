@@ -25,9 +25,9 @@ goog.exportSymbol('proto.api.Event', null, global);
 goog.exportSymbol('proto.api.PrepareParams', null, global);
 goog.exportSymbol('proto.api.PublishParams', null, global);
 goog.exportSymbol('proto.api.PublishResult', null, global);
+goog.exportSymbol('proto.api.ReEncryptDataParams', null, global);
 goog.exportSymbol('proto.api.RegisterVerifierParams', null, global);
 goog.exportSymbol('proto.api.Result', null, global);
-goog.exportSymbol('proto.api.SubmitMetaDataIdParams', null, global);
 goog.exportSymbol('proto.api.SubscribeInfo', null, global);
 goog.exportSymbol('proto.api.TokenBalanceParams', null, global);
 goog.exportSymbol('proto.api.TokenBalanceResult', null, global);
@@ -1130,11 +1130,8 @@ proto.api.Event.prototype.toObject = function(opt_includeInstance) {
  */
 proto.api.Event.toObject = function(includeInstance, msg) {
   var f, obj = {
-    blocknumber: jspb.Message.getFieldWithDefault(msg, 1, 0),
-    txhash: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    address: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    name: jspb.Message.getFieldWithDefault(msg, 4, ""),
-    jsondata: jspb.Message.getFieldWithDefault(msg, 5, "")
+    time: jspb.Message.getFieldWithDefault(msg, 1, 0),
+    jsondata: jspb.Message.getFieldWithDefault(msg, 2, "")
   };
 
   if (includeInstance) {
@@ -1172,22 +1169,10 @@ proto.api.Event.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {number} */ (reader.readUint64());
-      msg.setBlocknumber(value);
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setTime(value);
       break;
     case 2:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setTxhash(value);
-      break;
-    case 3:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setAddress(value);
-      break;
-    case 4:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setName(value);
-      break;
-    case 5:
       var value = /** @type {string} */ (reader.readString());
       msg.setJsondata(value);
       break;
@@ -1220,38 +1205,17 @@ proto.api.Event.prototype.serializeBinary = function() {
  */
 proto.api.Event.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
-  f = message.getBlocknumber();
+  f = message.getTime();
   if (f !== 0) {
-    writer.writeUint64(
+    writer.writeInt64(
       1,
-      f
-    );
-  }
-  f = message.getTxhash();
-  if (f.length > 0) {
-    writer.writeString(
-      2,
-      f
-    );
-  }
-  f = message.getAddress();
-  if (f.length > 0) {
-    writer.writeString(
-      3,
-      f
-    );
-  }
-  f = message.getName();
-  if (f.length > 0) {
-    writer.writeString(
-      4,
       f
     );
   }
   f = message.getJsondata();
   if (f.length > 0) {
     writer.writeString(
-      5,
+      2,
       f
     );
   }
@@ -1259,77 +1223,32 @@ proto.api.Event.serializeBinaryToWriter = function(message, writer) {
 
 
 /**
- * optional uint64 blockNumber = 1;
+ * optional int64 time = 1;
  * @return {number}
  */
-proto.api.Event.prototype.getBlocknumber = function() {
+proto.api.Event.prototype.getTime = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
 };
 
 
 /** @param {number} value */
-proto.api.Event.prototype.setBlocknumber = function(value) {
+proto.api.Event.prototype.setTime = function(value) {
   jspb.Message.setProto3IntField(this, 1, value);
 };
 
 
 /**
- * optional string txHash = 2;
+ * optional string jsonData = 2;
  * @return {string}
  */
-proto.api.Event.prototype.getTxhash = function() {
+proto.api.Event.prototype.getJsondata = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
 };
 
 
 /** @param {string} value */
-proto.api.Event.prototype.setTxhash = function(value) {
-  jspb.Message.setProto3StringField(this, 2, value);
-};
-
-
-/**
- * optional string address = 3;
- * @return {string}
- */
-proto.api.Event.prototype.getAddress = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
-};
-
-
-/** @param {string} value */
-proto.api.Event.prototype.setAddress = function(value) {
-  jspb.Message.setProto3StringField(this, 3, value);
-};
-
-
-/**
- * optional string name = 4;
- * @return {string}
- */
-proto.api.Event.prototype.getName = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
-};
-
-
-/** @param {string} value */
-proto.api.Event.prototype.setName = function(value) {
-  jspb.Message.setProto3StringField(this, 4, value);
-};
-
-
-/**
- * optional string jsonData = 5;
- * @return {string}
- */
-proto.api.Event.prototype.getJsondata = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
-};
-
-
-/** @param {string} value */
 proto.api.Event.prototype.setJsondata = function(value) {
-  jspb.Message.setProto3StringField(this, 5, value);
+  jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
@@ -2643,7 +2562,7 @@ proto.api.BuyParams.deserializeBinaryFromReader = function(msg, reader) {
       msg.setTxparam(value);
       break;
     case 2:
-      var value = /** @type {number} */ (reader.readUint64());
+      var value = /** @type {number} */ (reader.readInt64());
       msg.setTxid(value);
       break;
     default:
@@ -2685,7 +2604,7 @@ proto.api.BuyParams.serializeBinaryToWriter = function(message, writer) {
   }
   f = message.getTxid();
   if (f !== 0) {
-    writer.writeUint64(
+    writer.writeInt64(
       2,
       f
     );
@@ -2724,7 +2643,7 @@ proto.api.BuyParams.prototype.hasTxparam = function() {
 
 
 /**
- * optional uint64 txId = 2;
+ * optional int64 txId = 2;
  * @return {number}
  */
 proto.api.BuyParams.prototype.getTxid = function() {
@@ -2829,7 +2748,7 @@ proto.api.CancelTxParams.deserializeBinaryFromReader = function(msg, reader) {
       msg.setTxparam(value);
       break;
     case 2:
-      var value = /** @type {number} */ (reader.readUint64());
+      var value = /** @type {number} */ (reader.readInt64());
       msg.setTxid(value);
       break;
     default:
@@ -2871,7 +2790,7 @@ proto.api.CancelTxParams.serializeBinaryToWriter = function(message, writer) {
   }
   f = message.getTxid();
   if (f !== 0) {
-    writer.writeUint64(
+    writer.writeInt64(
       2,
       f
     );
@@ -2910,7 +2829,7 @@ proto.api.CancelTxParams.prototype.hasTxparam = function() {
 
 
 /**
- * optional uint64 txId = 2;
+ * optional int64 txId = 2;
  * @return {number}
  */
 proto.api.CancelTxParams.prototype.getTxid = function() {
@@ -2935,20 +2854,13 @@ proto.api.CancelTxParams.prototype.setTxid = function(value) {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.api.SubmitMetaDataIdParams = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, proto.api.SubmitMetaDataIdParams.repeatedFields_, null);
+proto.api.ReEncryptDataParams = function(opt_data) {
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
-goog.inherits(proto.api.SubmitMetaDataIdParams, jspb.Message);
+goog.inherits(proto.api.ReEncryptDataParams, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
-  proto.api.SubmitMetaDataIdParams.displayName = 'proto.api.SubmitMetaDataIdParams';
+  proto.api.ReEncryptDataParams.displayName = 'proto.api.ReEncryptDataParams';
 }
-/**
- * List of repeated fields within this message type.
- * @private {!Array<number>}
- * @const
- */
-proto.api.SubmitMetaDataIdParams.repeatedFields_ = [3];
-
 
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
@@ -2962,8 +2874,8 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
  *     for transitional soy proto support: http://goto/soy-param-migration
  * @return {!Object}
  */
-proto.api.SubmitMetaDataIdParams.prototype.toObject = function(opt_includeInstance) {
-  return proto.api.SubmitMetaDataIdParams.toObject(opt_includeInstance, this);
+proto.api.ReEncryptDataParams.prototype.toObject = function(opt_includeInstance) {
+  return proto.api.ReEncryptDataParams.toObject(opt_includeInstance, this);
 };
 
 
@@ -2972,15 +2884,15 @@ proto.api.SubmitMetaDataIdParams.prototype.toObject = function(opt_includeInstan
  * @param {boolean|undefined} includeInstance Whether to include the JSPB
  *     instance for transitional soy proto support:
  *     http://goto/soy-param-migration
- * @param {!proto.api.SubmitMetaDataIdParams} msg The msg instance to transform.
+ * @param {!proto.api.ReEncryptDataParams} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.api.SubmitMetaDataIdParams.toObject = function(includeInstance, msg) {
+proto.api.ReEncryptDataParams.toObject = function(includeInstance, msg) {
   var f, obj = {
     txparam: (f = msg.getTxparam()) && proto.api.TxParams.toObject(includeInstance, f),
     txid: jspb.Message.getFieldWithDefault(msg, 2, 0),
-    encryptmetadataidList: msg.getEncryptmetadataidList_asB64()
+    encodeddatawithseller: msg.getEncodeddatawithseller_asB64()
   };
 
   if (includeInstance) {
@@ -2994,23 +2906,23 @@ proto.api.SubmitMetaDataIdParams.toObject = function(includeInstance, msg) {
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
- * @return {!proto.api.SubmitMetaDataIdParams}
+ * @return {!proto.api.ReEncryptDataParams}
  */
-proto.api.SubmitMetaDataIdParams.deserializeBinary = function(bytes) {
+proto.api.ReEncryptDataParams.deserializeBinary = function(bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.api.SubmitMetaDataIdParams;
-  return proto.api.SubmitMetaDataIdParams.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.api.ReEncryptDataParams;
+  return proto.api.ReEncryptDataParams.deserializeBinaryFromReader(msg, reader);
 };
 
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
  * given reader into the given message object.
- * @param {!proto.api.SubmitMetaDataIdParams} msg The message object to deserialize into.
+ * @param {!proto.api.ReEncryptDataParams} msg The message object to deserialize into.
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
- * @return {!proto.api.SubmitMetaDataIdParams}
+ * @return {!proto.api.ReEncryptDataParams}
  */
-proto.api.SubmitMetaDataIdParams.deserializeBinaryFromReader = function(msg, reader) {
+proto.api.ReEncryptDataParams.deserializeBinaryFromReader = function(msg, reader) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
@@ -3023,12 +2935,12 @@ proto.api.SubmitMetaDataIdParams.deserializeBinaryFromReader = function(msg, rea
       msg.setTxparam(value);
       break;
     case 2:
-      var value = /** @type {number} */ (reader.readUint64());
+      var value = /** @type {number} */ (reader.readInt64());
       msg.setTxid(value);
       break;
     case 3:
       var value = /** @type {!Uint8Array} */ (reader.readBytes());
-      msg.addEncryptmetadataid(value);
+      msg.setEncodeddatawithseller(value);
       break;
     default:
       reader.skipField();
@@ -3043,9 +2955,9 @@ proto.api.SubmitMetaDataIdParams.deserializeBinaryFromReader = function(msg, rea
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.api.SubmitMetaDataIdParams.prototype.serializeBinary = function() {
+proto.api.ReEncryptDataParams.prototype.serializeBinary = function() {
   var writer = new jspb.BinaryWriter();
-  proto.api.SubmitMetaDataIdParams.serializeBinaryToWriter(this, writer);
+  proto.api.ReEncryptDataParams.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
 
@@ -3053,11 +2965,11 @@ proto.api.SubmitMetaDataIdParams.prototype.serializeBinary = function() {
 /**
  * Serializes the given message to binary data (in protobuf wire
  * format), writing to the given BinaryWriter.
- * @param {!proto.api.SubmitMetaDataIdParams} message
+ * @param {!proto.api.ReEncryptDataParams} message
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.api.SubmitMetaDataIdParams.serializeBinaryToWriter = function(message, writer) {
+proto.api.ReEncryptDataParams.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = message.getTxparam();
   if (f != null) {
@@ -3069,14 +2981,14 @@ proto.api.SubmitMetaDataIdParams.serializeBinaryToWriter = function(message, wri
   }
   f = message.getTxid();
   if (f !== 0) {
-    writer.writeUint64(
+    writer.writeInt64(
       2,
       f
     );
   }
-  f = message.getEncryptmetadataidList_asU8();
+  f = message.getEncodeddatawithseller_asU8();
   if (f.length > 0) {
-    writer.writeRepeatedBytes(
+    writer.writeBytes(
       3,
       f
     );
@@ -3088,19 +3000,19 @@ proto.api.SubmitMetaDataIdParams.serializeBinaryToWriter = function(message, wri
  * optional TxParams txParam = 1;
  * @return {?proto.api.TxParams}
  */
-proto.api.SubmitMetaDataIdParams.prototype.getTxparam = function() {
+proto.api.ReEncryptDataParams.prototype.getTxparam = function() {
   return /** @type{?proto.api.TxParams} */ (
     jspb.Message.getWrapperField(this, proto.api.TxParams, 1));
 };
 
 
 /** @param {?proto.api.TxParams|undefined} value */
-proto.api.SubmitMetaDataIdParams.prototype.setTxparam = function(value) {
+proto.api.ReEncryptDataParams.prototype.setTxparam = function(value) {
   jspb.Message.setWrapperField(this, 1, value);
 };
 
 
-proto.api.SubmitMetaDataIdParams.prototype.clearTxparam = function() {
+proto.api.ReEncryptDataParams.prototype.clearTxparam = function() {
   this.setTxparam(undefined);
 };
 
@@ -3109,76 +3021,62 @@ proto.api.SubmitMetaDataIdParams.prototype.clearTxparam = function() {
  * Returns whether this field is set.
  * @return {!boolean}
  */
-proto.api.SubmitMetaDataIdParams.prototype.hasTxparam = function() {
+proto.api.ReEncryptDataParams.prototype.hasTxparam = function() {
   return jspb.Message.getField(this, 1) != null;
 };
 
 
 /**
- * optional uint64 txId = 2;
+ * optional int64 txId = 2;
  * @return {number}
  */
-proto.api.SubmitMetaDataIdParams.prototype.getTxid = function() {
+proto.api.ReEncryptDataParams.prototype.getTxid = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 2, 0));
 };
 
 
 /** @param {number} value */
-proto.api.SubmitMetaDataIdParams.prototype.setTxid = function(value) {
+proto.api.ReEncryptDataParams.prototype.setTxid = function(value) {
   jspb.Message.setProto3IntField(this, 2, value);
 };
 
 
 /**
- * repeated bytes encryptMetaDataId = 3;
- * @return {!(Array<!Uint8Array>|Array<string>)}
+ * optional bytes encodedDataWithSeller = 3;
+ * @return {!(string|Uint8Array)}
  */
-proto.api.SubmitMetaDataIdParams.prototype.getEncryptmetadataidList = function() {
-  return /** @type {!(Array<!Uint8Array>|Array<string>)} */ (jspb.Message.getRepeatedField(this, 3));
+proto.api.ReEncryptDataParams.prototype.getEncodeddatawithseller = function() {
+  return /** @type {!(string|Uint8Array)} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
 };
 
 
 /**
- * repeated bytes encryptMetaDataId = 3;
- * This is a type-conversion wrapper around `getEncryptmetadataidList()`
- * @return {!Array<string>}
+ * optional bytes encodedDataWithSeller = 3;
+ * This is a type-conversion wrapper around `getEncodeddatawithseller()`
+ * @return {string}
  */
-proto.api.SubmitMetaDataIdParams.prototype.getEncryptmetadataidList_asB64 = function() {
-  return /** @type {!Array<string>} */ (jspb.Message.bytesListAsB64(
-      this.getEncryptmetadataidList()));
+proto.api.ReEncryptDataParams.prototype.getEncodeddatawithseller_asB64 = function() {
+  return /** @type {string} */ (jspb.Message.bytesAsB64(
+      this.getEncodeddatawithseller()));
 };
 
 
 /**
- * repeated bytes encryptMetaDataId = 3;
+ * optional bytes encodedDataWithSeller = 3;
  * Note that Uint8Array is not supported on all browsers.
  * @see http://caniuse.com/Uint8Array
- * This is a type-conversion wrapper around `getEncryptmetadataidList()`
- * @return {!Array<!Uint8Array>}
+ * This is a type-conversion wrapper around `getEncodeddatawithseller()`
+ * @return {!Uint8Array}
  */
-proto.api.SubmitMetaDataIdParams.prototype.getEncryptmetadataidList_asU8 = function() {
-  return /** @type {!Array<!Uint8Array>} */ (jspb.Message.bytesListAsU8(
-      this.getEncryptmetadataidList()));
+proto.api.ReEncryptDataParams.prototype.getEncodeddatawithseller_asU8 = function() {
+  return /** @type {!Uint8Array} */ (jspb.Message.bytesAsU8(
+      this.getEncodeddatawithseller()));
 };
 
 
-/** @param {!(Array<!Uint8Array>|Array<string>)} value */
-proto.api.SubmitMetaDataIdParams.prototype.setEncryptmetadataidList = function(value) {
-  jspb.Message.setField(this, 3, value || []);
-};
-
-
-/**
- * @param {!(string|Uint8Array)} value
- * @param {number=} opt_index
- */
-proto.api.SubmitMetaDataIdParams.prototype.addEncryptmetadataid = function(value, opt_index) {
-  jspb.Message.addToRepeatedField(this, 3, value, opt_index);
-};
-
-
-proto.api.SubmitMetaDataIdParams.prototype.clearEncryptmetadataidList = function() {
-  this.setEncryptmetadataidList([]);
+/** @param {!(string|Uint8Array)} value */
+proto.api.ReEncryptDataParams.prototype.setEncodeddatawithseller = function(value) {
+  jspb.Message.setProto3BytesField(this, 3, value);
 };
 
 
@@ -3274,7 +3172,7 @@ proto.api.DataConfirmParams.deserializeBinaryFromReader = function(msg, reader) 
       msg.setTxparam(value);
       break;
     case 2:
-      var value = /** @type {number} */ (reader.readUint64());
+      var value = /** @type {number} */ (reader.readInt64());
       msg.setTxid(value);
       break;
     case 3:
@@ -3320,7 +3218,7 @@ proto.api.DataConfirmParams.serializeBinaryToWriter = function(message, writer) 
   }
   f = message.getTxid();
   if (f !== 0) {
-    writer.writeUint64(
+    writer.writeInt64(
       2,
       f
     );
@@ -3366,7 +3264,7 @@ proto.api.DataConfirmParams.prototype.hasTxparam = function() {
 
 
 /**
- * optional uint64 txId = 2;
+ * optional int64 txId = 2;
  * @return {number}
  */
 proto.api.DataConfirmParams.prototype.getTxid = function() {
@@ -3703,7 +3601,7 @@ proto.api.VoteParams.deserializeBinaryFromReader = function(msg, reader) {
       msg.setTxparam(value);
       break;
     case 2:
-      var value = /** @type {number} */ (reader.readUint64());
+      var value = /** @type {number} */ (reader.readInt64());
       msg.setTxid(value);
       break;
     case 3:
@@ -3753,7 +3651,7 @@ proto.api.VoteParams.serializeBinaryToWriter = function(message, writer) {
   }
   f = message.getTxid();
   if (f !== 0) {
-    writer.writeUint64(
+    writer.writeInt64(
       2,
       f
     );
@@ -3806,7 +3704,7 @@ proto.api.VoteParams.prototype.hasTxparam = function() {
 
 
 /**
- * optional uint64 txId = 2;
+ * optional int64 txId = 2;
  * @return {number}
  */
 proto.api.VoteParams.prototype.getTxid = function() {
@@ -4104,7 +4002,7 @@ proto.api.CreditVerifierParams.deserializeBinaryFromReader = function(msg, reade
       msg.setTxparam(value);
       break;
     case 2:
-      var value = /** @type {number} */ (reader.readUint64());
+      var value = /** @type {number} */ (reader.readInt64());
       msg.setTxid(value);
       break;
     case 3:
@@ -4154,7 +4052,7 @@ proto.api.CreditVerifierParams.serializeBinaryToWriter = function(message, write
   }
   f = message.getTxid();
   if (f !== 0) {
-    writer.writeUint64(
+    writer.writeInt64(
       2,
       f
     );
@@ -4207,7 +4105,7 @@ proto.api.CreditVerifierParams.prototype.hasTxparam = function() {
 
 
 /**
- * optional uint64 txId = 2;
+ * optional int64 txId = 2;
  * @return {number}
  */
 proto.api.CreditVerifierParams.prototype.getTxid = function() {
@@ -4848,12 +4746,19 @@ proto.api.TokenBalanceResult.prototype.hasResult = function() {
  * @constructor
  */
 proto.api.SubscribeInfo = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
+  jspb.Message.initialize(this, opt_data, 0, -1, proto.api.SubscribeInfo.repeatedFields_, null);
 };
 goog.inherits(proto.api.SubscribeInfo, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
   proto.api.SubscribeInfo.displayName = 'proto.api.SubscribeInfo';
 }
+/**
+ * List of repeated fields within this message type.
+ * @private {!Array<number>}
+ * @const
+ */
+proto.api.SubscribeInfo.repeatedFields_ = [2];
+
 
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
@@ -4884,7 +4789,7 @@ proto.api.SubscribeInfo.prototype.toObject = function(opt_includeInstance) {
 proto.api.SubscribeInfo.toObject = function(includeInstance, msg) {
   var f, obj = {
     address: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    event: jspb.Message.getFieldWithDefault(msg, 2, "")
+    eventList: jspb.Message.getRepeatedField(msg, 2)
   };
 
   if (includeInstance) {
@@ -4927,7 +4832,7 @@ proto.api.SubscribeInfo.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 2:
       var value = /** @type {string} */ (reader.readString());
-      msg.setEvent(value);
+      msg.addEvent(value);
       break;
     default:
       reader.skipField();
@@ -4965,9 +4870,9 @@ proto.api.SubscribeInfo.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getEvent();
+  f = message.getEventList();
   if (f.length > 0) {
-    writer.writeString(
+    writer.writeRepeatedString(
       2,
       f
     );
@@ -4991,17 +4896,31 @@ proto.api.SubscribeInfo.prototype.setAddress = function(value) {
 
 
 /**
- * optional string event = 2;
- * @return {string}
+ * repeated string event = 2;
+ * @return {!Array<string>}
  */
-proto.api.SubscribeInfo.prototype.getEvent = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+proto.api.SubscribeInfo.prototype.getEventList = function() {
+  return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 2));
 };
 
 
-/** @param {string} value */
-proto.api.SubscribeInfo.prototype.setEvent = function(value) {
-  jspb.Message.setProto3StringField(this, 2, value);
+/** @param {!Array<string>} value */
+proto.api.SubscribeInfo.prototype.setEventList = function(value) {
+  jspb.Message.setField(this, 2, value || []);
+};
+
+
+/**
+ * @param {!string} value
+ * @param {number=} opt_index
+ */
+proto.api.SubscribeInfo.prototype.addEvent = function(value, opt_index) {
+  jspb.Message.addToRepeatedField(this, 2, value, opt_index);
+};
+
+
+proto.api.SubscribeInfo.prototype.clearEventList = function() {
+  this.setEventList([]);
 };
 
 

@@ -50,7 +50,7 @@ func (c *Executor) Create(l dot.Line) error {
 func (c *Executor) ExecuteEvents(ce chan event.Event, r *event.Repository, appId string) {
     defer func() {
         if er := recover(); er != nil {
-            dot.Logger().Errorln("Executor::ExecuteEvents", zap.Any("Error: failed to execute event, error: ", er))
+            dot.Logger().Errorln("Executor::ExecuteEvents", zap.Any("error: failed to execute event, error: ", er))
         }
     }()
 
@@ -70,7 +70,7 @@ func (c *Executor) ExecuteEvents(ce chan event.Event, r *event.Repository, appId
 func (c *Executor) executeEvent(e event.Event) bool {
     defer func() {
         if er := recover(); er != nil {
-            dot.Logger().Errorln("", zap.Any("error: failed to execute e "+e.Name+" because of error: ", er))
+            dot.Logger().Errorln("", zap.Any("error: failed to execute event "+e.Name+" because of error: ", er))
         }
     }()
 
