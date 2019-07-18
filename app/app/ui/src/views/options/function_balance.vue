@@ -2,22 +2,26 @@
 <!-- license that can be found in the license file.-->
 <template>
     <section>
-        <el-row class="section-item center token-height">
-            <el-col :span="21">
-                以太币余额：&nbsp;{{ this.$store.state.balance[0].Balance }}&nbsp;wei
-                <span class="token-time">查询时间：{{ this.$store.state.balance[0].Time }}</span>
-            </el-col>
+        <el-row class="section-item center token-item">
+            <el-col :span="2">以太币</el-col>
+            <el-col :span="2">余额：</el-col>
+            <el-col :span="5">{{ this.$store.state.balance[0].Balance }}</el-col>
+            <el-col :span="2">wei</el-col>
+            <el-col :span="2" class="token-time">查询时间：</el-col>
+            <el-col :span="8" class="token-time">{{ this.$store.state.balance[0].Time }}</el-col>
             <el-col :span="3" class="section-item-right">
-                <s-f-t button-name="余额查询" @password="getEthBalance"></s-f-t>
+                <s-f-t button-name="余额查询" button-size="small" @password="getEthBalance"></s-f-t>
             </el-col>
         </el-row>
-        <el-row class="section-item center token-height">
-            <el-col :span="21">
-                &nbsp;token&nbsp;余额：&nbsp;{{ this.$store.state.balance[1].Balance }}&nbsp;DDD
-                <span class="token-time">查询时间：{{ this.$store.state.balance[1].Time }}</span>
-            </el-col>
+        <el-row class="section-item center token-item">
+            <el-col :span="2">token</el-col>
+            <el-col :span="2">余额：</el-col>
+            <el-col :span="5">{{ this.$store.state.balance[1].Balance }}</el-col>
+            <el-col :span="2">DDD</el-col>
+            <el-col :span="2" class="token-time">查询时间：</el-col>
+            <el-col :span="8" class="token-time">{{ this.$store.state.balance[1].Time }}</el-col>
             <el-col :span="3" class="section-item-right">
-                <s-f-t button-name="余额查询" @password="getTokenBalance"></s-f-t>
+                <s-f-t button-name="余额查询" button-size="small" @password="getTokenBalance"></s-f-t>
             </el-col>
         </el-row>
     </section>
@@ -41,7 +45,7 @@ export default {
                 _balance.$store.state.balance[0].Balance = payload.split("|")[0];
                 _balance.$store.state.balance[0].Time = payload.split("|")[1];
             }, function (payload, _this) {
-                console.log("查询以太币余额成功：", payload);
+                console.log("查询以太币余额失败：", payload);
                 _this.$alert(payload, "查询以太币余额失败！", {
                     confirmButtonText: "关闭",
                     showClose: false,
@@ -56,7 +60,7 @@ export default {
                 _balance.$store.state.balance[1].Balance = payload.split("|")[0];
                 _balance.$store.state.balance[1].Time = payload.split("|")[1];
             }, function (payload, _this) {
-                console.log("查询token余额成功：", payload);
+                console.log("查询token余额失败：", payload);
                 _this.$alert(payload, "查询token余额失败！", {
                     confirmButtonText: "关闭",
                     showClose: false,
@@ -72,11 +76,11 @@ export default {
 </script>
 
 <style scoped>
-.token-height {
+.token-item {
     height: 80px;
+    font-size: 20px;
 }
 .token-time {
-    margin-left: 20px;
-    font-size: 10px;
+    font-size: 12px;
 }
 </style>

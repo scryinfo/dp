@@ -4,14 +4,11 @@
 package main
 
 import (
+    "github.com/pkg/errors"
     "github.com/scryinfo/dot/dot"
     "github.com/scryinfo/dot/dots/line"
-    app2 "github.com/scryinfo/dp/dots/app"
-    "github.com/scryinfo/dp/dots/app/connection"
-    "github.com/scryinfo/dp/dots/app/connection/msg_handler"
-    sdkinterface2 "github.com/scryinfo/dp/dots/app/sdkinterface"
-    "github.com/scryinfo/dp/dots/app/settings"
-    "github.com/scryinfo/dp/dots/binary"
+    "github.com/scryinfo/dp/dots/connection"
+    "github.com/scryinfo/dp/dots/connection/business"
     "github.com/scryinfo/scryg/sutils/ssignal"
     "go.uber.org/zap"
     "os"
@@ -20,21 +17,18 @@ import (
 func main() {
     l, err := line.BuildAndStart(func(l dot.Line) error {
         //todo
-        l.PreAdd(binary.BinTypeLive()...)
-        l.PreAdd(settings.ConfTypeLive())
+        l.PreAdd(business.BusTypeLive()...)
         return nil
     })
     if err != nil {
-        dot.Logger().Debugln("Line init failed. ", zap.NamedError("", err))
+        dot.Logger().Errorln("Line init failed. ", zap.NamedError("error", err))
         return
     }
 
     if err := Init(l); err != nil {
-        dot.Logger().Errorln("App init failed. ", zap.NamedError("err", err))
+        dot.Logger().Errorln("App init failed. ", zap.NamedError("error", err))
         return
     }
-
-    dot.SetDefaultLine(l)
 
     defer line.StopAndDestroy(l, true)
 
@@ -43,52 +37,25 @@ func main() {
     })
 }
 
-func Init(l dot.Line) (err error) {
+func Init(l dot.Line) error {
     logger := dot.Logger()
 
-    {
-        d, err := l.ToInjecter().GetByLiveId(dot.LiveId(binary.BinLiveId))
-        if err != nil {
-            logger.Errorln("load Binary component failed.")
-            return nil
-        }
-
-        if g, ok := d.(*binary.Binary); ok {
-            app2.GetGapp().ChainWrapper = g.ChainWrapper()
-        } else {
-            logger.Errorln("load Binary component failed.", zap.Any("d", d))
-            return nil
-        }
+    d, err := l.ToInjecter().GetByLiveId(dot.LiveId(connection.WebSocketTypeId))
+    if err != nil {
+        logger.Errorln("load connect component failed. ")
+        return errors.New("load connect component failed. ")
     }
 
-    l.ToInjecter().ReplaceOrAddByType(app2.GetGapp().ChainWrapper)
-
-    logger.Infoln("ChainWrapper init finished. ")
-
-    {
-        d, err := l.ToInjecter().GetByLiveId(dot.LiveId(settings.ConfLiveId))
-        if err != nil {
-            logger.Errorln("load Config component failed.")
-            return nil
+    // todo: move 'start web server' to 'after start' stage
+    if ws, ok := d.(*connection.WSServer); ok {
+        if err = ws.Connect(); err != nil {
+            logger.Errorln("WebSocket Connect failed. ", zap.NamedError("error", err))
+            return errors.New("WebSocket Connect failed. ")
         }
-
-        if g, ok := d.(*settings.Config); ok {
-            app2.GetGapp().ScryInfo = g
-        } else {
-            logger.Errorln("load Config component failed.", zap.Any("d", d))
-            return nil
-        }
+    } else {
+        logger.Errorln("load connect component failed.", zap.Any("dot", d))
+        return errors.New("load connect component failed. ")
     }
 
-    app2.GetGapp().Connection = connection.CreateConnetion(app2.GetGapp().ScryInfo.WSPort, app2.GetGapp().ScryInfo.UIResourcesDir)
-
-    app2.GetGapp().CurUser = sdkinterface2.CreateSDKWrapperImp(app2.GetGapp().ChainWrapper)
-
-    msg_handler.MessageHandlerInit()
-
-    if err = app2.GetGapp().Connection.Connect(); err != nil {
-        logger.Errorln("WebSocket Connect failed. ", zap.NamedError("", err))
-    }
-
-    return
+    return nil
 }

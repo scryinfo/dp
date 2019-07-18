@@ -26,7 +26,7 @@ contract TestVfRegister is ScryToken {
         verification.register(ds, "seqNo", token);
     }
 
-    function prepareParamsForRegister() public {
+    function prepareParamsForRegister() internal {
         approve(address(this), 10000);
         require(allowance(msg.sender, address(this)) == 10000, "extra address approve test contract transfer token failed. ");
 
@@ -34,7 +34,7 @@ contract TestVfRegister is ScryToken {
         ds.conf = common.Configuration(2, 10000, 300,   1, 0, 500,   0, 5, 2,   0, 32);
     }
 
-    function checkParamsForRegister() public view {
+    function checkParamsForRegister() internal view {
         require(balanceOf(address(this)) == 10000, "balance of verifier1 is wrong. ");
         require(allowance(msg.sender, address(this)) == 0, "allowance of extra address - test contract is wrong. ");
 

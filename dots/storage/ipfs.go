@@ -24,27 +24,6 @@ func (c *Ipfs) Create(l dot.Line) error {
     return nil
 }
 
-func GetIPFSIns() *Ipfs {
-    logger := dot.Logger()
-    l := dot.GetDefaultLine()
-    if l == nil {
-        logger.Errorln("the line do not create, do not call it")
-        return nil
-    }
-    d, err := l.ToInjecter().GetByLiveId(IpfsLiveId)
-    if err != nil {
-        logger.Errorln(err.Error())
-        return nil
-    }
-
-    if g, ok := d.(*Ipfs); ok {
-        return g
-    }
-
-    logger.Errorln("do not get the IPFS dot")
-    return nil
-}
-
 //construct dot
 func newIpfsDot() (dot.Dot, error) {
     d := &Ipfs{}
