@@ -17,7 +17,7 @@ type ChainWrapper interface {
     PrepareToBuy(txParams *tx.TxParams, publishId string, startVerify bool) error
     BuyData(txParams *tx.TxParams, txId *big.Int) error
     CancelTransaction(txParams *tx.TxParams, txId *big.Int) error
-    ReEncryptMetaDataIdBySeller(txParams *tx.TxParams, txId *big.Int, encIdWithBuyer []byte, encIdsWithArbitrators []byte) error
+    ReEncryptMetaDataId(txParams *tx.TxParams, txId *big.Int, encodedData []byte) error
     ConfirmDataTruth(txParams *tx.TxParams, txId *big.Int, truth bool) error
     ApproveTransfer(txParams *tx.TxParams, spender common.Address, value *big.Int) error
     Vote(txParams *tx.TxParams, txId *big.Int, judge bool, comments string) error

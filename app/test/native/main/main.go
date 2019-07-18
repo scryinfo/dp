@@ -9,7 +9,7 @@ import (
     "github.com/scryinfo/dot/dot"
     "github.com/scryinfo/dot/dots/line"
     "github.com/scryinfo/dp/dots/binary"
-    scry2 "github.com/scryinfo/dp/dots/binary/scry"
+    "github.com/scryinfo/dp/dots/binary/scry"
     "github.com/scryinfo/dp/dots/eth/event"
     "github.com/scryinfo/dp/dots/eth/transaction"
     "github.com/scryinfo/scryg/sutils/ssignal"
@@ -20,24 +20,23 @@ import (
 )
 
 var (
-    seller    scry2.Client = nil
-    buyer     scry2.Client = nil
-    verifier1 scry2.Client = nil
-    verifier2 scry2.Client = nil
-    verifier3 scry2.Client = nil
+    seller    scry.Client = nil
+    buyer     scry.Client = nil
+    verifier1 scry.Client = nil
+    verifier2 scry.Client = nil
+    verifier3 scry.Client = nil
 
-    protocolContractAddr = "0x8af6e28777f52bd97cc1b2b534d6b7601ea0afc7"
+    protocolContractAddr = "0x3420c44090c6a2c444ce85cb914087760ac0a78b"
     clientPassword       = "888888"
     suAddress            = "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8"
     suPassword           = "111111"
 
-    bin   *binary.Binary     = nil
-    chain scry2.ChainWrapper = nil
+    bin   *binary.Binary    = nil
+    chain scry.ChainWrapper = nil
 
     publishId                        = ""
     txId                    *big.Int = big.NewInt(0)
     metaDataIdEncWithSeller []byte
-    metaDataIdEncWithBuyer  []byte
 )
 
 func main() {
@@ -85,7 +84,7 @@ func Start() {
 }
 
 func TestClient() {
-    c := scry2.NewScryClient("0xd280b60638bc8db9d309fa5a540ffec499f0a3e8", chain)
+    c := scry.NewScryClient("0xd280b60638bc8db9d309fa5a540ffec499f0a3e8", chain)
     rv, err := c.Authenticate("111111")
     if err != nil {
         fmt.Println("failed to authenticate user account, error:", err)
@@ -131,8 +130,8 @@ func StartTestingWithoutVerify() {
     SellerPublishData()
 }
 
-func CreateClientWithToken(token *big.Int, eth *big.Int) (scry2.Client, error) {
-    client, err := scry2.CreateScryClient(clientPassword, chain)
+func CreateClientWithToken(token *big.Int, eth *big.Int) (scry.Client, error) {
+    client, err := scry.CreateScryClient(clientPassword, chain)
     if err != nil {
         return nil, err
     }
@@ -224,6 +223,7 @@ func BuyerApproveTransfer() {
         Value:    big.NewInt(0),
         Pending:  false,
     }
+
     err := chain.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(1600))
     if err != nil {
         fmt.Println("BuyerApproveTransfer:", err)
@@ -257,7 +257,7 @@ func Buy(txId *big.Int) {
     }
 }
 
-func SubmitMetaDataIdEncWithBuyer(txId *big.Int) {
+func SubmitMetaDataId(txId *big.Int) {
     txParam := transaction.TxParams{
         From:     common.HexToAddress(seller.Account().Addr),
         Password: clientPassword,
@@ -265,9 +265,9 @@ func SubmitMetaDataIdEncWithBuyer(txId *big.Int) {
         Pending:  false,
     }
 
-    err := chain.ReEncryptMetaDataIdBySeller(&txParam, txId, metaDataIdEncWithBuyer, metaDataIdEncWithBuyer)
+    err := chain.ReEncryptMetaDataId(&txParam, txId, metaDataIdEncWithSeller)
     if err != nil {
-        fmt.Println("failed to SubmitMetaDataIdEncWithBuyer, error:", err)
+        fmt.Println("failed to SubmitMetaDataId, error:", err)
     }
 }
 
@@ -288,16 +288,13 @@ func onPurchase(event event.Event) bool {
     fmt.Println("onPurchase:", event)
     metaDataIdEncWithSeller = event.Data.Get("metaDataIdEncSeller").([]byte)
     fmt.Println("Node: EncID. ", metaDataIdEncWithSeller)
-    metaDataIdEncWithBuyer = make([]byte, len(metaDataIdEncWithSeller))
-    copy(metaDataIdEncWithBuyer, metaDataIdEncWithSeller)
 
-    SubmitMetaDataIdEncWithBuyer(txId)
+    SubmitMetaDataId(txId)
     return true
 }
 
 func onReadyForDownload(event event.Event) bool {
     fmt.Println("onReadyForDownload:", event)
-    metaDataIdEncWithBuyer = event.Data.Get("metaDataIdEncBuyer").([]byte)
 
     ConfirmDataTruth(txId)
 
@@ -330,7 +327,7 @@ func onTransactionCreate(event event.Event) bool {
 }
 
 func onPublish(event event.Event) bool {
-    fmt.Println("onpublish: ", event)
+    fmt.Println("onPublish: ", event)
 
     publishId = event.Data.Get("publishId").(string)
 
