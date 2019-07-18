@@ -2,6 +2,7 @@ package grpc
 
 import (
     "context"
+    "encoding/json"
     "errors"
     "github.com/ethereum/go-ethereum/common"
     "github.com/scryinfo/dot/dot"
@@ -16,7 +17,11 @@ import (
     "time"
 )
 
-const BinaryGrpcServerTypeId = "96a6e2b5-f0b6-48dc-b0ff-2d9f2c5c9f1d"
+const (
+    BinaryGrpcServerTypeId = "96a6e2b5-f0b6-48dc-b0ff-2d9f2c5c9f1d"
+    ScanEventInterval      = 200  //milli seconds
+)
+
 
 type ChanEvent chan event.Event
 
@@ -117,22 +122,24 @@ func (c *BinaryGrpcServer) SubscribeEvent(ctx context.Context, info *api.Subscri
     //data channel for server streaming
     ce := c.eventChan[hexAddr]
     if ce == nil {
-        errMsg := "failed to subscribe event as no server streaming channel could be found"
+        errMsg := "failed to subscribe event since no server streaming channel found"
         dot.Logger().Errorln("BinaryGrpcServer::SubscribeEvent", zap.String("error:", errMsg))
         rs.ErrMsg = errMsg
         return rs, errors.New(errMsg)
     }
 
     addr := common.HexToAddress(info.GetAddress())
-    err := c.Subscriber.Subscribe(addr, info.GetEvent(), func(event event.Event) bool {
-        ce <- event
-        return true
-    })
+    for _, ev := range info.GetEvent() {
+        err := c.Subscriber.Subscribe(addr, ev, func(event event.Event) bool {
+            ce <- event
+            return true
+        })
 
-    if err != nil {
-        dot.Logger().Errorln("BinaryGrpcServer::SubscribeEvent", zap.Error(err))
-        rs.ErrMsg = err.Error()
-        return rs, err
+        if err != nil {
+            dot.Logger().Errorln("BinaryGrpcServer::SubscribeEvent", zap.Error(err))
+            rs.ErrMsg = err.Error()
+            return rs, err
+        }
     }
 
     return rs, nil
@@ -162,25 +169,44 @@ func (c *BinaryGrpcServer) RecvEvents(client *api.ClientInfo,srv api.BinaryServi
         select {
         case e := <- ce:
             dot.Logger().Debugln("BinaryGrpcServer::RecvEvents", zap.String("event:", e.Name))
-            err := srv.Send(makeProtoEvent(&e))
+
+            ev, err := makeProtoEvent(&e)
+            if err != nil {
+                dot.Logger().Errorln("BinaryGrpcServer::RecvEvents", zap.String("error:", err.Error()))
+                break
+            }
+
+            err = srv.Send(ev)
             if err != nil {
                 dot.Logger().Errorln("BinaryGrpcServer::RecvEvents", zap.String("error:", err.Error()))
             }
-        case <-time.After(time.Microsecond * 50):
+
+        case <-time.After(time.Microsecond * ScanEventInterval):
         }
     }
 }
 
-func makeProtoEvent(e *event.Event) *api.Event {
-    pe := &api.Event{
-        BlockNumber: e.BlockNumber,
-        Address: e.Address.String(),
-        Name: e.Name,
-        TxHash: e.TxHash.String(),
-        JsonData: e.Data.String(),
+func makeProtoEvent(e *event.Event) (*api.Event, error) {
+    obj := map[string]interface{} {
+        "BlockNumber": e.BlockNumber,
+        "ContractAddress": e.Address.String(),
+        "EventName": e.Name,
+        "TxHash": e.TxHash.String(),
+        "EventData": e.Data.String(),
     }
 
-    return pe
+    jsonEvent, err := json.Marshal(obj)
+    if err != nil {
+        dot.Logger().Errorln("BinaryGrpcServer::makeProtoEvent", zap.String("error:", err.Error()))
+        return nil, err
+    }
+
+    pe := &api.Event{
+        Time: time.Now().Unix(),
+        JsonData: string(jsonEvent),
+    }
+
+    return pe, nil
 }
 
 func (c *BinaryGrpcServer) Publish(ctx context.Context, params *api.PublishParams) (*api.PublishResult, error) {
@@ -423,40 +449,248 @@ func makeTokenBalanceResult(r **api.TokenBalanceResult, e string, s bool, b int6
     }
 }
 
-func (c *BinaryGrpcServer) PrepareToBuy(context.Context, *api.PrepareParams) (*api.Result, error) {
-    return nil, nil
+func (c *BinaryGrpcServer) PrepareToBuy(
+    ctx context.Context,
+    params *api.PrepareParams,
+) (*api.Result, error) {
+    if c.chainWrapper == nil {
+        e := "invalid scry chain interface"
+        return makeResult(false, e), errors.New(e)
+    }
+
+    if params == nil || params.TxParam == nil {
+        e := "null publish parameters"
+        return makeResult(false, e), errors.New(e)
+    }
+
+    err := c.chainWrapper.PrepareToBuy(
+        makeTxParams(params.TxParam),
+        params.PublishId,
+        params.StartVerify,
+    )
+    if err != nil {
+        e := err.Error()
+        return makeResult(false, e), err
+    }
+
+    return makeResult(true, ""), nil
 }
 
-func (c *BinaryGrpcServer) BuyData(context.Context, *api.BuyParams) (*api.Result, error) {
-    return nil, nil
+func (c *BinaryGrpcServer) BuyData(
+    ctx context.Context,
+    params *api.BuyParams,
+) (*api.Result, error) {
+    if c.chainWrapper == nil {
+        e := "invalid scry chain interface"
+        return makeResult(false, e), errors.New(e)
+    }
+
+    if params == nil || params.TxParam == nil {
+        e := "null publish parameters"
+        return makeResult(false, e), errors.New(e)
+    }
+
+    err := c.chainWrapper.BuyData(
+        makeTxParams(params.TxParam),
+        big.NewInt(params.TxId),
+    )
+    if err != nil {
+        e := err.Error()
+        return makeResult(false, e), err
+    }
+
+    return makeResult(true, ""), nil
 }
 
-func (c *BinaryGrpcServer) CancelTransaction(context.Context, *api.CancelTxParams) (*api.Result, error) {
-    return nil, nil
+func (c *BinaryGrpcServer) CancelTransaction(
+    ctx context.Context,
+    params *api.CancelTxParams,
+) (*api.Result, error) {
+    if c.chainWrapper == nil {
+        e := "invalid scry chain interface"
+        return makeResult(false, e), errors.New(e)
+    }
+
+    if params == nil || params.TxParam == nil {
+        e := "null publish parameters"
+        return makeResult(false, e), errors.New(e)
+    }
+
+    err := c.chainWrapper.CancelTransaction(
+        makeTxParams(params.TxParam),
+        big.NewInt(params.TxId),
+    )
+    if err != nil {
+        e := err.Error()
+        return makeResult(false, e), err
+    }
+
+    return makeResult(true, ""), nil
 }
 
-func (c *BinaryGrpcServer) SubmitMetaDataIdEncWithBuyer(context.Context, *api.SubmitMetaDataIdParams) (*api.Result, error) {
-    return nil, nil
+//re-encrypt meta data id
+func (c *BinaryGrpcServer) ReEncryptMetaDataId(
+    ctx context.Context,
+    params *api.ReEncryptDataParams,
+) (*api.Result, error) {
+    if c.chainWrapper == nil {
+        e := "invalid scry chain interface"
+        return makeResult(false, e), errors.New(e)
+    }
+
+    if params == nil || params.TxParam == nil {
+        e := "null publish parameters"
+        return makeResult(false, e), errors.New(e)
+    }
+
+    //get buyer address and arbitrators address
+    err := c.chainWrapper.ReEncryptMetaDataId(
+        makeTxParams(params.TxParam),
+        big.NewInt(params.TxId),
+        params.EncodedDataWithSeller,
+    )
+    if err != nil {
+        e := err.Error()
+        return makeResult(false, e), err
+    }
+
+    return makeResult(true, ""), nil
 }
 
-func (c *BinaryGrpcServer) ConfirmDataTruth(context.Context, *api.DataConfirmParams) (*api.Result, error) {
-    return nil, nil
+func (c *BinaryGrpcServer) ConfirmDataTruth(
+    ctx context.Context,
+    params *api.DataConfirmParams,
+) (*api.Result, error) {
+    if c.chainWrapper == nil {
+        e := "invalid scry chain interface"
+        return makeResult(false, e), errors.New(e)
+    }
+
+    if params == nil || params.TxParam == nil {
+        e := "null publish parameters"
+        return makeResult(false, e), errors.New(e)
+    }
+
+    err := c.chainWrapper.ConfirmDataTruth(
+        makeTxParams(params.TxParam),
+        big.NewInt(params.TxId),
+        params.Truth,
+    )
+    if err != nil {
+        e := err.Error()
+        return makeResult(false, e), err
+    }
+
+    return makeResult(true, ""), nil
 }
 
-func (c *BinaryGrpcServer) ApproveTransfer(context.Context, *api.ApproveTransferParams) (*api.Result, error) {
-    return nil, nil
+func (c *BinaryGrpcServer) ApproveTransfer(
+    ctx context.Context,
+    params *api.ApproveTransferParams,
+) (*api.Result, error) {
+    if c.chainWrapper == nil {
+        e := "invalid scry chain interface"
+        return makeResult(false, e), errors.New(e)
+    }
+
+    if params == nil || params.TxParam == nil {
+        e := "null publish parameters"
+        return makeResult(false, e), errors.New(e)
+    }
+
+    err := c.chainWrapper.ApproveTransfer(
+        makeTxParams(params.TxParam),
+        common.HexToAddress(params.SpenderAddr),
+        big.NewInt(params.Value),
+    )
+    if err != nil {
+        e := err.Error()
+        return makeResult(false, e), err
+    }
+
+    return makeResult(true, ""), nil
 }
 
-func (c *BinaryGrpcServer) Vote(context.Context, *api.VoteParams) (*api.Result, error) {
-    return nil, nil
+func (c *BinaryGrpcServer) Vote(
+    ctx context.Context,
+    params *api.VoteParams,
+) (*api.Result, error) {
+    if c.chainWrapper == nil {
+        e := "invalid scry chain interface"
+        return makeResult(false, e), errors.New(e)
+    }
+
+    if params == nil || params.TxParam == nil {
+        e := "null publish parameters"
+        return makeResult(false, e), errors.New(e)
+    }
+
+    err := c.chainWrapper.Vote(
+        makeTxParams(params.TxParam),
+        big.NewInt(params.TxId),
+        params.Judge,
+        params.Comments,
+    )
+    if err != nil {
+        e := err.Error()
+        return makeResult(false, e), err
+    }
+
+    return makeResult(true, ""), nil
 }
 
-func (c *BinaryGrpcServer) RegisterAsVerifier(context.Context, *api.RegisterVerifierParams) (*api.Result, error) {
-    return nil, nil
+func (c *BinaryGrpcServer) RegisterAsVerifier(
+    ctx context.Context,
+    params *api.RegisterVerifierParams,
+) (*api.Result, error) {
+
+    if c.chainWrapper == nil {
+        e := "invalid scry chain interface"
+        return makeResult(false, e), errors.New(e)
+    }
+
+    if params == nil || params.TxParam == nil {
+        e := "null publish parameters"
+        return makeResult(false, e), errors.New(e)
+    }
+
+    err := c.chainWrapper.RegisterAsVerifier(
+        makeTxParams(params.TxParam),
+    )
+    if err != nil {
+        e := err.Error()
+        return makeResult(false, e), err
+    }
+
+    return makeResult(true, ""), nil
 }
 
-func (c *BinaryGrpcServer) CreditsToVerifier(context.Context, *api.CreditVerifierParams) (*api.Result, error) {
-    return nil, nil
+func (c *BinaryGrpcServer) CreditsToVerifier(
+    ctx context.Context,
+    params *api.CreditVerifierParams,
+) (*api.Result, error) {
+    if c.chainWrapper == nil {
+        e := "invalid scry chain interface"
+        return makeResult(false, e), errors.New(e)
+    }
+
+    if params == nil || params.TxParam == nil {
+        e := "null publish parameters"
+        return makeResult(false, e), errors.New(e)
+    }
+
+    err := c.chainWrapper.CreditsToVerifier(
+        makeTxParams(params.TxParam),
+        big.NewInt(params.TxId),
+        uint8(params.Index),
+        uint8(params.Credit),
+    )
+    if err != nil {
+        e := err.Error()
+        return makeResult(false, e), err
+    }
+
+    return makeResult(true, ""), nil
 }
 
 
