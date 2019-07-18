@@ -11,6 +11,7 @@ replace (
 	golang.org/x/image => github.com/golang/image v0.0.0-20190507092727-e4e5bf290fec
 	golang.org/x/lint => github.com/golang/lint v0.0.0-20190409202823-959b441ac422
 	golang.org/x/mobile => github.com/golang/mobile v0.0.0-20190509164839-32b2708ab171
+	golang.org/x/mod => github.com/golang/mod v0.1.0
 	golang.org/x/net => github.com/golang/net v0.0.0-20190509222800-a4d6f7feada5
 	golang.org/x/oauth2 => github.com/golang/oauth2 v0.0.0-20190402181905-9f3314589c9a
 	golang.org/x/sync => github.com/golang/sync v0.0.0-20190423024810-112230192c58
@@ -23,6 +24,7 @@ replace (
 	google.golang.org/genproto => github.com/google/go-genproto v0.0.0-20190513181449-d00d292a067c
 	google.golang.org/grpc => github.com/grpc/grpc-go v1.21.0
 	gopkg.in/check.v1 => github.com/go-check/check v0.0.0-20180628173108-788fd7840127
+	gopkg.in/errgo.v2 => github.com/go-errgo/errgo v0.0.0-20180823071505-f768c5ab0476
 	gopkg.in/natefinch/npipe.v2 => github.com/natefinch/npipe v0.0.0-20160621034901-c1b8fa8bdcce
 	gopkg.in/urfave/cli.v1 => github.com/urfave/cli v1.20.0
 	honnef.co/go/tools => github.com/dominikh/go-tools v0.0.0-20190418001031-e561f6794a2a
