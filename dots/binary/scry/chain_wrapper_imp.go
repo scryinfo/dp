@@ -10,7 +10,7 @@ import (
     "github.com/ethereum/go-ethereum/ethclient"
     "github.com/scryinfo/dot/dot"
     "github.com/scryinfo/dp/dots/auth"
-    contract2 "github.com/scryinfo/dp/dots/binary/stub/contract"
+    "github.com/scryinfo/dp/dots/binary/stub/contract"
     tx "github.com/scryinfo/dp/dots/eth/transaction"
     "github.com/scryinfo/dp/util"
     "go.uber.org/zap"
@@ -19,8 +19,8 @@ import (
 
 type chainWrapperImp struct {
     conn     *ethclient.Client
-    protocol *contract2.ScryProtocol
-    token    *contract2.ScryToken
+    protocol *contract.ScryProtocol
+    token    *contract.ScryToken
     Tx       *tx.Transaction `dot:"a3e1a88e-f84e-4285-b5ff-54a16fdcd44c"`
     Account  *auth.Account   `dot:"ca1c6ce4-182b-430a-9813-caeccf83f8ab"`
     appId    string
@@ -37,13 +37,13 @@ func NewChainWrapper(protocolContractAddress common.Address,
     var err error = nil
     c := &chainWrapperImp{}
 
-    c.protocol, err = contract2.NewScryProtocol(protocolContractAddress, clientConn)
+    c.protocol, err = contract.NewScryProtocol(protocolContractAddress, clientConn)
     if err != nil {
         dot.Logger().Errorln("", zap.NamedError("failed to initialize protocol contract interface wrapper.", err))
         return nil, err
     }
 
-    c.token, err = contract2.NewScryToken(tokenContractAddress, clientConn)
+    c.token, err = contract.NewScryToken(tokenContractAddress, clientConn)
     if err != nil {
         dot.Logger().Errorln("", zap.NamedError("failed to initialize token contract interface wrapper.", err))
         return nil, err
@@ -159,8 +159,50 @@ func (c *chainWrapperImp) CancelTransaction(txParams *tx.TxParams, txId *big.Int
     return err
 }
 
-func (c *chainWrapperImp) ReEncryptMetaDataIdBySeller(txParams *tx.TxParams, txId *big.Int, encIdWithBuyer []byte, encIdsWithArbitrators []byte) error {
-    t, err := c.protocol.ReEncryptMetaDataIdBySeller(c.Tx.BuildTransactOpts(txParams), c.appId, txId, encIdWithBuyer, encIdsWithArbitrators)
+func (c *chainWrapperImp) ReEncryptMetaDataId(
+    txParams *tx.TxParams,
+    txId *big.Int,
+    encodedData []byte,
+) error {
+    buyer, err := c.protocol.GetBuyer(c.Tx.BuildCallOpts(txParams), txId)
+    if err != nil {
+        dot.Logger().Errorln("chainWrapperImp::ReEncryptMetaDataId", zap.Error(err))
+        return err
+    }
+
+    if buyer == common.HexToAddress("0x0"){
+        e := "invalid buyer address"
+        dot.Logger().Errorln("chainWrapperImp::ReEncryptMetaDataId", zap.String("error:", e))
+        return errors.New(e)
+    }
+
+    edb, err := c.Account.ReEncrypt(encodedData, txParams.From.String(), buyer.String(), txParams.Password)
+    if err != nil {
+        dot.Logger().Errorln("chainWrapperImp::ReEncryptMetaDataId", zap.Error(err))
+        return err
+    }
+
+    //re-encrypt with arbitrators public key
+    arbitrators, err := c.protocol.GetArbitrators(c.Tx.BuildCallOpts(txParams), txId)
+    var edaList []byte
+    for _, ab := range arbitrators {
+        if ab == common.HexToAddress("0x0"){
+            e := "invalid arbitrator address"
+            dot.Logger().Errorln("chainWrapperImp::ReEncryptMetaDataId", zap.String("error:", e))
+            return errors.New(e)
+        }
+
+        eda, err := c.Account.ReEncrypt(encodedData, txParams.From.String(), ab.String(), txParams.Password)
+        if err != nil {
+            dot.Logger().Errorln("chainWrapperImp::ReEncryptMetaDataId", zap.Error(err))
+            return err
+        }
+
+        edaList = append(edaList, eda...)
+    }
+
+    //submit
+    t, err := c.protocol.ReEncryptMetaDataIdBySeller(c.Tx.BuildTransactOpts(txParams), c.appId, txId, edb, edaList)
     if err == nil {
         dot.Logger().Debugln("ReEncryptMetaDataIdBySeller: tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
     }

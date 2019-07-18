@@ -1,6 +1,3 @@
-// Scry Info.  All rights reserved.
-// license that can be found in the license file.
-
 // Code generated - DO NOT EDIT.
 // This file is a generated binding and any manual changes will be lost.
 
@@ -177,7 +174,7 @@ func (_ScryProtocol *ScryProtocolTransactorRaw) Transact(opts *bind.TransactOpts
 
 // GetArbitrators is a free data retrieval call binding the contract method 0x3297e591.
 //
-// Solidity: function getArbitrators(uint256 txId) constant returns(address[])
+// Solidity: function getArbitrators(txId uint256) constant returns(address[])
 func (_ScryProtocol *ScryProtocolCaller) GetArbitrators(opts *bind.CallOpts, txId *big.Int) ([]common.Address, error) {
 	var (
 		ret0 = new([]common.Address)
@@ -189,21 +186,21 @@ func (_ScryProtocol *ScryProtocolCaller) GetArbitrators(opts *bind.CallOpts, txI
 
 // GetArbitrators is a free data retrieval call binding the contract method 0x3297e591.
 //
-// Solidity: function getArbitrators(uint256 txId) constant returns(address[])
+// Solidity: function getArbitrators(txId uint256) constant returns(address[])
 func (_ScryProtocol *ScryProtocolSession) GetArbitrators(txId *big.Int) ([]common.Address, error) {
 	return _ScryProtocol.Contract.GetArbitrators(&_ScryProtocol.CallOpts, txId)
 }
 
 // GetArbitrators is a free data retrieval call binding the contract method 0x3297e591.
 //
-// Solidity: function getArbitrators(uint256 txId) constant returns(address[])
+// Solidity: function getArbitrators(txId uint256) constant returns(address[])
 func (_ScryProtocol *ScryProtocolCallerSession) GetArbitrators(txId *big.Int) ([]common.Address, error) {
 	return _ScryProtocol.Contract.GetArbitrators(&_ScryProtocol.CallOpts, txId)
 }
 
 // GetBuyer is a free data retrieval call binding the contract method 0x5bf608b8.
 //
-// Solidity: function getBuyer(uint256 txId) constant returns(address)
+// Solidity: function getBuyer(txId uint256) constant returns(address)
 func (_ScryProtocol *ScryProtocolCaller) GetBuyer(opts *bind.CallOpts, txId *big.Int) (common.Address, error) {
 	var (
 		ret0 = new(common.Address)
@@ -215,224 +212,224 @@ func (_ScryProtocol *ScryProtocolCaller) GetBuyer(opts *bind.CallOpts, txId *big
 
 // GetBuyer is a free data retrieval call binding the contract method 0x5bf608b8.
 //
-// Solidity: function getBuyer(uint256 txId) constant returns(address)
+// Solidity: function getBuyer(txId uint256) constant returns(address)
 func (_ScryProtocol *ScryProtocolSession) GetBuyer(txId *big.Int) (common.Address, error) {
 	return _ScryProtocol.Contract.GetBuyer(&_ScryProtocol.CallOpts, txId)
 }
 
 // GetBuyer is a free data retrieval call binding the contract method 0x5bf608b8.
 //
-// Solidity: function getBuyer(uint256 txId) constant returns(address)
+// Solidity: function getBuyer(txId uint256) constant returns(address)
 func (_ScryProtocol *ScryProtocolCallerSession) GetBuyer(txId *big.Int) (common.Address, error) {
 	return _ScryProtocol.Contract.GetBuyer(&_ScryProtocol.CallOpts, txId)
 }
 
 // Arbitrate is a paid mutator transaction binding the contract method 0xdaff1168.
 //
-// Solidity: function arbitrate(string seqNo, uint256 txId, bool judge) returns()
+// Solidity: function arbitrate(seqNo string, txId uint256, judge bool) returns()
 func (_ScryProtocol *ScryProtocolTransactor) Arbitrate(opts *bind.TransactOpts, seqNo string, txId *big.Int, judge bool) (*types.Transaction, error) {
 	return _ScryProtocol.contract.Transact(opts, "arbitrate", seqNo, txId, judge)
 }
 
 // Arbitrate is a paid mutator transaction binding the contract method 0xdaff1168.
 //
-// Solidity: function arbitrate(string seqNo, uint256 txId, bool judge) returns()
+// Solidity: function arbitrate(seqNo string, txId uint256, judge bool) returns()
 func (_ScryProtocol *ScryProtocolSession) Arbitrate(seqNo string, txId *big.Int, judge bool) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.Arbitrate(&_ScryProtocol.TransactOpts, seqNo, txId, judge)
 }
 
 // Arbitrate is a paid mutator transaction binding the contract method 0xdaff1168.
 //
-// Solidity: function arbitrate(string seqNo, uint256 txId, bool judge) returns()
+// Solidity: function arbitrate(seqNo string, txId uint256, judge bool) returns()
 func (_ScryProtocol *ScryProtocolTransactorSession) Arbitrate(seqNo string, txId *big.Int, judge bool) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.Arbitrate(&_ScryProtocol.TransactOpts, seqNo, txId, judge)
 }
 
 // BuyData is a paid mutator transaction binding the contract method 0x9a756a99.
 //
-// Solidity: function buyData(string seqNo, uint256 txId) returns()
+// Solidity: function buyData(seqNo string, txId uint256) returns()
 func (_ScryProtocol *ScryProtocolTransactor) BuyData(opts *bind.TransactOpts, seqNo string, txId *big.Int) (*types.Transaction, error) {
 	return _ScryProtocol.contract.Transact(opts, "buyData", seqNo, txId)
 }
 
 // BuyData is a paid mutator transaction binding the contract method 0x9a756a99.
 //
-// Solidity: function buyData(string seqNo, uint256 txId) returns()
+// Solidity: function buyData(seqNo string, txId uint256) returns()
 func (_ScryProtocol *ScryProtocolSession) BuyData(seqNo string, txId *big.Int) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.BuyData(&_ScryProtocol.TransactOpts, seqNo, txId)
 }
 
 // BuyData is a paid mutator transaction binding the contract method 0x9a756a99.
 //
-// Solidity: function buyData(string seqNo, uint256 txId) returns()
+// Solidity: function buyData(seqNo string, txId uint256) returns()
 func (_ScryProtocol *ScryProtocolTransactorSession) BuyData(seqNo string, txId *big.Int) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.BuyData(&_ScryProtocol.TransactOpts, seqNo, txId)
 }
 
 // CancelTransaction is a paid mutator transaction binding the contract method 0xcca8f8c3.
 //
-// Solidity: function cancelTransaction(string seqNo, uint256 txId) returns()
+// Solidity: function cancelTransaction(seqNo string, txId uint256) returns()
 func (_ScryProtocol *ScryProtocolTransactor) CancelTransaction(opts *bind.TransactOpts, seqNo string, txId *big.Int) (*types.Transaction, error) {
 	return _ScryProtocol.contract.Transact(opts, "cancelTransaction", seqNo, txId)
 }
 
 // CancelTransaction is a paid mutator transaction binding the contract method 0xcca8f8c3.
 //
-// Solidity: function cancelTransaction(string seqNo, uint256 txId) returns()
+// Solidity: function cancelTransaction(seqNo string, txId uint256) returns()
 func (_ScryProtocol *ScryProtocolSession) CancelTransaction(seqNo string, txId *big.Int) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.CancelTransaction(&_ScryProtocol.TransactOpts, seqNo, txId)
 }
 
 // CancelTransaction is a paid mutator transaction binding the contract method 0xcca8f8c3.
 //
-// Solidity: function cancelTransaction(string seqNo, uint256 txId) returns()
+// Solidity: function cancelTransaction(seqNo string, txId uint256) returns()
 func (_ScryProtocol *ScryProtocolTransactorSession) CancelTransaction(seqNo string, txId *big.Int) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.CancelTransaction(&_ScryProtocol.TransactOpts, seqNo, txId)
 }
 
 // ConfirmDataTruth is a paid mutator transaction binding the contract method 0xdd16673b.
 //
-// Solidity: function confirmDataTruth(string seqNo, uint256 txId, bool truth) returns()
+// Solidity: function confirmDataTruth(seqNo string, txId uint256, truth bool) returns()
 func (_ScryProtocol *ScryProtocolTransactor) ConfirmDataTruth(opts *bind.TransactOpts, seqNo string, txId *big.Int, truth bool) (*types.Transaction, error) {
 	return _ScryProtocol.contract.Transact(opts, "confirmDataTruth", seqNo, txId, truth)
 }
 
 // ConfirmDataTruth is a paid mutator transaction binding the contract method 0xdd16673b.
 //
-// Solidity: function confirmDataTruth(string seqNo, uint256 txId, bool truth) returns()
+// Solidity: function confirmDataTruth(seqNo string, txId uint256, truth bool) returns()
 func (_ScryProtocol *ScryProtocolSession) ConfirmDataTruth(seqNo string, txId *big.Int, truth bool) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.ConfirmDataTruth(&_ScryProtocol.TransactOpts, seqNo, txId, truth)
 }
 
 // ConfirmDataTruth is a paid mutator transaction binding the contract method 0xdd16673b.
 //
-// Solidity: function confirmDataTruth(string seqNo, uint256 txId, bool truth) returns()
+// Solidity: function confirmDataTruth(seqNo string, txId uint256, truth bool) returns()
 func (_ScryProtocol *ScryProtocolTransactorSession) ConfirmDataTruth(seqNo string, txId *big.Int, truth bool) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.ConfirmDataTruth(&_ScryProtocol.TransactOpts, seqNo, txId, truth)
 }
 
 // CreateTransaction is a paid mutator transaction binding the contract method 0xccc2ba76.
 //
-// Solidity: function createTransaction(string seqNo, string publishId, bool startVerify) returns()
+// Solidity: function createTransaction(seqNo string, publishId string, startVerify bool) returns()
 func (_ScryProtocol *ScryProtocolTransactor) CreateTransaction(opts *bind.TransactOpts, seqNo string, publishId string, startVerify bool) (*types.Transaction, error) {
 	return _ScryProtocol.contract.Transact(opts, "createTransaction", seqNo, publishId, startVerify)
 }
 
 // CreateTransaction is a paid mutator transaction binding the contract method 0xccc2ba76.
 //
-// Solidity: function createTransaction(string seqNo, string publishId, bool startVerify) returns()
+// Solidity: function createTransaction(seqNo string, publishId string, startVerify bool) returns()
 func (_ScryProtocol *ScryProtocolSession) CreateTransaction(seqNo string, publishId string, startVerify bool) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.CreateTransaction(&_ScryProtocol.TransactOpts, seqNo, publishId, startVerify)
 }
 
 // CreateTransaction is a paid mutator transaction binding the contract method 0xccc2ba76.
 //
-// Solidity: function createTransaction(string seqNo, string publishId, bool startVerify) returns()
+// Solidity: function createTransaction(seqNo string, publishId string, startVerify bool) returns()
 func (_ScryProtocol *ScryProtocolTransactorSession) CreateTransaction(seqNo string, publishId string, startVerify bool) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.CreateTransaction(&_ScryProtocol.TransactOpts, seqNo, publishId, startVerify)
 }
 
 // CreditsToVerifier is a paid mutator transaction binding the contract method 0xbd7ff8e5.
 //
-// Solidity: function creditsToVerifier(string seqNo, uint256 txId, uint8 verifierIndex, uint8 credit) returns()
+// Solidity: function creditsToVerifier(seqNo string, txId uint256, verifierIndex uint8, credit uint8) returns()
 func (_ScryProtocol *ScryProtocolTransactor) CreditsToVerifier(opts *bind.TransactOpts, seqNo string, txId *big.Int, verifierIndex uint8, credit uint8) (*types.Transaction, error) {
 	return _ScryProtocol.contract.Transact(opts, "creditsToVerifier", seqNo, txId, verifierIndex, credit)
 }
 
 // CreditsToVerifier is a paid mutator transaction binding the contract method 0xbd7ff8e5.
 //
-// Solidity: function creditsToVerifier(string seqNo, uint256 txId, uint8 verifierIndex, uint8 credit) returns()
+// Solidity: function creditsToVerifier(seqNo string, txId uint256, verifierIndex uint8, credit uint8) returns()
 func (_ScryProtocol *ScryProtocolSession) CreditsToVerifier(seqNo string, txId *big.Int, verifierIndex uint8, credit uint8) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.CreditsToVerifier(&_ScryProtocol.TransactOpts, seqNo, txId, verifierIndex, credit)
 }
 
 // CreditsToVerifier is a paid mutator transaction binding the contract method 0xbd7ff8e5.
 //
-// Solidity: function creditsToVerifier(string seqNo, uint256 txId, uint8 verifierIndex, uint8 credit) returns()
+// Solidity: function creditsToVerifier(seqNo string, txId uint256, verifierIndex uint8, credit uint8) returns()
 func (_ScryProtocol *ScryProtocolTransactorSession) CreditsToVerifier(seqNo string, txId *big.Int, verifierIndex uint8, credit uint8) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.CreditsToVerifier(&_ScryProtocol.TransactOpts, seqNo, txId, verifierIndex, credit)
 }
 
 // PublishDataInfo is a paid mutator transaction binding the contract method 0x377caed1.
 //
-// Solidity: function publishDataInfo(string seqNo, string publishId, uint256 price, bytes metaDataIdEncSeller, bytes32[] proofDataIds, string descDataId, bool supportVerify) returns()
+// Solidity: function publishDataInfo(seqNo string, publishId string, price uint256, metaDataIdEncSeller bytes, proofDataIds bytes32[], descDataId string, supportVerify bool) returns()
 func (_ScryProtocol *ScryProtocolTransactor) PublishDataInfo(opts *bind.TransactOpts, seqNo string, publishId string, price *big.Int, metaDataIdEncSeller []byte, proofDataIds [][32]byte, descDataId string, supportVerify bool) (*types.Transaction, error) {
 	return _ScryProtocol.contract.Transact(opts, "publishDataInfo", seqNo, publishId, price, metaDataIdEncSeller, proofDataIds, descDataId, supportVerify)
 }
 
 // PublishDataInfo is a paid mutator transaction binding the contract method 0x377caed1.
 //
-// Solidity: function publishDataInfo(string seqNo, string publishId, uint256 price, bytes metaDataIdEncSeller, bytes32[] proofDataIds, string descDataId, bool supportVerify) returns()
+// Solidity: function publishDataInfo(seqNo string, publishId string, price uint256, metaDataIdEncSeller bytes, proofDataIds bytes32[], descDataId string, supportVerify bool) returns()
 func (_ScryProtocol *ScryProtocolSession) PublishDataInfo(seqNo string, publishId string, price *big.Int, metaDataIdEncSeller []byte, proofDataIds [][32]byte, descDataId string, supportVerify bool) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.PublishDataInfo(&_ScryProtocol.TransactOpts, seqNo, publishId, price, metaDataIdEncSeller, proofDataIds, descDataId, supportVerify)
 }
 
 // PublishDataInfo is a paid mutator transaction binding the contract method 0x377caed1.
 //
-// Solidity: function publishDataInfo(string seqNo, string publishId, uint256 price, bytes metaDataIdEncSeller, bytes32[] proofDataIds, string descDataId, bool supportVerify) returns()
+// Solidity: function publishDataInfo(seqNo string, publishId string, price uint256, metaDataIdEncSeller bytes, proofDataIds bytes32[], descDataId string, supportVerify bool) returns()
 func (_ScryProtocol *ScryProtocolTransactorSession) PublishDataInfo(seqNo string, publishId string, price *big.Int, metaDataIdEncSeller []byte, proofDataIds [][32]byte, descDataId string, supportVerify bool) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.PublishDataInfo(&_ScryProtocol.TransactOpts, seqNo, publishId, price, metaDataIdEncSeller, proofDataIds, descDataId, supportVerify)
 }
 
 // ReEncryptMetaDataIdBySeller is a paid mutator transaction binding the contract method 0x275e7bc8.
 //
-// Solidity: function reEncryptMetaDataIdBySeller(string seqNo, uint256 txId, bytes encryptedMetaDataId, bytes encryptedMetaDataIds) returns()
+// Solidity: function reEncryptMetaDataIdBySeller(seqNo string, txId uint256, encryptedMetaDataId bytes, encryptedMetaDataIds bytes) returns()
 func (_ScryProtocol *ScryProtocolTransactor) ReEncryptMetaDataIdBySeller(opts *bind.TransactOpts, seqNo string, txId *big.Int, encryptedMetaDataId []byte, encryptedMetaDataIds []byte) (*types.Transaction, error) {
 	return _ScryProtocol.contract.Transact(opts, "reEncryptMetaDataIdBySeller", seqNo, txId, encryptedMetaDataId, encryptedMetaDataIds)
 }
 
 // ReEncryptMetaDataIdBySeller is a paid mutator transaction binding the contract method 0x275e7bc8.
 //
-// Solidity: function reEncryptMetaDataIdBySeller(string seqNo, uint256 txId, bytes encryptedMetaDataId, bytes encryptedMetaDataIds) returns()
+// Solidity: function reEncryptMetaDataIdBySeller(seqNo string, txId uint256, encryptedMetaDataId bytes, encryptedMetaDataIds bytes) returns()
 func (_ScryProtocol *ScryProtocolSession) ReEncryptMetaDataIdBySeller(seqNo string, txId *big.Int, encryptedMetaDataId []byte, encryptedMetaDataIds []byte) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.ReEncryptMetaDataIdBySeller(&_ScryProtocol.TransactOpts, seqNo, txId, encryptedMetaDataId, encryptedMetaDataIds)
 }
 
 // ReEncryptMetaDataIdBySeller is a paid mutator transaction binding the contract method 0x275e7bc8.
 //
-// Solidity: function reEncryptMetaDataIdBySeller(string seqNo, uint256 txId, bytes encryptedMetaDataId, bytes encryptedMetaDataIds) returns()
+// Solidity: function reEncryptMetaDataIdBySeller(seqNo string, txId uint256, encryptedMetaDataId bytes, encryptedMetaDataIds bytes) returns()
 func (_ScryProtocol *ScryProtocolTransactorSession) ReEncryptMetaDataIdBySeller(seqNo string, txId *big.Int, encryptedMetaDataId []byte, encryptedMetaDataIds []byte) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.ReEncryptMetaDataIdBySeller(&_ScryProtocol.TransactOpts, seqNo, txId, encryptedMetaDataId, encryptedMetaDataIds)
 }
 
 // RegisterAsVerifier is a paid mutator transaction binding the contract method 0x93151dd5.
 //
-// Solidity: function registerAsVerifier(string seqNo) returns()
+// Solidity: function registerAsVerifier(seqNo string) returns()
 func (_ScryProtocol *ScryProtocolTransactor) RegisterAsVerifier(opts *bind.TransactOpts, seqNo string) (*types.Transaction, error) {
 	return _ScryProtocol.contract.Transact(opts, "registerAsVerifier", seqNo)
 }
 
 // RegisterAsVerifier is a paid mutator transaction binding the contract method 0x93151dd5.
 //
-// Solidity: function registerAsVerifier(string seqNo) returns()
+// Solidity: function registerAsVerifier(seqNo string) returns()
 func (_ScryProtocol *ScryProtocolSession) RegisterAsVerifier(seqNo string) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.RegisterAsVerifier(&_ScryProtocol.TransactOpts, seqNo)
 }
 
 // RegisterAsVerifier is a paid mutator transaction binding the contract method 0x93151dd5.
 //
-// Solidity: function registerAsVerifier(string seqNo) returns()
+// Solidity: function registerAsVerifier(seqNo string) returns()
 func (_ScryProtocol *ScryProtocolTransactorSession) RegisterAsVerifier(seqNo string) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.RegisterAsVerifier(&_ScryProtocol.TransactOpts, seqNo)
 }
 
 // Vote is a paid mutator transaction binding the contract method 0x980da40d.
 //
-// Solidity: function vote(string seqNo, uint256 txId, bool judge, string comments) returns()
+// Solidity: function vote(seqNo string, txId uint256, judge bool, comments string) returns()
 func (_ScryProtocol *ScryProtocolTransactor) Vote(opts *bind.TransactOpts, seqNo string, txId *big.Int, judge bool, comments string) (*types.Transaction, error) {
 	return _ScryProtocol.contract.Transact(opts, "vote", seqNo, txId, judge, comments)
 }
 
 // Vote is a paid mutator transaction binding the contract method 0x980da40d.
 //
-// Solidity: function vote(string seqNo, uint256 txId, bool judge, string comments) returns()
+// Solidity: function vote(seqNo string, txId uint256, judge bool, comments string) returns()
 func (_ScryProtocol *ScryProtocolSession) Vote(seqNo string, txId *big.Int, judge bool, comments string) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.Vote(&_ScryProtocol.TransactOpts, seqNo, txId, judge, comments)
 }
 
 // Vote is a paid mutator transaction binding the contract method 0x980da40d.
 //
-// Solidity: function vote(string seqNo, uint256 txId, bool judge, string comments) returns()
+// Solidity: function vote(seqNo string, txId uint256, judge bool, comments string) returns()
 func (_ScryProtocol *ScryProtocolTransactorSession) Vote(seqNo string, txId *big.Int, judge bool, comments string) (*types.Transaction, error) {
 	return _ScryProtocol.Contract.Vote(&_ScryProtocol.TransactOpts, seqNo, txId, judge, comments)
 }
@@ -517,7 +514,7 @@ type ScryProtocolArbitrationBegin struct {
 
 // FilterArbitrationBegin is a free log retrieval operation binding the contract event 0x541c5ec36a883a22048ce07131e93f1c295bd6ccfed09aaab4e233e9b07c87b0.
 //
-// Solidity: event ArbitrationBegin(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bytes metaDataIdEncArbitrator, address[] users)
+// Solidity: e ArbitrationBegin(seqNo string, transactionId uint256, publishId string, proofIds bytes32[], metaDataIdEncArbitrator bytes, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) FilterArbitrationBegin(opts *bind.FilterOpts) (*ScryProtocolArbitrationBeginIterator, error) {
 
 	logs, sub, err := _ScryProtocol.contract.FilterLogs(opts, "ArbitrationBegin")
@@ -529,7 +526,7 @@ func (_ScryProtocol *ScryProtocolFilterer) FilterArbitrationBegin(opts *bind.Fil
 
 // WatchArbitrationBegin is a free log subscription operation binding the contract event 0x541c5ec36a883a22048ce07131e93f1c295bd6ccfed09aaab4e233e9b07c87b0.
 //
-// Solidity: event ArbitrationBegin(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bytes metaDataIdEncArbitrator, address[] users)
+// Solidity: e ArbitrationBegin(seqNo string, transactionId uint256, publishId string, proofIds bytes32[], metaDataIdEncArbitrator bytes, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) WatchArbitrationBegin(opts *bind.WatchOpts, sink chan<- *ScryProtocolArbitrationBegin) (event.Subscription, error) {
 
 	logs, sub, err := _ScryProtocol.contract.WatchLogs(opts, "ArbitrationBegin")
@@ -643,7 +640,7 @@ type ScryProtocolArbitrationResult struct {
 
 // FilterArbitrationResult is a free log retrieval operation binding the contract event 0x8b3b8af680cfe70f3a16a2750d9dee312f8002fd35bd049d61befe3cb7c5a3c7.
 //
-// Solidity: event ArbitrationResult(string seqNo, uint256 transactionId, bool judge, uint8 identify, address[] users)
+// Solidity: e ArbitrationResult(seqNo string, transactionId uint256, judge bool, identify uint8, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) FilterArbitrationResult(opts *bind.FilterOpts) (*ScryProtocolArbitrationResultIterator, error) {
 
 	logs, sub, err := _ScryProtocol.contract.FilterLogs(opts, "ArbitrationResult")
@@ -655,7 +652,7 @@ func (_ScryProtocol *ScryProtocolFilterer) FilterArbitrationResult(opts *bind.Fi
 
 // WatchArbitrationResult is a free log subscription operation binding the contract event 0x8b3b8af680cfe70f3a16a2750d9dee312f8002fd35bd049d61befe3cb7c5a3c7.
 //
-// Solidity: event ArbitrationResult(string seqNo, uint256 transactionId, bool judge, uint8 identify, address[] users)
+// Solidity: e ArbitrationResult(seqNo string, transactionId uint256, judge bool, identify uint8, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) WatchArbitrationResult(opts *bind.WatchOpts, sink chan<- *ScryProtocolArbitrationResult) (event.Subscription, error) {
 
 	logs, sub, err := _ScryProtocol.contract.WatchLogs(opts, "ArbitrationResult")
@@ -771,7 +768,7 @@ type ScryProtocolBuy struct {
 
 // FilterBuy is a free log retrieval operation binding the contract event 0x8fc09fab957b20f7258d7947b08e0b4ef8cca78ab1b4111fc8af6104d024613b.
 //
-// Solidity: event Buy(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, uint8 state, uint8 index, address[] users)
+// Solidity: e Buy(seqNo string, transactionId uint256, publishId string, metaDataIdEncSeller bytes, state uint8, index uint8, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) FilterBuy(opts *bind.FilterOpts) (*ScryProtocolBuyIterator, error) {
 
 	logs, sub, err := _ScryProtocol.contract.FilterLogs(opts, "Buy")
@@ -783,7 +780,7 @@ func (_ScryProtocol *ScryProtocolFilterer) FilterBuy(opts *bind.FilterOpts) (*Sc
 
 // WatchBuy is a free log subscription operation binding the contract event 0x8fc09fab957b20f7258d7947b08e0b4ef8cca78ab1b4111fc8af6104d024613b.
 //
-// Solidity: event Buy(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, uint8 state, uint8 index, address[] users)
+// Solidity: e Buy(seqNo string, transactionId uint256, publishId string, metaDataIdEncSeller bytes, state uint8, index uint8, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) WatchBuy(opts *bind.WatchOpts, sink chan<- *ScryProtocolBuy) (event.Subscription, error) {
 
 	logs, sub, err := _ScryProtocol.contract.WatchLogs(opts, "Buy")
@@ -898,7 +895,7 @@ type ScryProtocolDataPublish struct {
 
 // FilterDataPublish is a free log retrieval operation binding the contract event 0x382c732523b607b116dd2681b4e54c31b1ee534cf9eed7bcb98e1ec8d43ecbea.
 //
-// Solidity: event DataPublish(string seqNo, string publishId, uint256 price, string despDataId, bool supportVerify, address[] users)
+// Solidity: e DataPublish(seqNo string, publishId string, price uint256, despDataId string, supportVerify bool, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) FilterDataPublish(opts *bind.FilterOpts) (*ScryProtocolDataPublishIterator, error) {
 
 	logs, sub, err := _ScryProtocol.contract.FilterLogs(opts, "DataPublish")
@@ -910,7 +907,7 @@ func (_ScryProtocol *ScryProtocolFilterer) FilterDataPublish(opts *bind.FilterOp
 
 // WatchDataPublish is a free log subscription operation binding the contract event 0x382c732523b607b116dd2681b4e54c31b1ee534cf9eed7bcb98e1ec8d43ecbea.
 //
-// Solidity: event DataPublish(string seqNo, string publishId, uint256 price, string despDataId, bool supportVerify, address[] users)
+// Solidity: e DataPublish(seqNo string, publishId string, price uint256, despDataId string, supportVerify bool, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) WatchDataPublish(opts *bind.WatchOpts, sink chan<- *ScryProtocolDataPublish) (event.Subscription, error) {
 
 	logs, sub, err := _ScryProtocol.contract.WatchLogs(opts, "DataPublish")
@@ -1025,7 +1022,7 @@ type ScryProtocolReadyForDownload struct {
 
 // FilterReadyForDownload is a free log retrieval operation binding the contract event 0xef3b9511479459f28053c72c9c2deba123aa2ddf021496d5cce3b788f7494e5c.
 //
-// Solidity: event ReadyForDownload(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, uint8 state, uint8 index, address[] users)
+// Solidity: e ReadyForDownload(seqNo string, transactionId uint256, metaDataIdEncBuyer bytes, state uint8, index uint8, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) FilterReadyForDownload(opts *bind.FilterOpts) (*ScryProtocolReadyForDownloadIterator, error) {
 
 	logs, sub, err := _ScryProtocol.contract.FilterLogs(opts, "ReadyForDownload")
@@ -1037,7 +1034,7 @@ func (_ScryProtocol *ScryProtocolFilterer) FilterReadyForDownload(opts *bind.Fil
 
 // WatchReadyForDownload is a free log subscription operation binding the contract event 0xef3b9511479459f28053c72c9c2deba123aa2ddf021496d5cce3b788f7494e5c.
 //
-// Solidity: event ReadyForDownload(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, uint8 state, uint8 index, address[] users)
+// Solidity: e ReadyForDownload(seqNo string, transactionId uint256, metaDataIdEncBuyer bytes, state uint8, index uint8, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) WatchReadyForDownload(opts *bind.WatchOpts, sink chan<- *ScryProtocolReadyForDownload) (event.Subscription, error) {
 
 	logs, sub, err := _ScryProtocol.contract.WatchLogs(opts, "ReadyForDownload")
@@ -1148,7 +1145,7 @@ type ScryProtocolRegisterVerifier struct {
 
 // FilterRegisterVerifier is a free log retrieval operation binding the contract event 0x476785064b6fb8cce78cd4377a03177c7bac7803ef345a1eaf34d1dbdbf0e864.
 //
-// Solidity: event RegisterVerifier(string seqNo, address[] users)
+// Solidity: e RegisterVerifier(seqNo string, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) FilterRegisterVerifier(opts *bind.FilterOpts) (*ScryProtocolRegisterVerifierIterator, error) {
 
 	logs, sub, err := _ScryProtocol.contract.FilterLogs(opts, "RegisterVerifier")
@@ -1160,7 +1157,7 @@ func (_ScryProtocol *ScryProtocolFilterer) FilterRegisterVerifier(opts *bind.Fil
 
 // WatchRegisterVerifier is a free log subscription operation binding the contract event 0x476785064b6fb8cce78cd4377a03177c7bac7803ef345a1eaf34d1dbdbf0e864.
 //
-// Solidity: event RegisterVerifier(string seqNo, address[] users)
+// Solidity: e RegisterVerifier(seqNo string, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) WatchRegisterVerifier(opts *bind.WatchOpts, sink chan<- *ScryProtocolRegisterVerifier) (event.Subscription, error) {
 
 	logs, sub, err := _ScryProtocol.contract.WatchLogs(opts, "RegisterVerifier")
@@ -1274,7 +1271,7 @@ type ScryProtocolTransactionClose struct {
 
 // FilterTransactionClose is a free log retrieval operation binding the contract event 0xef210c4e1a93373cd651f7dea507cd35c6eb5b14f64ce0f9dd941e0d4be1cbb7.
 //
-// Solidity: event TransactionClose(string seqNo, uint256 transactionId, uint8 state, uint8 index, address[] users)
+// Solidity: e TransactionClose(seqNo string, transactionId uint256, state uint8, index uint8, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) FilterTransactionClose(opts *bind.FilterOpts) (*ScryProtocolTransactionCloseIterator, error) {
 
 	logs, sub, err := _ScryProtocol.contract.FilterLogs(opts, "TransactionClose")
@@ -1286,7 +1283,7 @@ func (_ScryProtocol *ScryProtocolFilterer) FilterTransactionClose(opts *bind.Fil
 
 // WatchTransactionClose is a free log subscription operation binding the contract event 0xef210c4e1a93373cd651f7dea507cd35c6eb5b14f64ce0f9dd941e0d4be1cbb7.
 //
-// Solidity: event TransactionClose(string seqNo, uint256 transactionId, uint8 state, uint8 index, address[] users)
+// Solidity: e TransactionClose(seqNo string, transactionId uint256, state uint8, index uint8, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) WatchTransactionClose(opts *bind.WatchOpts, sink chan<- *ScryProtocolTransactionClose) (event.Subscription, error) {
 
 	logs, sub, err := _ScryProtocol.contract.WatchLogs(opts, "TransactionClose")
@@ -1402,7 +1399,7 @@ type ScryProtocolTransactionCreate struct {
 
 // FilterTransactionCreate is a free log retrieval operation binding the contract event 0x87712a8083757ec54dddd564e3755ff6db99131f0a2f8e8db57795d71926a781.
 //
-// Solidity: event TransactionCreate(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool needVerify, uint8 state, address[] users)
+// Solidity: e TransactionCreate(seqNo string, transactionId uint256, publishId string, proofIds bytes32[], needVerify bool, state uint8, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) FilterTransactionCreate(opts *bind.FilterOpts) (*ScryProtocolTransactionCreateIterator, error) {
 
 	logs, sub, err := _ScryProtocol.contract.FilterLogs(opts, "TransactionCreate")
@@ -1414,7 +1411,7 @@ func (_ScryProtocol *ScryProtocolFilterer) FilterTransactionCreate(opts *bind.Fi
 
 // WatchTransactionCreate is a free log subscription operation binding the contract event 0x87712a8083757ec54dddd564e3755ff6db99131f0a2f8e8db57795d71926a781.
 //
-// Solidity: event TransactionCreate(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool needVerify, uint8 state, address[] users)
+// Solidity: e TransactionCreate(seqNo string, transactionId uint256, publishId string, proofIds bytes32[], needVerify bool, state uint8, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) WatchTransactionCreate(opts *bind.WatchOpts, sink chan<- *ScryProtocolTransactionCreate) (event.Subscription, error) {
 
 	logs, sub, err := _ScryProtocol.contract.WatchLogs(opts, "TransactionCreate")
@@ -1526,7 +1523,7 @@ type ScryProtocolVerifierDisable struct {
 
 // FilterVerifierDisable is a free log retrieval operation binding the contract event 0xd0e2127bc672e5762b6852e277e4d77594e1eecad47e50f41f56d9a87c1f7505.
 //
-// Solidity: event VerifierDisable(string seqNo, address verifier, address[] users)
+// Solidity: e VerifierDisable(seqNo string, verifier address, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) FilterVerifierDisable(opts *bind.FilterOpts) (*ScryProtocolVerifierDisableIterator, error) {
 
 	logs, sub, err := _ScryProtocol.contract.FilterLogs(opts, "VerifierDisable")
@@ -1538,7 +1535,7 @@ func (_ScryProtocol *ScryProtocolFilterer) FilterVerifierDisable(opts *bind.Filt
 
 // WatchVerifierDisable is a free log subscription operation binding the contract event 0xd0e2127bc672e5762b6852e277e4d77594e1eecad47e50f41f56d9a87c1f7505.
 //
-// Solidity: event VerifierDisable(string seqNo, address verifier, address[] users)
+// Solidity: e VerifierDisable(seqNo string, verifier address, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) WatchVerifierDisable(opts *bind.WatchOpts, sink chan<- *ScryProtocolVerifierDisable) (event.Subscription, error) {
 
 	logs, sub, err := _ScryProtocol.contract.WatchLogs(opts, "VerifierDisable")
@@ -1653,7 +1650,7 @@ type ScryProtocolVerifiersChosen struct {
 
 // FilterVerifiersChosen is a free log retrieval operation binding the contract event 0x8c48707022c17239432366b846b96252d3a8c7f241cbba874edb30ec41c1acb3.
 //
-// Solidity: event VerifiersChosen(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, uint8 state, address[] users)
+// Solidity: e VerifiersChosen(seqNo string, transactionId uint256, publishId string, proofIds bytes32[], state uint8, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) FilterVerifiersChosen(opts *bind.FilterOpts) (*ScryProtocolVerifiersChosenIterator, error) {
 
 	logs, sub, err := _ScryProtocol.contract.FilterLogs(opts, "VerifiersChosen")
@@ -1665,7 +1662,7 @@ func (_ScryProtocol *ScryProtocolFilterer) FilterVerifiersChosen(opts *bind.Filt
 
 // WatchVerifiersChosen is a free log subscription operation binding the contract event 0x8c48707022c17239432366b846b96252d3a8c7f241cbba874edb30ec41c1acb3.
 //
-// Solidity: event VerifiersChosen(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, uint8 state, address[] users)
+// Solidity: e VerifiersChosen(seqNo string, transactionId uint256, publishId string, proofIds bytes32[], state uint8, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) WatchVerifiersChosen(opts *bind.WatchOpts, sink chan<- *ScryProtocolVerifiersChosen) (event.Subscription, error) {
 
 	logs, sub, err := _ScryProtocol.contract.WatchLogs(opts, "VerifiersChosen")
@@ -1781,7 +1778,7 @@ type ScryProtocolVote struct {
 
 // FilterVote is a free log retrieval operation binding the contract event 0x0ffb7cbdd6a39a576bf0eedc7cf48b5d1da05a4d9e868397dafb21ffc1df9c6b.
 //
-// Solidity: event Vote(string seqNo, uint256 transactionId, bool judge, string comments, uint8 state, uint8 index, address[] users)
+// Solidity: e Vote(seqNo string, transactionId uint256, judge bool, comments string, state uint8, index uint8, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) FilterVote(opts *bind.FilterOpts) (*ScryProtocolVoteIterator, error) {
 
 	logs, sub, err := _ScryProtocol.contract.FilterLogs(opts, "Vote")
@@ -1793,7 +1790,7 @@ func (_ScryProtocol *ScryProtocolFilterer) FilterVote(opts *bind.FilterOpts) (*S
 
 // WatchVote is a free log subscription operation binding the contract event 0x0ffb7cbdd6a39a576bf0eedc7cf48b5d1da05a4d9e868397dafb21ffc1df9c6b.
 //
-// Solidity: event Vote(string seqNo, uint256 transactionId, bool judge, string comments, uint8 state, uint8 index, address[] users)
+// Solidity: e Vote(seqNo string, transactionId uint256, judge bool, comments string, state uint8, index uint8, users address[])
 func (_ScryProtocol *ScryProtocolFilterer) WatchVote(opts *bind.WatchOpts, sink chan<- *ScryProtocolVote) (event.Subscription, error) {
 
 	logs, sub, err := _ScryProtocol.contract.WatchLogs(opts, "Vote")

@@ -67,12 +67,12 @@ type BinaryServiceCancelTransaction = {
   readonly responseType: typeof binary_pb.Result;
 };
 
-type BinaryServiceSubmitMetaDataIdEncWithBuyer = {
+type BinaryServiceReEncryptMetaDataId = {
   readonly methodName: string;
   readonly service: typeof BinaryService;
   readonly requestStream: false;
   readonly responseStream: false;
-  readonly requestType: typeof binary_pb.SubmitMetaDataIdParams;
+  readonly requestType: typeof binary_pb.ReEncryptDataParams;
   readonly responseType: typeof binary_pb.Result;
 };
 
@@ -184,7 +184,7 @@ export class BinaryService {
   static readonly PrepareToBuy: BinaryServicePrepareToBuy;
   static readonly BuyData: BinaryServiceBuyData;
   static readonly CancelTransaction: BinaryServiceCancelTransaction;
-  static readonly SubmitMetaDataIdEncWithBuyer: BinaryServiceSubmitMetaDataIdEncWithBuyer;
+  static readonly ReEncryptMetaDataId: BinaryServiceReEncryptMetaDataId;
   static readonly ConfirmDataTruth: BinaryServiceConfirmDataTruth;
   static readonly ApproveTransfer: BinaryServiceApproveTransfer;
   static readonly Vote: BinaryServiceVote;
@@ -285,13 +285,13 @@ export class BinaryServiceClient {
     requestMessage: binary_pb.CancelTxParams,
     callback: (error: ServiceError|null, responseMessage: binary_pb.Result|null) => void
   ): UnaryResponse;
-  submitMetaDataIdEncWithBuyer(
-    requestMessage: binary_pb.SubmitMetaDataIdParams,
+  reEncryptMetaDataId(
+    requestMessage: binary_pb.ReEncryptDataParams,
     metadata: grpc.Metadata,
     callback: (error: ServiceError|null, responseMessage: binary_pb.Result|null) => void
   ): UnaryResponse;
-  submitMetaDataIdEncWithBuyer(
-    requestMessage: binary_pb.SubmitMetaDataIdParams,
+  reEncryptMetaDataId(
+    requestMessage: binary_pb.ReEncryptDataParams,
     callback: (error: ServiceError|null, responseMessage: binary_pb.Result|null) => void
   ): UnaryResponse;
   confirmDataTruth(

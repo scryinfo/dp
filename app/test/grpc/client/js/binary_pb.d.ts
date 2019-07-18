@@ -152,17 +152,8 @@ export namespace ClientInfo {
 }
 
 export class Event extends jspb.Message {
-  getBlocknumber(): number;
-  setBlocknumber(value: number): void;
-
-  getTxhash(): string;
-  setTxhash(value: string): void;
-
-  getAddress(): string;
-  setAddress(value: string): void;
-
-  getName(): string;
-  setName(value: string): void;
+  getTime(): number;
+  setTime(value: number): void;
 
   getJsondata(): string;
   setJsondata(value: string): void;
@@ -179,10 +170,7 @@ export class Event extends jspb.Message {
 
 export namespace Event {
   export type AsObject = {
-    blocknumber: number,
-    txhash: string,
-    address: string,
-    name: string,
+    time: number,
     jsondata: string,
   }
 }
@@ -409,7 +397,7 @@ export namespace CancelTxParams {
   }
 }
 
-export class SubmitMetaDataIdParams extends jspb.Message {
+export class ReEncryptDataParams extends jspb.Message {
   hasTxparam(): boolean;
   clearTxparam(): void;
   getTxparam(): TxParams | undefined;
@@ -418,28 +406,26 @@ export class SubmitMetaDataIdParams extends jspb.Message {
   getTxid(): number;
   setTxid(value: number): void;
 
-  clearEncryptmetadataidList(): void;
-  getEncryptmetadataidList(): Array<Uint8Array | string>;
-  getEncryptmetadataidList_asU8(): Array<Uint8Array>;
-  getEncryptmetadataidList_asB64(): Array<string>;
-  setEncryptmetadataidList(value: Array<Uint8Array | string>): void;
-  addEncryptmetadataid(value: Uint8Array | string, index?: number): Uint8Array | string;
+  getEncodeddatawithseller(): Uint8Array | string;
+  getEncodeddatawithseller_asU8(): Uint8Array;
+  getEncodeddatawithseller_asB64(): string;
+  setEncodeddatawithseller(value: Uint8Array | string): void;
 
   serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): SubmitMetaDataIdParams.AsObject;
-  static toObject(includeInstance: boolean, msg: SubmitMetaDataIdParams): SubmitMetaDataIdParams.AsObject;
+  toObject(includeInstance?: boolean): ReEncryptDataParams.AsObject;
+  static toObject(includeInstance: boolean, msg: ReEncryptDataParams): ReEncryptDataParams.AsObject;
   static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
   static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-  static serializeBinaryToWriter(message: SubmitMetaDataIdParams, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): SubmitMetaDataIdParams;
-  static deserializeBinaryFromReader(message: SubmitMetaDataIdParams, reader: jspb.BinaryReader): SubmitMetaDataIdParams;
+  static serializeBinaryToWriter(message: ReEncryptDataParams, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ReEncryptDataParams;
+  static deserializeBinaryFromReader(message: ReEncryptDataParams, reader: jspb.BinaryReader): ReEncryptDataParams;
 }
 
-export namespace SubmitMetaDataIdParams {
+export namespace ReEncryptDataParams {
   export type AsObject = {
     txparam?: TxParams.AsObject,
     txid: number,
-    encryptmetadataidList: Array<Uint8Array | string>,
+    encodeddatawithseller: Uint8Array | string,
   }
 }
 
@@ -679,8 +665,10 @@ export class SubscribeInfo extends jspb.Message {
   getAddress(): string;
   setAddress(value: string): void;
 
-  getEvent(): string;
-  setEvent(value: string): void;
+  clearEventList(): void;
+  getEventList(): Array<string>;
+  setEventList(value: Array<string>): void;
+  addEvent(value: string, index?: number): string;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): SubscribeInfo.AsObject;
@@ -695,7 +683,7 @@ export class SubscribeInfo extends jspb.Message {
 export namespace SubscribeInfo {
   export type AsObject = {
     address: string,
-    event: string,
+    eventList: Array<string>,
   }
 }
 

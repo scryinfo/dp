@@ -73,12 +73,12 @@ BinaryService.CancelTransaction = {
   responseType: binary_pb.Result
 };
 
-BinaryService.SubmitMetaDataIdEncWithBuyer = {
-  methodName: "SubmitMetaDataIdEncWithBuyer",
+BinaryService.ReEncryptMetaDataId = {
+  methodName: "ReEncryptMetaDataId",
   service: BinaryService,
   requestStream: false,
   responseStream: false,
-  requestType: binary_pb.SubmitMetaDataIdParams,
+  requestType: binary_pb.ReEncryptDataParams,
   responseType: binary_pb.Result
 };
 
@@ -413,11 +413,11 @@ BinaryServiceClient.prototype.cancelTransaction = function cancelTransaction(req
   };
 };
 
-BinaryServiceClient.prototype.submitMetaDataIdEncWithBuyer = function submitMetaDataIdEncWithBuyer(requestMessage, metadata, callback) {
+BinaryServiceClient.prototype.reEncryptMetaDataId = function reEncryptMetaDataId(requestMessage, metadata, callback) {
   if (arguments.length === 2) {
     callback = arguments[1];
   }
-  var client = grpc.unary(BinaryService.SubmitMetaDataIdEncWithBuyer, {
+  var client = grpc.unary(BinaryService.ReEncryptMetaDataId, {
     request: requestMessage,
     host: this.serviceHost,
     metadata: metadata,
