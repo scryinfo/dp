@@ -52,3 +52,5 @@ node_modules/
 /services/auth_s/account_server
 /app/test/grpc/server/server
 /app/test/native/main/main
+/app/test/native/main/native
+/services/auth_s/scrytool
