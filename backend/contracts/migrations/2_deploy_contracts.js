@@ -8,10 +8,6 @@ let Common = artifacts.require("common");
 let Transaction = artifacts.require("transaction");
 let Verification = artifacts.require("verification");
 
-// for test:
-let testAddr = artifacts.require("testAddr");
-// for test end.
-
 let tokenContract;
 module.exports = function(deployer, network, accounts) {
     deployer.deploy(Common);
@@ -31,8 +27,4 @@ module.exports = function(deployer, network, accounts) {
         console.log("> protocol: ", ptl.address);
         console.log("> accounts: ", accounts.length);
     });
-
-    // for test:
-    deployer.deploy(testAddr);
-    // for test end.
 };

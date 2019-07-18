@@ -6,6 +6,7 @@
   "dots": [
     {
       "metaData": {
+        "name": "binary component",
         "typeId": "92fed326-2f2c-40c5-8664-107473238390"
       },
       "lives": [
@@ -38,6 +39,7 @@
     },
     {
       "metaData": {
+        "name": "app connect",
         "typeId": "40ef6679-5cfc-4436-a1f6-7f39870bc5ef"
       },
       "lives": [
@@ -52,6 +54,7 @@
     },
     {
       "metaData": {
+        "name": "app business",
         "typeId": "64a3ff50-50de-447c-b0b9-401fff8c4fa4"
       },
       "lives": [
