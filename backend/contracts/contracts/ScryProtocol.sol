@@ -132,10 +132,10 @@ contract ScryProtocol {
     }
 
     function getBuyer(uint256 txId) external view returns (address) {
-        return transaction.getBuyerAddrInDesignatedTx(dataSet, txId);
+        return transaction.getBuyer(dataSet, txId);
     }
 
     function getArbitrators(uint256 txId) external view returns (address[]) {
-        return transaction.getArbitratorsAddrsInDesignatedTx(dataSet, txId);
+        return transaction.getArbitrators(dataSet, txId);
     }
 }

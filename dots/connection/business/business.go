@@ -41,6 +41,7 @@ type businessConfig struct {
 
 const (
     BusTypeId = "64a3ff50-50de-447c-b0b9-401fff8c4fa4"
+    BusLiveId = "64a3ff50-50de-447c-b0b9-401fff8c4fa4"
 
     verifierNum            = 2
     verifierBonus          = 300
@@ -140,7 +141,16 @@ func (b *Business) Create(l dot.Line) error {
 }
 
 func (b *Business) Start(ignore bool) error {
-    return b.WS.PresetMsgHandleFuncs(b.PresetMsgNames, b.PresetMsgHandlers)
+    if err := b.WS.PresetMsgHandleFuncs(b.PresetMsgNames, b.PresetMsgHandlers); err != nil {
+        return err
+    }
+
+    if err := b.WS.Connect(); err != nil {
+        dot.Logger().Errorln("Start http web server failed. ", zap.NamedError("error", err))
+        return errors.New("Start http web server failed. ")
+    }
+
+    return nil
 }
 
 //construct dot
@@ -171,6 +181,12 @@ func BusTypeLive() []*dot.TypeLives {
                 TypeId: BusTypeId,
                 NewDoter: func(conf interface{}) (dot.Dot, error) {
                     return newBusDot(conf)
+                },
+            },
+            Lives: []dot.Live{
+                {
+                    LiveId:    BusLiveId,
+                    RelyLives: map[string]dot.LiveId{"binary": binary.BinLiveId},
                 },
             },
         },
@@ -408,47 +424,16 @@ func (b *Business) ReEncrypt(mi *ci.MessageIn) (payload interface{}, err error) 
         return
     }
 
-    {
-        var (
-            buyer                         string
-            arbitrators                   []string
-            metaDataIdEncWithBuyer        []byte
-            metaDataIdsEncWithArbitrators []byte
-        )
+    txParam := b.makeTxParams(re.Password)
+    tID, ok := new(big.Int).SetString(re.SelectedTx.TransactionID, 10)
+    if !ok {
+        err = errors.New("Set to *big.Int failed. ")
+        return
+    }
 
-        txParam := b.makeTxParams(re.Password)
-        tID, ok := new(big.Int).SetString(re.SelectedTx.TransactionID, 10)
-        if !ok {
-            err = errors.New("Set to *big.Int failed. ")
-            return
-        }
-
-        if buyer, err = b.Bin.ChainWrapper().GetBuyer(txParam, tID); err != nil {
-            err = errors.Wrap(err, "Get buyer address failed. ")
-            return
-        }
-        if metaDataIdEncWithBuyer, err = b.Bin.Account.ReEncrypt(re.SelectedTx.MetaDataIDEncWithSeller, re.SelectedTx.Seller, buyer, re.Password); err != nil {
-            err = errors.Wrap(err, "Re-encrypt meta data ID failed. ")
-            return
-        }
-
-        if arbitrators, err = b.Bin.ChainWrapper().GetArbitrators(txParam, tID); err != nil {
-            err = errors.Wrap(err, "Get arbitrators addresses failed. ")
-            return
-        }
-        for i := 0; i < len(arbitrators); i++ {
-            var bs []byte
-            if bs, err = b.Bin.Account.ReEncrypt(re.SelectedTx.MetaDataIDEncWithSeller, re.SelectedTx.Seller, arbitrators[i], re.Password); err != nil {
-                err = errors.Wrap(err, "Re-encrypt meta data ID failed. ")
-                return
-            }
-            metaDataIdsEncWithArbitrators = append(metaDataIdsEncWithArbitrators, bs...)
-        }
-
-        if err = b.Bin.ChainWrapper().ReEncryptMetaDataIdBySeller(txParam, tID, metaDataIdEncWithBuyer, metaDataIdsEncWithArbitrators); err != nil {
-            err = errors.Wrap(err, "Submit encrypted ID with buyer failed. ")
-            return
-        }
+    if err = b.Bin.ChainWrapper().ReEncryptMetaDataId(txParam, tID, re.SelectedTx.MetaDataIDEncWithSeller); err != nil {
+        err = errors.Wrap(err, "Submit encrypted ID with buyer failed. ")
+        return
     }
 
     payload = true
