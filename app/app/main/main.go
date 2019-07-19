@@ -6,7 +6,7 @@ package main
 import (
     "github.com/scryinfo/dot/dot"
     "github.com/scryinfo/dot/dots/line"
-    "github.com/scryinfo/dp/dots/connection/business"
+    "github.com/scryinfo/dp/dots/app/business"
     "github.com/scryinfo/scryg/sutils/ssignal"
     "go.uber.org/zap"
     "os"

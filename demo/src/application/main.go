@@ -37,6 +37,6 @@ func init() {
 func main() {
     flag.Parse()
     if err = WSConnect.WebsocketConnect(*port); err != nil {
-        rlog.Error(errors.Wrap(err, "WebSocket Connect failed. "))
+        rlog.Error(errors.Wrap(err, "WebSocket ListenAndServe failed. "))
     }
 }

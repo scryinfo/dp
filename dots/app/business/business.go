@@ -8,9 +8,9 @@ import (
     "github.com/scryinfo/dot/dot"
     "github.com/scryinfo/dp/dots/binary"
     scry2 "github.com/scryinfo/dp/dots/binary/scry"
-    "github.com/scryinfo/dp/dots/connection"
-    "github.com/scryinfo/dp/dots/connection/business/definition"
-    ci "github.com/scryinfo/dp/dots/connection/interface"
+    "github.com/scryinfo/dp/dots/app"
+    "github.com/scryinfo/dp/dots/app/business/definition"
+    ci "github.com/scryinfo/dp/dots/app/server"
     "github.com/scryinfo/dp/dots/eth/event"
     "github.com/scryinfo/dp/dots/eth/transaction"
     "go.uber.org/zap"
@@ -30,8 +30,8 @@ type Business struct {
     deployer          *definition.AccInfo
     extChan           chan []string
     config            businessConfig
-    Bin               *binary.Binary       `dot:""`
-    WS                *connection.WSServer `dot:""`
+    Bin               *binary.Binary `dot:"binary"`
+    WS                *app.WSServer  `dot:""`
 }
 
 type businessConfig struct {
@@ -145,7 +145,7 @@ func (b *Business) Start(ignore bool) error {
         return err
     }
 
-    if err := b.WS.Connect(); err != nil {
+    if err := b.WS.ListenAndServe(); err != nil {
         dot.Logger().Errorln("Start http web server failed. ", zap.NamedError("error", err))
         return errors.New("Start http web server failed. ")
     }
@@ -190,7 +190,7 @@ func BusTypeLive() []*dot.TypeLives {
                 },
             },
         },
-        connection.WebSocketTypeLive(),
+        app.WebSocketTypeLive(),
     }
 
     t = append(t, binary.BinTypeLive()...)
