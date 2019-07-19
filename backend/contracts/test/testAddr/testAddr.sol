@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "../ScryToken.sol";
+import "../../contracts/ScryToken.sol";
 
 contract testAddr {
     function () public payable {}

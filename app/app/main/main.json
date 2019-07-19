@@ -6,6 +6,7 @@
   "dots": [
     {
       "metaData": {
+        "name": "binary component",
         "typeId": "92fed326-2f2c-40c5-8664-107473238390"
       },
       "lives": [
@@ -16,24 +17,8 @@
             "ethServiceAddr": "http://localhost:8545",
             "keyServiceAddr": "localhost:48080",
             "storageServiceAddr": "/ip4/127.0.0.1/tcp/5001",
-            "protocolContractAddr": "0x3420c44090c6a2c444ce85cb914087760ac0a78b",
-            "tokenContractAddr": "0xd3ed5f6c2bb59b4bcd0cf75560d346ff991b9d59"
-          }
-        }
-      ]
-    },
-    {
-      "metaData": {
-        "typeId": "1241ebcb-4b9d-498d-9749-de0e0cd7d6a2"
-      },
-      "lives": [
-        {
-          "liveId": "1241ebcb-4b9d-498d-9749-de0e0cd7d6a2",
-          "json": {
-            "wsPort": "9822",
-            "uiResourcesDir": "D:/GoPath/src/github.com/scryinfo/dp/app/app/ui/resources/app",
-            "IPFSOutDir": "C:/Users/Will/Desktop",
-            "accsBackupFile": "C:/Users/Will/Desktop/accounts.json"
+            "protocolContractAddr": "0xd3ed5f6c2bb59b4bcd0cf75560d346ff991b9d59",
+            "tokenContractAddr": "0x34306d87653011bbb3cdf35e742e12135ddb817a"
           }
         }
       ]
@@ -48,6 +33,77 @@
           "json": {
             "gasPrice": 1,
             "gasLimit": 3000000
+          }
+        }
+      ]
+    },
+    {
+      "metaData": {
+        "name": "app connect",
+        "typeId": "40ef6679-5cfc-4436-a1f6-7f39870bc5ef"
+      },
+      "lives": [
+        {
+          "liveId": "40ef6679-5cfc-4436-a1f6-7f39870bc5ef",
+          "json": {
+            "wsPort": "9822",
+            "uiResourcesDir": "D:/GoPath/src/github.com/scryinfo/dp/app/app/ui/resources/app"
+          }
+        }
+      ]
+    },
+    {
+      "metaData": {
+        "name": "app business",
+        "typeId": "64a3ff50-50de-447c-b0b9-401fff8c4fa4"
+      },
+      "lives": [
+        {
+          "liveId": "64a3ff50-50de-447c-b0b9-401fff8c4fa4",
+          "json": {
+            "IPFSOutDir": "C:/Users/Will/Desktop",
+            "accsBackupFile": "C:/Users/Will/Desktop/accounts.json"
+          }
+        }
+      ]
+    },
+    {
+      "metaData": {
+        "typeId": "96a6e2b5-f0b6-48dc-b0ff-2d9f2c5c9f1d"
+      },
+      "lives": [
+        {
+          "liveId": "96a6e2b5-f0b6-48dc-b0ff-2d9f2c5c9f1d",
+          "json": {
+            "EventChanCap": 100
+          }
+        }
+      ]
+    },
+    {
+      "metaData":{
+        "name": "ServerNobl",
+        "typeId":"77a766e7-c288-413f-946b-bc9de6df3d70"
+      },
+      "lives":[
+        {
+          "liveId":"77a766e7-c288-413f-946b-bc9de6df3d70",
+          "json":{
+            "addrs":["localhost:5012"]
+          }
+        }
+      ]
+    },
+    {
+      "metaData":{
+        "name": "grpc http server",
+        "typeId":"afbeac47-e5fd-4bf3-8fb1-f0fb8ec79bd0"
+      },
+      "lives":[
+        {
+          "liveId":"afbeac47-e5fd-4bf3-8fb1-f0fb8ec79bd0",
+          "json": {
+            "addr": ":6868"
           }
         }
       ]

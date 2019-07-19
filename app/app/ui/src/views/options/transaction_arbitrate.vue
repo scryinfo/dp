@@ -60,7 +60,8 @@ export default {
             this.selectedTx = {
                 TransactionID: curRow.TransactionID,
                 User: this.$store.state.account,
-                MetaDataIDEncrypt: curRow.MetaDataIDEncWithArbitrator
+                MetaDataIDEncrypt: curRow.MetaDataIDEncWithArbitrator,
+                MetaDataExtension: curRow.MetaDataExtension
             };
         },
         initTxA: function () {
