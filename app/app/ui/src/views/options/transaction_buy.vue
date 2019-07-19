@@ -36,14 +36,14 @@
                     <el-form-item label="描述"><span>{{ props.row.Description }}</span></el-form-item>
                     <el-form-item label="卖家"><span>{{ props.row.Seller }}</span></el-form-item>
                     <el-form-item label="状态"><span>{{ props.row.State }}</span></el-form-item>
-                    <el-form-item label="验证者回复1"><span>{{ props.row.Verifier1Response }}</span></el-form-item>
-                    <el-form-item label="验证者回复2"><span>{{ props.row.Verifier2Response }}</span></el-form-item>
+                    <el-form-item label="是否支持验证"><span>{{ props.row.SVDisplay }}</span></el-form-item>
                     <el-form-item label="仲裁结果"><span>{{ props.row.ArbitrateResult }}</span></el-form-item>
                 </el-form>
             </el-table-column>
             <el-table-column prop="Title" label="标题" show-overflow-tooltip></el-table-column>
             <el-table-column prop="Price" label="价格" show-overflow-tooltip></el-table-column>
             <el-table-column prop="State" label="状态" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="SVDisplay" label="是否支持验证" show-overflow-tooltip></el-table-column>
         </el-table>
         <el-pagination class="pagination" @current-change="setCurPage" @size-change="setPageSize" :total="total"
                        layout="sizes, total, prev, pager, next, jumper" :page-sizes="[5, 6]" :page-size="pageSize"

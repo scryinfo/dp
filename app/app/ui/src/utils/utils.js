@@ -116,29 +116,55 @@ let presetFunc = {
             position: "top-left"
         });
         dl_db.read(payload.PublishID, function (dataDetails) {
-            txBuyer_db.write({
-                Title: dataDetails.Title,
-                Price: dataDetails.Price,
-                Keys: dataDetails.Keys,
-                Description: dataDetails.Description,
-                Buyer: payload.Buyer, // -
-                Seller: dataDetails.Seller,
-                State: payload.TxState, // -
-                SupportVerify: dataDetails.SupportVerify,
-                StartVerify: payload.StartVerify, // -
-                MetaDataExtension: dataDetails.MetaDataExtension,
-                ProofDataExtensions: dataDetails.ProofDataExtensions,
-                MetaDataIDEncWithSeller: "",
-                MetaDataIDEncWithBuyer: "",
-                MetaDataIDEncWithArbitrator: "",
-                Verifier1Response: "",
-                Verifier2Response: "",
-                ArbitrateResult: "",
-                PublishID: dataDetails.PublishID,
-                TransactionID: payload.TransactionID    // keyPath
-            }, function () {
-                txBuyer_db.init(_this);
-            });
+            if (_this.$store.state.account === dataDetails.Seller) {
+                txSeller_db.write({
+                    Title: dataDetails.Title,
+                    Price: dataDetails.Price,
+                    Keys: dataDetails.Keys,
+                    Description: dataDetails.Description,
+                    Buyer: payload.Buyer, // -
+                    Seller: dataDetails.Seller,
+                    State: payload.TxState, // -
+                    SupportVerify: dataDetails.SupportVerify,
+                    StartVerify: payload.StartVerify, // -
+                    MetaDataExtension: dataDetails.MetaDataExtension,
+                    ProofDataExtensions: dataDetails.ProofDataExtensions,
+                    MetaDataIDEncWithSeller: "",
+                    MetaDataIDEncWithBuyer: "",
+                    MetaDataIDEncWithArbitrator: "",
+                    Verifier1Response: "",
+                    Verifier2Response: "",
+                    ArbitrateResult: "",
+                    PublishID: dataDetails.PublishID,
+                    TransactionID: payload.TransactionID    // keyPath
+                }, function () {
+                    txSeller_db.init(_this);
+                });
+            } else {
+                txBuyer_db.write({
+                    Title: dataDetails.Title,
+                    Price: dataDetails.Price,
+                    Keys: dataDetails.Keys,
+                    Description: dataDetails.Description,
+                    Buyer: payload.Buyer, // -
+                    Seller: dataDetails.Seller,
+                    State: payload.TxState, // -
+                    SupportVerify: dataDetails.SupportVerify,
+                    StartVerify: payload.StartVerify, // -
+                    MetaDataExtension: dataDetails.MetaDataExtension,
+                    ProofDataExtensions: dataDetails.ProofDataExtensions,
+                    MetaDataIDEncWithSeller: "",
+                    MetaDataIDEncWithBuyer: "",
+                    MetaDataIDEncWithArbitrator: "",
+                    Verifier1Response: "",
+                    Verifier2Response: "",
+                    ArbitrateResult: "",
+                    PublishID: dataDetails.PublishID,
+                    TransactionID: payload.TransactionID    // keyPath
+                }, function () {
+                    txBuyer_db.init(_this);
+                });
+            }
         });
         acc_db.read(_this.$store.state.account, function (accInstance) {
             acc_db.write({
