@@ -11,6 +11,11 @@ let dl_db = {
         c.onsuccess = function(event) {
             let cursor = event.target.result;
             if (cursor) {
+                let sv = "";
+                switch (cursor.value.SupportVerify) {
+                    case true: sv = "支持验证"; break;
+                    case false: sv = "不支持验证"; break;
+                }
                 _this.$store.state.datalist.push({
                     Title: cursor.value.Title,
                     Price: cursor.value.Price,
@@ -18,6 +23,7 @@ let dl_db = {
                     Description: cursor.value.Description,
                     Seller: cursor.value.Seller,
                     SupportVerify: cursor.value.SupportVerify,
+                    SVDisplay: sv,
                     MetaDataExtension: cursor.value.MetaDataExtension,
                     ProofDataExtensions: cursor.value.ProofDataExtensions,
                     PublishID: cursor.value.PublishID
@@ -157,8 +163,6 @@ let txSeller_db = {
                     MetaDataIDEncWithSeller: cursor.value.MetaDataIDEncWithSeller,
                     MetaDataIDEncWithBuyer: cursor.value.MetaDataIDEncWithBuyer,
                     MetaDataIDEncWithArbitrator: cursor.value.MetaDataIDEncWithArbitrator,
-                    Verifier1Response: cursor.value.Verifier1Response,
-                    Verifier2Response: cursor.value.Verifier2Response,
                     ArbitrateResult: cursor.value.ArbitrateResult,
                     PublishID: cursor.value.PublishID,
                     TransactionID: cursor.value.TransactionID
@@ -209,6 +213,11 @@ let txBuyer_db = {
         c.onsuccess = function (event) {
             let cursor = event.target.result;
             if (cursor) {
+                let sv = "";
+                switch (cursor.value.SupportVerify) {
+                    case true: sv = "支持验证"; break;
+                    case false: sv = "不支持验证"; break;
+                }
                 _this.$store.state.transactionbuy.push({
                     Title: cursor.value.Title,
                     Price: cursor.value.Price,
@@ -218,6 +227,7 @@ let txBuyer_db = {
                     Seller: cursor.value.Seller,
                     State: cursor.value.State,
                     SupportVerify: cursor.value.SupportVerify,
+                    SVDisplay: sv,
                     StartVerify: cursor.value.StartVerify,
                     MetaDataExtension: cursor.value.MetaDataExtension,
                     ProofDataExtensions: cursor.value.ProofDataExtensions,

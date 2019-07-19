@@ -6,7 +6,7 @@
   "dots": [
     {
       "metaData": {
-        "name": "binary component",
+        "name": "binary",
         "typeId": "92fed326-2f2c-40c5-8664-107473238390"
       },
       "lives": [
@@ -39,7 +39,7 @@
     },
     {
       "metaData": {
-        "name": "app connect",
+        "name": "app server",
         "typeId": "40ef6679-5cfc-4436-a1f6-7f39870bc5ef"
       },
       "lives": [
