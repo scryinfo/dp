@@ -42,13 +42,13 @@ let state = {
     balance: [
         // balance[0]: eth
         {
-            Balance: "-",
-            Time: "-"
+            Balance: "1000000",
+            Time: "2019-07-18 09:41:54.6533355 +0800 CST m=+1404.330239401"
         },
         // balance[1]: scry token
         {
-            Balance: "-",
-            Time: "-"
+            Balance: "100000000000",
+            Time: "2019-07-18 09:41:54.6533355 +0800 CST m=+1404.330239401"
         }
     ]
 

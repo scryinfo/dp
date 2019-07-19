@@ -1,21 +1,7 @@
 // Scry Info.  All rights reserved.
 // license that can be found in the license file.
 
-package settings
-
-import "encoding/json"
-
-type MessageIn struct {
-    Name    string          `json:"Name"`
-    Payload json.RawMessage `json:"Payload"`
-}
-
-type MessageOut struct {
-    Name    string      `json:"Name"`
-    Payload interface{} `json:"Payload,omitempty"`
-}
-
-type PresetFunc = func(*MessageIn) (interface{}, error)
+package definition
 
 type AccInfo struct {
     Account  string `json:"account"`

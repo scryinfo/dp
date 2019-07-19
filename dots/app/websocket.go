@@ -1,13 +1,10 @@
-// Scry Info.  All rights reserved.
-// license that can be found in the license file.
-
-package connection
+package app
 
 import (
     "encoding/json"
     "github.com/pkg/errors"
     "github.com/scryinfo/dot/dot"
-    "github.com/scryinfo/dp/dots/app/settings"
+    "github.com/scryinfo/dp/dots/app/server"
     "go.uber.org/zap"
     "golang.org/x/net/websocket"
     "net/http"
@@ -15,43 +12,88 @@ import (
 )
 
 type WSServer struct {
-    port           string
-    connParams     *websocket.Conn
-    funcMap        map[string]settings.PresetFunc
-    uiResourcesDir string
+    connParams *websocket.Conn
+    funcMap    map[string]server.PresetFunc
+    config     connectionConfig
 }
 
-const EventSendFailed = " event send failed. "
+type connectionConfig struct {
+    Port           string `json:"wsPort"`
+    UIResourcesDir string `json:"uiResourcesDir"`
+}
 
-var _ Connection = (*WSServer)(nil)
+const WebSocketTypeId = "40ef6679-5cfc-4436-a1f6-7f39870bc5ef"
 
-func CreateConnetion(port, dir string) *WSServer {
-    return &WSServer{
-        port:           port,
-        uiResourcesDir: dir,
-        funcMap:        make(map[string]settings.PresetFunc),
+var _ server.Server = (*WSServer)(nil)
+
+func newWebSocketDot(conf interface{}) (dot.Dot, error) {
+    var err error
+    var bs []byte
+    if bt, ok := conf.([]byte); ok {
+        bs = bt
+    } else {
+        return nil, dot.SError.Parameter
+    }
+
+    dConf := &connectionConfig{}
+    err = dot.UnMarshalConfig(bs, dConf)
+    if err != nil {
+        return nil, err
+    }
+
+    d := &WSServer{config: *dConf}
+
+    return d, err
+}
+
+func WebSocketTypeLive() *dot.TypeLives {
+    return &dot.TypeLives{
+        Meta: dot.Metadata{
+            TypeId: WebSocketTypeId,
+            NewDoter: func(conf interface{}) (dot.Dot, error) {
+                return newWebSocketDot(conf)
+            },
+        },
     }
 }
 
-func (ws *WSServer) Connect() error {
-    return errors.Wrap(ws.start(), "ws connect failed. ")
+func (ws *WSServer) Create(l dot.Line) error {
+    ws.funcMap = make(map[string]server.PresetFunc)
+
+    return nil
+}
+
+func (ws *WSServer) Start(ignore bool) error {
+    return nil
+}
+
+func (ws *WSServer) Stop(ignore bool) error {
+    return nil
+}
+
+func (ws *WSServer) Destroy(ignore bool) error {
+    return nil
+}
+
+func (ws *WSServer) ListenAndServe() error {
+    return errors.Wrap(ws.start(), "web serve start failed. ")
 }
 
 func (ws *WSServer) start() error {
     dot.Logger().Infoln("> Start listening ... ")
 
     http.HandleFunc("/", ws.bindHTMLFile)
-    http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(ws.uiResourcesDir+"/static"))))
+    http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(ws.config.UIResourcesDir+"/static"))))
     http.Handle("/ws", websocket.Handler(ws.handleMessages))
 
-    if err := exec.Command("cmd", "/c start http://127.0.0.1:"+ws.port).Start(); err != nil {
-        return errors.Wrap(err, "auto-open url failed, (origin: http://127.0.0.1:"+ws.port+"). ")
+    if err := exec.Command("cmd", "/c start http://127.0.0.1:"+ws.config.Port).Start(); err != nil {
+        return errors.Wrap(err, "auto-open url failed, (origin: http://127.0.0.1:"+ws.config.Port+"). ")
     }
 
-    dot.Logger().Infoln("> Listening at http://127.0.0.1:" + ws.port)
+    dot.Logger().Infoln("> Listening at http://127.0.0.1:" + ws.config.Port)
 
     go func() {
-        if err := http.ListenAndServe(":"+ws.port, nil); err != nil {
+        if err := http.ListenAndServe(":"+ws.config.Port, nil); err != nil {
             dot.Logger().Errorln("Listen and Server failed. ", zap.NamedError("", err))
         }
     }()
@@ -59,9 +101,8 @@ func (ws *WSServer) start() error {
     return nil
 }
 func (ws *WSServer) bindHTMLFile(w http.ResponseWriter, r *http.Request) {
-    http.ServeFile(w, r, ws.uiResourcesDir+"/index.html")
+    http.ServeFile(w, r, ws.config.UIResourcesDir+"/index.html")
 }
-
 func (ws *WSServer) handleMessages(conn *websocket.Conn) {
     logger := dot.Logger()
     ws.connParams = conn
@@ -71,7 +112,7 @@ func (ws *WSServer) handleMessages(conn *websocket.Conn) {
     var err error
     for {
         // receive message and check if handle function is exist.
-        var mi settings.MessageIn
+        var mi server.MessageIn
         {
             var reply []byte
             if err = websocket.Message.Receive(ws.connParams, &reply); err != nil {
@@ -107,7 +148,7 @@ func (ws *WSServer) handleMessages(conn *websocket.Conn) {
 
             // send
             if err = ws.SendMessage(name, payload); err != nil {
-                logger.Errorln("", zap.NamedError(name+EventSendFailed, err))
+                logger.Errorln("", zap.NamedError(name+server.EventSendFailed, err))
             }
         }
     }
@@ -117,7 +158,7 @@ func (ws *WSServer) SendMessage(name string, payload interface{}) error {
     if bs, ok := payload.([]byte); ok {
         payload = string(bs)
     }
-    mo := settings.MessageOut{
+    mo := server.MessageOut{
         Name:    name,
         Payload: payload,
     }
@@ -130,10 +171,14 @@ func (ws *WSServer) SendMessage(name string, payload interface{}) error {
     return websocket.Message.Send(ws.connParams, string(b))
 }
 
-func (ws *WSServer) AddCallbackFunc(name string, presetFunc settings.PresetFunc) {
-    ws.funcMap[name] = presetFunc
-}
+func (ws *WSServer) PresetMsgHandleFuncs(name []string, presetFunc []server.PresetFunc) error {
+    if len(name) != len(presetFunc) {
+        return errors.New("Quantities of name and function are not matched. ")
+    }
 
-func (ws *WSServer) GetPort() string {
-    return ws.port
+    for i := range name {
+        ws.funcMap[name[i]] = presetFunc[i]
+    }
+
+    return nil
 }

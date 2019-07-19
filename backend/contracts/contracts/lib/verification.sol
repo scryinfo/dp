@@ -30,6 +30,7 @@ library verification {
         common.TransactionItem storage txItem = ds.txData.map[txId];
         require(txItem.used, "Transaction does not exist");
         require(txItem.state == common.TransactionState.Created || txItem.state == common.TransactionState.Voted, "Invalid transaction state");
+        require(!ds.voteData.map[txId][msg.sender].used, "Verifier has voted");
 
         bool valid;
         uint8 index;
@@ -37,9 +38,7 @@ library verification {
         (valid, index) = verifierValid(verifier, txItem.verifiers);
         require(valid, "Invalid verifier");
 
-        if (!ds.voteData.map[txId][msg.sender].used) {
-            payToVerifier(txItem, ds.conf, verifier.addr, token);
-        }
+        payToVerifier(txItem, ds.conf.verifierBonus, verifier.addr, token);
         ds.voteData.map[txId][msg.sender] = common.VoteResult(judge, comments, true);
 
         txItem.state = common.TransactionState.Voted;
@@ -148,12 +147,12 @@ library verification {
         return (false, 0);
     }
 
-    function payToVerifier(common.TransactionItem storage txItem, common.Configuration storage conf, address verifier, ERC20 token) internal {
-        if (txItem.buyerDeposit >= conf.verifierBonus) {
-            txItem.buyerDeposit -= conf.verifierBonus;
+    function payToVerifier(common.TransactionItem storage txItem, uint256 amount, address verifier, ERC20 token) internal {
+        if (txItem.buyerDeposit >= amount) {
+            txItem.buyerDeposit -= amount;
 
-            if (!token.transfer(verifier, conf.verifierBonus)) {
-                txItem.buyerDeposit += conf.verifierBonus;
+            if (!token.transfer(verifier, amount)) {
+                txItem.buyerDeposit += amount;
                 require(false, "Failed to pay to verifier");
             }
         } else {
@@ -226,7 +225,7 @@ library verification {
         require(exist, "Invalid arbitrator");
         require(!ds.arbitratorData.map[txId][index].used, "Address already arbitrated");
 
-        payToArbitrator(txItem, ds.conf, msg.sender, token);
+        payToArbitrator(txItem, ds.conf.arbitratorBonus, msg.sender, token);
         ds.arbitratorData.map[txId][index] = common.ArbitratorResult(msg.sender, judge, true);
     }
 
@@ -242,12 +241,12 @@ library verification {
         return finish;
     }
 
-    function payToArbitrator(common.TransactionItem storage txItem, common.Configuration storage conf, address arbitrator, ERC20 token) internal {
-        if (txItem.buyerDeposit >= conf.arbitratorBonus) {
-            txItem.buyerDeposit -= conf.arbitratorBonus;
+    function payToArbitrator(common.TransactionItem storage txItem, uint256 amount, address arbitrator, ERC20 token) internal {
+        if (txItem.buyerDeposit >= amount) {
+            txItem.buyerDeposit -= amount;
 
-            if (!token.transfer(arbitrator, conf.arbitratorBonus)) {
-                txItem.buyerDeposit += conf.arbitratorBonus;
+            if (!token.transfer(arbitrator, amount)) {
+                txItem.buyerDeposit += amount;
                 require(false, "Failed to pay to verifier");
             }
         } else {

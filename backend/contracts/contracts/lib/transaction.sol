@@ -417,18 +417,16 @@ library transaction {
         }
     }
 
-    function getBuyerAddrInDesignatedTx(common.DataSet storage ds, uint256 txId) internal view returns (address) {
+    function getBuyer(common.DataSet storage ds, uint256 txId) internal view returns (address) {
         common.TransactionItem memory txItem = ds.txData.map[txId];
         require(msg.sender == txItem.seller, "Invalid caller");
-        require(txItem.state == common.TransactionState.Buying, "Invalid transaction state");
 
         return txItem.buyer;
     }
 
-    function getArbitratorsAddrsInDesignatedTx(common.DataSet storage ds, uint256 txId) internal view returns (address[]) {
+    function getArbitrators(common.DataSet storage ds, uint256 txId) internal view returns (address[]) {
         common.TransactionItem memory txItem = ds.txData.map[txId];
         require(msg.sender == txItem.seller, "Invalid caller");
-        require(txItem.state == common.TransactionState.Buying, "Invalid transaction state");
 
         return txItem.arbitrators;
     }

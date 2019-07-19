@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import "truffle/Assert.sol";
 import "truffle/DeployedAddresses.sol";
 
-import "../contracts/test/testAddr.sol";
+import "./testAddr/testAddr.sol";
 
 import "../contracts/ScryToken.sol";
 

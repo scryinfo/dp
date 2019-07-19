@@ -25,27 +25,6 @@ type UserAccount struct {
     Addr string
 }
 
-func GetAccIns() *Account {
-    logger := dot.Logger()
-    l := dot.GetDefaultLine()
-    if l == nil {
-        logger.Errorln("the line do not create, do not call it")
-        return nil
-    }
-    d, err := l.ToInjecter().GetByLiveId(AccountTypeId)
-    if err != nil {
-        logger.Errorln(err.Error())
-        return nil
-    }
-
-    if g, ok := d.(*Account); ok {
-        return g
-    }
-
-    logger.Errorln("do not get the Account dot")
-    return nil
-}
-
 //construct dot
 func newAccountDot(_ interface{}) (dot.Dot, error) {
     d := &Account{}
