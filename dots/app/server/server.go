@@ -1,13 +1,13 @@
 // Scry Info.  All rights reserved.
 // license that can be found in the license file.
 
-package _interface
+package server
 
 import "encoding/json"
 
 // define what a type of connection should implement.
-type Connection interface {
-    Connect() error
+type Server interface {
+    ListenAndServe() error
 
     // send message.
     SendMessage(name string, payload interface{}) error

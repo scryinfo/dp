@@ -1,10 +1,10 @@
-package connection
+package app
 
 import (
     "encoding/json"
     "github.com/pkg/errors"
     "github.com/scryinfo/dot/dot"
-    "github.com/scryinfo/dp/dots/connection/interface"
+    "github.com/scryinfo/dp/dots/app/server"
     "go.uber.org/zap"
     "golang.org/x/net/websocket"
     "net/http"
@@ -13,7 +13,7 @@ import (
 
 type WSServer struct {
     connParams *websocket.Conn
-    funcMap    map[string]_interface.PresetFunc
+    funcMap    map[string]server.PresetFunc
     config     connectionConfig
 }
 
@@ -24,7 +24,7 @@ type connectionConfig struct {
 
 const WebSocketTypeId = "40ef6679-5cfc-4436-a1f6-7f39870bc5ef"
 
-var _ _interface.Connection = (*WSServer)(nil)
+var _ server.Server = (*WSServer)(nil)
 
 func newWebSocketDot(conf interface{}) (dot.Dot, error) {
     var err error
@@ -58,7 +58,7 @@ func WebSocketTypeLive() *dot.TypeLives {
 }
 
 func (ws *WSServer) Create(l dot.Line) error {
-    ws.funcMap = make(map[string]_interface.PresetFunc)
+    ws.funcMap = make(map[string]server.PresetFunc)
 
     return nil
 }
@@ -75,8 +75,8 @@ func (ws *WSServer) Destroy(ignore bool) error {
     return nil
 }
 
-func (ws *WSServer) Connect() error {
-    return errors.Wrap(ws.start(), "ws connect failed. ")
+func (ws *WSServer) ListenAndServe() error {
+    return errors.Wrap(ws.start(), "web serve start failed. ")
 }
 
 func (ws *WSServer) start() error {
@@ -112,7 +112,7 @@ func (ws *WSServer) handleMessages(conn *websocket.Conn) {
     var err error
     for {
         // receive message and check if handle function is exist.
-        var mi _interface.MessageIn
+        var mi server.MessageIn
         {
             var reply []byte
             if err = websocket.Message.Receive(ws.connParams, &reply); err != nil {
@@ -148,7 +148,7 @@ func (ws *WSServer) handleMessages(conn *websocket.Conn) {
 
             // send
             if err = ws.SendMessage(name, payload); err != nil {
-                logger.Errorln("", zap.NamedError(name+_interface.EventSendFailed, err))
+                logger.Errorln("", zap.NamedError(name+server.EventSendFailed, err))
             }
         }
     }
@@ -158,7 +158,7 @@ func (ws *WSServer) SendMessage(name string, payload interface{}) error {
     if bs, ok := payload.([]byte); ok {
         payload = string(bs)
     }
-    mo := _interface.MessageOut{
+    mo := server.MessageOut{
         Name:    name,
         Payload: payload,
     }
@@ -171,7 +171,7 @@ func (ws *WSServer) SendMessage(name string, payload interface{}) error {
     return websocket.Message.Send(ws.connParams, string(b))
 }
 
-func (ws *WSServer) PresetMsgHandleFuncs(name []string, presetFunc []_interface.PresetFunc) error {
+func (ws *WSServer) PresetMsgHandleFuncs(name []string, presetFunc []server.PresetFunc) error {
     if len(name) != len(presetFunc) {
         return errors.New("Quantities of name and function are not matched. ")
     }
