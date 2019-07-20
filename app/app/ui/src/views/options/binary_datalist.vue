@@ -22,6 +22,7 @@
             <el-table-column prop="Keys" label="标签" show-overflow-tooltip></el-table-column>
             <el-table-column prop="Description" label="描述" show-overflow-tooltip></el-table-column>
             <el-table-column prop="Seller" label="卖家" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="SVDisplay" label="是否支持验证" show-overflow-tooltip></el-table-column>
         </el-table>
         <el-pagination class="pagination" @current-change="setCurPage" @size-change="setPageSize" :total="total"
             layout="sizes, total, prev, pager, next, jumper" :page-sizes="[5, 6]" :page-size="pageSize"
