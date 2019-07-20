@@ -14,6 +14,7 @@ import (
     "github.com/scryinfo/dp/dots/eth/transaction"
     "go.uber.org/zap"
     "math/big"
+    "sync"
     "time"
 )
 
@@ -27,7 +28,7 @@ type ChanEvent chan event.Event
 
 type BinaryGrpcServer struct {
     config       binaryGrpcServerConfig
-    eventChan    map[string]ChanEvent
+    eventChan    sync.Map
     chainWrapper scry.ChainWrapper
     Subscriber   *subscribe.Subscribe `dot:""`
     ServerNobl   gserver.ServerNobl   `dot:""`
@@ -82,7 +83,7 @@ func BinaryGrpcServerTypeLive() []*dot.TypeLives {
 }
 
 func (c *BinaryGrpcServer) Create(l dot.Line) error {
-    c.eventChan = make(map[string]ChanEvent)
+    //c.eventChan = make(map[string]ChanEvent)
 
     return nil
 }
@@ -120,12 +121,14 @@ func (c *BinaryGrpcServer) SubscribeEvent(ctx context.Context, info *api.Subscri
     }
 
     //data channel for server streaming
-    ce := c.eventChan[hexAddr]
-    if ce == nil {
+    var ce ChanEvent
+    if rv, ok := c.eventChan.Load(hexAddr); !ok {
         errMsg := "failed to subscribe event since no server streaming channel found"
         dot.Logger().Errorln("BinaryGrpcServer::SubscribeEvent", zap.String("error:", errMsg))
         rs.ErrMsg = errMsg
         return rs, errors.New(errMsg)
+    } else {
+        ce = rv.(ChanEvent)
     }
 
     addr := common.HexToAddress(info.GetAddress())
@@ -145,24 +148,56 @@ func (c *BinaryGrpcServer) SubscribeEvent(ctx context.Context, info *api.Subscri
     return rs, nil
 }
 
-func (c *BinaryGrpcServer) UnSubscribeEvent(context.Context, *api.SubscribeInfo) (*api.Result, error) {
-    return nil, nil
+func (c *BinaryGrpcServer) UnSubscribeEvent(
+    ctx context.Context,
+    info *api.SubscribeInfo,
+) (*api.Result, error) {
+    rs := makeResult(true,"")
+
+    hexAddr := info.GetAddress()
+    if hexAddr == "" {
+        errMsg := "client address can not be empty"
+        dot.Logger().Errorln("BinaryGrpcServer::UnSubscribeEvent", zap.String("error:", errMsg))
+        rs.ErrMsg = errMsg
+        return rs, errors.New(errMsg)
+    }
+
+    addr := common.HexToAddress(info.GetAddress())
+    for _, ev := range info.GetEvent() {
+        err := c.Subscriber.UnSubscribe(addr, ev)
+        if err != nil {
+            dot.Logger().Errorln("BinaryGrpcServer::UnSubscribeEvent", zap.Error(err))
+        }
+    }
+
+    return rs, nil
 }
 
 //the function should be called firstly to create server stream channel
 func (c *BinaryGrpcServer) RecvEvents(client *api.ClientInfo,srv api.BinaryService_RecvEventsServer) error {
+    defer func() {
+        if err := recover(); err != nil {
+            dot.Logger().Errorln("BinaryGrpcServer::RecvEvents", zap.Any("error:", err))
+        }
+    }()
+
     //create channel for server streaming
-    if client.Address == "" {
+    if client == nil || client.Address == "" {
         errMsg := "client address can not be empty"
         dot.Logger().Errorln("BinaryGrpcServer::RecvEvents", zap.String("error:", errMsg))
         return errors.New(errMsg)
     }
 
-    ce := c.eventChan[client.Address]
-    if ce == nil {
-        ce = make(chan event.Event, c.config.EventChanCap)
-        c.eventChan[client.Address] = ce
+    var ce ChanEvent
+    if rv, ok := c.eventChan.Load(client.Address); !ok {
+        ce = make(ChanEvent, c.config.EventChanCap)
+        c.eventChan.Store(client.Address, ce)
+    } else {
+        ce = rv.(ChanEvent)
     }
+
+    //channel created event
+    ce <- *makeChannelCreatedEvent()
 
     //push stream
     for {
@@ -179,10 +214,18 @@ func (c *BinaryGrpcServer) RecvEvents(client *api.ClientInfo,srv api.BinaryServi
             err = srv.Send(ev)
             if err != nil {
                 dot.Logger().Errorln("BinaryGrpcServer::RecvEvents", zap.String("error:", err.Error()))
+                ce <- e
+                return err
             }
 
         case <-time.After(time.Microsecond * ScanEventInterval):
         }
+    }
+}
+
+func makeChannelCreatedEvent() *event.Event {
+    return &event.Event{
+        Name: "ChannelCreated",
     }
 }
 
@@ -308,7 +351,23 @@ func (c *BinaryGrpcServer) Authenticate(
     ctx context.Context,
     in *api.ClientInfo,
 ) (*api.Result, error) {
-    return nil, nil
+    if c.chainWrapper == nil {
+        e := "invalid scry chain interface"
+        return makeResult(false, e), errors.New(e)
+    }
+
+    client := scry.NewScryClient(in.Address, c.chainWrapper)
+    if client == nil {
+        e := "failed to new scry client"
+        return makeResult(false, e), errors.New(e)
+    }
+
+    _, err := client.Authenticate(in.Password)
+    if err != nil {
+        return makeResult(false, err.Error()), err
+    }
+
+    return makeResult(true, ""), nil
 }
 
 func (c *BinaryGrpcServer) TransferEth(

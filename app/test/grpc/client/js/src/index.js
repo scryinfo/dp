@@ -38,7 +38,6 @@ var buyerPassword = "333333";
 var protocolContractAddr = "0x3420c44090c6a2c444ce85cb914087760ac0a78b";
 
 var publishId;
-var txId;
 
 start();
 
@@ -50,6 +49,7 @@ function start() {
 }
 
 function onCreateSeller() {
+    authenticateSeller();
     createBuyer();
 }
 
@@ -59,10 +59,6 @@ function onCreateBuyer() {
 
     createEventsChannel(buyerAddr, buyerPassword, dispatchBuyerEvent);
     console.log("streaming channel for buyer created");
-
-    subscribeEvent(sellerAddr, ["DataPublish", "Approval", "TransactionCreate", "Buy", "ReadyForDownload", "TransactionClose"]);
-    console.log("event subscribed");
-
 }
 
 function onTransferEth() {
@@ -111,10 +107,29 @@ function createBuyer() {
             } else {
                 console.log("error: CreateAccount", status, statusMessage, headers, trailers);
             }
-
         },
     });
 }
+
+
+function authenticateSeller() {
+    let req = new ClientInfo();
+    req.setAddress(sellerAddr);
+    req.setPassword(sellerPassword);
+    grpc.unary(BinaryService.Authenticate, {
+        request: req,
+        host: "http://localhost:6868",
+        onEnd: res => {
+            const { status, statusMessage, headers, message, trailers } = res;
+            if (status === grpc.Code.OK && message) {
+                console.log("ok: Authenticate", message.toObject());
+            } else {
+                console.log("error: Authenticate", status, statusMessage, headers, trailers);
+            }
+        },
+    });
+}
+
 
 function transferEth(to) {
     let req = new TransferEthParams();
@@ -284,14 +299,14 @@ function createEventsChannel(addr, password, eventDispatcher) {
         request: req,
         host: "http://localhost:6868",
         onHeaders: ((headers) => {
-            console.log("onHeaders", headers);
+            console.log("createEventsChannel: onHeaders", addr, headers);
         }),
         onMessage: ((message) => {
-            console.log("onMessage", message);
+            //console.log("onMessage", message);
             eventDispatcher(message);
         }),
         onEnd: ((status, statusMessage, trailers) => {
-            console.log("onEnd", status, statusMessage, trailers);
+            console.log("createEventsChannel: onEnd", addr, status, statusMessage, trailers);
         }),
     });
 }
@@ -309,15 +324,34 @@ function subscribeEvent(addr, events) {
             if (status === grpc.Code.OK && message) {
                 console.log("ok: subscribeEvent", message.toObject());
 
-                if (addr === sellerAddr) {
-                    subscribeEvent(buyerAddr, ["DataPublish", "Approval", "TransactionCreate", "Buy", "ReadyForDownload", "TransactionClose"]);
-                }
-
                 if (addr === buyerAddr) {
                     transferEth(sellerAddr);
                 }
 
                 console.log("eth is transferred");
+            } else {
+                console.log("error: subscribeEvent ", status, statusMessage, headers, trailers);
+            }
+        },
+    });
+}
+
+function unSubscribeEvent(addr, events) {
+    let req = new SubscribeInfo();
+    req.setAddress(addr);
+    req.setEventList(events);
+
+    grpc.unary(BinaryService.UnSubscribeEvent, {
+        request: req,
+        host: "http://localhost:6868",
+        onEnd: res => {
+            const { status, statusMessage, headers, message, trailers } = res;
+            if (status === grpc.Code.OK && message) {
+                console.log("ok: UnSubscribeEvent", message.toObject());
+
+                if (addr === sellerAddr) {
+                    unSubscribeEvent(buyerAddr, ["DataPublish", "Approval", "TransactionCreate", "Buy", "ReadyForDownload", "TransactionClose"]);
+                }
             } else {
                 console.log("error: subscribeEvent ", status, statusMessage, headers, trailers);
             }
@@ -347,9 +381,14 @@ function confirmDataTruth(txId) {
 
 function dispatchSellerEvent(message) {
     let evt = parseEvent(message);
-    console.log("event:", evt);
+    console.log("event to seller:", evt);
 
     switch (evt.EventName) {
+        case "ChannelCreated":
+            subscribeEvent(sellerAddr, ["DataPublish", "Approval", "TransactionCreate", "Buy", "ReadyForDownload", "TransactionClose"]);
+            console.log("seller event subscribed");
+            break;
+
         case "DataPublish":
             break;
         case "Buy":
@@ -365,9 +404,13 @@ function dispatchSellerEvent(message) {
 
 function dispatchBuyerEvent(message) {
     let evt = parseEvent(message);
-    console.log("event:", evt);
+    console.log("event to buyer:", evt);
 
     switch (evt.EventName) {
+        case "ChannelCreated":
+            subscribeEvent(buyerAddr, ["DataPublish", "Approval", "TransactionCreate", "Buy", "ReadyForDownload", "TransactionClose"]);
+            console.log("buyer event subscribed");
+            break;
         case "DataPublish":
             publishId = evt.EventData.publishId;
             console.log("publishID:", publishId);
@@ -386,6 +429,7 @@ function dispatchBuyerEvent(message) {
             break;
         case "TransactionClose":
             console.log("Buyer: Transaction Closed.");
+            unSubscribeEvent(sellerAddr, ["DataPublish", "Approval", "TransactionCreate", "Buy", "ReadyForDownload", "TransactionClose"]);
             break;
     }
 }
