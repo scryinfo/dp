@@ -51,8 +51,6 @@ func main() {
         return
     }
 
-    dot.SetDefaultLine(l)
-
     d, err := l.ToInjecter().GetByLiveId(dot.LiveId(binary.BinLiveId))
     if err != nil {
         logger.Errorln("load Binary component failed.")
