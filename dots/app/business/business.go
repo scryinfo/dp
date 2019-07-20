@@ -30,7 +30,7 @@ type Business struct {
     deployer          *definition.AccInfo
     extChan           chan []string
     config            businessConfig
-    Bin               *binary.Binary `dot:"binary"`
+    Bin               *binary.Binary `dot:""`
     WS                *app.WSServer  `dot:""`
 }
 

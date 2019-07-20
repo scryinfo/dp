@@ -146,6 +146,9 @@ library transaction {
 
         users[0] = msg.sender;
         emit TransactionCreate(seqNo, txId, publishId, proofIds, true, uint8(common.TransactionState.Created), users);
+
+        users[0] = pubItem.seller;
+        emit TransactionCreate(seqNo, txId, publishId, proofIds, true, uint8(common.TransactionState.Created), users);
     }
 
     function createTxWithoutVerify(
@@ -183,6 +186,9 @@ library transaction {
         );
 
         users[0] = msg.sender;
+        emit TransactionCreate(seqNo, txId, publishId, proofIds, false, uint8(common.TransactionState.Created), users);
+
+        users[0] = pubItem.seller;
         emit TransactionCreate(seqNo, txId, publishId, proofIds, false, uint8(common.TransactionState.Created), users);
     }
 
