@@ -129,15 +129,16 @@ func (c *Account) AuthUserAccount(address string, password string) (bool, error)
         err = errors.Wrap(err, "failed to authenticate user account")
     } else if addr == nil {
         err = errors.New("failed to authenticate user account, returned address is null")
+    } else if addr.Status != authStub.Status_OK {
+        err = errors.New(addr.Msg)
     }
+
     if err != nil {
         dot.Logger().Errorln("failed to authenticate user account", zap.Error(err))
         return false, err
     }
 
-    rv := addr.Status == authStub.Status_OK
-
-    return rv, nil
+    return true, nil
 }
 
 func (c *Account) Encrypt(
