@@ -59,10 +59,35 @@
       },
       "lives": [
         {
-          "liveId": "64a3ff50-50de-447c-b0b9-401fff8c4fa4",
+          "liveId": "64a3ff50-50de-447c-b0b9-401fff8c4fa4"
+        }
+      ]
+    },
+    {
+      "metaData": {
+        "name": "app business preset",
+        "typeId": "13d73d73-da19-4d39-9dca-3018fbf0ec30"
+      },
+      "lives": [
+        {
+          "liveId": "13d73d73-da19-4d39-9dca-3018fbf0ec30",
           "json": {
-            "IPFSOutDir": "C:/Users/Will/Desktop",
-            "accsBackupFile": "C:/Users/Will/Desktop/accounts.json"
+            "metaDataOutDir": "C:/Users/Will/Desktop",
+            "accsInfoBackupFile": "C:/Users/Will/Desktop/accounts.json"
+          }
+        }
+      ]
+    },
+    {
+      "metaData": {
+        "name": "app business preset callbacks",
+        "typeId": "36b2b9b7-1559-4d57-a388-f8224072a5d1"
+      },
+      "lives": [
+        {
+          "liveId": "36b2b9b7-1559-4d57-a388-f8224072a5d1",
+          "json": {
+            "proofsOutDir": "C:/Users/Will/Desktop"
           }
         }
       ]
