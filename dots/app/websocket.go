@@ -14,10 +14,10 @@ import (
 type WSServer struct {
     connParams *websocket.Conn
     funcMap    map[string]server.PresetFunc
-    config     connectionConfig
+    config     serverConfig
 }
 
-type connectionConfig struct {
+type serverConfig struct {
     Port           string `json:"wsPort"`
     UIResourcesDir string `json:"uiResourcesDir"`
 }
@@ -35,7 +35,7 @@ func newWebSocketDot(conf interface{}) (dot.Dot, error) {
         return nil, dot.SError.Parameter
     }
 
-    dConf := &connectionConfig{}
+    dConf := &serverConfig{}
     err = dot.UnMarshalConfig(bs, dConf)
     if err != nil {
         return nil, err
@@ -60,18 +60,6 @@ func WebSocketTypeLive() *dot.TypeLives {
 func (ws *WSServer) Create(l dot.Line) error {
     ws.funcMap = make(map[string]server.PresetFunc)
 
-    return nil
-}
-
-func (ws *WSServer) Start(ignore bool) error {
-    return nil
-}
-
-func (ws *WSServer) Stop(ignore bool) error {
-    return nil
-}
-
-func (ws *WSServer) Destroy(ignore bool) error {
     return nil
 }
 
@@ -114,10 +102,11 @@ func (ws *WSServer) handleMessages(conn *websocket.Conn) {
         // receive message and check if handle function is exist.
         var mi server.MessageIn
         {
+            // receive from client
             var reply []byte
             if err = websocket.Message.Receive(ws.connParams, &reply); err != nil {
                 if err.Error() == "EOF" {
-                    logger.Warnln("> Client disconnect. ")
+                    logger.Warnln("> Client disconnect: " + conn.LocalAddr().String())
                     return
                 }
                 logger.Errorln("Received failed. ", zap.NamedError("", err))
@@ -173,7 +162,7 @@ func (ws *WSServer) SendMessage(name string, payload interface{}) error {
 
 func (ws *WSServer) PresetMsgHandleFuncs(name []string, presetFunc []server.PresetFunc) error {
     if len(name) != len(presetFunc) {
-        return errors.New("Quantities of name and function are not matched. ")
+        return errors.New("Quantities of name and function are not equal. ")
     }
 
     for i := range name {
