@@ -4,17 +4,18 @@
 package event
 
 import (
-    "github.com/ethereum/go-ethereum/common"
+    "sync"
 )
 
 type Callback func(event Event) bool
 
 type Repository struct {
-    MapEventCallback map[string]map[common.Address]Callback
+    //MapEventCallback map[string]map[common.Address]Callback
+    MapEventCallback sync.Map
 }
 
 func NewRepository() *Repository {
     return &Repository{
-        MapEventCallback: make(map[string]map[common.Address]Callback),
+        //MapEventCallback: make(map[string]map[common.Address]Callback),
     }
 }
