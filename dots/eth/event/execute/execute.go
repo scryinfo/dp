@@ -8,6 +8,7 @@ import (
     "github.com/scryinfo/dot/dot"
     "github.com/scryinfo/dp/dots/eth/event"
     "go.uber.org/zap"
+    "sync"
 )
 
 const (
@@ -50,7 +51,7 @@ func (c *Executor) Create(l dot.Line) error {
 func (c *Executor) ExecuteEvents(ce chan event.Event, r *event.Repository, appId string) {
     defer func() {
         if er := recover(); er != nil {
-            dot.Logger().Errorln("Executor::ExecuteEvents", zap.Any("error: failed to execute event, error: ", er))
+            dot.Logger().Errorln("Executor::ExecuteEvents", zap.Any("failed to execute event, error: ", er))
         }
     }()
 
@@ -70,14 +71,16 @@ func (c *Executor) ExecuteEvents(ce chan event.Event, r *event.Repository, appId
 func (c *Executor) executeEvent(e event.Event) bool {
     defer func() {
         if er := recover(); er != nil {
-            dot.Logger().Errorln("", zap.Any("error: failed to execute event "+e.Name+" because of error: ", er))
+            dot.Logger().Errorln("", zap.Any("failed to execute event "+e.Name+" because of error: ", er))
         }
     }()
 
-    subs := c.repo.MapEventCallback[e.Name]
-    if subs == nil {
-        dot.Logger().Warnln("warning: no event was executed, event:" + e.Name)
+    var subs sync.Map
+    if rv, ok := c.repo.MapEventCallback.Load(e.Name); !ok {
+        dot.Logger().Warnln("no event was executed, event:" + e.Name)
         return false
+    } else {
+        subs = rv.(sync.Map)
     }
 
     seqNo := e.Data.Get(AppSeqNo)
@@ -100,7 +103,7 @@ func (c *Executor) executeEvent(e event.Event) bool {
             owner := common.HexToAddress(obj)
             c.executeMatchedEvent(subs, []common.Address{owner}, e)
         } else {
-            dot.Logger().Warnln("Warning: unknown e type, e:" + e.Name)
+            dot.Logger().Warnln("unknown e type, e:" + e.Name)
         }
     }
 
@@ -108,25 +111,40 @@ func (c *Executor) executeEvent(e event.Event) bool {
 }
 
 func (c *Executor) executeMatchedEvent(
-    sim map[common.Address]event.Callback,
+    //sim map[common.Address]event.Callback,
+    m sync.Map,
     users []common.Address, e event.Event,
 ) {
-    for k, v := range sim {
-        if c.containUser(users, k) {
-            if v != nil {
-                event.Callback(v)(e)
+    m.Range(func(k, v interface{}) bool {
+        cb, ok1 := v.(event.Callback)
+        ca, ok2 := k.(common.Address)
+        if  ok1 && ok2 {
+            if c.containUser(users, ca) && !cb(e) {
+                dot.Logger().Warnln("event execute error, event:" + e.Name)
             }
+        } else {
+            dot.Logger().Warnln("parameters error, event:" + e.Name)
         }
-    }
+
+        return true
+    })
 }
 
 func (c *Executor) executeAllEvent(
-    sim map[common.Address]event.Callback,
+    m sync.Map,
     e event.Event,
 ) {
-    for _, v := range sim {
-        event.Callback(v)(e)
-    }
+    m.Range(func(k, v interface{}) bool {
+        if cb, ok := v.(event.Callback); ok {
+            if !cb(e) {
+                dot.Logger().Warnln("event execute error, event:" + e.Name)
+            }
+        } else {
+            dot.Logger().Warnln("parameters error, event:" + e.Name)
+        }
+
+        return true
+    })
 }
 
 func (c *Executor) containUser(ul []common.Address, user common.Address) bool {
