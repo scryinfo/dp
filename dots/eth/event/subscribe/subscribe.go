@@ -8,6 +8,7 @@ import (
     "github.com/pkg/errors"
     "github.com/scryinfo/dot/dot"
     "github.com/scryinfo/dp/dots/eth/event"
+    "sync"
 )
 
 const (
@@ -52,13 +53,14 @@ func (c *Subscribe) Subscribe(
         return errors.New("couldn't subscribe event because of null eventCallback or empty event name")
     }
 
-    subscribeInfoMap := c.eventRepo.MapEventCallback[eventName]
-    if subscribeInfoMap == nil {
-        subscribeInfoMap = make(map[common.Address]event.Callback)
-        c.eventRepo.MapEventCallback[eventName] = subscribeInfoMap
+    var subscribeInfoMap sync.Map
+    if rv, ok := c.eventRepo.MapEventCallback.Load(eventName); !ok {
+        subscribeInfoMap.Store(clientAddr, eventCallback)
+        c.eventRepo.MapEventCallback.Store(eventName, subscribeInfoMap)
+    } else {
+        subscribeInfoMap = rv.(sync.Map)
+        subscribeInfoMap.Store(clientAddr, eventCallback)
     }
-
-    subscribeInfoMap[clientAddr] = eventCallback
 
     return nil
 }
@@ -71,16 +73,30 @@ func (c *Subscribe) UnSubscribe(
         return errors.New("couldn't unsubscribe event because of empty event name")
     }
 
-    subscribeInfoMap := c.eventRepo.MapEventCallback[eventName]
-    if subscribeInfoMap == nil || subscribeInfoMap[clientAddr] == nil {
-        return errors.New("couldn't find corresponding event to unsubscribe:" + eventName)
+    var subscribeInfoMap sync.Map
+    if rv, ok := c.eventRepo.MapEventCallback.Load(eventName); !ok {
+        return errors.New("couldn't find corresponding client to unsubscribe:" + eventName)
+    } else {
+        subscribeInfoMap = rv.(sync.Map)
+        if rv, ok = subscribeInfoMap.Load(clientAddr); !ok {
+            return errors.New("couldn't find corresponding event to unsubscribe:" + clientAddr.String())
+        }
     }
 
-    delete(subscribeInfoMap, clientAddr)
-    if len(subscribeInfoMap) == 0 {
-        subscribeInfoMap = nil
-        delete(c.eventRepo.MapEventCallback, eventName)
+    subscribeInfoMap.Delete(clientAddr)
+    if getMapLen(subscribeInfoMap) == 0 {
+        c.eventRepo.MapEventCallback.Delete(eventName)
     }
 
     return nil
+}
+
+func getMapLen(m sync.Map) int {
+    l := 0
+    m.Range(func(key, value interface{}) bool {
+        l++
+        return true
+    })
+
+    return l
 }
