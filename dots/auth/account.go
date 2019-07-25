@@ -157,8 +157,6 @@ func (c *Account) Encrypt(
 
     in := authStub.CipherParameter{Message: plainText, Address: address}
 
-    dot.Logger().Debugln("Node: show encrypt params. ", zap.Any("in", in))
-
     out, err := c.client.ContentEncrypt(context.Background(), &in)
     if err != nil {
         err = errors.Wrap(err, "failed to encrypt data")

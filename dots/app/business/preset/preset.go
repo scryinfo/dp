@@ -249,6 +249,8 @@ func (p *Preset) Logout(_ *server.MessageIn) (payload interface{}, err error) {
        }
    }
 
+   p.CurUser = nil
+
    payload = true
 
    return
