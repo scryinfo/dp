@@ -14,29 +14,45 @@ import (
 )
 
 const (
-    dir = "D:/GoPath/src/github.com/scryinfo/dp/test/binary/users/"
+    // todo: config file?
+    dir        = "D:/GoPath/src/github.com/scryinfo/dp/test/binary/users/"
     resultFile = "D:/GoPath/src/github.com/scryinfo/dp/test/binary/result.txt"
 
     deployerAddr = "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8"
-    deployerPwd = "111111"
+    deployerPwd  = "111111"
 )
 
-func RecordResult(r []byte) {
-    _ = ioutil.WriteFile(resultFile, r, 0777)
+func RecordResult(ch chan string, caseNum int) {
+    var result []string
+    for {
+        t := <- ch
+        result = append(result, t)
+        if len(result) == caseNum {
+            break
+        }
+    }
+    
+    var str string
+    for i := range result {
+        str += result[i] + "\r\n"
+    }
+    
+    _ = ioutil.WriteFile(resultFile, []byte(str), 0666)
 }
 
-func Start(identify string) (process exec.Cmd, pipe io.ReadCloser) {
-    user := exec.Cmd{
+func Start(identify string, caseNo string) (user exec.Cmd, pipe io.ReadCloser) {
+    user = exec.Cmd{
         Path: identify + ".exe",
-        Dir: dir + identify,
+        Dir:  dir + identify + "/" + caseNo,
     }
 
-    pipe, err := user.StdoutPipe()
-    if err != nil {
-        fmt.Println(identify, "pipe make failed", err)
+    var err error
+
+    if pipe, err = user.StdoutPipe(); err != nil {
+        fmt.Println("make ", identify, " pipe failed", err)
     }
 
-    if err := user.Start(); err != nil {
+    if err = user.Start(); err != nil {
         fmt.Println("sub process start failed", err)
     }
 
@@ -44,7 +60,7 @@ func Start(identify string) (process exec.Cmd, pipe io.ReadCloser) {
     
     time.Sleep(time.Second * 3)
     
-    return user, pipe
+    return
 }
 
 func ReadPipes(pipes []io.ReadCloser, ch chan int) {
@@ -55,10 +71,10 @@ func ReadPipes(pipes []io.ReadCloser, ch chan int) {
                 n, err := pipe.Read(buffer)
                 if err != nil {
                     if err == io.EOF {
-                        fmt.Println("pipe has Closed: ", i)
+                        fmt.Println("pipe ", i, " has closed. ")
                         break
                     } else {
-                        fmt.Println("Read content failed")
+                        fmt.Println("Read pipe", i, " failed. ")
                     }
                 }
                 if string(buffer[:n]) == "[exit]" {
@@ -71,7 +87,17 @@ func ReadPipes(pipes []io.ReadCloser, ch chan int) {
     }
 }
 
-func Stop(process exec.Cmd) {
+func Stop(processes []exec.Cmd, ch chan int, chStr chan string, userNum int) {
+    for i := 0; i < userNum; i++ {
+        t := <-ch
+        fmt.Println("Node: receive exit flag. ", t)
+        stop(processes[t])
+    }
+
+    chStr <- "Test case 1 passed. "
+}
+
+func stop(process exec.Cmd) {
     process.Process.Kill()
 
     if err := process.Wait(); err != nil {
@@ -81,9 +107,8 @@ func Stop(process exec.Cmd) {
     }
 }
 
-func CreateClientWithToken(password string, cw scry.ChainWrapper) (scry.Client, error) {
-    client, err := scry.CreateScryClient(password, cw)
-    if err != nil {
+func CreateClientWithToken(password string, cw scry.ChainWrapper) (client scry.Client, err error) {
+    if client, err = scry.CreateScryClient(password, cw); err != nil {
         return nil, err
     }
 
@@ -108,7 +133,7 @@ func CreateClientWithToken(password string, cw scry.ChainWrapper) (scry.Client, 
         return nil, err
     }
 
-    return client, nil
+    return
 }
 
 func MakeTxParams(address, password string) *transaction.TxParams {
