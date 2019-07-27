@@ -2,7 +2,6 @@ package main
 
 import (
     "fmt"
-    "github.com/ethereum/go-ethereum/common"
     "github.com/scryinfo/dot/dot"
     "github.com/scryinfo/dot/dots/line"
     "github.com/scryinfo/dp/dots/binary"
@@ -25,13 +24,12 @@ var (
     CurUser scry.Client
     Chain scry.ChainWrapper
     Listener *listen.Listener
-    protocolAddress common.Address
 )
 
 func main() {
     logger := dot.Logger()
     l, err := line.BuildAndStart(func(l dot.Line) error {
-        l.PreAdd(binary.BinTypeLive()...)
+        l.PreAdd(binary.BinTypeLive(false)...)
         return nil
     })
 
@@ -50,7 +48,6 @@ func main() {
     } else {
         Chain = bin.ChainWrapper()
         Listener = bin.Listener
-        protocolAddress = common.HexToAddress(bin.Config().ProtocolContractAddr)
     }
 
     defer line.StopAndDestroy(l, true)
@@ -64,9 +61,9 @@ func main() {
 
 func testCase() {
     var err error
-    CurUser, err = utils.CreateClientWithToken(password, Chain)
-    if err != nil {
-        fmt.Println("create buyer failed. ", err)
+
+    if CurUser, err = utils.CreateClientWithToken(password, Chain); err != nil {
+        dot.Logger().Errorln("create seller failed. ", zap.NamedError("error", err))
     }
 
     time.Sleep(time.Second * 5)
@@ -76,43 +73,35 @@ func testCase() {
     CurUser.SubscribeEvent("TransactionClose", onTransactionClose)
 
     Listener.SetFromBlock(uint64(1))
+
+    _, err = Chain.Publish(
+       utils.MakeTxParams(CurUser.Account().Addr, password),
+       big.NewInt(1000),
+       []byte("QmVak3K153a6uEuLQh1etXFWV8Zz3yymGEznR299fz7nDe"),
+       []string{"QmRkVKnkni12YfoG4GJcAZzUb9uaFQgDRDzQX3tEBFfqQ3", "QmdGm9Kq6idatRRb74vtEQFUUMJJV94xiT9zzY5E4Cf9BD"},
+       int32(2),
+       "QmNxBaNK9sFzMguAv7yLj3TaLo1NATmqzYfZj6cdahpjpM",
+       false,
+    )
+    if err != nil {
+       fmt.Println("seller publish failed. ", err)
+    }
 }
 
 func onPublish(event event.Event) bool {
-    fmt.Println("> buyer received publish event: ", event.String())
-
-    var err error
-    err = Chain.ApproveTransfer(utils.MakeTxParams(CurUser.Account().Addr, password), protocolAddress, big.NewInt(1000))
-    if err != nil {
-        fmt.Println("buyer approve contract transfer token failed. ", err)
-    }
-
-    err = Chain.PrepareToBuy(
-        utils.MakeTxParams(CurUser.Account().Addr, password),
-        event.Data.Get("publishId").(string),
-        false,
-    )
-    if err != nil {
-        fmt.Println("buyer pre-buy failed. ", err)
-    }
+    fmt.Println("> Seller received publish event: ", event.String())
 
     return true
 }
 
 func onTransactionCreate(event event.Event) bool {
-    fmt.Println("> buyer received tx create event: ", event.String())
-
-    var err error
-    err = Chain.CancelTransaction(utils.MakeTxParams(CurUser.Account().Addr, password), event.Data.Get("transactionId").(*big.Int))
-    if err != nil {
-        fmt.Println("buyer cancel tx failed. ", err)
-    }
+    fmt.Println("> Seller received tx create event: ", event.String())
 
     return true
 }
 
 func onTransactionClose(event event.Event) bool {
-    fmt.Println("> buyer received tx close event: ", event.String())
+    fmt.Println("> Seller received tx close event: ", event.String())
     fmt.Print("[exit]")
 
     return true
