@@ -28,7 +28,7 @@ type ChanEvent chan event.Event
 
 type BinaryGrpcServer struct {
     config       binaryGrpcServerConfig
-    eventChan    sync.Map
+    eventChanMap sync.Map
     chainWrapper scry.ChainWrapper
     Subscriber   *subscribe.Subscribe `dot:""`
     ServerNobl   gserver.ServerNobl   `dot:""`
@@ -83,8 +83,6 @@ func BinaryGrpcServerTypeLive() []*dot.TypeLives {
 }
 
 func (c *BinaryGrpcServer) Create(l dot.Line) error {
-    //c.eventChan = make(map[string]ChanEvent)
-
     return nil
 }
 
@@ -122,7 +120,7 @@ func (c *BinaryGrpcServer) SubscribeEvent(ctx context.Context, info *api.Subscri
 
     //data channel for server streaming
     var ce ChanEvent
-    if rv, ok := c.eventChan.Load(hexAddr); !ok {
+    if rv, ok := c.eventChanMap.Load(hexAddr); !ok {
         errMsg := "failed to subscribe event since no server streaming channel found"
         dot.Logger().Errorln("BinaryGrpcServer::SubscribeEvent", zap.String("error:", errMsg))
         rs.ErrMsg = errMsg
@@ -189,9 +187,9 @@ func (c *BinaryGrpcServer) RecvEvents(client *api.ClientInfo,srv api.BinaryServi
     }
 
     var ce ChanEvent
-    if rv, ok := c.eventChan.Load(client.Address); !ok {
+    if rv, ok := c.eventChanMap.Load(client.Address); !ok {
         ce = make(ChanEvent, c.config.EventChanCap)
-        c.eventChan.Store(client.Address, ce)
+        c.eventChanMap.Store(client.Address, ce)
     } else {
         ce = rv.(ChanEvent)
     }
