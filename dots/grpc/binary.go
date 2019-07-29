@@ -35,7 +35,7 @@ type BinaryGrpcServer struct {
 }
 
 type binaryGrpcServerConfig struct {
-    EventChanCap uint64
+    EventChanCapacity uint64
 }
 
 func newBinaryGrpcServerDot(conf interface{}) (dot.Dot, error) {
@@ -119,6 +119,8 @@ func (c *BinaryGrpcServer) SubscribeEvent(ctx context.Context, info *api.Subscri
     }
 
     //data channel for server streaming
+
+    //event channel stored event data between grpc client and grpc server
     var ce ChanEvent
     if rv, ok := c.eventChanMap.Load(hexAddr); !ok {
         errMsg := "failed to subscribe event since no server streaming channel found"
@@ -129,6 +131,7 @@ func (c *BinaryGrpcServer) SubscribeEvent(ctx context.Context, info *api.Subscri
         ce = rv.(ChanEvent)
     }
 
+    //grpc client addr
     addr := common.HexToAddress(info.GetAddress())
     for _, ev := range info.GetEvent() {
         err := c.Subscriber.Subscribe(addr, ev, func(event event.Event) bool {
@@ -186,9 +189,10 @@ func (c *BinaryGrpcServer) RecvEvents(client *api.ClientInfo,srv api.BinaryServi
         return errors.New(errMsg)
     }
 
+    //event channel stored event data between grpc client and grpc server
     var ce ChanEvent
     if rv, ok := c.eventChanMap.Load(client.Address); !ok {
-        ce = make(ChanEvent, c.config.EventChanCap)
+        ce = make(ChanEvent, c.config.EventChanCapacity)
         c.eventChanMap.Store(client.Address, ce)
     } else {
         ce = rv.(ChanEvent)
