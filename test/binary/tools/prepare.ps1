@@ -35,6 +35,9 @@ if ($confirm -eq "Y") { # no matter if the character is big-case or small-case
         Write-Output "|-> * $t finished. "
     }
 
+    Set-Location $PSScriptRoot
+    go build ".\main.go"
+
     Write-Output ""
     Write-Output "|-> * Generate executeable file finished. "
     Write-Output "|-> * Modify config file finished. "
