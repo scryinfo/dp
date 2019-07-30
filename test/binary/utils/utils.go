@@ -42,7 +42,7 @@ func RecordResult(ch chan string, caseNum int) {
 
 func Start(identify string, caseNo string) (user exec.Cmd, pipe io.ReadCloser) {
     user = exec.Cmd{
-        Path: identify + ".exe",
+        Path: "main.exe",
         Dir:  dir + identify + "/" + caseNo,
     }
 

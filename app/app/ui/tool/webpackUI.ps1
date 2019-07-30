@@ -1,28 +1,30 @@
-echo "Scry Info.  All rights reserved."
-echo "license that can be found in the license file."
+Write-Output "Scry Info.  All rights reserved."
+Write-Output "license that can be found in the license file."
 
-cd $PSScriptRoot
-cd ..
+Set-Location $PSScriptRoot
+Set-Location ..
 
-echo "|-> * Install dependences in 'package.json' "
-echo ""
+Write-Output "|-> * Install dependences in 'package.json' "
+Write-Output ""
 Start-Sleep -Milliseconds 1000
 
 npm install
 
-echo ""
-echo "|-> * Install dependences finished. "
+Write-Output "|-> * Install dependences finished. "
+Write-Output ""
 
+if (Test-Path ".\resources\app\*") {
+    Remove-Item ".\resources\app\*" -Recurse
+}
 
-Remove-Item ".\resources\app\*" -Recurse
-echo "|-> * Webpack UI files prepared. "
-echo ""
+Write-Output "|-> * Webpack UI files prepared. "
+Write-Output ""
 Start-Sleep -Milliseconds 1000
 
 npm run build --report
 
-echo ""
-echo "|-> * Webpack UI files finished. "
-echo "|-> * End. "
-echo ""
-Start-Sleep -Milliseconds 15000
+Write-Output "|-> * Webpack UI files finished. "
+Write-Output "|-> * End. "
+Write-Output ""
+
+Start-Sleep -Milliseconds 5000

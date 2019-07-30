@@ -1,0 +1,2 @@
+token address: "0x34306d87653011bbb3cdf35e742e12135ddb817a"
+protocol address: "0xd3ed5f6c2bb59b4bcd0cf75560d346ff991b9d59"
