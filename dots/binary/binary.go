@@ -79,7 +79,7 @@ func newBinaryDot(conf interface{}) (dot.Dot, error) {
 }
 
 //Data structure needed when generating newer component
-func BinTypeLive() []*dot.TypeLives {
+func BinTypeLive(grpcSwitch bool) []*dot.TypeLives {
     t := []*dot.TypeLives{
         &dot.TypeLives{
             Meta: dot.Metadata{TypeId: BinTypeId, NewDoter: func(conf interface{}) (dot.Dot, error) {
@@ -94,7 +94,11 @@ func BinTypeLive() []*dot.TypeLives {
     }
 
     t = append(t, currency.CurrTypeLive()...)
-    t = append(t, grpc.BinaryGrpcServerTypeLive()...)
+
+    if grpcSwitch {
+        t = append(t, grpc.BinaryGrpcServerTypeLive()...)
+    }
+
     return t
 }
 
@@ -139,7 +143,9 @@ func (c *Binary) Start(ignore bool) error {
         return errors.New(initStorageServiceFailed)
     }
 
-    c.Grpc.SetChainWrapper(c.chainWrapper)
+    if c.Grpc != nil {
+        c.Grpc.SetChainWrapper(c.chainWrapper)
+    }
 
     return nil
 }

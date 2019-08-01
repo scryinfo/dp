@@ -91,47 +91,6 @@
           }
         }
       ]
-    },
-    {
-      "metaData": {
-        "typeId": "96a6e2b5-f0b6-48dc-b0ff-2d9f2c5c9f1d"
-      },
-      "lives": [
-        {
-          "liveId": "96a6e2b5-f0b6-48dc-b0ff-2d9f2c5c9f1d",
-          "json": {
-            "EventChanCap": 100
-          }
-        }
-      ]
-    },
-    {
-      "metaData":{
-        "name": "ServerNobl",
-        "typeId":"77a766e7-c288-413f-946b-bc9de6df3d70"
-      },
-      "lives":[
-        {
-          "liveId":"77a766e7-c288-413f-946b-bc9de6df3d70",
-          "json":{
-            "addrs":["localhost:5012"]
-          }
-        }
-      ]
-    },
-    {
-      "metaData":{
-        "name": "grpc http server",
-        "typeId":"afbeac47-e5fd-4bf3-8fb1-f0fb8ec79bd0"
-      },
-      "lives":[
-        {
-          "liveId":"afbeac47-e5fd-4bf3-8fb1-f0fb8ec79bd0",
-          "json": {
-            "addr": ":6868"
-          }
-        }
-      ]
     }
   ]
 }

@@ -131,7 +131,7 @@ func PreTypeLive() []*dot.TypeLives {
         },
     }
     
-    t = append(t, binary.BinTypeLive()...)
+    t = append(t, binary.BinTypeLive(false)...)
     t = append(t, cec.CBsTypeLive()...)
     
     return t
@@ -248,6 +248,8 @@ func (p *Preset) Logout(_ *server.MessageIn) (payload interface{}, err error) {
            return
        }
    }
+
+   p.CurUser = nil
 
    payload = true
 
