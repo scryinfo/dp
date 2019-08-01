@@ -23,7 +23,7 @@ func main() {
         return
     }
 
-    rlog.Debug("conf: ", conf)
+    rlog.Debug("unmeanedname: ", conf)
 
     conf.Contact.EMail = []string{"982200000@qq.com", "mat00000000@foxmail.com", "new e-mail."}
     conf.ForeignLanguage = []string{"CET-4", "no others."}
