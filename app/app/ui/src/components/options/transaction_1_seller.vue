@@ -3,7 +3,7 @@
 <template>
     <section>
         <el-col :span="21" class="section-item">
-            <s-f-t button-name="再加密数据" @password="reEncrypt"></s-f-t>
+            <s-f-t button-name="再加密数据" @password="reEncrypt" :button-disabled="buttonDisabled(0)"></s-f-t>
         </el-col>
         <el-col :span="3" class="section-item">
             <el-button size="mini" type="primary" @click="initTxS">刷新列表</el-button>
@@ -13,13 +13,13 @@
                   highlight-current-row border :height=height @current-change="currentChange">
             <el-table-column type="expand">
                 <el-form slot-scope="props" label-position="left" class="tx-table-expand">
+                    <el-form-item label="数据ID"><span>{{ props.row.PublishID }}</span></el-form-item>
+                    <el-form-item label="交易ID"><span>{{ props.row.TransactionID}}</span></el-form-item>
                     <el-form-item label="标题"><span>{{ props.row.Title }}</span></el-form-item>
                     <el-form-item label="价格"><span>{{ props.row.Price }}</span></el-form-item>
                     <el-form-item label="标签"><span>{{ props.row.Keys }}</span></el-form-item>
                     <el-form-item label="描述"><span>{{ props.row.Description }}</span></el-form-item>
                     <el-form-item label="状态"><span>{{ props.row.State }}</span></el-form-item>
-                    <el-form-item label="验证者回复1"><span>{{ props.row.Verifier1Response }}</span></el-form-item>
-                    <el-form-item label="验证者回复2"><span>{{ props.row.Verifier2Response }}</span></el-form-item>
                     <el-form-item label="仲裁结果"><span>{{ props.row.ArbitrateResult }}</span></el-form-item>
                 </el-form>
             </el-table-column>
@@ -33,11 +33,12 @@
 </template>
 
 <script>
-import {connect} from "../../utils/connect";
-import {txSeller_db} from "../../utils/DBoptions";
+import {connect} from "../../utils/connect.js";
+import {txSeller_db} from "../../utils/DBoptions.js";
+import {utils} from "../../utils/utils.js";
 import SFT from "../templates/simple_function_template.vue";
 export default {
-    name: "transaction_sell.vue",
+    name: "transaction_1_seller.vue",
     data () {
         return {
             selectedTx: {},  // {tID: "", Seller: "", MetaDataIDEncWithSeller: "", pID: ""}
@@ -45,11 +46,12 @@ export default {
             pageSize: 6,
             total: 0,
             height: window.innerHeight - 170,
+            txState: "Begin"
         }
     },
     methods: {
-        setCurPage: function (curPageReturn) {this.curPage = curPageReturn;},
-        setPageSize: function (newPageSize) {this.pageSize = newPageSize;},
+        setCurPage: function (curPageReturn) { this.curPage = curPageReturn; },
+        setPageSize: function (newPageSize) { this.pageSize = newPageSize; },
         currentChange: function (curRow) {
             this.selectedTx = {
                 TransactionID: curRow.TransactionID,
@@ -57,6 +59,10 @@ export default {
                 PublishID: curRow.PublishID,
                 MetaDataIDEncWithSeller: curRow.MetaDataIDEncWithSeller // WSConnect between go and js buy not show out to user.
             };
+            this.txState = curRow.State;
+        },
+        buttonDisabled: function (funcNum) {
+            return utils.functionDisabled(funcNum, this.txState);
         },
         initTxS: function () {
             txSeller_db.init(this);

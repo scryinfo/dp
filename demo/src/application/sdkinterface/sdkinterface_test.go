@@ -142,7 +142,7 @@ func TestPublishData(t *testing.T) {
         Password:      "111",
     })
 
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     if err != nil || !publishTest {
         fmt.Println(err, "|", publishTest)
@@ -158,7 +158,7 @@ func TestApproveTransferForRegisterAsVerifier(t *testing.T) {
     _ = SubscribeEvents([]string{"Approval"}, onApprove)
     err := ApproveTransferForRegisterAsVerifier("111")
 
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     if err != nil || !approveTest {
         fmt.Println(err, "|", approveTest)
@@ -174,7 +174,7 @@ func TestApproveTransferForBuying(t *testing.T) {
     _ = SubscribeEvents([]string{"Approval"}, onApprove)
     err := ApproveTransferForBuying("111")
 
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     if err != nil || !approveTest {
         fmt.Println(err, "|", approveTest)
@@ -199,7 +199,7 @@ func TestCreateTransaction(t *testing.T) {
         Password:      "111",
     })
 
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     _, _ = CreateUserWithLogin("222")
     _ = SubscribeEvents([]string{"Approval"}, onApprove)
@@ -209,7 +209,7 @@ func TestCreateTransaction(t *testing.T) {
 
     err := CreateTransaction(publishID, "222", needVerify)
 
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     if err != nil || !txCreateTest || (needVerify != verifiersChosenTest) {
         fmt.Println(err, "|", txCreateTest, "|", needVerify != verifiersChosenTest)
@@ -234,7 +234,7 @@ func TestBuy(t *testing.T) {
         Password:      "111",
     })
 
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     _, _ = CreateUserWithLogin("222")
     _ = SubscribeEvents([]string{"Approval"}, onApprove)
@@ -245,11 +245,11 @@ func TestBuy(t *testing.T) {
 
     _ = CreateTransaction(publishID, "222", needVerify)
 
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     err := Buy(transactionID, "222")
 
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     if err != nil || !purchaseTest {
         fmt.Println(err, "|", purchaseTest)
@@ -274,7 +274,7 @@ func TestSubmitMetaDataIdEncWithBuyer(t *testing.T) {
         Password:      "111",
     })
 
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     buyer, _ := CreateUserWithLogin("222")
     _ = SubscribeEvents([]string{"Approval"}, onApprove)
@@ -285,18 +285,18 @@ func TestSubmitMetaDataIdEncWithBuyer(t *testing.T) {
 
     _ = CreateTransaction(publishID, "222", needVerify)
 
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     _ = Buy(transactionID, "222")
 
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     _, _ = UserLogin(seller, "111")
     _ = SubscribeEvents([]string{"ReadyForDownload"}, onReadyForDownload)
 
     err := SubmitMetaDataIdEncWithBuyer(transactionID, "111", seller, buyer, metaDataIDEncWithSeller)
 
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     if err != nil || !readyForDownloadTest {
         fmt.Println(err, "|", readyForDownloadTest)
@@ -321,7 +321,7 @@ func TestDecryptAndGetMetaDataFromIPFS(t *testing.T) {
         Password:      "111",
     })
 
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     buyer, _ := CreateUserWithLogin("222")
     _ = SubscribeEvents([]string{"Approval"}, onApprove)
@@ -332,23 +332,23 @@ func TestDecryptAndGetMetaDataFromIPFS(t *testing.T) {
 
     _ = CreateTransaction(publishID, "222", needVerify)
 
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     _ = Buy(transactionID, "222")
 
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     _, _ = UserLogin(seller, "111")
     _ = SubscribeEvents([]string{"ReadyForDownload"}, onReadyForDownload)
 
     _ = SubmitMetaDataIdEncWithBuyer(transactionID, "111", seller, buyer, metaDataIDEncWithSeller)
 
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     _, _ = UserLogin(buyer, "222")
     _, err := DecryptAndGetMetaDataFromIPFS("222", metaDataIDEncWithBuyer, buyer, ".txt")
 
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     if err != nil {
         fmt.Println(err)
@@ -373,7 +373,7 @@ func TestConfirmDataTruth(t *testing.T) {
         Password:      "111",
     })
 
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     buyer, _ := CreateUserWithLogin("222")
     _ = SubscribeEvents([]string{"Approval"}, onApprove)
@@ -384,25 +384,25 @@ func TestConfirmDataTruth(t *testing.T) {
 
     _ = CreateTransaction(publishID, "222", needVerify)
 
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     _ = Buy(transactionID, "222")
 
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     _, _ = UserLogin(seller, "111")
     _ = SubscribeEvents([]string{"ReadyForDownload"}, onReadyForDownload)
 
     _ = SubmitMetaDataIdEncWithBuyer(transactionID, "111", seller, buyer, metaDataIDEncWithSeller)
 
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     _, _ = UserLogin(buyer, "222")
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     err := ConfirmDataTruth(transactionID, "222", confirmDataTruth)
 
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     if err != nil {
         fmt.Println(err)
@@ -427,7 +427,7 @@ func TestCancelTransaction(t *testing.T) {
             Password:      "111",
         })
 
-        time.Sleep(time.Second * 5)
+        time.Sleep(time.Second * 3)
 
         _, _ = CreateUserWithLogin("222")
         _ = SubscribeEvents([]string{"Approval"}, onApprove)
@@ -438,10 +438,10 @@ func TestCancelTransaction(t *testing.T) {
 
         _ = CreateTransaction(publishID, "222", needVerify)
 
-        time.Sleep(time.Second * 5)
+        time.Sleep(time.Second * 3)
         _ = SubscribeEvents([]string{"TransactionClose"}, onClose)
         err := CancelTransaction(transactionID, "222")
-        time.Sleep(time.Second * 5)
+        time.Sleep(time.Second * 3)
         if err != nil || !closeTest {
             fmt.Println(err, "|", closeTest)
             t.Fail()
@@ -465,7 +465,7 @@ func TestCancelTransaction(t *testing.T) {
             Password:      "111",
         })
 
-        time.Sleep(time.Second * 5)
+        time.Sleep(time.Second * 3)
 
         _, _ = CreateUserWithLogin("222")
         _ = SubscribeEvents([]string{"Approval"}, onApprove)
@@ -476,14 +476,14 @@ func TestCancelTransaction(t *testing.T) {
 
         _ = CreateTransaction(publishID, "222", needVerify)
 
-        time.Sleep(time.Second * 5)
+        time.Sleep(time.Second * 3)
 
         _ = Buy(transactionID, "222")
 
-        time.Sleep(time.Second * 5)
+        time.Sleep(time.Second * 3)
         _ = SubscribeEvents([]string{"TransactionClose"}, onClose)
         err := CancelTransaction(transactionID, "222")
-        time.Sleep(time.Second * 5)
+        time.Sleep(time.Second * 3)
         if err != nil || !closeTest {
             fmt.Println(err, "|", closeTest)
             t.Fail()
@@ -507,7 +507,7 @@ func TestCancelTransaction(t *testing.T) {
             Password:      "111",
         })
 
-        time.Sleep(time.Second * 5)
+        time.Sleep(time.Second * 3)
 
         buyer, _ := CreateUserWithLogin("222")
         _ = SubscribeEvents([]string{"Approval"}, onApprove)
@@ -518,22 +518,22 @@ func TestCancelTransaction(t *testing.T) {
 
         _ = CreateTransaction(publishID, "222", needVerify)
 
-        time.Sleep(time.Second * 5)
+        time.Sleep(time.Second * 3)
 
         _ = Buy(transactionID, "222")
 
-        time.Sleep(time.Second * 5)
+        time.Sleep(time.Second * 3)
 
         _, _ = UserLogin(seller, "111")
         _ = SubscribeEvents([]string{"ReadyForDownload"}, onReadyForDownload)
 
         _ = SubmitMetaDataIdEncWithBuyer(transactionID, "111", seller, buyer, metaDataIDEncWithSeller)
 
-        time.Sleep(time.Second * 5)
+        time.Sleep(time.Second * 3)
         _, _ = UserLogin(buyer, "222")
         _ = SubscribeEvents([]string{"TransactionClose"}, onClose)
         err := CancelTransaction(transactionID, "222")
-        time.Sleep(time.Second * 5)
+        time.Sleep(time.Second * 3)
         if err == nil || closeTest {
             fmt.Println(err, "|", closeTest)
             t.Fail()

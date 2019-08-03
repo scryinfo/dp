@@ -31,7 +31,8 @@ export default {
         welcome: function () {
             this.$notify({
                 title: "彩蛋: ",
-                message: "谢谢你使用我的程序！ :)  ",
+                dangerouslyUseHTMLString: true,
+                message: '谢谢你使用我的程序!&nbsp;<strong>:)</strong>',
                 position: "top-left"
             });
             acc_db.init(this);

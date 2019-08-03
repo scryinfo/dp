@@ -4,14 +4,22 @@ Write-Output "license that can be found in the license file."
 Set-Location $PSScriptRoot
 Set-Location ..
 
-Write-Output "|-> * Install dependences in 'package.json' "
-Write-Output ""
-Start-Sleep -Milliseconds 1000
+Write-Output "|-> * Next step is `npm install`, if you are already install successfully one time, you can skip it.  "
 
-npm install
+Start-Sleep -Milliseconds 300
 
-Write-Output "|-> * Install dependences finished. "
-Write-Output ""
+$confirm = Read-Host "|-> * Make sure you read the tip above, do you want to install? [Y/N] "
+
+if ($confirm -eq "Y") {
+    Write-Output "|-> * Install dependences in 'package.json' "
+    Write-Output ""
+    Start-Sleep -Milliseconds 1000
+
+    npm install
+
+    Write-Output "|-> * Install dependences finished. "
+    Write-Output ""
+}
 
 if (Test-Path ".\resources\app\*") {
     Remove-Item ".\resources\app\*" -Recurse

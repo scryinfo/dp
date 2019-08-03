@@ -23,7 +23,7 @@ if ($confirm -eq "Y") { # no matter if the character is big-case or small-case
         if (Test-Path -Path ".\main.exe") {
             Remove-Item ".\main.exe" -Force
         }
-        # go build ".\main.go"
+        go build ".\main.go"
 
         $conf = Get-Content $_.FullName | ConvertFrom-Json
         $conf.dots[0].lives[0].json.tokenContractAddr = $tokenAddr.Replace("`"", "")
@@ -36,6 +36,7 @@ if ($confirm -eq "Y") { # no matter if the character is big-case or small-case
     }
 
     Set-Location $PSScriptRoot
+    Set-Location ..
     go build ".\main.go"
 
     Write-Output ""

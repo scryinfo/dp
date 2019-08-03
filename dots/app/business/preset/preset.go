@@ -131,7 +131,7 @@ func PreTypeLive() []*dot.TypeLives {
         },
     }
     
-    t = append(t, binary.BinTypeLive(false)...)
+    t = append(t, binary.BinTypeLiveWithoutGrpc()...)
     t = append(t, cec.CBsTypeLive()...)
     
     return t
