@@ -2,14 +2,10 @@ package utils
 
 import (
     "fmt"
-    "github.com/ethereum/go-ethereum/common"
-    "github.com/scryinfo/dot/dot"
-    "github.com/scryinfo/dp/dots/binary/scry"
-    "github.com/scryinfo/dp/dots/eth/transaction"
     "io"
     "io/ioutil"
-    "math/big"
     "os/exec"
+    "strconv"
     "time"
 )
 
@@ -21,24 +17,6 @@ const (
     deployerAddr = "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8"
     deployerPwd  = "111111"
 )
-
-func RecordResult(ch chan string, caseNum int) {
-    var result []string
-    for {
-        t := <- ch
-        result = append(result, t)
-        if len(result) == caseNum {
-            break
-        }
-    }
-    
-    var str string
-    for i := range result {
-        str += result[i] + "\r\n"
-    }
-    
-    _ = ioutil.WriteFile(resultFile, []byte(str), 0666)
-}
 
 func Start(identify string, caseNo string) (user exec.Cmd, pipe io.ReadCloser) {
     user = exec.Cmd{
@@ -63,7 +41,7 @@ func Start(identify string, caseNo string) (user exec.Cmd, pipe io.ReadCloser) {
     return
 }
 
-func ReadPipes(pipes []io.ReadCloser, ch chan int) {
+func ReadPipes(ch chan int, pipes ...io.ReadCloser) {
     for i := range pipes {
         go func(pipe io.ReadCloser, i int, ch chan int) {
             var buffer = make([]byte, 4096)
@@ -87,14 +65,14 @@ func ReadPipes(pipes []io.ReadCloser, ch chan int) {
     }
 }
 
-func Stop(processes []exec.Cmd, ch chan int, chStr chan string, userNum int) {
+func Stop(ch chan int, chStr chan string, userNum int, caseNo int, processes ...exec.Cmd) {
     for i := 0; i < userNum; i++ {
         t := <-ch
         fmt.Println("Node: receive exit flag. ", t)
         stop(processes[t])
     }
 
-    chStr <- "Test case 1 passed. "
+    chStr <- "Test case " + strconv.Itoa(caseNo) + " passed. "
 }
 
 func stop(process exec.Cmd) {
@@ -107,40 +85,23 @@ func stop(process exec.Cmd) {
     }
 }
 
-func CreateClientWithToken(password string, cw scry.ChainWrapper) (client scry.Client, err error) {
-    if client, err = scry.CreateScryClient(password, cw); err != nil {
-        return nil, err
-    }
+func RegisterVerifiers(chStr chan string) {
+    process, pipe := Start("verifiers", "register")
 
-    dot.Logger().Debugln("client:" + client.Account().Addr)
+    var ch = make(chan int)
+    ReadPipes(ch, pipe)
 
-    err = client.TransferEthFrom(
-        common.HexToAddress(deployerAddr),
-        deployerPwd,
-        big.NewInt(10000000),
-        cw.Conn(),
-    )
-    if err != nil {
-        return nil, err
-    }
+    time.Sleep(time.Second * 3)
 
-    err = cw.TransferTokens(
-        MakeTxParams(deployerAddr, deployerPwd),
-        common.HexToAddress(client.Account().Addr),
-        big.NewInt(10000000),
-    )
-    if err != nil {
-        return nil, err
-    }
-
-    return
+    Stop(ch, chStr, 1, 0, process)
 }
 
-func MakeTxParams(address, password string) *transaction.TxParams {
-    return &transaction.TxParams{
-        From:     common.HexToAddress(address),
-        Password: password,
-        Value:    big.NewInt(0),
-        Pending:  false,
+func RecordResult(ch chan string, caseNum int) {
+    var str string
+    for i := 0; i < caseNum; i++ {
+        t := <- ch
+        str += t + "\r\n"
     }
+
+    _ = ioutil.WriteFile(resultFile, []byte(str), 0666)
 }

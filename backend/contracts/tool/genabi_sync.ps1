@@ -10,10 +10,10 @@ Start-Sleep -Milliseconds 300
 
 $confirm = Read-Host "|-> * Make sure you read the tip above, do you want to continue now? [Y/N] "
 
-if ($confirm) {
+if ($confirm -eq "Y") {
     Write-Output "|-> * Genarate abi files: "
     if (Test-Path ".\*.go") {
-        Remove-Item *.go
+        Remove-Item ".\*.go"
     }
     
     abigen --abi ".\build\contracts\ScryProtocol.abi" --type ScryProtocol --pkg contractinterface --out ScryProtocolInterface.go
@@ -25,8 +25,8 @@ if ($confirm) {
         Remove-Item "..\..\dots\binary\stub\contract\*.go"
     }
     
-    Copy-Item "*.go" "..\..\dots\binary\stub\contract\"
-    Remove-Item *.go
+    Copy-Item ".\*.go" "..\..\dots\binary\stub\contract\"
+    Remove-Item ".\*.go"
     Write-Output "|-> * Finish"
 }
 

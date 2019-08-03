@@ -184,6 +184,7 @@ type SelectedTxAD struct {
 }
 
 type OnVerifierDisable struct {
+    Verifier string
     Block uint64
 }
 

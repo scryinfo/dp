@@ -10,19 +10,22 @@ const (
 )
 
 func main() {
-    // todo: format print to stdout -> write log file
+    // think: format print to stdout -> write log file, is it necessary?
 
-    var ch = make(chan string, caseNum)
-    
-    // todo: register a group of verifiers
+    var (
+        ch = make(chan string, caseNum)
+    )
+
+    // todo: concurrent register
+    utils.RegisterVerifiers(ch)
 
     // run cases
-    // idea: simulate concurrent with goroutine: PT
-    //       without goroutine: FT
-
+    // idea:
+    //   simulate concurrent with goroutine: PT
+    //   without goroutine: FT
     // todo: add the other cases
-    go cases.CaseOne(ch)
-    
+    cases.CaseOne(ch)
+
     // record result
     utils.RecordResult(ch, caseNum)
 }

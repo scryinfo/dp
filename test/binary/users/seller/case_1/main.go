@@ -29,7 +29,7 @@ var (
 func main() {
     logger := dot.Logger()
     l, err := line.BuildAndStart(func(l dot.Line) error {
-        l.PreAdd(binary.BinTypeLive(false)...)
+        l.PreAdd(binary.BinTypeLiveWithoutGrpc()...)
         return nil
     })
 
@@ -62,17 +62,15 @@ func main() {
 func testCase() {
     var err error
 
-    if CurUser, err = utils.CreateClientWithToken(password, Chain); err != nil {
+    if CurUser, err = utils.CreateClientWithEthAndToken(password, Chain); err != nil {
         dot.Logger().Errorln("create seller failed. ", zap.NamedError("error", err))
     }
 
-    time.Sleep(time.Second * 5)
+    time.Sleep(time.Second * 3)
 
     CurUser.SubscribeEvent("DataPublish", onPublish)
     CurUser.SubscribeEvent("TransactionCreate", onTransactionCreate)
     CurUser.SubscribeEvent("TransactionClose", onTransactionClose)
-
-    Listener.SetFromBlock(uint64(1))
 
     _, err = Chain.Publish(
        utils.MakeTxParams(CurUser.Account().Addr, password),
