@@ -4,7 +4,7 @@ Write-Output "license that can be found in the license file."
 Set-Location $PSScriptRoot
 Set-Location ..
 
-Write-Output "|-> * Next step is `npm install`, if you are already install successfully one time, you can skip it.  "
+Write-Output "|-> * Next step is npm 'install', if you are already install successfully one time, you can skip it.  "
 
 Start-Sleep -Milliseconds 300
 
@@ -32,5 +32,3 @@ truffle migrate --network geth
 Stop-Transcript 
 Write-Output "|-> * truffle migrate finished. "
 Write-Output "|-> * End. "
-
-Start-Sleep -Milliseconds 5000

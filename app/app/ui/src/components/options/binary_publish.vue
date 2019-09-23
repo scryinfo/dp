@@ -3,7 +3,6 @@
 <template>
     <section>
         <el-form class="pubForm" :model="pubData" label-position="left" label-width="25%" :style-height="height">
-            <el-form-item label="输入密码:"><el-input v-model="password" show-password clearable></el-input></el-form-item>
             <el-form-item label="标题:"><el-input v-model="pubData.details.Title" clearable></el-input></el-form-item>
             <el-form-item label="价格:"><el-input type="number" v-model.number="pubData.Price" clearable placeholder="uint is DDD"></el-input></el-form-item>
             <el-form-item label="标签:"><el-input v-model="pubData.details.Keys" clearable></el-input></el-form-item>
@@ -15,13 +14,14 @@
             </el-form-item>
             <el-form-item label="数据:"><input class="el-input__inner" ref="selectedData" type="file"></el-form-item>
             <el-form-item label="证明:"><input class="el-input__inner" ref="selectedProofs" type="file" multiple></el-form-item>
-            <el-form-item><el-button type="primary" @click="pubPrepare">Publish</el-button></el-form-item>
+            <el-form-item><s-f-t button-name="Publish" button-size="medium" @password="pubPrepare"></s-f-t></el-form-item>
         </el-form>
     </section>
 </template>
 
 <script>
 import {connect} from "../../utils/connect";
+import SFT from "../templates/simple_function_template.vue";
 export default {
     name: "publish.vue",
     data () {
@@ -49,7 +49,8 @@ export default {
         }
     },
     methods: {
-        pubPrepare: function () {
+        pubPrepare: function (pwd) {
+            this.password = pwd;
             this.count = this.$refs.selectedProofs.files.length;
             this.pubData.details.Seller = this.$store.state.account;
             this.setDataID();
@@ -130,6 +131,9 @@ export default {
                 });
             });
         }
+    },
+    components: {
+        SFT
     },
     watch: {
         count: function () {
