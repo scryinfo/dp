@@ -67,6 +67,10 @@ func (ws *WSServer) ListenAndServe() error {
     return errors.Wrap(ws.start(), "web serve start failed. ")
 }
 
+// start, start web service (brief description, GoDoc demo)
+// start a http web service, change to ws protocol when a client connect and require. (detailed description)
+//
+// 中间空行表示新的段落
 func (ws *WSServer) start() error {
     dot.Logger().Infoln("> Start listening ... ")
 

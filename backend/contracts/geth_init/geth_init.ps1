@@ -8,4 +8,4 @@ if (Test-Path ".\chain\*") {
 }
 
 geth --datadir "chain" init genesis.json
-geth --datadir "chain" --rpc --rpcapi "db,eth,net,web3" --nodiscover console
+geth --datadir "chain" --rpc --rpcapi "db,eth,net,web3,debug" --nodiscover console

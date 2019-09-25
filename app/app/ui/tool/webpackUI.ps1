@@ -4,7 +4,7 @@ Write-Output "license that can be found in the license file."
 Set-Location $PSScriptRoot
 Set-Location ..
 
-Write-Output "|-> * Next step is 'npm install', if you are already install successfully one time, you can skip it.  "
+Write-Output "|-> * Next step is 'npm install', if you have already install successfully one time, you can skip it and run webpack directly.  "
 
 Start-Sleep -Milliseconds 300
 
