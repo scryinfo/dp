@@ -9,7 +9,7 @@
         </div>
         <div v-if="showControl">
             <el-col :span="21" class="section-item">
-                <c-f-t button-name="验证数据" dialog-title="验证数据：" @password="Vote">
+                <c-f-t button-name="验证数据" dialog-title="验证数据：" @password="Vote" :button-disabled="buttonDisabled(2)">
                     <p>是否建议购买：</p>
                     <p><el-switch v-model="verify.suggestion" active-text="是" inactive-text="否"></el-switch></p>
                     <p><el-input v-model="verify.comment" placeholder="评论" clearable></el-input></p>
@@ -20,11 +20,12 @@
             </el-col>
             <el-table :data="this.$store.state.transactionverifier.slice((curPage-1)*pageSize, curPage*pageSize)"
                       highlight-current-row border :height=height @current-change="currentChange">
+                <el-table-column prop="PublishID" label="数据ID" show-overflow-tooltip></el-table-column>
+                <el-table-column prop="TransactionID" label="交易ID" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="Title" label="标题" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="Price" label="价格" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="Keys" label="标签" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="Description" label="描述" show-overflow-tooltip></el-table-column>
-                <el-table-column prop="Seller" label="卖家" show-overflow-tooltip></el-table-column>
             </el-table>
             <el-pagination class="pagination" @current-change="setCurPage" @size-change="setPageSize" :total="total"
                            layout="sizes, total, prev, pager, next, jumper" :page-sizes="[5, 6]" :page-size="pageSize"
@@ -34,12 +35,13 @@
 </template>
 
 <script>
-import {connect} from "../../utils/connect";
-import {acc_db, txVerifier_db} from "../../utils/DBoptions";
+import {connect} from "../../utils/connect.js";
+import {acc_db, txVerifier_db} from "../../utils/DBoptions.js";
+import {utils} from "../../utils/utils.js";
 import SFT from "../templates/simple_function_template.vue";
 import CFT from "../templates/complex_function_template.vue";
 export default {
-    name: "transaction_verify.vue",
+    name: "transaction_3_verifier.vue",
     data () {
         return {
             selectedTx: "",     // txID: ""
@@ -48,6 +50,7 @@ export default {
             total: 0,
             height: window.innerHeight - 170,
             showControl: false,
+            txState: "Begin",
             verify: {
                 suggestion: false,
                 comment: ""
@@ -55,9 +58,15 @@ export default {
         }
     },
     methods: {
-        setCurPage: function (curPageReturn) {this.curPage = curPageReturn;},
-        setPageSize: function (newPageSize) {this.pageSize = newPageSize;},
-        currentChange: function (curRow) {this.selectedTx = curRow.TransactionID;},
+        setCurPage: function (curPageReturn) { this.curPage = curPageReturn; },
+        setPageSize: function (newPageSize) { this.pageSize = newPageSize; },
+        currentChange: function (curRow) {
+            this.selectedTx = curRow.TransactionID;
+            this.txState = curRow.State;
+        },
+        buttonDisabled: function (funcNum) {
+            return utils.functionDisabled(funcNum, this.txState);
+        },
         initTxV: function () {
             txVerifier_db.init(this);
         },

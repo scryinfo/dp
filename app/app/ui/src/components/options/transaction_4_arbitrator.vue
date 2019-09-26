@@ -9,8 +9,8 @@
         </div>
         <div v-if="showControl">
             <el-col :span="21" class="section-item">
-                <s-f-t button-name="解密数据" @password="decrypt"></s-f-t>
-                <c-f-t button-name="仲裁数据" dialog-title="仲裁数据：" @password="Arbitrate">
+                <s-f-t button-name="解密数据" @password="decrypt" :button-disabled="buttonDisabled(3)"></s-f-t>
+                <c-f-t button-name="仲裁数据" dialog-title="仲裁数据：" @password="Arbitrate" :button-disabled="buttonDisabled(3)">
                     <p>判断数据真实性：</p>
                     <p><el-switch v-model="arbitrateResult" active-text="真" inactive-text="假"></el-switch></p>
                 </c-f-t>
@@ -21,12 +21,12 @@
 
             <el-table :data="this.$store.state.transactionarbitrator.slice((curPage-1)*pageSize, curPage*pageSize)"
                       highlight-current-row border :height=height @current-change="currentChange">
+                <el-table-column prop="PublishID" label="数据ID" show-overflow-tooltip></el-table-column>
+                <el-table-column prop="TransactionID" label="交易ID" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="Title" label="标题" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="Price" label="价格" show-overflow-tooltip></el-table-column>
-                <el-table-column prop="State" label="状态" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="Keys" label="标签" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="Description" label="描述" show-overflow-tooltip></el-table-column>
-                <el-table-column prop="Seller" label="卖家" show-overflow-tooltip></el-table-column>
             </el-table>
             <el-pagination class="pagination" @current-change="setCurPage" @size-change="setPageSize" :total="total"
                            layout="sizes, total, prev, pager, next, jumper" :page-sizes="[5, 6]" :page-size="pageSize"
@@ -38,16 +38,18 @@
 <script>
 import {connect} from "../../utils/connect.js";
 import {acc_db, txArbitrator_db} from "../../utils/DBoptions.js";
+import {utils} from "../../utils/utils.js";
 import SFT from "../templates/simple_function_template.vue";
 import CFT from "../templates/complex_function_template.vue";
 export default {
-    name: "transaction_arbitrate.vue",
+    name: "transaction_4_arbitrator.vue",
     data () {
         return {
-            showControl: false,
             selectedTx: {},     // {txID: "", User: "", MetaDataIDEncrypt: ""}
             arbitrateResult: false,
             height: window.innerHeight - 170,
+            showControl: false,
+            txState: "Begin",
             curPage: 1,
             pageSize: 6,
             total: 0
@@ -63,6 +65,10 @@ export default {
                 MetaDataIDEncrypt: curRow.MetaDataIDEncWithArbitrator,
                 MetaDataExtension: curRow.MetaDataExtension
             };
+            this.txState = curRow.State;
+        },
+        buttonDisabled: function (funcNum) {
+            return utils.functionDisabled(funcNum, this.txState);
         },
         initTxA: function () {
             txArbitrator_db.init(this);

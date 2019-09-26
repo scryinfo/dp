@@ -40,12 +40,12 @@ type Binary struct {
     subsRepo     *event.Repository
     dataChannel  chan event.Event
     errorChannel chan error
-    Executor     *execute.Executor    `dot:""`
-    Listener     *listen.Listener     `dot:""`
-    Account      *auth.Account        `dot:""`
-    Storage      *storage.Ipfs        `dot:""`
-    Subscriber   *subscribe.Subscribe `dot:""`
-    Grpc         *grpc.BinaryGrpcServer `dot:""`
+    Executor     *execute.Executor     `dot:""`
+    Listener     *listen.Listener      `dot:""`
+    Account      *auth.Account         `dot:""`
+    Storage      *storage.Ipfs         `dot:""`
+    Subscriber   *subscribe.Subscribe  `dot:""`
+    Grpc         grpc.BinaryGrpcServer `dot:"96a6e2b5-f0b6-48dc-b0ff-2d9f2c5c9f1d"`
 }
 
 type BinaryConfig struct {
@@ -79,7 +79,7 @@ func newBinaryDot(conf interface{}) (dot.Dot, error) {
 }
 
 //Data structure needed when generating newer component
-func BinTypeLive(grpcSwitch bool) []*dot.TypeLives {
+func BinTypeLiveWithoutGrpc() []*dot.TypeLives {
     t := []*dot.TypeLives{
         &dot.TypeLives{
             Meta: dot.Metadata{TypeId: BinTypeId, NewDoter: func(conf interface{}) (dot.Dot, error) {
@@ -95,9 +95,27 @@ func BinTypeLive(grpcSwitch bool) []*dot.TypeLives {
 
     t = append(t, currency.CurrTypeLive()...)
 
-    if grpcSwitch {
-        t = append(t, grpc.BinaryGrpcServerTypeLive()...)
+    return t
+}
+
+//Data structure needed when generating newer component
+func BinTypeLiveWithGrpc() []*dot.TypeLives {
+    t := []*dot.TypeLives{
+        &dot.TypeLives{
+            Meta: dot.Metadata{TypeId: BinTypeId, NewDoter: func(conf interface{}) (dot.Dot, error) {
+                return newBinaryDot(conf)
+            }},
+        },
+        execute.ExecutorTypeLive(),
+        listen.ListenerTypeLive(),
+        auth.AccountTypeLive(),
+        storage.IpfsTypeLive(),
+        subscribe.SubsTypeLive(),
     }
+
+    t = append(t, currency.CurrTypeLive()...)
+
+    t = append(t, grpc.BinaryGrpcServerImpTypeLive()...)
 
     return t
 }

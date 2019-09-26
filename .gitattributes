@@ -1,1 +1,2 @@
 *.js linguist-language=go
+*.vue linguist-language=go

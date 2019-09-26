@@ -20,9 +20,9 @@ func CaseOne(chStr chan string) {
     processes[0], pipes[0] = utils.Start("seller", "case_1")
     processes[1], pipes[1] = utils.Start("buyer", "case_1")
 
-    utils.ReadPipes(pipes, ch)
+    utils.ReadPipes(ch, pipes...)
 
     time.Sleep(time.Second * 3)
 
-    utils.Stop(processes, ch, chStr, userNum)
+    utils.Stop(ch, chStr, userNum, 1, processes...)
 }

@@ -2,6 +2,14 @@ import {acc_db, dl_db, txBuyer_db, txSeller_db, txVerifier_db, txArbitrator_db} 
 import {connect} from "./connect";
 
 let utils = {
+    stateEnum: ["Begin", "Created", "Voted", "Buying", "ReadyForDownload", "Closed"],
+    state: [ // tx state -> func state, true: disable & false: able
+        [true,  true,  true, false,  true,  true], // 0 seller: re-encrypt
+        [true, false, false, false,  true,  true], // 1 buyer: cancel
+        [true, false, false,  true,  true,  true], // 2 buyer: purchase & verifier: vote
+        [true,  true,  true,  true, false,  true], // 3 buyer: decrypt/confirm & arbitrator: decrypt/arbitrate
+        [true,  true, false, false, false, false]  // 4 buyer: credit
+    ],
     init: function () {
         connect.addCallbackFunc("onPublish", presetFunc.onPublish);
         connect.addCallbackFunc("onProofFilesExtensions", presetFunc.onProofFilesExtensions);
@@ -22,6 +30,19 @@ let utils = {
     },
     timeout: function (ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
+    },
+    setStateString: function (str) {
+        let index;
+        for (let i = 0; i < utils.stateEnum.length; i++) {
+            if (str === utils.stateEnum[i]) {
+                index = i;
+                break;
+            }
+        }
+        return index;
+    },
+    functionDisabled: function (funcNum, stateStr) {
+        return utils.state[funcNum][utils.setStateString(stateStr)];
     }
 };
 
@@ -30,7 +51,7 @@ let presetFunc = {
         console.log("发布事件回调：", payload);
         _this.$notify({
             title: "发布事件回调：",
-            message: payload,
+            message: "数据ID：" + payload.PublishID,
             position: "top-left"
         });
         dl_db.write({
@@ -71,7 +92,7 @@ let presetFunc = {
         console.log("选择验证者事件回调：", payload);
         _this.$notify({
             title: "选择验证者事件回调：",
-            message: payload,
+            message: "你已被选中成为 ID: " + payload.TransactionID + " 交易 的验证者。",
             position: "top-left"
         });
         dl_db.read(payload.PublishID, function (dataDetails) {
@@ -112,7 +133,9 @@ let presetFunc = {
         console.log("创建交易事件回调：", payload);
         _this.$notify({
             title: "创建交易事件回调：",
-            message: payload,
+            dangerouslyUseHTMLString: true,
+            message: `<p>创建ID：<strong>payload.TransactionID</strong>交易成功</p>
+                        <p>购买的数据ID为：<strong>payload.PublishID</strong></p>`,
             position: "top-left"
         });
         dl_db.read(payload.PublishID, function (dataDetails) {
@@ -179,7 +202,7 @@ let presetFunc = {
         console.log("购买数据事件回调：", payload);
         _this.$notify({
             title: "购买数据事件回调：",
-            message: payload,
+            message: "交易(ID: " + payload.TransactionID + ")已确认购买。",
             position: "top-left"
         });
         if (payload.UserIndex === "0") {
@@ -290,7 +313,7 @@ let presetFunc = {
         console.log("再加密数据事件回调：", payload);
         _this.$notify({
             title: "再加密数据事件回调：",
-            message: payload,
+            message: "交易(ID: " + payload.TransactionID + ")已重新加密。",
             position: "top-left"
         });
         if (payload.UserIndex === "0") {
@@ -367,7 +390,7 @@ let presetFunc = {
         console.log("交易关闭事件回调：", payload);
         _this.$notify({
             title: "交易关闭事件回调：",
-            message: payload,
+            message: "交易(ID: " + payload.TransactionID + ")已关闭。",
             position: "top-left"
         });
         if (payload.UserIndex === "0") {
@@ -478,7 +501,7 @@ let presetFunc = {
         console.log("注册成为验证者事件回调：", payload);
         _this.$notify({
             title: "注册成为验证者事件回调：",
-            message: payload,
+            message: "你已成功注册成为验证者！ :)",
             position: "top-left"
         });
         acc_db.read(_this.$store.state.account, function (accInstance) {
@@ -494,7 +517,7 @@ let presetFunc = {
         console.log("验证者验证事件回调：", payload);
         _this.$notify({
             title: "验证者验证事件回调：",
-            message: payload,
+            message: "收到新的验证者回复，交易ID：" + payload.TransactionID,
             position: "top-left"
         });
         if (payload.VerifierIndex === "0") {
@@ -607,7 +630,7 @@ let presetFunc = {
         console.log("取消验证者验证资格事件回调：", payload);
         _this.$notify({
             title: "取消验证者验证资格事件回调：",
-            message: payload,
+            message: "验证者： " + payload.Verifier + "被取消验证资格。",
             position: "top-left"
         });
         acc_db.read(_this.$store.state.account, function (accInstance) {
@@ -623,7 +646,7 @@ let presetFunc = {
         console.log("仲裁开始事件回调：", payload);
         _this.$notify({
             title: "仲裁开始事件回调：",
-            message: payload,
+            message: "你已被选中成为 ID: " + payload.TransactionID + " 交易 的仲裁者。",
             position: "top-left"
         });
         dl_db.read(payload.PublishId, function (dataDetails) {
@@ -664,7 +687,7 @@ let presetFunc = {
         console.log("仲裁结果事件回调：", payload);
         _this.$notify({
             title: "仲裁结果事件回调：",
-            message: payload,
+            message: "交易(ID: " + payload.TransactionId + ")已完成仲裁，仲裁结果为：" + payload.ArbitrateResult + " 。",
             position: "top-left"
         });
         if (payload.User === "0") {
