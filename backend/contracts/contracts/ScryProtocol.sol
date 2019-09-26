@@ -8,7 +8,7 @@ import "./ScryToken.sol";
 contract ScryProtocol {
     common.DataSet private dataSet;
 
-    address owner         = 0x0;
+    address owner;
     ERC20   token;
 
     event DataPublish(string seqNo, string publishId, uint256 price, string despDataId, bool supportVerify, address[] users);
