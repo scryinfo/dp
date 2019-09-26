@@ -351,6 +351,7 @@ func (c *Callbacks) onVote(event event.Event) bool {
 func (c *Callbacks) onVerifierDisable(event event.Event) bool {
     var ovd definition.OnVerifierDisable
     {
+        ovd.Verifier = event.Data.Get("verifier").(common.Address).String()
         ovd.Block = event.BlockNumber
     }
 

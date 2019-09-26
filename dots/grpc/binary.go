@@ -23,10 +23,9 @@ const (
     ScanEventInterval      = 200  //milli seconds
 )
 
-
 type ChanEvent chan event.Event
 
-type BinaryGrpcServer struct {
+type BinaryGrpcServerImp struct {
     config       binaryGrpcServerConfig
     eventChanMap sync.Map
     chainWrapper scry.ChainWrapper
@@ -37,6 +36,8 @@ type BinaryGrpcServer struct {
 type binaryGrpcServerConfig struct {
     EventChanCapacity uint64
 }
+
+var _ BinaryGrpcServer = (*BinaryGrpcServerImp)(nil)
 
 func newBinaryGrpcServerDot(conf interface{}) (dot.Dot, error) {
     var err error
@@ -53,13 +54,13 @@ func newBinaryGrpcServerDot(conf interface{}) (dot.Dot, error) {
         return nil, err
     }
 
-    d := &BinaryGrpcServer{config: *dConf}
+    d := &BinaryGrpcServerImp{config: *dConf}
 
     return d, err
 }
 
 //Data structure needed when generating newer component
-func BinaryGrpcServerTypeLive() []*dot.TypeLives {
+func BinaryGrpcServerImpTypeLive() []*dot.TypeLives {
     t := []*dot.TypeLives{
         &dot.TypeLives{
             Meta: dot.Metadata{TypeId: BinaryGrpcServerTypeId,
@@ -82,24 +83,26 @@ func BinaryGrpcServerTypeLive() []*dot.TypeLives {
     return t
 }
 
-func (c *BinaryGrpcServer) Create(l dot.Line) error {
+func (c *BinaryGrpcServerImp) Create(l dot.Line) error {
+    //c.eventChan = make(map[string]ChanEvent)
+
     return nil
 }
 
-func (c *BinaryGrpcServer) Start(ignore bool) error {
+func (c *BinaryGrpcServerImp) Start(ignore bool) error {
     api.RegisterBinaryServiceServer(c.ServerNobl.Server(), c)
     return nil
 }
 
-func (c *BinaryGrpcServer) Stop(ignore bool) error {
+func (c *BinaryGrpcServerImp) Stop(ignore bool) error {
     return nil
 }
 
-func (c *BinaryGrpcServer) Destroy(ignore bool) error {
+func (c *BinaryGrpcServerImp) Destroy(ignore bool) error {
     return nil
 }
 
-func (c *BinaryGrpcServer) SetChainWrapper(w scry.ChainWrapper) {
+func (c *BinaryGrpcServerImp) SetChainWrapper(w scry.ChainWrapper) {
     c.chainWrapper = w
 }
 
@@ -107,13 +110,13 @@ func makeResult(s bool, e string) *api.Result {
     return &api.Result{Success: s, ErrMsg: e}
 }
 
-func (c *BinaryGrpcServer) SubscribeEvent(ctx context.Context, info *api.SubscribeInfo) (*api.Result, error) {
+func (c *BinaryGrpcServerImp) SubscribeEvent(ctx context.Context, info *api.SubscribeInfo) (*api.Result, error) {
     rs := makeResult(true,"")
 
     hexAddr := info.GetAddress()
     if hexAddr == "" {
         errMsg := "client address can not be empty"
-        dot.Logger().Errorln("BinaryGrpcServer::SubscribeEvent", zap.String("error:", errMsg))
+        dot.Logger().Errorln("BinaryGrpcServerImp::SubscribeEvent", zap.String("error:", errMsg))
         rs.ErrMsg = errMsg
         return rs, errors.New(errMsg)
     }
@@ -124,7 +127,7 @@ func (c *BinaryGrpcServer) SubscribeEvent(ctx context.Context, info *api.Subscri
     var ce ChanEvent
     if rv, ok := c.eventChanMap.Load(hexAddr); !ok {
         errMsg := "failed to subscribe event since no server streaming channel found"
-        dot.Logger().Errorln("BinaryGrpcServer::SubscribeEvent", zap.String("error:", errMsg))
+        dot.Logger().Errorln("BinaryGrpcServerImp::SubscribeEvent", zap.String("error:", errMsg))
         rs.ErrMsg = errMsg
         return rs, errors.New(errMsg)
     } else {
@@ -140,7 +143,7 @@ func (c *BinaryGrpcServer) SubscribeEvent(ctx context.Context, info *api.Subscri
         })
 
         if err != nil {
-            dot.Logger().Errorln("BinaryGrpcServer::SubscribeEvent", zap.Error(err))
+            dot.Logger().Errorln("BinaryGrpcServerImp::SubscribeEvent", zap.Error(err))
             rs.ErrMsg = err.Error()
             return rs, err
         }
@@ -149,7 +152,7 @@ func (c *BinaryGrpcServer) SubscribeEvent(ctx context.Context, info *api.Subscri
     return rs, nil
 }
 
-func (c *BinaryGrpcServer) UnSubscribeEvent(
+func (c *BinaryGrpcServerImp) UnSubscribeEvent(
     ctx context.Context,
     info *api.SubscribeInfo,
 ) (*api.Result, error) {
@@ -158,7 +161,7 @@ func (c *BinaryGrpcServer) UnSubscribeEvent(
     hexAddr := info.GetAddress()
     if hexAddr == "" {
         errMsg := "client address can not be empty"
-        dot.Logger().Errorln("BinaryGrpcServer::UnSubscribeEvent", zap.String("error:", errMsg))
+        dot.Logger().Errorln("BinaryGrpcServerImp::UnSubscribeEvent", zap.String("error:", errMsg))
         rs.ErrMsg = errMsg
         return rs, errors.New(errMsg)
     }
@@ -167,7 +170,7 @@ func (c *BinaryGrpcServer) UnSubscribeEvent(
     for _, ev := range info.GetEvent() {
         err := c.Subscriber.UnSubscribe(addr, ev)
         if err != nil {
-            dot.Logger().Errorln("BinaryGrpcServer::UnSubscribeEvent", zap.Error(err))
+            dot.Logger().Errorln("BinaryGrpcServerImp::UnSubscribeEvent", zap.Error(err))
         }
     }
 
@@ -175,17 +178,17 @@ func (c *BinaryGrpcServer) UnSubscribeEvent(
 }
 
 //the function should be called firstly to create server stream channel
-func (c *BinaryGrpcServer) RecvEvents(client *api.ClientInfo,srv api.BinaryService_RecvEventsServer) error {
+func (c *BinaryGrpcServerImp) RecvEvents(client *api.ClientInfo,srv api.BinaryService_RecvEventsServer) error {
     defer func() {
         if err := recover(); err != nil {
-            dot.Logger().Errorln("BinaryGrpcServer::RecvEvents", zap.Any("error:", err))
+            dot.Logger().Errorln("BinaryGrpcServerImp::RecvEvents", zap.Any("error:", err))
         }
     }()
 
     //create channel for server streaming
     if client == nil || client.Address == "" {
         errMsg := "client address can not be empty"
-        dot.Logger().Errorln("BinaryGrpcServer::RecvEvents", zap.String("error:", errMsg))
+        dot.Logger().Errorln("BinaryGrpcServerImp::RecvEvents", zap.String("error:", errMsg))
         return errors.New(errMsg)
     }
 
@@ -205,17 +208,17 @@ func (c *BinaryGrpcServer) RecvEvents(client *api.ClientInfo,srv api.BinaryServi
     for {
         select {
         case e := <- ce:
-            dot.Logger().Debugln("BinaryGrpcServer::RecvEvents", zap.String("event:", e.Name))
+            dot.Logger().Debugln("BinaryGrpcServerImp::RecvEvents", zap.String("event:", e.Name))
 
             ev, err := makeProtoEvent(&e)
             if err != nil {
-                dot.Logger().Errorln("BinaryGrpcServer::RecvEvents", zap.String("error:", err.Error()))
+                dot.Logger().Errorln("BinaryGrpcServerImp::RecvEvents", zap.String("error:", err.Error()))
                 break
             }
 
             err = srv.Send(ev)
             if err != nil {
-                dot.Logger().Errorln("BinaryGrpcServer::RecvEvents", zap.String("error:", err.Error()))
+                dot.Logger().Errorln("BinaryGrpcServerImp::RecvEvents", zap.String("error:", err.Error()))
                 ce <- e
                 return err
             }
@@ -242,7 +245,7 @@ func makeProtoEvent(e *event.Event) (*api.Event, error) {
 
     jsonEvent, err := json.Marshal(obj)
     if err != nil {
-        dot.Logger().Errorln("BinaryGrpcServer::makeProtoEvent", zap.String("error:", err.Error()))
+        dot.Logger().Errorln("BinaryGrpcServerImp::makeProtoEvent", zap.String("error:", err.Error()))
         return nil, err
     }
 
@@ -254,7 +257,7 @@ func makeProtoEvent(e *event.Event) (*api.Event, error) {
     return pe, nil
 }
 
-func (c *BinaryGrpcServer) Publish(ctx context.Context, params *api.PublishParams) (*api.PublishResult, error) {
+func (c *BinaryGrpcServerImp) Publish(ctx context.Context, params *api.PublishParams) (*api.PublishResult, error) {
     var pr *api.PublishResult
     makePublishResult(&pr, "", "", true)
 
@@ -314,7 +317,7 @@ func makePublishResult(r **api.PublishResult, pid, e string, s bool)  {
     }
 }
 
-func (c *BinaryGrpcServer) CreateAccount(
+func (c *BinaryGrpcServerImp) CreateAccount(
     ctx context.Context,
     in *api.CreateAccountParams,
 ) (*api.AccountResult, error) {
@@ -349,7 +352,7 @@ func makeAccountResult(r **api.AccountResult, aid, e string, s bool)  {
     }
 }
 
-func (c *BinaryGrpcServer) Authenticate(
+func (c *BinaryGrpcServerImp) Authenticate(
     ctx context.Context,
     in *api.ClientInfo,
 ) (*api.Result, error) {
@@ -372,7 +375,7 @@ func (c *BinaryGrpcServer) Authenticate(
     return makeResult(true, ""), nil
 }
 
-func (c *BinaryGrpcServer) TransferEth(
+func (c *BinaryGrpcServerImp) TransferEth(
     ctx context.Context,
     in *api.TransferEthParams,
 ) (*api.Result, error) {
@@ -400,7 +403,7 @@ func (c *BinaryGrpcServer) TransferEth(
     return makeResult(true, ""), nil
 }
 
-func (c *BinaryGrpcServer) GetEthBalance(
+func (c *BinaryGrpcServerImp) GetEthBalance(
     ctx context.Context,
     in *api.EthBalanceParams,
 ) (*api.EthBalanceResult, error) {
@@ -445,7 +448,7 @@ func makeEthBalanceResult(r **api.EthBalanceResult, e string, s bool, b int64)  
     }
 }
 
-func (c *BinaryGrpcServer) TransferTokens(
+func (c *BinaryGrpcServerImp) TransferTokens(
     ctx context.Context,
     params *api.TransferTokenParams,
 ) (*api.Result, error) {
@@ -472,7 +475,7 @@ func (c *BinaryGrpcServer) TransferTokens(
     return makeResult(true, ""), nil
 }
 
-func (c *BinaryGrpcServer) GetTokenBalance(
+func (c *BinaryGrpcServerImp) GetTokenBalance(
     ctx context.Context,
     params *api.TokenBalanceParams,
 ) (*api.TokenBalanceResult, error) {
@@ -510,7 +513,7 @@ func makeTokenBalanceResult(r **api.TokenBalanceResult, e string, s bool, b int6
     }
 }
 
-func (c *BinaryGrpcServer) PrepareToBuy(
+func (c *BinaryGrpcServerImp) PrepareToBuy(
     ctx context.Context,
     params *api.PrepareParams,
 ) (*api.Result, error) {
@@ -537,7 +540,7 @@ func (c *BinaryGrpcServer) PrepareToBuy(
     return makeResult(true, ""), nil
 }
 
-func (c *BinaryGrpcServer) BuyData(
+func (c *BinaryGrpcServerImp) BuyData(
     ctx context.Context,
     params *api.BuyParams,
 ) (*api.Result, error) {
@@ -563,7 +566,7 @@ func (c *BinaryGrpcServer) BuyData(
     return makeResult(true, ""), nil
 }
 
-func (c *BinaryGrpcServer) CancelTransaction(
+func (c *BinaryGrpcServerImp) CancelTransaction(
     ctx context.Context,
     params *api.CancelTxParams,
 ) (*api.Result, error) {
@@ -590,7 +593,7 @@ func (c *BinaryGrpcServer) CancelTransaction(
 }
 
 //re-encrypt meta data id
-func (c *BinaryGrpcServer) ReEncryptMetaDataId(
+func (c *BinaryGrpcServerImp) ReEncryptMetaDataId(
     ctx context.Context,
     params *api.ReEncryptDataParams,
 ) (*api.Result, error) {
@@ -618,7 +621,7 @@ func (c *BinaryGrpcServer) ReEncryptMetaDataId(
     return makeResult(true, ""), nil
 }
 
-func (c *BinaryGrpcServer) ConfirmDataTruth(
+func (c *BinaryGrpcServerImp) ConfirmDataTruth(
     ctx context.Context,
     params *api.DataConfirmParams,
 ) (*api.Result, error) {
@@ -645,7 +648,7 @@ func (c *BinaryGrpcServer) ConfirmDataTruth(
     return makeResult(true, ""), nil
 }
 
-func (c *BinaryGrpcServer) ApproveTransfer(
+func (c *BinaryGrpcServerImp) ApproveTransfer(
     ctx context.Context,
     params *api.ApproveTransferParams,
 ) (*api.Result, error) {
@@ -672,7 +675,7 @@ func (c *BinaryGrpcServer) ApproveTransfer(
     return makeResult(true, ""), nil
 }
 
-func (c *BinaryGrpcServer) Vote(
+func (c *BinaryGrpcServerImp) Vote(
     ctx context.Context,
     params *api.VoteParams,
 ) (*api.Result, error) {
@@ -700,7 +703,7 @@ func (c *BinaryGrpcServer) Vote(
     return makeResult(true, ""), nil
 }
 
-func (c *BinaryGrpcServer) RegisterAsVerifier(
+func (c *BinaryGrpcServerImp) RegisterAsVerifier(
     ctx context.Context,
     params *api.RegisterVerifierParams,
 ) (*api.Result, error) {
@@ -726,7 +729,7 @@ func (c *BinaryGrpcServer) RegisterAsVerifier(
     return makeResult(true, ""), nil
 }
 
-func (c *BinaryGrpcServer) CreditsToVerifier(
+func (c *BinaryGrpcServerImp) CreditsToVerifier(
     ctx context.Context,
     params *api.CreditVerifierParams,
 ) (*api.Result, error) {

@@ -8,13 +8,13 @@
             </el-col>
         </el-row>
         <el-row class="section-item center nickname_nickname">
-            <el-col :span="14">
+            <el-col :span="12">
                 用户昵称：{{ this.$store.state.nickname }}
             </el-col>
-            <el-col :span="6">
-                <el-input v-model="nickName" placeholder="nickname"></el-input>
+            <el-col :span="9">
+                <el-input v-model="nickName" placeholder="nickname, suggest different structure from address"></el-input>
             </el-col>
-            <el-col :span="4" >
+            <el-col :span="3" >
                 <el-button size="mini" type="primary" class="section-item-right" @click="modifyNickname">修改昵称</el-button>
             </el-col>
         </el-row>
@@ -34,14 +34,22 @@ export default {
     name: "nickname.vue",
     data () {
         return {
-            nickName: "", // todo: limit, can not modify nickName as 42chars string start with "0x".
+            nickName: "",
             accBackup: []
         }
     },
     methods: {
         modifyNickname: function () {
-            this.$store.state.nickname = this.nickName;
             let _nickname = this;
+            if (_nickname.validNickname()) {
+                _nickname.$alert("请勿使用标准地址类型（以'0x'开头的40位十六进制数）作为昵称。", "非法昵称！", {
+                    confirmButtonText: "关闭",
+                    showClose: false,
+                    type: "error"
+                });
+                return;
+            }
+            this.$store.state.nickname = this.nickName;
             acc_db.read(this.$store.state.account, function (accInstance) {
                 acc_db.write({
                     address: accInstance.address,
@@ -50,6 +58,10 @@ export default {
                     isVerifier: accInstance.isVerifier
                 });
             })
+        },
+        validNickname: function () {
+            let reg = /^0x(\d|[a-f]){40}$/i; // match standard 40 digits Hexadecimal number
+            return reg.test(this.nickName);
         },
         DBBackup: function () {
             let _this = this;
