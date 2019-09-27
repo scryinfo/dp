@@ -37,7 +37,7 @@
 
 <script>
 import {connect} from "../../utils/connect.js";
-import {acc_db, txArbitrator_db} from "../../utils/DBoptions.js";
+import {acc_db, tx_db} from "../../utils/DBoptions.js";
 import {utils} from "../../utils/utils.js";
 import SFT from "../templates/simple_function_template.vue";
 import CFT from "../templates/complex_function_template.vue";
@@ -45,7 +45,7 @@ export default {
     name: "transaction_4_arbitrator.vue",
     data () {
         return {
-            selectedTx: {},     // {txID: "", User: "", MetaDataIDEncrypt: ""}
+            selectedTx: {},     // {txID: "", User: "", MetaDataIDEncrypt: "", MetaDataExtension: ""}
             arbitrateResult: false,
             height: window.innerHeight - 170,
             showControl: false,
@@ -71,7 +71,7 @@ export default {
             return utils.functionDisabled(funcNum, this.txState);
         },
         initTxA: function () {
-            txArbitrator_db.init(this);
+            tx_db.initArbitrator(this);
         },
         refresh: function () {
             let _this = this;
@@ -115,18 +115,18 @@ export default {
     },
     computed: {
         listenTxARefresh() {
-            return this.$store.state.transactionarbitrator
+            return this.$store.state.transactionarbitrator;
         }
     },
     watch: {
         listenTxARefresh: function () {
-            this.curPage = 1
-            this.total = this.$store.state.transactionarbitrator.length
+            this.curPage = 1;
+            this.total = this.$store.state.transactionarbitrator.length;
         }
     },
     created () {
-        this.total = this.$store.state.transactionarbitrator.length
-        this.refresh()
+        this.total = this.$store.state.transactionarbitrator.length;
+        this.refresh();
     }
 }
 </script>

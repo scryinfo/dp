@@ -19,7 +19,8 @@
 </template>
 
 <script>
-import {dl_db, acc_db, txBuyer_db, txSeller_db, txVerifier_db, txArbitrator_db, db_options} from "../../utils/DBoptions.js";
+import {dl_db, acc_db, db_options} from "../../utils/DBoptions.js";
+import {tx_db} from "../../utils/DBoptions";
 export default {
     name: "ES_administrator.vue",
     data () {
@@ -48,28 +49,22 @@ export default {
             console.log("数据列表初始化完成");
         },
         initTx: function () {
-            txBuyer_db.init(this);
-            txSeller_db.init(this);
-            txVerifier_db.init(this);
-            txArbitrator_db.init(this);
+            tx_db.init(this);
             console.log("交易列表初始化完成");
         },
         testTxDBsConnect: function () {
-            let result = "";
-            if (txBuyer_db.db_name === txSeller_db.db_name && txSeller_db.db_name === txVerifier_db.db_name) {
-                result = "数据库名： " + txBuyer_db.db_name;
-            } else {
-                result = "数据库名： " + txBuyer_db.db_name + " " + txSeller_db.db_name + " " + txVerifier_db.db_name;
+            console.log("Node: show param acc ", this.$store.state.account);
+            let os = tx_db.db.transaction(this.$store.state.account, "readwrite").objectStore(this.$store.state.account);
+            os.onsuccess = function () {
+                console.log("数据库连接正常");
             }
-            console.log(result)
         },
         resetTxDBs: function () {
             let c = acc_db.db.transaction(acc_db.db_store_name,"readwrite").objectStore(acc_db.db_store_name).openCursor();
             c.onsuccess = function (evt) {
                 let cursor = evt.target.result;
                 if (cursor) {
-                    db_options.userDBInit(cursor.value.address);
-                    db_options.deleteDB(cursor.value.address);
+                    db_options.clearTxObjectStore(cursor.value.address);
                     cursor.continue();
                 }
             }

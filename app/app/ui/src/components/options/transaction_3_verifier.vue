@@ -36,7 +36,7 @@
 
 <script>
 import {connect} from "../../utils/connect.js";
-import {acc_db, txVerifier_db} from "../../utils/DBoptions.js";
+import {acc_db, tx_db} from "../../utils/DBoptions.js";
 import {utils} from "../../utils/utils.js";
 import SFT from "../templates/simple_function_template.vue";
 import CFT from "../templates/complex_function_template.vue";
@@ -68,7 +68,7 @@ export default {
             return utils.functionDisabled(funcNum, this.txState);
         },
         initTxV: function () {
-            txVerifier_db.init(this);
+            tx_db.initVerifier(this);
         },
         refresh: function () {
             let _this = this;

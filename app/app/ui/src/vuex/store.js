@@ -17,7 +17,9 @@ let state = {
     transactionsell: [],
     // {Title: "", Price: 0, Keys: "", Description: "", Buyer: "", Seller: "", State: "", SupportVerify: false, StartVerify: false,
     //     MetaDataExtension: "", ProofDataExtensions: [], MetaDataIDEncWithSeller: "", MetaDataIDEncWithBuyer: "", MetaDataIDEncWithArbitrator: "",
-    //     Verifier1Response: "", Verifier2Response: "", ArbitrateResult: "", pID: "", tID: ""}
+    //     Verifier1Response: "", Verifier2Response: "", ArbitrateResult: "", pID: "", tID: ""， Identify: 0}
+    //
+    // identify match: 0 -> seller, 1 -> buyer, 2 -> verifier, 3 -> arbitrator
     //
     // transaction's data dictionary = [datalist] + {Buyer, State, StartVerify, MetaDataIDEncWithSeller, MetaDataIDEncWithBuyer, MetaDataIDEncWithArbitrator,
     //     Verifier1Response, Verifier2Response, ArbitrateResult, tID} = 9 + 10 = 19

@@ -13,12 +13,12 @@ contract ScryProtocol {
 
     event DataPublish(string seqNo, string publishId, uint256 price, string despDataId, bool supportVerify, address[] users);
     event TransactionCreate(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool needVerify, uint8 state, address[] users);
-    event Buy(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, uint8 state, uint8 index, address[] users);
-    event TransactionClose(string seqNo, uint256 transactionId, uint8 state, uint8 index, address[] users);
+    event Buy(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, uint8 state, address[] users);
+    event TransactionClose(string seqNo, uint256 transactionId, uint8 state, address[] users);
     event VerifiersChosen(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, uint8 state, address[] users);
-    event ReadyForDownload(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, uint8 state, uint8 index, address[] users);
+    event ReadyForDownload(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, uint8 state, address[] users);
     event ArbitrationBegin(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bytes metaDataIdEncArbitrator, address[] users);
-    event ArbitrationResult(string seqNo, uint256 transactionId, bool judge, uint8 identify, address[] users);
+    event ArbitrationResult(string seqNo, uint256 transactionId, bool judge, address[] users);
     event RegisterVerifier(string seqNo, address[] users);
     event Vote(string seqNo, uint256 transactionId, bool judge, string comments, uint8 state, uint8 index, address[] users);
     event VerifierDisable(string seqNo, address verifier, address[] users);
