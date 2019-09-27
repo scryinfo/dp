@@ -195,8 +195,6 @@ func (c *Account) Decrypt(
         Password: password,
     }
 
-    dot.Logger().Debugln("Node: show decrypt params. ", zap.Any("in", in))
-
     out, err := c.client.ContentDecrypt(context.Background(), &in)
     if err != nil {
         err = errors.Wrap(err, "failed to decrypt data")

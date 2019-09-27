@@ -36,16 +36,13 @@ let connect = {
             console.log("connection onerror. ", evt);
             connect.ws.close();
         };
-        window.onbeforeunload = function () {
-            connect.ws.close();
-        };
-        connect.WSConnect = function () {};
+        connect.WSConnect = function (_this) {};
     },
     msgHandle: async function (obj, _this) {
         if (connect.msgMutex) {
             connect.msgMutex = false;
             await connect.map[obj.Name](obj.Payload, _this);
-            await utils.timeout(100);
+            await utils.timeout(250);
             connect.msgMutex = true;
             if (connect.msgParams.length > 0) {
                 connect.msgHandle(connect.msgParams.shift(), _this);
