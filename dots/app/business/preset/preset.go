@@ -306,6 +306,8 @@ func (p *Preset) Buy(mi *server.MessageIn) (payload interface{}, err error) {
        return
    }
 
+   time.Sleep(5 * time.Second)
+
    if err = p.Bin.ChainWrapper().PrepareToBuy(p.makeTxParams(bd.Password), bd.SelectedData.PublishID, bd.StartVerify); err != nil {
        err = errors.Wrap(err, "Transaction create failed. ")
        return
@@ -318,7 +320,7 @@ func (p *Preset) Buy(mi *server.MessageIn) (payload interface{}, err error) {
 
 func (p *Preset) Extensions(mi *server.MessageIn) (payload interface{}, err error) {
    var ppd definition.Prepared
-   if err = json.Unmarshal(mi.Payload, &p); err != nil {
+   if err = json.Unmarshal(mi.Payload, &ppd); err != nil {
        return
    }
    p.CBs.ExtChan <- ppd.Extensions

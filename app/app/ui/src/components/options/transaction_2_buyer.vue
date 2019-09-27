@@ -56,7 +56,7 @@
 
 <script>
 import {connect} from "../../utils/connect.js";
-import {txBuyer_db} from "../../utils/DBoptions.js"
+import {tx_db} from "../../utils/DBoptions.js"
 import {utils} from "../../utils/utils.js";
 import SFT from "../templates/simple_function_template.vue"
 import CFT from "../templates/complex_function_template.vue"
@@ -99,7 +99,7 @@ export default {
             return utils.functionDisabled(funcNum, this.txState);
         },
         initTxB: function () {
-            txBuyer_db.init(this);
+            tx_db.initBuyer(this);
         },
         cancelBuying: function (pwd) {
             connect.send({Name:"cancel", Payload:{password: pwd, tID: this.selectedTx}}, function (payload, _this) {
@@ -128,9 +128,8 @@ export default {
         decrypt: function (pwd) {
             connect.send({Name:"decrypt", Payload:{password: pwd, tID: this.selectedTx}}, function (payload, _this) {
                 console.log("解密数据成功", payload);
-                _this.$alert(payload, "原始数据：", {
+                _this.$alert(payload.replace(/[\\\/]/g, "/").split("/").pop(), "原始数据：", {
                     confirmButtonText: "关闭",
-                    dangerouslyUseHTMLString: true,
                     showClose: false,
                     type: "info"
                 });
@@ -202,6 +201,8 @@ export default {
 }
 </script>
 
-<style>
-
+<style scoped>
+.el-message-box {
+    width: 500px;
+}
 </style>
