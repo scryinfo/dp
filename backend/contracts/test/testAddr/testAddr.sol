@@ -2,6 +2,7 @@ pragma solidity ^0.4.24;
 
 import "../../contracts/ScryToken.sol";
 
+// move deploy file to it's position before use this file.
 contract testAddr {
     function () public payable {}
 

@@ -19,6 +19,8 @@ if ($confirm -eq "Y") {
     abigen --abi ".\build\contracts\ScryProtocol.abi" --type ScryProtocol --pkg contractinterface --out ScryProtocolInterface.go
     abigen --abi ".\build\contracts\ScryToken.abi" --type ScryToken --pkg contractinterface --out ScryTokenInterface.go
     Write-Output "|-> * Finish. "
+
+    Start-Sleep -Milliseconds 1500
     
     Write-Output "|-> * Move go interface to it's position"
     if (Test-Path "..\..\dots\binary\stub\contract\*.go") {

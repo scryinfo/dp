@@ -138,87 +138,20 @@ let acc_db = {
     }
 };
 
-let txSeller_db = {
+let tx_db = {
     db_name: "",
-    db_store_name: "tx_seller",
+    db_store_name: "transaction",
     db: IDBDatabase,
     init: function (_this) {
         _this.$store.state.transactionsell = [];
-        let c = txSeller_db.db.transaction(txSeller_db.db_store_name, "readwrite").objectStore(txSeller_db.db_store_name).openCursor();
-        c.onsuccess = function (event) {
-            let cursor = event.target.result;
-            if (cursor) {
-                _this.$store.state.transactionsell.push({
-                    Title: cursor.value.Title,
-                    Price: cursor.value.Price,
-                    Keys: cursor.value.Keys,
-                    Description: cursor.value.Description,
-                    Buyer: cursor.value.Buyer,
-                    Seller: cursor.value.Seller,
-                    State: cursor.value.State,
-                    SupportVerify: cursor.value.SupportVerify,
-                    StartVerify: cursor.value.StartVerify,
-                    MetaDataExtension: cursor.value.MetaDataExtension,
-                    ProofDataExtensions: cursor.value.ProofDataExtensions,
-                    MetaDataIDEncWithSeller: cursor.value.MetaDataIDEncWithSeller,
-                    MetaDataIDEncWithBuyer: cursor.value.MetaDataIDEncWithBuyer,
-                    MetaDataIDEncWithArbitrator: cursor.value.MetaDataIDEncWithArbitrator,
-                    ArbitrateResult: cursor.value.ArbitrateResult,
-                    PublishID: cursor.value.PublishID,
-                    TransactionID: cursor.value.TransactionID
-                });
-                cursor.continue();
-            }
-        };
-    },
-    write:function(params, cb) {
-        let store = txSeller_db.db.transaction(txSeller_db.db_store_name, "readwrite").objectStore(txSeller_db.db_store_name);
-        let request = store.put(params);
-        request.onerror = function(err){
-            console.log(err);
-        };
-        request.onsuccess = function() {
-            cb();
-        };
-    },
-    read:function (key, cb) {
-        let store = txSeller_db.db.transaction(txSeller_db.db_store_name, "readwrite").objectStore(txSeller_db.db_store_name);
-        let request = store.get(key);
-        request.onerror = function (err) {
-            console.log(err);
-        };
-        request.onsuccess = function (event) {
-            cb(event.target.result);
-        };
-    },
-    closeDB: function () {
-        txSeller_db.db.close();
-    },
-    reset:function() {
-        let store = txSeller_db.db.transaction(txSeller_db.db_store_name,"readwrite").objectStore(txSeller_db.db_store_name);
-        let request = store.clear();
-        request.onerror = function (err) {
-            console.log(err);
-        };
-    }
-};
-
-let txBuyer_db = {
-    db_name: "",
-    db_store_name: "tx_buy",
-    db: IDBDatabase,
-    init: function (_this) {
         _this.$store.state.transactionbuy = [];
-        let c = txBuyer_db.db.transaction(txBuyer_db.db_store_name, "readwrite").objectStore(txBuyer_db.db_store_name).openCursor();
+        _this.$store.state.transactionverifier = [];
+        _this.$store.state.transactionarbitrator = [];
+        let c = tx_db.db.transaction(tx_db.db_store_name, "readwrite").objectStore(tx_db.db_store_name).openCursor();
         c.onsuccess = function (event) {
             let cursor = event.target.result;
             if (cursor) {
-                let sv = "";
-                switch (cursor.value.SupportVerify) {
-                    case true: sv = "支持验证"; break;
-                    case false: sv = "不支持验证"; break;
-                }
-                _this.$store.state.transactionbuy.push({
+                let param = {
                     Title: cursor.value.Title,
                     Price: cursor.value.Price,
                     Keys: cursor.value.Keys,
@@ -227,7 +160,6 @@ let txBuyer_db = {
                     Seller: cursor.value.Seller,
                     State: cursor.value.State,
                     SupportVerify: cursor.value.SupportVerify,
-                    SVDisplay: sv,
                     StartVerify: cursor.value.StartVerify,
                     MetaDataExtension: cursor.value.MetaDataExtension,
                     ProofDataExtensions: cursor.value.ProofDataExtensions,
@@ -238,55 +170,94 @@ let txBuyer_db = {
                     Verifier2Response: cursor.value.Verifier2Response,
                     ArbitrateResult: cursor.value.ArbitrateResult,
                     PublishID: cursor.value.PublishID,
-                    TransactionID: cursor.value.TransactionID
-                });
+                    TransactionID: cursor.value.TransactionID,
+                    Identify: cursor.value.Identify
+                };
+                switch (cursor.value.Identify) {
+                    case 0: _this.$store.state.transactionsell.push(param);break;
+                    case 1: _this.$store.state.transactionbuy.push(param);break;
+                    case 2: _this.$store.state.transactionverifier.push(param);break;
+                    case 3: _this.$store.state.transactionarbitrator.push(param);break;
+                }
                 cursor.continue();
             }
         };
     },
-    write: function (params, cb) {
-        let store = txBuyer_db.db.transaction(txBuyer_db.db_store_name, "readwrite").objectStore(txBuyer_db.db_store_name);
-        let request = store.put(params);
-        request.onerror = function(err){
-            console.log(err);
-        };
-        request.onsuccess = function() {
-            cb();
-        };
-    },
-    read: function (key, cb) {
-        let store = txBuyer_db.db.transaction(txBuyer_db.db_store_name, "readwrite").objectStore(txBuyer_db.db_store_name);
-        let request = store.get(key);
-        request.onerror = function (err) {
-            console.log(err);
-        };
-        request.onsuccess = function (event) {
-            cb(event.target.result);
-        };
-    },
-    closeDB: function () {
-        txBuyer_db.db.close();
-    },
-    reset: function () {
-        let store = txBuyer_db.db.transaction(txBuyer_db.db_store_name,"readwrite").objectStore(txBuyer_db.db_store_name);
-        let request = store.clear();
-        request.onerror = function (err) {
-            console.log(err);
-        };
-    }
-};
-
-let txVerifier_db = {
-    db_name: "",
-    db_store_name: "tx_verifier",
-    db: IDBDatabase,
-    init: function (_this) {
-        _this.$store.state.transactionverifier = [];
-        let c = txVerifier_db.db.transaction(txVerifier_db.db_store_name, "readwrite").objectStore(txVerifier_db.db_store_name).openCursor();
+    initSeller: function (_this) {
+        _this.$store.state.transactionsell = [];
+        let c = tx_db.db.transaction(tx_db.db_store_name, "readwrite").objectStore(tx_db.db_store_name).openCursor();
         c.onsuccess = function (event) {
             let cursor = event.target.result;
             if (cursor) {
-                if (cursor.value.State === "Created" || cursor.value.State === "Voted") {
+                if (cursor.value.Identify === 0) {
+                    _this.$store.state.transactionsell.push({
+                        Title: cursor.value.Title,
+                        Price: cursor.value.Price,
+                        Keys: cursor.value.Keys,
+                        Description: cursor.value.Description,
+                        Buyer: cursor.value.Buyer,
+                        Seller: cursor.value.Seller,
+                        State: cursor.value.State,
+                        SupportVerify: cursor.value.SupportVerify,
+                        StartVerify: cursor.value.StartVerify,
+                        MetaDataExtension: cursor.value.MetaDataExtension,
+                        ProofDataExtensions: cursor.value.ProofDataExtensions,
+                        MetaDataIDEncWithSeller: cursor.value.MetaDataIDEncWithSeller,
+                        MetaDataIDEncWithBuyer: cursor.value.MetaDataIDEncWithBuyer,
+                        MetaDataIDEncWithArbitrator: cursor.value.MetaDataIDEncWithArbitrator,
+                        Verifier1Response: cursor.value.Verifier1Response,
+                        Verifier2Response: cursor.value.Verifier2Response,
+                        ArbitrateResult: cursor.value.ArbitrateResult,
+                        PublishID: cursor.value.PublishID,
+                        TransactionID: cursor.value.TransactionID,
+                        Identify: cursor.value.Identify
+                    });
+                }
+                cursor.continue();
+            }
+        }
+    },
+    initBuyer: function (_this) {
+        _this.$store.state.transactionbuy = [];
+        let c = tx_db.db.transaction(tx_db.db_store_name, "readwrite").objectStore(tx_db.db_store_name).openCursor();
+        c.onsuccess = function (event) {
+            let cursor = event.target.result;
+            if (cursor) {
+                if (cursor.value.Identify === 1) {
+                    _this.$store.state.transactionbuy.push({
+                        Title: cursor.value.Title,
+                        Price: cursor.value.Price,
+                        Keys: cursor.value.Keys,
+                        Description: cursor.value.Description,
+                        Buyer: cursor.value.Buyer,
+                        Seller: cursor.value.Seller,
+                        State: cursor.value.State,
+                        SupportVerify: cursor.value.SupportVerify,
+                        StartVerify: cursor.value.StartVerify,
+                        MetaDataExtension: cursor.value.MetaDataExtension,
+                        ProofDataExtensions: cursor.value.ProofDataExtensions,
+                        MetaDataIDEncWithSeller: cursor.value.MetaDataIDEncWithSeller,
+                        MetaDataIDEncWithBuyer: cursor.value.MetaDataIDEncWithBuyer,
+                        MetaDataIDEncWithArbitrator: cursor.value.MetaDataIDEncWithArbitrator,
+                        Verifier1Response: cursor.value.Verifier1Response,
+                        Verifier2Response: cursor.value.Verifier2Response,
+                        ArbitrateResult: cursor.value.ArbitrateResult,
+                        PublishID: cursor.value.PublishID,
+                        TransactionID: cursor.value.TransactionID,
+                        Identify: cursor.value.Identify
+                    });
+                }
+                cursor.continue();
+            }
+        }
+    },
+    initVerifier: function (_this) {
+        _this.$store.state.transactionverifier = [];
+        let c = tx_db.db.transaction(tx_db.db_store_name, "readwrite").objectStore(tx_db.db_store_name).openCursor();
+        c.onsuccess = function (event) {
+            let cursor = event.target.result;
+            if (cursor) {
+                if (cursor.value.Identify === 2) {
                     _this.$store.state.transactionverifier.push({
                         Title: cursor.value.Title,
                         Price: cursor.value.Price,
@@ -306,56 +277,21 @@ let txVerifier_db = {
                         Verifier2Response: cursor.value.Verifier2Response,
                         ArbitrateResult: cursor.value.ArbitrateResult,
                         PublishID: cursor.value.PublishID,
-                        TransactionID: cursor.value.TransactionID
+                        TransactionID: cursor.value.TransactionID,
+                        Identify: cursor.value.Identify
                     });
                 }
                 cursor.continue();
             }
-        };
+        }
     },
-    write: function (params, cb) {
-        let store = txVerifier_db.db.transaction(txVerifier_db.db_store_name, "readwrite").objectStore(txVerifier_db.db_store_name);
-        let request = store.put(params);
-        request.onerror = function(err){
-            console.log(err);
-        };
-        request.onsuccess = function() {
-            cb();
-        };
-    },
-    read: function (key, cb) {
-        let store = txVerifier_db.db.transaction(txVerifier_db.db_store_name, "readwrite").objectStore(txVerifier_db.db_store_name);
-        let request = store.get(key);
-        request.onerror = function (err) {
-            console.log(err);
-        };
-        request.onsuccess = function (event) {
-            cb(event.target.result);
-        };
-    },
-    closeDB: function () {
-        txVerifier_db.db.close();
-    },
-    reset: function () {
-        let store = txVerifier_db.db.transaction(txVerifier_db.db_store_name,"readwrite").objectStore(txVerifier_db.db_store_name);
-        let request = store.clear();
-        request.onerror = function (err) {
-            console.log(err);
-        };
-    }
-};
-
-let txArbitrator_db = {
-    db_name: "",
-    db_store_name: "tx_arbitrator",
-    db: IDBDatabase,
-    init: function (_this) {
+    initArbitrator: function (_this) {
         _this.$store.state.transactionarbitrator = [];
-        let c = txArbitrator_db.db.transaction(txArbitrator_db.db_store_name, "readwrite").objectStore(txArbitrator_db.db_store_name).openCursor();
+        let c = tx_db.db.transaction(tx_db.db_store_name, "readwrite").objectStore(tx_db.db_store_name).openCursor();
         c.onsuccess = function (event) {
             let cursor = event.target.result;
             if (cursor) {
-                if (cursor.value.State === "ReadyForDownload") {
+                if (cursor.value.Identify === 2) {
                     _this.$store.state.transactionarbitrator.push({
                         Title: cursor.value.Title,
                         Price: cursor.value.Price,
@@ -375,15 +311,16 @@ let txArbitrator_db = {
                         Verifier2Response: cursor.value.Verifier2Response,
                         ArbitrateResult: cursor.value.ArbitrateResult,
                         PublishID: cursor.value.PublishID,
-                        TransactionID: cursor.value.TransactionID
+                        TransactionID: cursor.value.TransactionID,
+                        Identify: cursor.value.Identify
                     });
                 }
                 cursor.continue();
             }
-        };
+        }
     },
-    write: function (params, cb) {
-        let store = txArbitrator_db.db.transaction(txArbitrator_db.db_store_name, "readwrite").objectStore(txArbitrator_db.db_store_name);
+    write:function(params, cb) {
+        let store = tx_db.db.transaction(tx_db.db_store_name, "readwrite").objectStore(tx_db.db_store_name);
         let request = store.put(params);
         request.onerror = function(err){
             console.log(err);
@@ -392,8 +329,8 @@ let txArbitrator_db = {
             cb();
         };
     },
-    read: function (key, cb) {
-        let store = txArbitrator_db.db.transaction(txArbitrator_db.db_store_name, "readwrite").objectStore(txArbitrator_db.db_store_name);
+    read:function (key, cb) {
+        let store = tx_db.db.transaction(tx_db.db_store_name, "readwrite").objectStore(tx_db.db_store_name);
         let request = store.get(key);
         request.onerror = function (err) {
             console.log(err);
@@ -403,10 +340,10 @@ let txArbitrator_db = {
         };
     },
     closeDB: function () {
-        txArbitrator_db.db.close();
+        tx_db.db.close();
     },
-    reset: function () {
-        let store = txArbitrator_db.db.transaction(txArbitrator_db.db_store_name,"readwrite").objectStore(txArbitrator_db.db_store_name);
+    reset:function() {
+        let store = tx_db.db.transaction(tx_db.db_store_name,"readwrite").objectStore(tx_db.db_store_name);
         let request = store.clear();
         request.onerror = function (err) {
             console.log(err);
@@ -432,46 +369,31 @@ let db_options = {
         };
     },
     userDBInit: function (address) {
-        txBuyer_db.db_name = address;
-        txSeller_db.db_name = address;
-        txVerifier_db.db_name = address;
-        txArbitrator_db.db_name = address;
+        tx_db.db_name = address;
         let request = indexedDB.open(address, 1);
         request.onupgradeneeded = function (event) {
-            txBuyer_db.db = event.target.result;
-            txSeller_db.db = event.target.result;
-            txVerifier_db.db = event.target.result;
-            txArbitrator_db.db = event.target.result;
-            event.target.result.createObjectStore(txBuyer_db.db_store_name, {keyPath: "TransactionID"});
-            event.target.result.createObjectStore(txSeller_db.db_store_name, {keyPath: "TransactionID"});
-            event.target.result.createObjectStore(txVerifier_db.db_store_name, {keyPath: "TransactionID"});
-            event.target.result.createObjectStore(txArbitrator_db.db_store_name, {keyPath: "TransactionID"});
+            tx_db.db = event.target.result;
+            event.target.result.createObjectStore(tx_db.db_store_name, {keyPath: "TransactionID"});
         };
         request.onsuccess = function (event) {
-            txBuyer_db.db = event.target.result;
-            txSeller_db.db = event.target.result;
-            txVerifier_db.db = event.target.result;
-            txArbitrator_db.db = event.target.result;
+            tx_db.db = event.target.result;
         };
         request.onerror = function (err) {
             console.log("数据库创建/打开失败，错误代码： ", err);
         };
     },
     txDBsDataUpdate: function (_this) {
-        txBuyer_db.init(_this);
-        txSeller_db.init(_this);
-        txVerifier_db.init(_this);
-        txArbitrator_db.init(_this);
+        tx_db.init(_this);
     },
     userDBClose: function () {
-        txBuyer_db.closeDB();
-        txSeller_db.closeDB();
-        txVerifier_db.closeDB();
-        txArbitrator_db.closeDB();
+        tx_db.closeDB();
     },
-    deleteDB: function (db_name) {
-        window.indexedDB.deleteDatabase(db_name);
+    clearTxObjectStore: function () {
+        let c = tx_db.db.transaction(tx_db.db_store_name, "readwrite").objectStore(tx_db.db_store_name).clear();
+        c.onsuccess = function () {
+            console.log("交易信息已清空");
+        }
     }
 };
 
-export {db_options, dl_db, acc_db, txBuyer_db, txSeller_db, txVerifier_db, txArbitrator_db};
+export {db_options, dl_db, acc_db, tx_db};

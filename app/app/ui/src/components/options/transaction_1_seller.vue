@@ -34,7 +34,7 @@
 
 <script>
 import {connect} from "../../utils/connect.js";
-import {txSeller_db} from "../../utils/DBoptions.js";
+import {tx_db} from "../../utils/DBoptions.js";
 import {utils} from "../../utils/utils.js";
 import SFT from "../templates/simple_function_template.vue";
 export default {
@@ -65,7 +65,7 @@ export default {
             return utils.functionDisabled(funcNum, this.txState);
         },
         initTxS: function () {
-            txSeller_db.init(this);
+            tx_db.initSeller(this);
         },
         reEncrypt:function (pwd) {
             connect.send({ Name:"reEncrypt", Payload:{password: pwd, tID: this.selectedTx}}, function (payload, _this) {
