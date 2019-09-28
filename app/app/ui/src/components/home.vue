@@ -88,8 +88,8 @@ export default {
     },
     created() {
         utils.init();
-        db_options.utilsDBInit(this);
         db_options.userDBInit(this.$route.params.acc);
+
         let _home = this;
         acc_db.read(this.$route.params.acc, function (accInstance) {
             _home.$store.state.account = accInstance.address;

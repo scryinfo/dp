@@ -24,19 +24,6 @@ type IDs struct {
 	DetailsID    string   `json:"detailsID"`
 }
 
-type OnPublish struct {
-	Title               string   `json:"Title"`
-	Keys                string   `json:"Keys"`
-	Description         string   `json:"Description"`
-	MetaDataExtension   string   `json:"MetaDataExtension"`
-	ProofDataExtensions []string `json:"ProofDataExtensions"`
-	Seller              string   `json:"Seller"`
-	Price               string
-	PublishID           string
-	SupportVerify       bool
-	Block               uint64
-}
-
 type BuyData struct {
 	Password     string       `json:"password"`
 	StartVerify  bool         `json:"startVerify"`
@@ -45,28 +32,6 @@ type BuyData struct {
 type SelectedData struct {
 	PublishID string  `json:"PublishID"`
 	Price     float64 `json:"Price"`
-}
-
-type OnApprove struct {
-	Block uint64
-}
-
-type OnVerifiersChosen struct {
-	TransactionID  string
-	PublishID      string
-	ProofFileNames []string
-	TxState        string
-	Block          uint64
-}
-
-type OnTransactionCreate struct {
-	TransactionID  string
-	PublishID      string
-	ProofFileNames []string
-	Buyer          string
-	StartVerify    bool
-	TxState        string
-	Block          uint64
 }
 
 type Prepared struct {
@@ -81,14 +46,6 @@ type SelectedTxPD struct {
 	TransactionID string `json:"TransactionID"`
 }
 
-type OnPurchase struct {
-	TransactionID           string
-	PublishID               string
-	MetaDataIdEncWithSeller []byte
-	TxState                 string
-	Block                   uint64
-}
-
 type ReEncryptData struct {
 	Password   string        `json:"password"`
 	SelectedTx SelectedTxRED `json:"tID"`
@@ -97,13 +54,6 @@ type SelectedTxRED struct {
 	TransactionID           string `json:"TransactionID"`
 	Seller                  string `json:"Seller"`
 	MetaDataIDEncWithSeller []byte `json:"MetaDataIDEncWithSeller"`
-}
-
-type OnReadyForDownload struct {
-	TransactionID          string
-	MetaDataIdEncWithBuyer []byte
-	TxState                string
-	Block                  uint64
 }
 
 type DecryptData struct {
@@ -125,17 +75,8 @@ type SelectedTxCD struct {
 	TransactionID string `json:"TransactionID"`
 }
 
-type OnClose struct {
-	TransactionID string
-	TxState       string
-	Block         uint64
-}
-
 type RegisterVerifierData struct {
 	Password string `json:"password"`
-}
-type OnRegisterAsVerifier struct {
-	Block uint64
 }
 
 type VerifyData struct {
@@ -146,14 +87,6 @@ type VerifyData struct {
 type Verify struct {
 	Suggestion bool   `json:"suggestion"`
 	Comment    string `json:"comment"`
-}
-
-type OnVote struct {
-	TransactionID    string
-	VerifierResponse string
-	VerifierIndex    string
-	TxState          string
-	Block            uint64
 }
 
 type CreditData struct {
@@ -178,25 +111,6 @@ type ArbitrateData struct {
 }
 type SelectedTxAD struct {
 	TransactionId string `json:"TransactionID"`
-}
-
-type OnVerifierDisable struct {
-	Verifier string
-	Block    uint64
-}
-
-type OnArbitrationBegin struct {
-	TransactionId               string
-	PublishId                   string
-	ProofFileNames              []string
-	MetaDataIdEncWithArbitrator []byte
-	Block                       uint64
-}
-
-type OnArbitrationResult struct {
-	TransactionId   string
-	ArbitrateResult string
-	Block           uint64
 }
 
 type Balance struct {

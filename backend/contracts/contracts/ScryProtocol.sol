@@ -35,25 +35,6 @@ contract ScryProtocol {
         dataSet.conf = common.Configuration(2, 10000, 300,   1, 0, 500,   0, 5, 2,   0, 32); // simple arbitrate params for test
     }
 
-    function registerAsVerifier(string seqNo) external {
-        verification.register(dataSet, seqNo, token);
-    }
-
-    function vote(string seqNo, uint txId, bool judge, string comments) external {
-        verification.vote(dataSet, seqNo, txId, judge, comments, token);
-    }
-
-    function creditsToVerifier(string seqNo, uint256 txId, uint8 verifierIndex, uint8 credit) external {
-        verification.creditsToVerifier(dataSet, seqNo, txId, verifierIndex, credit);
-    }
-
-    function arbitrate(string seqNo, uint txId, bool judge) external {
-        verification.arbitrate(dataSet, txId, judge, token);
-        if (verification.arbitrateFinished(dataSet, txId)) {
-            transaction.arbitrateResult(dataSet, seqNo, txId, token);
-        }
-    }
-
     function publishDataInfo(string seqNo, string publishId, uint256 price, bytes metaDataIdEncSeller,
         bytes32[] proofDataIds, string descDataId, bool supportVerify) public {
         transaction.publishDataInfo(
@@ -129,6 +110,25 @@ contract ScryProtocol {
             truth,
             token
         );
+    }
+
+    function registerAsVerifier(string seqNo) external {
+        verification.register(dataSet, seqNo, token);
+    }
+
+    function vote(string seqNo, uint txId, bool judge, string comments) external {
+        verification.vote(dataSet, seqNo, txId, judge, comments, token);
+    }
+
+    function creditsToVerifier(string seqNo, uint256 txId, uint8 verifierIndex, uint8 credit) external {
+        verification.creditsToVerifier(dataSet, seqNo, txId, verifierIndex, credit);
+    }
+
+    function arbitrate(string seqNo, uint txId, bool judge) external {
+        verification.arbitrate(dataSet, txId, judge, token);
+        if (verification.arbitrateFinished(dataSet, txId)) {
+            transaction.arbitrateResult(dataSet, seqNo, txId, token);
+        }
     }
 
     function getBuyer(uint256 txId) external view returns (address) {

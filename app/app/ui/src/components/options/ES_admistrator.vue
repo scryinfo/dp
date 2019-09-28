@@ -54,8 +54,8 @@ export default {
         },
         testTxDBsConnect: function () {
             console.log("Node: show param acc ", this.$store.state.account);
-            let os = tx_db.db.transaction(this.$store.state.account, "readwrite").objectStore(this.$store.state.account);
-            os.onsuccess = function () {
+            let c = tx_db.db.transaction(this.$store.state.account, "readwrite").objectStore(this.$store.state.account).openCursor();
+            c.onsuccess = function () {
                 console.log("数据库连接正常");
             }
         },
