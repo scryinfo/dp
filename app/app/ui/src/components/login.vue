@@ -46,7 +46,7 @@
 </template>
 
 <script>
-import {db_options, acc_db} from "../utils/DBoptions.js";
+import {acc_db} from "../utils/DBoptions.js";
 import {connect} from "../utils/connect.js";
 export default {
     name: "login.vue",
@@ -118,8 +118,6 @@ export default {
     },
     created() {
         this.password = "";this.describe = "";this.account = "";
-        db_options.utilsDBInit(this);
-        connect.WSConnect(this);
     }
 }
 </script>

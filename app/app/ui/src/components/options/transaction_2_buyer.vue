@@ -128,10 +128,12 @@ export default {
         decrypt: function (pwd) {
             connect.send({Name:"decrypt", Payload:{password: pwd, tID: this.selectedTx}}, function (payload, _this) {
                 console.log("解密数据成功", payload);
-                _this.$alert(payload.replace(/[\\\/]/g, "/").split("/").pop(), "原始数据：", {
+                _this.$alert(payload, "原始数据：", {
+                    customClass: "longText",
                     confirmButtonText: "关闭",
                     showClose: false,
-                    type: "info"
+                    type: "info",
+                    width:"500px",
                 });
             }, function (payload, _this) {
                 console.log("解密数据失败：", payload);
@@ -201,8 +203,8 @@ export default {
 }
 </script>
 
-<style scoped>
-.el-message-box {
-    width: 500px;
+<style>
+.longText {
+    width: auto !important;
 }
 </style>

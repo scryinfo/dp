@@ -491,6 +491,8 @@ func (p *Preset) Register(mi *server.MessageIn) (payload interface{}, err error)
        return
    }
 
+   time.Sleep(5 * time.Second)
+
    if err = p.Bin.ChainWrapper().RegisterAsVerifier(p.makeTxParams(rvd.Password)); err != nil {
        err = errors.Wrap(err, "Register as verifier failed. ")
        return
