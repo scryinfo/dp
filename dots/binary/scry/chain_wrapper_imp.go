@@ -19,8 +19,8 @@ import (
 
 type chainWrapperImp struct {
     conn     *ethclient.Client
-    protocol *contract.ScryProtocol
-    token    *contract.ScryToken
+    protocol *contractinterface.ScryProtocol
+    token    *contractinterface.ScryToken
     Tx       *tx.Transaction `dot:"a3e1a88e-f84e-4285-b5ff-54a16fdcd44c"`
     Account  *auth.Account   `dot:"ca1c6ce4-182b-430a-9813-caeccf83f8ab"`
     appId    string
@@ -29,23 +29,23 @@ type chainWrapperImp struct {
 // check if 'chainWrapperImp' implements 'ChainWrapper' interface.
 var _ ChainWrapper = (*chainWrapperImp)(nil)
 
-func NewChainWrapper(protocolContractAddress common.Address,
-    tokenContractAddress common.Address,
+func NewChainWrapper(protocolcontractinterfaceAddress common.Address,
+    tokencontractinterfaceAddress common.Address,
     clientConn *ethclient.Client,
     appId string,
 ) (ChainWrapper, error) {
     var err error = nil
     c := &chainWrapperImp{}
 
-    c.protocol, err = contract.NewScryProtocol(protocolContractAddress, clientConn)
+    c.protocol, err = contractinterface.NewScryProtocol(protocolcontractinterfaceAddress, clientConn)
     if err != nil {
-        dot.Logger().Errorln("", zap.NamedError("failed to initialize protocol contract interface wrapper.", err))
+        dot.Logger().Errorln("", zap.NamedError("failed to initialize protocol contractinterface interface wrapper.", err))
         return nil, err
     }
 
-    c.token, err = contract.NewScryToken(tokenContractAddress, clientConn)
+    c.token, err = contractinterface.NewScryToken(tokencontractinterfaceAddress, clientConn)
     if err != nil {
-        dot.Logger().Errorln("", zap.NamedError("failed to initialize token contract interface wrapper.", err))
+        dot.Logger().Errorln("", zap.NamedError("failed to initialize token contractinterface interface wrapper.", err))
         return nil, err
     }
 

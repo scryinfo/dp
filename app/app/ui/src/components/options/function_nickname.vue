@@ -72,7 +72,7 @@ export default {
                         "nickname": accs[i].nickname
                     });
                 }
-                connect.send({Name:"acc.backup",Payload:{"accounts": _this.accBackup}}, function (payload, _this) {
+                connect.send({Name:"accountsBackup",Payload:{"accounts": _this.accBackup}}, function (payload, _this) {
                     console.log("用户信息备份成功", payload);
                     _this.accBackup = [];
                 }, function (payload, _this) {
@@ -87,7 +87,7 @@ export default {
             });
         },
         DBRestore: function () {
-            connect.send({Name:"acc.restore",Payload:{}}, function (payload, _this) {
+            connect.send({Name:"accountsRestore",Payload:{}}, function (payload, _this) {
                 let accs = JSON.parse(payload);
                 console.log("用户信息还原成功", accs.accounts);
                 for (let i = 0; i < accs.accounts.length; i++) {

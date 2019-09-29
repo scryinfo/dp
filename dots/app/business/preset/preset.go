@@ -52,9 +52,9 @@ func (p *Preset) Create(l dot.Line) error {
     }
 
     p.PresetMsgNames = []string{
-        "login.verify",
-        "create.new.account",
-        "block.set",
+        "loginVerify",
+        "createNewAccount",
+        "blockSet",
         "logout",
         "publish",
         "buy",
@@ -68,10 +68,10 @@ func (p *Preset) Create(l dot.Line) error {
         "verify",
         "credit",
         "arbitrate",
-        "get.eth.balance",
-        "get.token.balance",
-        "acc.backup",
-        "acc.restore",
+        "getEthBalance",
+        "getTokenBalance",
+        "accountsBackup",
+        "accountsRestore",
     }
 
     p.PresetMsgHandlers = []server.PresetFunc{
@@ -306,6 +306,8 @@ func (p *Preset) Buy(mi *server.MessageIn) (payload interface{}, err error) {
        return
    }
 
+   time.Sleep(5 * time.Second)
+
    if err = p.Bin.ChainWrapper().PrepareToBuy(p.makeTxParams(bd.Password), bd.SelectedData.PublishID, bd.StartVerify); err != nil {
        err = errors.Wrap(err, "Transaction create failed. ")
        return
@@ -318,7 +320,7 @@ func (p *Preset) Buy(mi *server.MessageIn) (payload interface{}, err error) {
 
 func (p *Preset) Extensions(mi *server.MessageIn) (payload interface{}, err error) {
    var ppd definition.Prepared
-   if err = json.Unmarshal(mi.Payload, &p); err != nil {
+   if err = json.Unmarshal(mi.Payload, &ppd); err != nil {
        return
    }
    p.CBs.ExtChan <- ppd.Extensions
@@ -488,6 +490,8 @@ func (p *Preset) Register(mi *server.MessageIn) (payload interface{}, err error)
        err = errors.Wrap(err, "Contract transfer token from register failed. ")
        return
    }
+
+   time.Sleep(5 * time.Second)
 
    if err = p.Bin.ChainWrapper().RegisterAsVerifier(p.makeTxParams(rvd.Password)); err != nil {
        err = errors.Wrap(err, "Register as verifier failed. ")

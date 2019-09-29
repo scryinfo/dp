@@ -110,7 +110,7 @@ func (ws *WSServer) handleMessages(conn *websocket.Conn) {
             var reply []byte
             if err = websocket.Message.Receive(ws.connParams, &reply); err != nil {
                 if err.Error() == "EOF" {
-                    logger.Warnln("> Client disconnect: " + conn.LocalAddr().String())
+                    logger.Infoln("> Client disconnect: " + conn.LocalAddr().String())
                     return
                 }
                 logger.Errorln("Received failed. ", zap.NamedError("", err))

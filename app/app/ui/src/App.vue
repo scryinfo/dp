@@ -8,8 +8,23 @@
 </template>
 
 <script>
+import {db_options} from "./utils/DBoptions.js";
+import {connect} from "./utils/connect.js";
 export default {
-	name: "app"
+	name: "app",
+	created () {
+        db_options.utilsDBInit(this);
+        connect.WSConnect(this);
+
+        if (sessionStorage.getItem("store") ) {
+            this.$store.replaceState(Object.assign({}, this.$store.state,JSON.parse(sessionStorage.getItem("store"))));
+            sessionStorage.removeItem('store');
+        }
+
+        window.addEventListener("beforeunload",()=>{
+            sessionStorage.setItem("store",JSON.stringify(this.$store.state))
+        })
+	}
 }
 </script>
 
