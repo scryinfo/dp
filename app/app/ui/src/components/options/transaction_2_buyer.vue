@@ -56,7 +56,7 @@
 
 <script>
 import {connect} from "../../utils/connect.js";
-import {txBuyer_db} from "../../utils/DBoptions.js"
+import {tx_db} from "../../utils/DBoptions.js"
 import {utils} from "../../utils/utils.js";
 import SFT from "../templates/simple_function_template.vue"
 import CFT from "../templates/complex_function_template.vue"
@@ -96,10 +96,15 @@ export default {
             this.txState = curRow.State;
         },
         buttonDisabled: function (funcNum) {
-            return utils.functionDisabled(funcNum, this.txState);
+            let bool;
+            switch (funcNum) {
+                case 4: bool = utils.functionDisabled(funcNum, this.txState) || this.selectedTx.SupportVerify; break;
+                default: bool = utils.functionDisabled(funcNum, this.txState); break;
+            }
+            return bool;
         },
         initTxB: function () {
-            txBuyer_db.init(this);
+            tx_db.initBuyer(this);
         },
         cancelBuying: function (pwd) {
             connect.send({Name:"cancel", Payload:{password: pwd, tID: this.selectedTx}}, function (payload, _this) {
@@ -129,10 +134,11 @@ export default {
             connect.send({Name:"decrypt", Payload:{password: pwd, tID: this.selectedTx}}, function (payload, _this) {
                 console.log("解密数据成功", payload);
                 _this.$alert(payload, "原始数据：", {
+                    customClass: "longText",
                     confirmButtonText: "关闭",
-                    dangerouslyUseHTMLString: true,
                     showClose: false,
-                    type: "info"
+                    type: "info",
+                    width:"500px",
                 });
             }, function (payload, _this) {
                 console.log("解密数据失败：", payload);
@@ -203,5 +209,7 @@ export default {
 </script>
 
 <style>
-
+.longText {
+    width: auto !important;
+}
 </style>

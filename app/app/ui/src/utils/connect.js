@@ -9,6 +9,9 @@ let connect = {
     map: {},
     msgMutex: true,
     msgParams: [],
+    count: 0,
+    MAX: 1000,
+    t: setTimeout(function() {connect.reconnect();}, 100),
     WSConnect: function (_this) {
         // url: 'http://127.0.0.1:9822/#/'
         let port = window.location.href.split(":")[2].split("/")[0];
@@ -25,10 +28,19 @@ let connect = {
         connect.ws.onclose = function (evt) {
             console.log("connection onclose. ", evt);
             connect.ws.close();
-            _this.$alert("websocket连接已断开。", "连接断开！", {
-                confirmButtonText: "关闭",
-                showClose: false,
+            _this.$confirm("websocket连接已断开，请点击按钮重新连接。", "连接断开！", {
+                confirmButtonText: "重新连接",
+                cancelButtonText: "取消",
                 type: "error"
+            }).then(() => {
+                connect.reconnect();
+            }).catch(() => {
+                _this.$message({
+                    type:"info",
+                    message:"websocket连接已断开。",
+                    duration: 0,
+                    showClose: true
+                });
             });
             _this.$router.push("/");
         };
@@ -36,22 +48,33 @@ let connect = {
             console.log("connection onerror. ", evt);
             connect.ws.close();
         };
-        window.onbeforeunload = function () {
-            connect.ws.close();
-        };
-        connect.WSConnect = function () {};
     },
     msgHandle: async function (obj, _this) {
         if (connect.msgMutex) {
             connect.msgMutex = false;
             await connect.map[obj.Name](obj.Payload, _this);
-            await utils.timeout(100);
+            await utils.timeout(250);
             connect.msgMutex = true;
             if (connect.msgParams.length > 0) {
                 connect.msgHandle(connect.msgParams.shift(), _this);
             }
         } else {
             connect.msgParams.push(obj);
+        }
+    },
+    reconnect: function () {
+        connect.count++;
+        console.log("reconnection...【" + connect.count + "】");
+        //1与服务器已经建立连接
+        if (connect.count >= connect.MAX || connect.ws.readyState === 1) {
+            clearTimeout(connect.t);
+        } else {
+            //3已经关闭了与服务器的连接
+            if (connect.ws.readyState === 3) {
+                connect.WSConnect();
+            }
+            //0正尝试与服务器建立连接,2正在关闭与服务器的连接
+            connect.t = setTimeout(function() {connect.reconnect();}, 100);
         }
     },
     send: function (obj, cbs, cbf) {

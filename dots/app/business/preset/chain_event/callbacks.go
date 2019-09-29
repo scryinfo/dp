@@ -36,7 +36,7 @@ const (
 )
 
 func (c *Callbacks) Create(l dot.Line) error {
-    c.ExtChan = make(chan []string, 4)
+    c.ExtChan = make(chan []string, 10)
 
     c.EventNames = []string{
         "Approval",
@@ -206,14 +206,14 @@ func (c *Callbacks) onTransactionCreate(event event.Event) bool {
 
         otc.Block = event.BlockNumber
         otc.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
-        otc.Buyer = event.Data.Get("users").([]common.Address)[0].String()
+        otc.Buyer = event.Data.Get("users").([]common.Address)[1].String()
         otc.StartVerify = event.Data.Get("needVerify").(bool)
         otc.TxState = setTxState(event.Data.Get("state").(uint8))
 
         extensions := <- c.ExtChan
         var err error
         if otc.ProofFileNames, err = c.getAndRenameProofFiles(event.Data.Get("proofIds").([][32]uint8), extensions); err != nil {
-            dot.Logger().Errorln("", zap.NamedError("Node - onTC.callback: get and rename proof files failed. ", err))
+            dot.Logger().Errorln("", zap.Strings("show extensions: ", extensions), zap.NamedError("Node - onTC.callback: get and rename proof files failed. ", err))
         }
     }
 
@@ -226,7 +226,7 @@ func (c *Callbacks) onTransactionCreate(event event.Event) bool {
 
 func (c *Callbacks) getAndRenameProofFiles(ipfsIDs [][32]byte, extensions []string) ([]string, error) {
     if len(ipfsIDs) != len(extensions) {
-        return nil, errors.New("Quantity of IPFS IDs or extensions is wrong. ")
+        return nil, errors.New("Quantity of IPFS IDs or extensions is wrong. " + strconv.Itoa(len(ipfsIDs)) + ", " + strconv.Itoa(len(extensions)))
     }
 
     defer func() {
@@ -271,7 +271,6 @@ func (c *Callbacks) onPurchase(event event.Event) bool {
         op.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
         op.MetaDataIdEncWithSeller = event.Data.Get("metaDataIdEncSeller").([]byte)
         op.PublishID = event.Data.Get("publishId").(string)
-        op.UserIndex = strconv.Itoa(int(event.Data.Get("index").(uint8)))
         op.TxState = setTxState(event.Data.Get("state").(uint8))
     }
 
@@ -288,7 +287,6 @@ func (c *Callbacks) onReadyForDownload(event event.Event) bool {
         orfd.Block = event.BlockNumber
         orfd.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
         orfd.MetaDataIdEncWithBuyer = event.Data.Get("metaDataIdEncBuyer").([]byte)
-        orfd.UserIndex = strconv.Itoa(int(event.Data.Get("index").(uint8)))
         orfd.TxState = setTxState(event.Data.Get("state").(uint8))
     }
 
@@ -304,7 +302,6 @@ func (c *Callbacks) onClose(event event.Event) bool {
     {
         oc.Block = event.BlockNumber
         oc.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
-        oc.UserIndex = strconv.Itoa(int(event.Data.Get("index").(uint8)))
         oc.TxState = setTxState(event.Data.Get("state").(uint8))
     }
 
@@ -393,7 +390,6 @@ func (c *Callbacks) onArbitrationResult(event event.Event) bool {
     {
         oar.TransactionId = event.Data.Get("transactionId").(*big.Int).String()
         oar.ArbitrateResult = setArbitrateResult(event.Data.Get("judge").(bool))
-        oar.User = strconv.Itoa(int(event.Data.Get("identify").(uint8)))
         oar.Block = event.BlockNumber
     }
 

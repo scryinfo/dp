@@ -7,23 +7,25 @@ import "encoding/json"
 
 // define what a type of connection should implement.
 type Server interface {
-    ListenAndServe() error
+	ListenAndServe() error
 
-    // send message.
-    SendMessage(name string, payload interface{}) error
+	// send message.
+	SendMessage(name string, payload interface{}) error
 
-    // preset function to handle message.
-    PresetMsgHandleFuncs(name []string, presetFunc []PresetFunc) error
+	// preset function to handle message.
+	PresetMsgHandleFuncs(name []string, presetFunc []PresetFunc) error
 }
 
 type MessageIn struct {
-    Name    string          `json:"Name"`
-    Payload json.RawMessage `json:"Payload"`
+	Name    string          `json:"Name"`
+	Payload json.RawMessage `json:"Payload"`
+	//CommonPayload     json.RawMessage `json:"CommonPayload"`
+	//ParticularPayload json.RawMessage `json:"ParticularPayload"`
 }
 
 type MessageOut struct {
-    Name    string       `json:"Name"`
-    Payload interface{} `json:"Payload,omitempty"`
+	Name    string      `json:"Name"`
+	Payload interface{} `json:"Payload,omitempty"`
 }
 
 type PresetFunc = func(*MessageIn) (interface{}, error)
