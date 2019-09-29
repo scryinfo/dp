@@ -52,9 +52,9 @@ func (p *Preset) Create(l dot.Line) error {
     }
 
     p.PresetMsgNames = []string{
-        "login.verify",
-        "create.new.account",
-        "block.set",
+        "loginVerify",
+        "createNewAccount",
+        "blockSet",
         "logout",
         "publish",
         "buy",
@@ -68,10 +68,10 @@ func (p *Preset) Create(l dot.Line) error {
         "verify",
         "credit",
         "arbitrate",
-        "get.eth.balance",
-        "get.token.balance",
-        "acc.backup",
-        "acc.restore",
+        "getEthBalance",
+        "getTokenBalance",
+        "accountsBackup",
+        "accountsRestore",
     }
 
     p.PresetMsgHandlers = []server.PresetFunc{

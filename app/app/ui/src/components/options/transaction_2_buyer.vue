@@ -96,7 +96,12 @@ export default {
             this.txState = curRow.State;
         },
         buttonDisabled: function (funcNum) {
-            return utils.functionDisabled(funcNum, this.txState);
+            let bool;
+            switch (funcNum) {
+                case 4: bool = utils.functionDisabled(funcNum, this.txState) || this.selectedTx.SupportVerify; break;
+                default: bool = utils.functionDisabled(funcNum, this.txState); break;
+            }
+            return bool;
         },
         initTxB: function () {
             tx_db.initBuyer(this);
