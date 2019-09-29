@@ -3,12 +3,12 @@ import {connect} from "./connect";
 
 let utils = {
     stateEnum: ["Begin", "Created", "Voted", "Buying", "ReadyForDownload", "Closed"],
-    state: [ // tx state -> func state, true: disable & false: able
-        [true,  true,  true, false,  true,  true], // 0 seller: re-encrypt
-        [true, false, false, false,  true,  true], // 1 buyer: cancel
-        [true, false, false,  true,  true,  true], // 2 buyer: purchase & verifier: vote
-        [true,  true,  true,  true, false,  true], // 3 buyer: decrypt/confirm & arbitrator: decrypt/arbitrate
-        [true,  true, false, false, false, false]  // 4 buyer: credit
+    state: [ // tx state -> func state, means func button can or can't click
+        [false, false, false,  true, false, false], // 0 seller: re-encrypt
+        [false,  true,  true,  true, false, false], // 1 buyer: cancel
+        [false,  true,  true, false, false, false], // 2 buyer: purchase & verifier: vote
+        [false, false, false, false,  true, false], // 3 buyer: decrypt/confirm & arbitrator: decrypt/arbitrate
+        [false, false,  true,  true,  true,  true]  // 4 buyer: credit
     ],
     init: function () {
         connect.addCallbackFunc("onPublish", presetFunc.onPublish);
@@ -42,7 +42,7 @@ let utils = {
         return index;
     },
     functionDisabled: function (funcNum, stateStr) {
-        return utils.state[funcNum][utils.setStateString(stateStr)];
+        return !utils.state[funcNum][utils.setStateString(stateStr)];
     }
 };
 

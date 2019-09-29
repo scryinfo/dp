@@ -79,7 +79,7 @@ export default {
                     _login.account = accInstance.nickname;
                 });
             }
-            connect.send({Name: "login.verify", Payload: {account: this.account, password: pwd}}, function (payload, _this) {
+            connect.send({Name: "loginVerify", Payload: {account: this.account, password: pwd}}, function (payload, _this) {
                 _this.$router.push({ name: "home", params: {acc: _login.account}});
             }, function (payload, _this) {
                 console.log("登录验证失败：", payload);
@@ -92,7 +92,7 @@ export default {
         },
         submit_new: function () {
             let _login = this;
-            connect.send({Name: "create.new.account", Payload: {password: this.password}}, function (payload, _this) {
+            connect.send({Name: "createNewAccount", Payload: {password: this.password}}, function (payload, _this) {
                 acc_db.write({
                     address: payload,
                     nickname: payload,

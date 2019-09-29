@@ -94,7 +94,7 @@ export default {
         acc_db.read(this.$route.params.acc, function (accInstance) {
             _home.$store.state.account = accInstance.address;
             _home.$store.state.nickname = accInstance.nickname;
-            connect.send({Name:"block.set", Payload: {fromBlock: accInstance.fromBlock}}, function (payload, _this) {
+            connect.send({Name:"blockSet", Payload: {fromBlock: accInstance.fromBlock}}, function (payload, _this) {
                 console.log("设置初始区块成功", payload);
                 db_options.txDBsDataUpdate(_this);
             }, function (payload, _this) {

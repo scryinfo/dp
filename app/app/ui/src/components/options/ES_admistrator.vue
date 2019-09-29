@@ -9,12 +9,6 @@
             <el-button size="mini" type="primary" @click="welcome">Welcome</el-button></el-col>
         <el-col :span="24" class="section-item">
             <el-button size="mini" type="primary" @click="resetChain">ResetChain</el-button></el-col>
-        <el-col :span="24" class="section-item">
-            <el-button size="mini" type="primary" @click="initDL">InitDL</el-button></el-col>
-        <el-col :span="24" class="section-item">
-            <el-button size="mini" type="primary" @click="initTx">InitTx</el-button></el-col>
-        <el-col :span="24" class="section-item">
-            <el-button size="mini" type="primary" @click="testTxDBsConnect">TestTxDBsConnect</el-button></el-col>
     </section>
 </template>
 
@@ -43,21 +37,6 @@ export default {
             acc_db.reset();
             await this.resetTxDBs();
             console.log("已重置app全部数据");
-        },
-        initDL: function () {
-            dl_db.init(this);
-            console.log("数据列表初始化完成");
-        },
-        initTx: function () {
-            tx_db.init(this);
-            console.log("交易列表初始化完成");
-        },
-        testTxDBsConnect: function () {
-            console.log("Node: show param acc ", this.$store.state.account);
-            let c = tx_db.db.transaction(this.$store.state.account, "readwrite").objectStore(this.$store.state.account).openCursor();
-            c.onsuccess = function () {
-                console.log("数据库连接正常");
-            }
         },
         resetTxDBs: function () {
             let c = acc_db.db.transaction(acc_db.db_store_name,"readwrite").objectStore(acc_db.db_store_name).openCursor();
