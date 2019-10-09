@@ -88,6 +88,7 @@ export default {
     },
     created() {
         utils.init();
+        db_options.utilsDBInit(this);
         db_options.userDBInit(this.$route.params.acc);
 
         let _home = this;

@@ -4,16 +4,16 @@ import "./common.sol";
 import "../ScryToken.sol";
 
 library transaction {
-    event DataPublish(string seqNo, string publishId, uint256 price, string despDataId, bool supportVerify, address[] users);
-    event TransactionCreate(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool needVerify, uint8 state, address[] users);
-    event Buy(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, uint8 state, address[] users);
-    event TransactionClose(string seqNo, uint256 transactionId, uint8 state, address[] users);
+    event Publish(string seqNo, string publishId, uint256 price, string despDataId, bool supportVerify, address[] users);
+    event AdvancePurchase(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool needVerify, uint8 state, address[] users);
+    event ConfirmPurchase(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, uint8 state, address[] users);
+    event FinishPurchase(string seqNo, uint256 transactionId, uint8 state, address[] users);
     event VerifiersChosen(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, uint8 state, address[] users);
-    event ReadyForDownload(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, uint8 state, address[] users);
+    event ReEncrypt(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, uint8 state, address[] users);
     event ArbitrationBegin(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bytes metaDataIdEncArbitrator, address[] users);
     event ArbitrationResult(string seqNo, uint256 transactionId, bool judge, address[] users);
 
-    function publishDataInfo(
+    function publish(
         common.DataSet storage ds,
         string seqNo,
         string publishId,
@@ -40,7 +40,7 @@ library transaction {
             true
         );
 
-        emit DataPublish(seqNo, publishId, price, descDataId, supportVerify, users);
+        emit Publish(seqNo, publishId, price, descDataId, supportVerify, users);
     }
 
     function needVerification(
@@ -61,7 +61,7 @@ library transaction {
         return pubItem.supportVerify && startVerify;
     }
 
-    function createTransaction(
+    function advancePurchase(
         common.DataSet storage ds,
         address[] verifiers,
         address[] arbitrators,
@@ -139,7 +139,7 @@ library transaction {
         users[0] = pubItem.seller;
         users[1] = msg.sender;
 
-        emit TransactionCreate(seqNo, txId, publishId, pubItem.proofDataIds, true, uint8(common.TransactionState.Created), users);
+        emit AdvancePurchase(seqNo, txId, publishId, pubItem.proofDataIds, true, uint8(common.TransactionState.Created), users);
     }
 
     function createTxWithoutVerify(
@@ -179,7 +179,7 @@ library transaction {
         users[0] = pubItem.seller;
         users[1] = msg.sender;
 
-        emit TransactionCreate(seqNo, txId, publishId, proofIds, false, uint8(common.TransactionState.Created), users);
+        emit AdvancePurchase(seqNo, txId, publishId, proofIds, false, uint8(common.TransactionState.Created), users);
     }
 
     function buyerDeposit(
@@ -209,7 +209,7 @@ library transaction {
     }
 
 
-    function buy(
+    function confirmPurchase(
         common.DataSet storage ds,
         string seqNo,
         uint256 txId
@@ -232,10 +232,10 @@ library transaction {
             users[i + 2] = txItem.verifiers[i];
         }
 
-        emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, uint8(txItem.state), users);
+        emit ConfirmPurchase(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, uint8(txItem.state), users);
     }
 
-    function cancelTransaction(
+    function cancelPurchase(
         common.DataSet storage ds,
         string seqNo,
         uint256 txId,
@@ -267,7 +267,7 @@ library transaction {
             users[i + 2] = txItem.verifiers[i];
         }
 
-        emit TransactionClose(seqNo, txId, uint8(txItem.state), users);
+        emit FinishPurchase(seqNo, txId, uint8(txItem.state), users);
     }
 
     function revertToBuyer(common.TransactionItem storage txItem, ERC20 token) internal {
@@ -282,7 +282,7 @@ library transaction {
         }
     }
 
-    function reEncryptMetaDataIdBySeller(
+    function reEncrypt(
         common.DataSet storage ds,
         string seqNo,
         uint256 txId,
@@ -303,7 +303,7 @@ library transaction {
         address[] memory users = new address[](2);
         users[0] = txItem.seller;
         users[1] = txItem.buyer;
-        emit ReadyForDownload(seqNo, txId, txItem.meteDataIdEncBuyer, uint8(txItem.state), users);
+        emit ReEncrypt(seqNo, txId, txItem.meteDataIdEncBuyer, uint8(txItem.state), users);
     }
 
     function deserializeAndSave(common.TransactionItem storage txItem, bytes encIds, uint8 num) internal {
@@ -323,7 +323,7 @@ library transaction {
         txItem.metaDataIdEncArbitrators = ids;
     }
 
-    function confirmDataTruth(
+    function confirmData(
         common.DataSet storage ds,
         string seqNo,
         uint256 txId,
@@ -354,8 +354,8 @@ library transaction {
                 address[] memory users = new address[](ds.conf.arbitratorNum);
                 for (uint8 i = 0; i < ds.conf.arbitratorNum; i++) {
                     users[i] = txItem.arbitrators[i];
+                    emit ArbitrationBegin(seqNo, txId, txItem.publishId, data.proofDataIds, txItem.metaDataIdEncArbitrators[i], users);
                 }
-                emit ArbitrationBegin(seqNo, txId, txItem.publishId, data.proofDataIds, txItem.metaDataIdEncArbitrators[i], users);
             }
         }
     }

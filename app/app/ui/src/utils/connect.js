@@ -36,7 +36,7 @@ let connect = {
                 connect.reconnect();
             }).catch(() => {
                 _this.$message({
-                    type:"info",
+                    type:"error",
                     message:"websocket连接已断开。",
                     duration: 0,
                     showClose: true
@@ -65,15 +65,15 @@ let connect = {
     reconnect: function () {
         connect.count++;
         console.log("reconnection...【" + connect.count + "】");
-        //1与服务器已经建立连接
+        // 1: has connected with server
         if (connect.count >= connect.MAX || connect.ws.readyState === 1) {
             clearTimeout(connect.t);
         } else {
-            //3已经关闭了与服务器的连接
+            // 3: has closed connection with server
             if (connect.ws.readyState === 3) {
                 connect.WSConnect();
             }
-            //0正尝试与服务器建立连接,2正在关闭与服务器的连接
+            // 0: trying connect to server, 2: closing connection with server
             connect.t = setTimeout(function() {connect.reconnect();}, 100);
         }
     },

@@ -6,20 +6,20 @@ let utils = {
     state: [ // tx state -> func state, means func button can or can't click
         [false, false, false,  true, false, false], // 0 seller: re-encrypt
         [false,  true,  true,  true, false, false], // 1 buyer: cancel
-        [false,  true,  true, false, false, false], // 2 buyer: purchase & verifier: vote
-        [false, false, false, false,  true, false], // 3 buyer: decrypt/confirm & arbitrator: decrypt/arbitrate
-        [false, false,  true,  true,  true,  true]  // 4 buyer: credit
+        [false,  true,  true, false, false, false], // 2 buyer: confirmPurchase & verifier: vote
+        [false, false, false, false,  true, false], // 3 buyer: decrypt/confirmData & arbitrator: decrypt/arbitrate
+        [false, false,  true,  true,  true,  true]  // 4 buyer: grade
     ],
     init: function () {
         connect.addCallbackFunc("onPublish", presetFunc.onPublish);
         connect.addCallbackFunc("onProofFilesExtensions", presetFunc.onProofFilesExtensions);
         connect.addCallbackFunc("onVerifiersChosen", presetFunc.onVerifiersChosen);
-        connect.addCallbackFunc("onTransactionCreate", presetFunc.onTransactionCreate);
-        connect.addCallbackFunc("onPurchase", presetFunc.onPurchase);
-        connect.addCallbackFunc("onReadyForDownload", presetFunc.onReadyForDownload);
-        connect.addCallbackFunc("onClose", presetFunc.onClose);
+        connect.addCallbackFunc("onAdvancePurchase", presetFunc.onAdvancePurchase);
+        connect.addCallbackFunc("onConfirmPurchase", presetFunc.onConfirmPurchase);
+        connect.addCallbackFunc("onReEncrypt", presetFunc.onReEncrypt);
+        connect.addCallbackFunc("onFinishPurchase", presetFunc.onFinishPurchase);
         connect.addCallbackFunc("onRegisterVerifier", presetFunc.onRegisterVerifier);
-        connect.addCallbackFunc("onVote", presetFunc.onVote);
+        connect.addCallbackFunc("onVoteResult", presetFunc.onVoteResult);
         connect.addCallbackFunc("onVerifierDisable", presetFunc.onVerifierDisable);
         connect.addCallbackFunc("onArbitrationBegin", presetFunc.onArbitrationBegin);
         connect.addCallbackFunc("onArbitrationResult", presetFunc.onArbitrationResult);
@@ -130,7 +130,7 @@ let presetFunc = {
             });
         });
     },
-    onTransactionCreate: function (payload, _this) {
+    onAdvancePurchase: function (payload, _this) {
         console.log("创建交易事件回调：", payload);
         _this.$notify({
             title: "创建交易事件回调：",
@@ -181,7 +181,7 @@ let presetFunc = {
             });
         });
     },
-    onPurchase: function (payload, _this) {
+    onConfirmPurchase: function (payload, _this) {
         console.log("购买数据事件回调：", payload);
         _this.$notify({
             title: "购买数据事件回调：",
@@ -237,7 +237,7 @@ let presetFunc = {
             });
         });
     },
-    onReadyForDownload: function (payload, _this) {
+    onReEncrypt: function (payload, _this) {
         console.log("再加密数据事件回调：", payload);
         _this.$notify({
             title: "再加密数据事件回调：",
@@ -288,7 +288,7 @@ let presetFunc = {
             });
         });
     },
-    onClose: function (payload, _this) {
+    onFinishPurchase: function (payload, _this) {
         console.log("交易关闭事件回调：", payload);
         _this.$notify({
             title: "交易关闭事件回调：",
@@ -360,7 +360,7 @@ let presetFunc = {
             });
         });
     },
-    onVote: function (payload, _this) {
+    onVoteResult: function (payload, _this) {
         console.log("验证者验证事件回调：", payload);
         _this.$notify({
             title: "验证者验证事件回调：",
@@ -436,7 +436,7 @@ let presetFunc = {
         console.log("仲裁开始事件回调：", payload);
         _this.$notify({
             title: "仲裁开始事件回调：",
-            message: "你已被选中成为 ID: " + payload.TransactionID + " 交易 的仲裁者。",
+            message: "你已被选中成为 ID: " + payload.TransactionId + " 交易 的仲裁者。",
             position: "top-left"
         });
         dl_db.read(payload.PublishId, function (dataDetails) {

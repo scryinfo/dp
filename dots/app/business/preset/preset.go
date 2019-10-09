@@ -57,16 +57,16 @@ func (p *Preset) Create(l dot.Line) error {
         "blockSet",
         "logout",
         "publish",
-        "buy",
+        "advancePurchase",
         "extensions",
-        "purchase",
+        "confirmPurchase",
         "reEncrypt",
-        "cancel",
+        "cancelPurchase",
         "decrypt",
-        "confirm",
+        "confirmData",
         "register",
-        "verify",
-        "credit",
+        "vote",
+        "gradeToVerifier",
         "arbitrate",
         "getEthBalance",
         "getTokenBalance",
@@ -80,22 +80,23 @@ func (p *Preset) Create(l dot.Line) error {
         p.BlockSet,
         p.Logout,
         p.Publish,
-        p.Buy,
+        p.AdvancePurchase,
         p.Extensions,
-        p.Purchase,
+        p.ConfirmPurchase,
         p.ReEncrypt,
-        p.Cancel,
+        p.CancelPurchase,
         p.Decrypt,
-        p.Confirm,
+        p.ConfirmData,
         p.Register,
-        p.Verify,
-        p.Credit,
+        p.Vote,
+        p.GradeToVerifier,
         p.Arbitrate,
         p.GetEthBalance,
         p.GetTokenBalance,
         p.Backup,
         p.Restore,
     }
+
     return nil
 }
 
@@ -282,7 +283,7 @@ func (p *Preset) Publish(mi *server.MessageIn) (payload interface{}, err error) 
    return
 }
 
-func (p *Preset) Buy(mi *server.MessageIn) (payload interface{}, err error) {
+func (p *Preset) AdvancePurchase(mi *server.MessageIn) (payload interface{}, err error) {
    if p.CurUser == nil {
        err = errors.New("Current user is nil. ")
        return
@@ -308,8 +309,8 @@ func (p *Preset) Buy(mi *server.MessageIn) (payload interface{}, err error) {
 
    time.Sleep(5 * time.Second)
 
-   if err = p.Bin.ChainWrapper().PrepareToBuy(p.makeTxParams(bd.Password), bd.SelectedData.PublishID, bd.StartVerify); err != nil {
-       err = errors.Wrap(err, "Transaction create failed. ")
+   if err = p.Bin.ChainWrapper().AdvancePurchase(p.makeTxParams(bd.Password), bd.SelectedData.PublishID, bd.StartVerify); err != nil {
+       err = errors.Wrap(err, "Advance purchase failed. ")
        return
    }
 
@@ -329,7 +330,7 @@ func (p *Preset) Extensions(mi *server.MessageIn) (payload interface{}, err erro
    return
 }
 
-func (p *Preset) Purchase(mi *server.MessageIn) (payload interface{}, err error) {
+func (p *Preset) ConfirmPurchase(mi *server.MessageIn) (payload interface{}, err error) {
    if p.CurUser == nil {
        err = errors.New("Current user is nil. ")
        return
@@ -346,8 +347,8 @@ func (p *Preset) Purchase(mi *server.MessageIn) (payload interface{}, err error)
        return
    }
 
-   if err = p.Bin.ChainWrapper().BuyData(p.makeTxParams(pd.Password), tID); err != nil {
-       err = errors.Wrap(err, "Buy data failed. ")
+   if err = p.Bin.ChainWrapper().ConfirmPurchase(p.makeTxParams(pd.Password), tID); err != nil {
+       err = errors.Wrap(err, "Confirm purchase failed. ")
        return
    }
 
@@ -374,8 +375,8 @@ func (p *Preset) ReEncrypt(mi *server.MessageIn) (payload interface{}, err error
        return
    }
 
-   if err = p.Bin.ChainWrapper().ReEncryptMetaDataId(txParam, tID, re.SelectedTx.MetaDataIDEncWithSeller); err != nil {
-       err = errors.Wrap(err, "Submit encrypted ID with buyer failed. ")
+   if err = p.Bin.ChainWrapper().ReEncrypt(txParam, tID, re.SelectedTx.MetaDataIDEncWithSeller); err != nil {
+       err = errors.Wrap(err, "Re-encrypt failed. ")
        return
    }
 
@@ -384,7 +385,7 @@ func (p *Preset) ReEncrypt(mi *server.MessageIn) (payload interface{}, err error
    return
 }
 
-func (p *Preset) Cancel(mi *server.MessageIn) (payload interface{}, err error) {
+func (p *Preset) CancelPurchase(mi *server.MessageIn) (payload interface{}, err error) {
    if p.CurUser == nil {
        err = errors.New("Current user is nil. ")
        return
@@ -401,8 +402,8 @@ func (p *Preset) Cancel(mi *server.MessageIn) (payload interface{}, err error) {
        return
    }
 
-   if err = p.Bin.ChainWrapper().CancelTransaction(p.makeTxParams(pd.Password), tID); err != nil {
-       err = errors.Wrap(err, "Cancel transaction failed. ")
+   if err = p.Bin.ChainWrapper().CancelPurchase(p.makeTxParams(pd.Password), tID); err != nil {
+       err = errors.Wrap(err, "Cancel purchase failed. ")
        return
    }
 
@@ -445,7 +446,7 @@ func (p *Preset) Decrypt(mi *server.MessageIn) (payload interface{}, err error) 
    return
 }
 
-func (p *Preset) Confirm(mi *server.MessageIn) (payload interface{}, err error) {
+func (p *Preset) ConfirmData(mi *server.MessageIn) (payload interface{}, err error) {
    if p.CurUser == nil {
        err = errors.New("Current user is nil. ")
        return
@@ -462,8 +463,8 @@ func (p *Preset) Confirm(mi *server.MessageIn) (payload interface{}, err error) 
        return
    }
 
-   if err = p.Bin.ChainWrapper().ConfirmDataTruth(p.makeTxParams(cd.Password), tID, cd.Truth); err != nil {
-       err = errors.Wrap(err, "Confirm data truth failed. ")
+   if err = p.Bin.ChainWrapper().ConfirmData(p.makeTxParams(cd.Password), tID, cd.Truth); err != nil {
+       err = errors.Wrap(err, "Confirm data failed. ")
        return
    }
 
@@ -503,7 +504,7 @@ func (p *Preset) Register(mi *server.MessageIn) (payload interface{}, err error)
    return
 }
 
-func (p *Preset) Verify(mi *server.MessageIn) (payload interface{}, err error) {
+func (p *Preset) Vote(mi *server.MessageIn) (payload interface{}, err error) {
    if p.CurUser == nil {
        err = errors.New("Current user is nil. ")
        return
@@ -530,7 +531,7 @@ func (p *Preset) Verify(mi *server.MessageIn) (payload interface{}, err error) {
    return
 }
 
-func (p *Preset) Credit(mi *server.MessageIn) (payload interface{}, err error) {
+func (p *Preset) GradeToVerifier(mi *server.MessageIn) (payload interface{}, err error) {
    if p.CurUser == nil {
        err = errors.New("Current user is nil. ")
        return
@@ -550,15 +551,15 @@ func (p *Preset) Credit(mi *server.MessageIn) (payload interface{}, err error) {
 
    if cd.Credit.Verifier1Revert {
        credit := uint8(cd.Credit.Verifier1Credit)
-       if err = p.Bin.ChainWrapper().CreditsToVerifier(txParam, tID, 0, credit); err != nil {
-           err = errors.Wrap(err, "Credit verifier1 failed. ")
+       if err = p.Bin.ChainWrapper().GradeToVerifier(txParam, tID, 0, credit); err != nil {
+           err = errors.Wrap(err, "Grade verifier1 failed. ")
            return
        }
    }
    if cd.Credit.Verifier2Revert {
        credit := uint8(cd.Credit.Verifier2Credit)
-       if err = p.Bin.ChainWrapper().CreditsToVerifier(txParam, tID, 1, credit); err != nil {
-           err = errors.Wrap(err, "Credit verifier2 failed. ")
+       if err = p.Bin.ChainWrapper().GradeToVerifier(txParam, tID, 1, credit); err != nil {
+           err = errors.Wrap(err, "Grade verifier2 failed. ")
            return
        }
    }

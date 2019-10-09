@@ -3,7 +3,7 @@
 <template>
     <section>
         <el-col :span="21" class="section-item">
-            <c-f-t button-name="预购买" dialog-title="是否启动验证流程？" @password="buy">
+            <c-f-t button-name="预购买" dialog-title="是否启动验证流程？" @password="advancePurchase">
                 <div v-if="selectedData.SupportVerify">
                     <p>是否启动验证流程：</p>
                     <el-switch v-model="startVerify" active-text="是" inactive-text="否"></el-switch>
@@ -59,8 +59,8 @@ export default {
         initDL: function () {
             dl_db.init(this);
         },
-        buy: function (pwd) {
-            connect.send({Name:"buy",Payload:{password: pwd, startVerify: this.startVerify, pID: this.selectedData}}, function (payload, _this) {
+        advancePurchase: function (pwd) {
+            connect.send({Name:"advancePurchase",Payload:{password: pwd, startVerify: this.startVerify, pID: this.selectedData}}, function (payload, _this) {
                 console.log("预购买成功", payload);
             }, function (payload, _this) {
                 console.log("预购买失败：", payload);

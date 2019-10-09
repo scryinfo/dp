@@ -175,7 +175,14 @@ let tx_db = {
                 };
                 switch (cursor.value.Identify) {
                     case 0: _this.$store.state.transactionsell.push(param);break;
-                    case 1: _this.$store.state.transactionbuy.push(param);break;
+                    case 1:
+                        let sv = "";
+                        switch (cursor.value.SupportVerify) {
+                            case true: sv = "支持验证"; break;
+                            case false: sv = "不支持验证"; break;
+                        }
+                        param.SVDisplay = sv;
+                        _this.$store.state.transactionbuy.push(param);break;
                     case 2: _this.$store.state.transactionverifier.push(param);break;
                     case 3: _this.$store.state.transactionarbitrator.push(param);break;
                 }
@@ -224,6 +231,11 @@ let tx_db = {
             let cursor = event.target.result;
             if (cursor) {
                 if (cursor.value.Identify === 1) {
+                    let sv = "";
+                    switch (cursor.value.SupportVerify) {
+                        case true: sv = "支持验证"; break;
+                        case false: sv = "不支持验证"; break;
+                    }
                     _this.$store.state.transactionbuy.push({
                         Title: cursor.value.Title,
                         Price: cursor.value.Price,
@@ -233,6 +245,7 @@ let tx_db = {
                         Seller: cursor.value.Seller,
                         State: cursor.value.State,
                         SupportVerify: cursor.value.SupportVerify,
+                        SVDisplay: sv,
                         StartVerify: cursor.value.StartVerify,
                         MetaDataExtension: cursor.value.MetaDataExtension,
                         ProofDataExtensions: cursor.value.ProofDataExtensions,
@@ -291,7 +304,7 @@ let tx_db = {
         c.onsuccess = function (event) {
             let cursor = event.target.result;
             if (cursor) {
-                if (cursor.value.Identify === 2) {
+                if (cursor.value.Identify === 3) {
                     _this.$store.state.transactionarbitrator.push({
                         Title: cursor.value.Title,
                         Price: cursor.value.Price,
@@ -388,11 +401,14 @@ let db_options = {
     userDBClose: function () {
         tx_db.closeDB();
     },
-    clearTxObjectStore: function () {
-        let c = tx_db.db.transaction(tx_db.db_store_name, "readwrite").objectStore(tx_db.db_store_name).clear();
-        c.onsuccess = function () {
-            console.log("交易信息已清空");
-        }
+    clearTxObjectStore: function (addr) {
+        let request = indexedDB.open(addr, 1);
+        request.onsuccess = function (event) {
+            let c = event.target.result.transaction(addr, "readwrite").objectStore(tx_db.db_store_name).clear();
+            c.onsuccess = function () {
+                console.log("交易信息已清空");
+            }
+        };
     }
 };
 

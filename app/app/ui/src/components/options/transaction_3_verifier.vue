@@ -4,12 +4,12 @@
     <section>
         <div v-if="!showControl">
             <el-col :span="24" class="section-item">
-                <s-f-t button-name="注册成为验证者" @password="Register"></s-f-t>
+                <s-f-t button-name="注册成为验证者" @password="register"></s-f-t>
             </el-col>
         </div>
         <div v-if="showControl">
             <el-col :span="21" class="section-item">
-                <c-f-t button-name="验证数据" dialog-title="验证数据：" @password="Vote" :button-disabled="buttonDisabled(2)">
+                <c-f-t button-name="验证数据" dialog-title="验证数据：" @password="vote" :button-disabled="buttonDisabled(2)">
                     <p>是否建议购买：</p>
                     <p><el-switch v-model="verify.suggestion" active-text="是" inactive-text="否"></el-switch></p>
                     <p><el-input v-model="verify.comment" placeholder="评论" clearable></el-input></p>
@@ -76,7 +76,7 @@ export default {
                 _this.showControl = accInstance.isVerifier;
             });
         },
-        Register: function (pwd) {
+        register: function (pwd) {
             connect.send({Name:"register", Payload:{password: pwd}}, function (payload, _this) {
                 console.log("注册成为验证者成功", payload);
             }, function (payload, _this) {
@@ -88,8 +88,8 @@ export default {
                 });
             });
         },
-        Vote: function (pwd) {
-            connect.send({Name:"verify", Payload:{password: pwd, tID: this.selectedTx, verify: this.verify}},
+        vote: function (pwd) {
+            connect.send({Name:"vote", Payload:{password: pwd, tID: this.selectedTx, verify: this.verify}},
                 function (payload, _this) {
                 _this.verify = {suggestion: false, comment: ""};
                 console.log("验证成功", payload);
