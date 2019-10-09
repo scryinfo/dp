@@ -4,15 +4,15 @@
     <section>
         <el-col :span="21" class="section-item">
             <s-f-t button-name="取消交易" button-type="danger" @password="cancelBuying" :button-disabled="buttonDisabled(1)"></s-f-t>
-            <s-f-t button-name="购买数据" @password="purchase" :button-disabled="buttonDisabled(2)"></s-f-t>
+            <s-f-t button-name="购买数据" @password="confirmPurchase" :button-disabled="buttonDisabled(2)"></s-f-t>
             <s-f-t button-name="解密数据" @password="decrypt" :button-disabled="buttonDisabled(3)"></s-f-t>
-            <c-f-t button-name="确认数据" dialog-title="判断原始数据真实性：" @password="confirm"
-                   :pre-params="[this.selectedTx.SupportVerify]" @pre="confirmPre" :button-disabled="buttonDisabled(3)">
+            <c-f-t button-name="确认数据" dialog-title="判断原始数据真实性：" @password="confirmData"
+                   :pre-params="[this.selectedTx.SupportVerify]" @pre="confirmDataPre" :button-disabled="buttonDisabled(3)">
                 <p v-if="supportVerify">判断原始数据真实性，如果你认为原始数据是假的，我们将为你启动仲裁流程：</p>
                 <p v-if="!supportVerify">判断原始数据真实性，点击“输入密码”按钮完成交易。</p>
-                <p><el-switch v-model="confirmData" active-text="真" inactive-text="假"></el-switch></p>
+                <p><el-switch v-model="confirmDataResult" active-text="真" inactive-text="假"></el-switch></p>
             </c-f-t>
-            <c-f-t button-name="评价验证者" dialog-title="评价验证者：" @password="credit" @pre="creditPre" :button-disabled="buttonDisabled(4)"
+            <c-f-t button-name="评价验证者" dialog-title="评价验证者：" @password="gradeToVerifier" @pre="creditPre" :button-disabled="buttonDisabled(4)"
                    :pre-params="[this.selectedTx.Verifier1Response !== '', this.selectedTx.Verifier2Response !== '']">
                 <p>验证者1:</p>
                 <p><el-slider v-model="verifier1Credit" max="5" v-if="verifier1Revert" show-input></el-slider>
@@ -72,7 +72,7 @@ export default {
             height: window.innerHeight - 170,
             txState: "Begin",
             supportVerify: false,
-            confirmData: false,
+            confirmDataResult: true,
             verifier1Revert: false,
             verifier1Credit: 5,
             verifier2Revert: false,
@@ -96,18 +96,13 @@ export default {
             this.txState = curRow.State;
         },
         buttonDisabled: function (funcNum) {
-            let bool;
-            switch (funcNum) {
-                case 4: bool = utils.functionDisabled(funcNum, this.txState) || this.selectedTx.SupportVerify; break;
-                default: bool = utils.functionDisabled(funcNum, this.txState); break;
-            }
-            return bool;
+            return utils.functionDisabled(funcNum, this.txState);
         },
         initTxB: function () {
             tx_db.initBuyer(this);
         },
         cancelBuying: function (pwd) {
-            connect.send({Name:"cancel", Payload:{password: pwd, tID: this.selectedTx}}, function (payload, _this) {
+            connect.send({Name:"cancelPurchase", Payload:{password: pwd, tID: this.selectedTx}}, function (payload, _this) {
                 console.log("取消交易成功", payload);
             }, function (payload, _this) {
                 console.log("取消交易失败：", payload);
@@ -118,8 +113,8 @@ export default {
                 });
             });
         },
-        purchase: function (pwd) {
-            connect.send({Name:"purchase", Payload:{password: pwd, tID: this.selectedTx}}, function (payload, _this) {
+        confirmPurchase: function (pwd) {
+            connect.send({Name:"confirmPurchase", Payload:{password: pwd, tID: this.selectedTx}}, function (payload, _this) {
                 console.log("购买数据成功", payload);
             }, function (payload, _this) {
                 console.log("购买数据失败：", payload);
@@ -149,11 +144,11 @@ export default {
                 });
             });
         },
-        confirmPre: function (array) {
+        confirmDataPre: function (array) {
             this.supportVerify = array[0];
         },
-        confirm: function (pwd) {
-            connect.send({Name:"confirm", Payload:{password: pwd, tID: this.selectedTx, confirmData: this.confirmData}}, function (payload, _this) {
+        confirmData: function (pwd) {
+            connect.send({Name:"confirmData", Payload:{password: pwd, tID: this.selectedTx, confirmData: this.confirmDataResult}}, function (payload, _this) {
                 _this.supportVerify = false;
                 console.log("确认数据成功", payload);
             }, function (payload, _this) {
@@ -169,8 +164,8 @@ export default {
             this.verifier1Revert = array[0];
             this.verifier2Revert = array[1];
         },
-        credit: function (pwd) {
-            connect.send({Name:"credit", Payload:{password: pwd, tID: this.selectedTx, credit: {
+        gradeToVerifier: function (pwd) {
+            connect.send({Name:"gradeToVerifier", Payload:{password: pwd, tID: this.selectedTx, credit: {
                         verifier1Revert: this.verifier1Revert, verifier1Credit: this.verifier1Credit,
                         verifier2Revert: this.verifier2Revert, verifier2Credit: this.verifier2Credit}}},
                 function (payload, _this) {

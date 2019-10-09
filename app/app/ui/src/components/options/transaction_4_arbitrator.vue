@@ -10,7 +10,7 @@
         <div v-if="showControl">
             <el-col :span="21" class="section-item">
                 <s-f-t button-name="解密数据" @password="decrypt" :button-disabled="buttonDisabled(3)"></s-f-t>
-                <c-f-t button-name="仲裁数据" dialog-title="仲裁数据：" @password="Arbitrate" :button-disabled="buttonDisabled(3)">
+                <c-f-t button-name="仲裁数据" dialog-title="仲裁数据：" @password="arbitrate" :button-disabled="buttonDisabled(3)">
                     <p>判断数据真实性：</p>
                     <p><el-switch v-model="arbitrateResult" active-text="真" inactive-text="假"></el-switch></p>
                 </c-f-t>
@@ -96,7 +96,7 @@ export default {
                 });
             });
         },
-        Arbitrate: function (pwd) {
+        arbitrate: function (pwd) {
             connect.send({Name: "arbitrate", Payload: {password: pwd, tID: this.selectedTx, arbitrateResult: this.arbitrateResult}}, function (payload, _this) {
                 console.log("仲裁成功", payload);
             }, function (payload, _this) {

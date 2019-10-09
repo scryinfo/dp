@@ -527,7 +527,7 @@ func (c *BinaryGrpcServerImp) PrepareToBuy(
         return makeResult(false, e), errors.New(e)
     }
 
-    err := c.chainWrapper.PrepareToBuy(
+    err := c.chainWrapper.AdvancePurchase(
         makeTxParams(params.TxParam),
         params.PublishId,
         params.StartVerify,
@@ -554,7 +554,7 @@ func (c *BinaryGrpcServerImp) BuyData(
         return makeResult(false, e), errors.New(e)
     }
 
-    err := c.chainWrapper.BuyData(
+    err := c.chainWrapper.ConfirmPurchase(
         makeTxParams(params.TxParam),
         big.NewInt(params.TxId),
     )
@@ -580,7 +580,7 @@ func (c *BinaryGrpcServerImp) CancelTransaction(
         return makeResult(false, e), errors.New(e)
     }
 
-    err := c.chainWrapper.CancelTransaction(
+    err := c.chainWrapper.CancelPurchase(
         makeTxParams(params.TxParam),
         big.NewInt(params.TxId),
     )
@@ -608,7 +608,7 @@ func (c *BinaryGrpcServerImp) ReEncryptMetaDataId(
     }
 
     //get buyer address and arbitrators address
-    err := c.chainWrapper.ReEncryptMetaDataId(
+    err := c.chainWrapper.ReEncrypt(
         makeTxParams(params.TxParam),
         big.NewInt(params.TxId),
         params.EncodedDataWithSeller,
@@ -635,7 +635,7 @@ func (c *BinaryGrpcServerImp) ConfirmDataTruth(
         return makeResult(false, e), errors.New(e)
     }
 
-    err := c.chainWrapper.ConfirmDataTruth(
+    err := c.chainWrapper.ConfirmData(
         makeTxParams(params.TxParam),
         big.NewInt(params.TxId),
         params.Truth,
@@ -743,7 +743,7 @@ func (c *BinaryGrpcServerImp) CreditsToVerifier(
         return makeResult(false, e), errors.New(e)
     }
 
-    err := c.chainWrapper.CreditsToVerifier(
+    err := c.chainWrapper.GradeToVerifier(
         makeTxParams(params.TxParam),
         big.NewInt(params.TxId),
         uint8(params.Index),

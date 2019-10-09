@@ -121,7 +121,7 @@ func (ws *WSServer) handleMessages(conn *websocket.Conn) {
                 continue
             }
             if _, ok := ws.funcMap[mi.Name]; !ok {
-                logger.Errorln("Unknown method name: " + mi.Name)
+                logger.Errorln("Unknown request name: " + mi.Name)
                 continue
             }
         }

@@ -5,7 +5,7 @@ import "../ScryToken.sol";
 
 library verification {
     event RegisterVerifier(string seqNo, address[] users);
-    event Vote(string seqNo, uint256 transactionId, bool judge, string comments, uint8 state, uint8 index, address[] users);
+    event VoteResult(string seqNo, uint256 transactionId, bool judge, string comments, uint8 state, uint8 index, address[] users);
     event VerifierDisable(string seqNo, address verifier, address[] users);
 
     function register(common.DataSet storage ds, string seqNo, ERC20 token) public {
@@ -46,13 +46,13 @@ library verification {
 
         address[] memory users = new address[](1);
         users[0] = txItem.buyer;
-        emit Vote(seqNo, txId, judge, comments, uint8(txItem.state), index+1, users);
+        emit VoteResult(seqNo, txId, judge, comments, uint8(txItem.state), index+1, users);
 
         users[0] = msg.sender;
-        emit Vote(seqNo, txId, judge, comments, uint8(txItem.state), 0, users);
+        emit VoteResult(seqNo, txId, judge, comments, uint8(txItem.state), 0, users);
     }
 
-    function creditsToVerifier(common.DataSet storage ds, string seqNo, uint256 txId, uint8 verifierIndex, uint8 credit) public {
+    function gradeToVerifier(common.DataSet storage ds, string seqNo, uint256 txId, uint8 verifierIndex, uint8 credit) public {
         //validate
         require(credit >= ds.conf.creditLow && credit <= ds.conf.creditHigh, "0 <= credit <= 5 is valid");
 

@@ -91,7 +91,7 @@ func (c *chainWrapperImp) Publish(txParams *tx.TxParams, price *big.Int, metaDat
         return "", err
     }
 
-    t, err := c.protocol.PublishDataInfo(c.Tx.BuildTransactOpts(txParams), c.appId, publishId, price,
+    t, err := c.protocol.Publish(c.Tx.BuildTransactOpts(txParams), c.appId, publishId, price,
         encMetaId, pdIDs, detailsID, supportVerify)
     if err != nil {
         logger.Errorln("", zap.NamedError("failed to publish data information, error: ", err))
@@ -126,40 +126,40 @@ func Bytes32ToIpfsHash(value [32]byte) (string, error) {
     return hash, nil
 }
 
-func (c *chainWrapperImp) PrepareToBuy(txParams *tx.TxParams, publishId string, startVerify bool) error {
+func (c *chainWrapperImp) AdvancePurchase(txParams *tx.TxParams, publishId string, startVerify bool) error {
     defer func() {
         if er := recover(); er != nil {
-            dot.Logger().Errorln("", zap.Any("failed to prepare to buy , error:", er))
+            dot.Logger().Errorln("", zap.Any("failed to AdvancePurchase, error:", er))
         }
     }()
 
-    t, err := c.protocol.CreateTransaction(c.Tx.BuildTransactOpts(txParams), c.appId, publishId, startVerify)
+    t, err := c.protocol.AdvancePurchase(c.Tx.BuildTransactOpts(txParams), c.appId, publishId, startVerify)
     if err == nil {
-        dot.Logger().Debugln("CreateTransaction: tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
+        dot.Logger().Debugln("AdvancePurchase: tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
     }
 
     return err
 }
 
-func (c *chainWrapperImp) BuyData(txParams *tx.TxParams, txId *big.Int) error {
-    t, err := c.protocol.BuyData(c.Tx.BuildTransactOpts(txParams), c.appId, txId)
+func (c *chainWrapperImp) ConfirmPurchase(txParams *tx.TxParams, txId *big.Int) error {
+    t, err := c.protocol.ConfirmPurchase(c.Tx.BuildTransactOpts(txParams), c.appId, txId)
     if err == nil {
-        dot.Logger().Debugln("BuyData: tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
+        dot.Logger().Debugln("ConfirmPurchase: tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
     }
 
     return err
 }
 
-func (c *chainWrapperImp) CancelTransaction(txParams *tx.TxParams, txId *big.Int) error {
-    t, err := c.protocol.CancelTransaction(c.Tx.BuildTransactOpts(txParams), c.appId, txId)
+func (c *chainWrapperImp) CancelPurchase(txParams *tx.TxParams, txId *big.Int) error {
+    t, err := c.protocol.CancelPurchase(c.Tx.BuildTransactOpts(txParams), c.appId, txId)
     if err == nil {
-        dot.Logger().Debugln("CancelTransaction tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
+        dot.Logger().Debugln("CancelPurchase tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
     }
 
     return err
 }
 
-func (c *chainWrapperImp) ReEncryptMetaDataId(
+func (c *chainWrapperImp) ReEncrypt(
     txParams *tx.TxParams,
     txId *big.Int,
     encodedData []byte,
@@ -202,9 +202,9 @@ func (c *chainWrapperImp) ReEncryptMetaDataId(
     }
 
     //submit
-    t, err := c.protocol.ReEncryptMetaDataIdBySeller(c.Tx.BuildTransactOpts(txParams), c.appId, txId, edb, edaList)
+    t, err := c.protocol.ReEncrypt(c.Tx.BuildTransactOpts(txParams), c.appId, txId, edb, edaList)
     if err == nil {
-        dot.Logger().Debugln("ReEncryptMetaDataIdBySeller: tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
+        dot.Logger().Debugln("ReEncrypt: tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
     }
 
     return err
@@ -243,10 +243,10 @@ func (c *chainWrapperImp) GetArbitrators(txParams *tx.TxParams, txId *big.Int) (
     return arbitrators, err
 }
 
-func (c *chainWrapperImp) ConfirmDataTruth(txParams *tx.TxParams, txId *big.Int, truth bool) error {
-    t, err := c.protocol.ConfirmDataTruth(c.Tx.BuildTransactOpts(txParams), c.appId, txId, truth)
+func (c *chainWrapperImp) ConfirmData(txParams *tx.TxParams, txId *big.Int, truth bool) error {
+    t, err := c.protocol.ConfirmData(c.Tx.BuildTransactOpts(txParams), c.appId, txId, truth)
     if err == nil {
-        dot.Logger().Debugln("ConfirmDataTruth: tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
+        dot.Logger().Debugln("ConfirmData: tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
     }
 
     return err
@@ -280,10 +280,10 @@ func (c *chainWrapperImp) RegisterAsVerifier(txParams *tx.TxParams) error {
     return err
 }
 
-func (c *chainWrapperImp) CreditsToVerifier(txParams *tx.TxParams, txId *big.Int, index uint8, credit uint8) error {
-    t, err := c.protocol.CreditsToVerifier(c.Tx.BuildTransactOpts(txParams), c.appId, txId, index, credit)
+func (c *chainWrapperImp) GradeToVerifier(txParams *tx.TxParams, txId *big.Int, index uint8, credit uint8) error {
+    t, err := c.protocol.GradeToVerifier(c.Tx.BuildTransactOpts(txParams), c.appId, txId, index, credit)
     if err == nil {
-        dot.Logger().Debugln("CreditsToVerifier: tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
+        dot.Logger().Debugln("GradeToVerifier: tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
     }
 
     return err

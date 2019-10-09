@@ -40,14 +40,14 @@ func (c *Callbacks) Create(l dot.Line) error {
 
     c.EventNames = []string{
         "Approval",
-        "DataPublish",
+        "Publish",
         "VerifiersChosen",
-        "TransactionCreate",
-        "Buy",
-        "ReadyForDownload",
-        "TransactionClose",
+        "AdvancePurchase",
+        "ConfirmPurchase",
+        "ReEncrypt",
+        "FinishPurchase",
         "RegisterVerifier",
-        "Vote",
+        "VoteResult",
         "VerifierDisable",
         "ArbitrationBegin",
         "ArbitrationResult",
@@ -57,12 +57,12 @@ func (c *Callbacks) Create(l dot.Line) error {
         c.onApprove,
         c.onPublish,
         c.onVerifiersChosen,
-        c.onTransactionCreate,
-        c.onPurchase,
-        c.onReadyForDownload,
-        c.onClose,
+        c.onAdvancePurchase,
+        c.onConfirmPurchase,
+        c.onReEncrypt,
+        c.onFinishPurchase,
         c.onRegisterAsVerifier,
-        c.onVote,
+        c.onVoteResult,
         c.onVerifierDisable,
         c.onArbitrationBegin,
         c.onArbitrationResult,
@@ -196,7 +196,7 @@ func (c *Callbacks) onVerifiersChosen(event event.Event) bool {
     return true
 }
 
-func (c *Callbacks) onTransactionCreate(event event.Event) bool {
+func (c *Callbacks) onAdvancePurchase(event event.Event) bool {
     var otc definition.OnTransactionCreate
     {
         otc.PublishID = event.Data.Get("publishId").(string)
@@ -217,7 +217,7 @@ func (c *Callbacks) onTransactionCreate(event event.Event) bool {
         }
     }
 
-    if err := c.WS.SendMessage("onTransactionCreate", otc); err != nil {
+    if err := c.WS.SendMessage("onAdvancePurchase", otc); err != nil {
         dot.Logger().Errorln("", zap.NamedError("onTransactionCreate"+server.EventSendFailed, err))
     }
 
@@ -264,7 +264,7 @@ func ipfsBytes32ToHash(ipfsb [32]byte) string {
     return base58.Encode(byte34)
 }
 
-func (c *Callbacks) onPurchase(event event.Event) bool {
+func (c *Callbacks) onConfirmPurchase(event event.Event) bool {
     var op definition.OnPurchase
     {
         op.Block = event.BlockNumber
@@ -274,14 +274,14 @@ func (c *Callbacks) onPurchase(event event.Event) bool {
         op.TxState = setTxState(event.Data.Get("state").(uint8))
     }
 
-    if err := c.WS.SendMessage("onPurchase", op); err != nil {
+    if err := c.WS.SendMessage("onConfirmPurchase", op); err != nil {
         dot.Logger().Errorln("", zap.NamedError("onPurchase"+server.EventSendFailed, err))
     }
 
     return true
 }
 
-func (c *Callbacks) onReadyForDownload(event event.Event) bool {
+func (c *Callbacks) onReEncrypt(event event.Event) bool {
     var orfd definition.OnReadyForDownload
     {
         orfd.Block = event.BlockNumber
@@ -290,14 +290,14 @@ func (c *Callbacks) onReadyForDownload(event event.Event) bool {
         orfd.TxState = setTxState(event.Data.Get("state").(uint8))
     }
 
-    if err := c.WS.SendMessage("onReadyForDownload", orfd); err != nil {
+    if err := c.WS.SendMessage("onReEncrypt", orfd); err != nil {
         dot.Logger().Errorln("", zap.NamedError("onReadyForDownload"+server.EventSendFailed, err))
     }
 
     return true
 }
 
-func (c *Callbacks) onClose(event event.Event) bool {
+func (c *Callbacks) onFinishPurchase(event event.Event) bool {
     var oc definition.OnClose
     {
         oc.Block = event.BlockNumber
@@ -305,7 +305,7 @@ func (c *Callbacks) onClose(event event.Event) bool {
         oc.TxState = setTxState(event.Data.Get("state").(uint8))
     }
 
-    if err := c.WS.SendMessage("onClose", oc); err != nil {
+    if err := c.WS.SendMessage("onFinishPurchase", oc); err != nil {
         dot.Logger().Errorln("", zap.NamedError("onClose"+server.EventSendFailed, err))
     }
 
@@ -325,7 +325,7 @@ func (c *Callbacks) onRegisterAsVerifier(event event.Event) bool {
     return true
 }
 
-func (c *Callbacks) onVote(event event.Event) bool {
+func (c *Callbacks) onVoteResult(event event.Event) bool {
     var ov definition.OnVote
     {
         ov.Block = event.BlockNumber
@@ -338,7 +338,7 @@ func (c *Callbacks) onVote(event event.Event) bool {
         ov.VerifierResponse = setJudge(judge) + ", " + comment
     }
 
-    if err := c.WS.SendMessage("onVote", ov); err != nil {
+    if err := c.WS.SendMessage("onVoteResult", ov); err != nil {
         dot.Logger().Errorln("", zap.NamedError("onVote"+server.EventSendFailed, err))
     }
 

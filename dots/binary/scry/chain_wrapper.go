@@ -14,15 +14,15 @@ type ChainWrapper interface {
     Conn() *ethclient.Client
     Publish(txParams *tx.TxParams, price *big.Int, metaDataID []byte, proofDataIDs []string,
         proofNum int32, detailsID string, supportVerify bool) (string, error)
-    PrepareToBuy(txParams *tx.TxParams, publishId string, startVerify bool) error
-    BuyData(txParams *tx.TxParams, txId *big.Int) error
-    CancelTransaction(txParams *tx.TxParams, txId *big.Int) error
-    ReEncryptMetaDataId(txParams *tx.TxParams, txId *big.Int, encodedData []byte) error
-    ConfirmDataTruth(txParams *tx.TxParams, txId *big.Int, truth bool) error
+    AdvancePurchase(txParams *tx.TxParams, publishId string, startVerify bool) error
+    ConfirmPurchase(txParams *tx.TxParams, txId *big.Int) error
+    CancelPurchase(txParams *tx.TxParams, txId *big.Int) error
+    ReEncrypt(txParams *tx.TxParams, txId *big.Int, encodedData []byte) error
+    ConfirmData(txParams *tx.TxParams, txId *big.Int, truth bool) error
     ApproveTransfer(txParams *tx.TxParams, spender common.Address, value *big.Int) error
     Vote(txParams *tx.TxParams, txId *big.Int, judge bool, comments string) error
     RegisterAsVerifier(txParams *tx.TxParams) error
-    CreditsToVerifier(txParams *tx.TxParams, txId *big.Int, index uint8, credit uint8) error
+    GradeToVerifier(txParams *tx.TxParams, txId *big.Int, index uint8, credit uint8) error
     Arbitrate(txParams *tx.TxParams, txId *big.Int, judge bool) error
 
     GetBuyer(txParams *tx.TxParams, txId *big.Int) (string, error)
