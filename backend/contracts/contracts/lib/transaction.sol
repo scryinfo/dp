@@ -378,7 +378,7 @@ library transaction {
 
         revertToBuyer(txItem, token);
 
-        address[] memory users = new address[](1);
+        address[] memory users = new address[](2);
         users[0] = txItem.seller;
         users[1] = txItem.buyer;
 
