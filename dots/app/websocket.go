@@ -120,6 +120,9 @@ func (ws *WSServer) handleMessages(conn *websocket.Conn) {
                 logger.Errorln("JSON unmarshal failed. ", zap.NamedError("", err))
                 continue
             }
+
+            logger.Debugln("received   :", zap.Any("message in: ", mi))
+
             if _, ok := ws.funcMap[mi.Name]; !ok {
                 logger.Errorln("Unknown request name: " + mi.Name)
                 continue
@@ -149,7 +152,7 @@ func (ws *WSServer) handleMessages(conn *websocket.Conn) {
 
 func (ws *WSServer) SendMessage(name string, payload interface{}) error {
     if bs, ok := payload.([]byte); ok {
-        payload = string(bs)
+        payload = string(bs) // []byte will be base58 encode
     }
     mo := server.MessageOut{
         Name:    name,
@@ -160,6 +163,8 @@ func (ws *WSServer) SendMessage(name string, payload interface{}) error {
     if err != nil {
         return errors.Wrap(err, "Json marshal failed. ")
     }
+
+    dot.Logger().Debugln("before send:", zap.Any("message out: ", mo))
 
     return websocket.Message.Send(ws.connParams, string(b))
 }

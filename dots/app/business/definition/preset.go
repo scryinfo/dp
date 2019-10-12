@@ -3,114 +3,48 @@
 
 package definition
 
-type AccInfo struct {
-	Account  string `json:"account"`
-	Password string `json:"password"`
-}
+type Preset struct {
+	PublishId     string `json:"PublishId"`
+	TransactionId string `json:"TransactionId"`
 
-type SDKInitData struct {
-	FromBlock float64 `json:"fromBlock"`
-}
-
-type PublishData struct {
+	Address       string  `json:"address"`
+	Password      string  `json:"password"`
+	FromBlock     float64 `json:"fromBlock"`
 	Price         float64 `json:"price"`
 	SupportVerify bool    `json:"supportVerify"`
-	Password      string  `json:"password"`
-	IDs           IDs     `json:"IDs"`
-}
-type IDs struct {
-	MetaDataID   string   `json:"metaDataID"`
-	ProofDataIDs []string `json:"proofDataIDs"`
-	DetailsID    string   `json:"detailsID"`
+	StartVerify   bool    `json:"startVerify"`
+
+	Ids         Ids         `json:"Ids"`
+	EncryptedId EncryptedId `json:"encryptedId"`
+	Confirm     Confirm     `json:"confirm"`
+	Verify      Verify      `json:"verify"`
+	Grade       Grade       `json:"grade"`
+	Arbitrate   Arbitrate   `json:"arbitrate"`
+
+	Extensions Extensions `json:"extensions"`
+	Balance    Balance
 }
 
-type BuyData struct {
-	Password     string       `json:"password"`
-	StartVerify  bool         `json:"startVerify"`
-	SelectedData SelectedData `json:"pID"`
-}
-type SelectedData struct {
-	PublishID string  `json:"PublishID"`
-	Price     float64 `json:"Price"`
+type Ids struct {
+	MetaDataId   string   `json:"metaDataId"`
+	ProofDataIds []string `json:"proofDataIds"`
+	DetailsId    string   `json:"detailsId"`
 }
 
-type Prepared struct {
-	Extensions []string `json:"extensions"`
-}
-
-type PurchaseData struct {
-	Password   string       `json:"password"`
-	SelectedTx SelectedTxPD `json:"tID"`
-}
-type SelectedTxPD struct {
-	TransactionID string `json:"TransactionID"`
-}
-
-type ReEncryptData struct {
-	Password   string        `json:"password"`
-	SelectedTx SelectedTxRED `json:"tID"`
-}
-type SelectedTxRED struct {
-	TransactionID           string `json:"TransactionID"`
-	Seller                  string `json:"Seller"`
-	MetaDataIDEncWithSeller []byte `json:"MetaDataIDEncWithSeller"`
-}
-
-type DecryptData struct {
-	Password   string       `json:"password"`
-	SelectedTx SelectedTxDD `json:"tID"`
-}
-type SelectedTxDD struct {
-	MetaDataIDEncrypt []byte `json:"MetaDataIDEncrypt"`
-	MetaDataExtension string `json:"MetaDataExtension"`
-	User              string `json:"User"`
-}
-
-type ConfirmData struct {
-	Password   string       `json:"password"`
-	SelectedTx SelectedTxCD `json:"tID"`
-	Truth      bool         `json:"confirmData"`
-}
-type SelectedTxCD struct {
-	TransactionID string `json:"TransactionID"`
-}
-
-type RegisterVerifierData struct {
-	Password string `json:"password"`
-}
-
-type VerifyData struct {
-	Password      string `json:"password"`
-	TransactionID string `json:"tID"`
-	Verify        Verify `json:"verify"`
-}
 type Verify struct {
 	Suggestion bool   `json:"suggestion"`
 	Comment    string `json:"comment"`
 }
 
-type CreditData struct {
-	Password   string        `json:"password"`
-	SelectedTx SelectedTxCrD `json:"tID"`
-	Credit     Credit        `json:"credit"`
-}
-type SelectedTxCrD struct {
-	TransactionID string `json:"TransactionID"`
-}
-type Credit struct {
+type Grade struct {
 	Verifier1Revert bool    `json:"verifier1Revert"`
-	Verifier1Credit float64 `json:"verifier1Credit"`
+	Verifier1Grade  float64 `json:"verifier1Grade"`
 	Verifier2Revert bool    `json:"verifier2Revert"`
-	Verifier2Credit float64 `json:"verifier2Credit"`
+	Verifier2Grade  float64 `json:"verifier2Grade"`
 }
 
-type ArbitrateData struct {
-	Password        string       `json:"password"`
-	SelectedTx      SelectedTxAD `json:"tID"`
-	ArbitrateResult bool         `json:"arbitrateResult"`
-}
-type SelectedTxAD struct {
-	TransactionId string `json:"TransactionID"`
+type Confirm struct {
+	Truth bool `json:"confirmResult"`
 }
 
 type Balance struct {

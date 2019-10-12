@@ -26,7 +26,7 @@ let dl_db = {
                     SVDisplay: sv,
                     MetaDataExtension: cursor.value.MetaDataExtension,
                     ProofDataExtensions: cursor.value.ProofDataExtensions,
-                    PublishID: cursor.value.PublishID
+                    PublishId: cursor.value.PublishId
                 });
                 cursor.continue();
             }
@@ -163,14 +163,14 @@ let tx_db = {
                     StartVerify: cursor.value.StartVerify,
                     MetaDataExtension: cursor.value.MetaDataExtension,
                     ProofDataExtensions: cursor.value.ProofDataExtensions,
-                    MetaDataIDEncWithSeller: cursor.value.MetaDataIDEncWithSeller,
-                    MetaDataIDEncWithBuyer: cursor.value.MetaDataIDEncWithBuyer,
-                    MetaDataIDEncWithArbitrator: cursor.value.MetaDataIDEncWithArbitrator,
+                    MetaDataIdEncWithSeller: cursor.value.MetaDataIdEncWithSeller,
+                    MetaDataIdEncWithBuyer: cursor.value.MetaDataIdEncWithBuyer,
+                    MetaDataIdEncWithArbitrator: cursor.value.MetaDataIdEncWithArbitrator,
                     Verifier1Response: cursor.value.Verifier1Response,
                     Verifier2Response: cursor.value.Verifier2Response,
                     ArbitrateResult: cursor.value.ArbitrateResult,
-                    PublishID: cursor.value.PublishID,
-                    TransactionID: cursor.value.TransactionID,
+                    PublishId: cursor.value.PublishId,
+                    TransactionId: cursor.value.TransactionId,
                     Identify: cursor.value.Identify
                 };
                 switch (cursor.value.Identify) {
@@ -209,14 +209,14 @@ let tx_db = {
                         StartVerify: cursor.value.StartVerify,
                         MetaDataExtension: cursor.value.MetaDataExtension,
                         ProofDataExtensions: cursor.value.ProofDataExtensions,
-                        MetaDataIDEncWithSeller: cursor.value.MetaDataIDEncWithSeller,
-                        MetaDataIDEncWithBuyer: cursor.value.MetaDataIDEncWithBuyer,
-                        MetaDataIDEncWithArbitrator: cursor.value.MetaDataIDEncWithArbitrator,
+                        MetaDataIdEncWithSeller: cursor.value.MetaDataIdEncWithSeller,
+                        MetaDataIdEncWithBuyer: cursor.value.MetaDataIdEncWithBuyer,
+                        MetaDataIdEncWithArbitrator: cursor.value.MetaDataIdEncWithArbitrator,
                         Verifier1Response: cursor.value.Verifier1Response,
                         Verifier2Response: cursor.value.Verifier2Response,
                         ArbitrateResult: cursor.value.ArbitrateResult,
-                        PublishID: cursor.value.PublishID,
-                        TransactionID: cursor.value.TransactionID,
+                        PublishId: cursor.value.PublishId,
+                        TransactionId: cursor.value.TransactionId,
                         Identify: cursor.value.Identify
                     });
                 }
@@ -249,14 +249,14 @@ let tx_db = {
                         StartVerify: cursor.value.StartVerify,
                         MetaDataExtension: cursor.value.MetaDataExtension,
                         ProofDataExtensions: cursor.value.ProofDataExtensions,
-                        MetaDataIDEncWithSeller: cursor.value.MetaDataIDEncWithSeller,
-                        MetaDataIDEncWithBuyer: cursor.value.MetaDataIDEncWithBuyer,
-                        MetaDataIDEncWithArbitrator: cursor.value.MetaDataIDEncWithArbitrator,
+                        MetaDataIdEncWithSeller: cursor.value.MetaDataIdEncWithSeller,
+                        MetaDataIdEncWithBuyer: cursor.value.MetaDataIdEncWithBuyer,
+                        MetaDataIdEncWithArbitrator: cursor.value.MetaDataIdEncWithArbitrator,
                         Verifier1Response: cursor.value.Verifier1Response,
                         Verifier2Response: cursor.value.Verifier2Response,
                         ArbitrateResult: cursor.value.ArbitrateResult,
-                        PublishID: cursor.value.PublishID,
-                        TransactionID: cursor.value.TransactionID,
+                        PublishId: cursor.value.PublishId,
+                        TransactionId: cursor.value.TransactionId,
                         Identify: cursor.value.Identify
                     });
                 }
@@ -283,14 +283,14 @@ let tx_db = {
                         StartVerify: cursor.value.StartVerify,
                         MetaDataExtension: cursor.value.MetaDataExtension,
                         ProofDataExtensions: cursor.value.ProofDataExtensions,
-                        MetaDataIDEncWithSeller: cursor.value.MetaDataIDEncWithSeller,
-                        MetaDataIDEncWithBuyer: cursor.value.MetaDataIDEncWithBuyer,
-                        MetaDataIDEncWithArbitrator: cursor.value.MetaDataIDEncWithArbitrator,
+                        MetaDataIdEncWithSeller: cursor.value.MetaDataIdEncWithSeller,
+                        MetaDataIdEncWithBuyer: cursor.value.MetaDataIdEncWithBuyer,
+                        MetaDataIdEncWithArbitrator: cursor.value.MetaDataIdEncWithArbitrator,
                         Verifier1Response: cursor.value.Verifier1Response,
                         Verifier2Response: cursor.value.Verifier2Response,
                         ArbitrateResult: cursor.value.ArbitrateResult,
-                        PublishID: cursor.value.PublishID,
-                        TransactionID: cursor.value.TransactionID,
+                        PublishId: cursor.value.PublishId,
+                        TransactionId: cursor.value.TransactionId,
                         Identify: cursor.value.Identify
                     });
                 }
@@ -317,14 +317,14 @@ let tx_db = {
                         StartVerify: cursor.value.StartVerify,
                         MetaDataExtension: cursor.value.MetaDataExtension,
                         ProofDataExtensions: cursor.value.ProofDataExtensions,
-                        MetaDataIDEncWithSeller: cursor.value.MetaDataIDEncWithSeller,
-                        MetaDataIDEncWithBuyer: cursor.value.MetaDataIDEncWithBuyer,
-                        MetaDataIDEncWithArbitrator: cursor.value.MetaDataIDEncWithArbitrator,
+                        MetaDataIdEncWithSeller: cursor.value.MetaDataIdEncWithSeller,
+                        MetaDataIdEncWithBuyer: cursor.value.MetaDataIdEncWithBuyer,
+                        MetaDataIdEncWithArbitrator: cursor.value.MetaDataIdEncWithArbitrator,
                         Verifier1Response: cursor.value.Verifier1Response,
                         Verifier2Response: cursor.value.Verifier2Response,
                         ArbitrateResult: cursor.value.ArbitrateResult,
-                        PublishID: cursor.value.PublishID,
-                        TransactionID: cursor.value.TransactionID,
+                        PublishId: cursor.value.PublishId,
+                        TransactionId: cursor.value.TransactionId,
                         Identify: cursor.value.Identify
                     });
                 }
@@ -370,7 +370,7 @@ let db_options = {
         request.onupgradeneeded = function (event) {
             dl_db.db = event.target.result;
             acc_db.db = event.target.result;
-            event.target.result.createObjectStore(dl_db.db_store_name, {keyPath: "PublishID"});
+            event.target.result.createObjectStore(dl_db.db_store_name, {keyPath: "PublishId"});
             let store = event.target.result.createObjectStore(acc_db.db_store_name, {keyPath: "address"});
             store.createIndex(acc_db.db_index_name, acc_db.db_index_name, {unique: false});
         };
@@ -386,7 +386,7 @@ let db_options = {
         let request = indexedDB.open(address, 1);
         request.onupgradeneeded = function (event) {
             tx_db.db = event.target.result;
-            event.target.result.createObjectStore(tx_db.db_store_name, {keyPath: "TransactionID"});
+            event.target.result.createObjectStore(tx_db.db_store_name, {keyPath: "TransactionId"});
         };
         request.onsuccess = function (event) {
             tx_db.db = event.target.result;
@@ -404,7 +404,7 @@ let db_options = {
     clearTxObjectStore: function (addr) {
         let request = indexedDB.open(addr, 1);
         request.onsuccess = function (event) {
-            let c = event.target.result.transaction(addr, "readwrite").objectStore(tx_db.db_store_name).clear();
+            let c = event.target.result.transaction(tx_db.db_store_name, "readwrite").objectStore(tx_db.db_store_name).clear();
             c.onsuccess = function () {
                 console.log("交易信息已清空");
             }

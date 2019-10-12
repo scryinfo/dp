@@ -20,8 +20,8 @@
             </el-col>
             <el-table :data="this.$store.state.transactionverifier.slice((curPage-1)*pageSize, curPage*pageSize)"
                       highlight-current-row border :height=height @current-change="currentChange">
-                <el-table-column prop="PublishID" label="数据ID" show-overflow-tooltip></el-table-column>
-                <el-table-column prop="TransactionID" label="交易ID" show-overflow-tooltip></el-table-column>
+                <el-table-column prop="PublishId" label="数据ID" show-overflow-tooltip></el-table-column>
+                <el-table-column prop="TransactionId" label="交易ID" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="Title" label="标题" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="Price" label="价格" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="Keys" label="标签" show-overflow-tooltip></el-table-column>
@@ -44,7 +44,7 @@ export default {
     name: "transaction_3_verifier.vue",
     data () {
         return {
-            selectedTx: "",     // txID: ""
+            selectedTx: "",     // tId: ""
             curPage: 1,
             pageSize: 6,
             total: 0,
@@ -61,7 +61,7 @@ export default {
         setCurPage: function (curPageReturn) { this.curPage = curPageReturn; },
         setPageSize: function (newPageSize) { this.pageSize = newPageSize; },
         currentChange: function (curRow) {
-            this.selectedTx = curRow.TransactionID;
+            this.selectedTx = curRow.TransactionId;
             this.txState = curRow.State;
         },
         buttonDisabled: function (funcNum) {
@@ -89,7 +89,7 @@ export default {
             });
         },
         vote: function (pwd) {
-            connect.send({Name:"vote", Payload:{password: pwd, tID: this.selectedTx, verify: this.verify}},
+            connect.send({Name:"vote", Payload:{password: pwd, TransactionId: this.selectedTx, verify: this.verify}},
                 function (payload, _this) {
                 _this.verify = {suggestion: false, comment: ""};
                 console.log("验证成功", payload);

@@ -21,8 +21,8 @@
 
             <el-table :data="this.$store.state.transactionarbitrator.slice((curPage-1)*pageSize, curPage*pageSize)"
                       highlight-current-row border :height=height @current-change="currentChange">
-                <el-table-column prop="PublishID" label="数据ID" show-overflow-tooltip></el-table-column>
-                <el-table-column prop="TransactionID" label="交易ID" show-overflow-tooltip></el-table-column>
+                <el-table-column prop="PublishId" label="数据ID" show-overflow-tooltip></el-table-column>
+                <el-table-column prop="TransactionId" label="交易ID" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="Title" label="标题" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="Price" label="价格" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="Keys" label="标签" show-overflow-tooltip></el-table-column>
@@ -45,7 +45,7 @@ export default {
     name: "transaction_4_arbitrator.vue",
     data () {
         return {
-            selectedTx: {},     // {txID: "", User: "", MetaDataIDEncrypt: "", MetaDataExtension: ""}
+            selectedTx: {},     // {txId: "", address: "", MetaDataIdEncrypt: "", MetaDataExtension: ""}
             arbitrateResult: false,
             height: window.innerHeight - 170,
             showControl: false,
@@ -60,9 +60,9 @@ export default {
         setPageSize: function (newPageSize) { this.pageSize = newPageSize; },
         currentChange: function (curRow) {
             this.selectedTx = {
-                TransactionID: curRow.TransactionID,
-                User: this.$store.state.account,
-                MetaDataIDEncrypt: curRow.MetaDataIDEncWithArbitrator,
+                TransactionId: curRow.TransactionId,
+                address: this.$store.state.account,
+                MetaDataIdEncrypt: curRow.MetaDataIdEncWithArbitrator,
                 MetaDataExtension: curRow.MetaDataExtension
             };
             this.txState = curRow.State;
@@ -80,7 +80,9 @@ export default {
             })
         },
         decrypt: function (pwd) {
-            connect.send({Name:"decrypt", Payload:{password: pwd, tID: this.selectedTx}}, function (payload, _this) {
+            connect.send({Name:"decrypt", Payload:{password: pwd, address: this.selectedTx.address, 
+                    encryptedId: {encryptedMetaDataId: this.selectedTx.MetaDataIdEncrypt}, 
+                    extensions: {metaDataExtension: this.selectedTx.MetaDataExtension}}}, function (payload, _this) {
                 console.log("解密数据成功", payload);
                 _this.$alert(payload, "原始数据：", {
                     confirmButtonText: "关闭",
@@ -97,7 +99,8 @@ export default {
             });
         },
         arbitrate: function (pwd) {
-            connect.send({Name: "arbitrate", Payload: {password: pwd, tID: this.selectedTx, arbitrateResult: this.arbitrateResult}}, function (payload, _this) {
+            connect.send({Name: "arbitrate", Payload: {password: pwd, TransactionId: this.selectedTx.TransactionId,
+                    arbitrate: {arbitrateResult: this.arbitrateResult}}}, function (payload, _this) {
                 console.log("仲裁成功", payload);
             }, function (payload, _this) {
                 console.log("仲裁失败：", payload);

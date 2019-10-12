@@ -17,7 +17,7 @@
 
         <el-table :data="this.$store.state.datalist.slice((curPage-1)*pageSize, curPage*pageSize)"
                   highlight-current-row border :height=height @current-change="currentChange">
-            <el-table-column prop="PublishID" label="发布ID" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="PublishId" label="发布ID" show-overflow-tooltip></el-table-column>
             <el-table-column prop="Title" label="标题" show-overflow-tooltip></el-table-column>
             <el-table-column prop="Price" label="价格" show-overflow-tooltip></el-table-column>
             <el-table-column prop="Keys" label="标签" show-overflow-tooltip></el-table-column>
@@ -38,7 +38,7 @@ export default {
     name: "datalist.vue",
     data () {
         return {
-            selectedData: {},    // {pID: "", SupportVerify: false, Price: 0}
+            selectedData: {},    // {pId: "", SupportVerify: false, Price: 0}
             curPage: 1,
             pageSize: 6,
             total: 0,
@@ -51,7 +51,7 @@ export default {
         setPageSize: function (newPageSize) {this.pageSize = newPageSize;},
         currentChange: function (curRow) {
             this.selectedData = {
-                PublishID: curRow.PublishID,
+                PublishId: curRow.PublishId,
                 SupportVerify: curRow.SupportVerify,
                 Price: curRow.Price
             };
@@ -60,7 +60,9 @@ export default {
             dl_db.init(this);
         },
         advancePurchase: function (pwd) {
-            connect.send({Name:"advancePurchase",Payload:{password: pwd, startVerify: this.startVerify, pID: this.selectedData}}, function (payload, _this) {
+            connect.send({Name:"advancePurchase",Payload:{password: pwd, startVerify: this.startVerify,
+                        PublishId: this.selectedData.PublishId, price: this.selectedData.Price}},
+                function (payload, _this) {
                 console.log("预购买成功", payload);
             }, function (payload, _this) {
                 console.log("预购买失败：", payload);

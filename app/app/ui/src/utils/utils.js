@@ -51,7 +51,7 @@ let presetFunc = {
         console.log("发布事件回调：", payload);
         _this.$notify({
             title: "发布事件回调：",
-            message: "数据ID：" + payload.PublishID,
+            message: "数据ID：" + payload.PublishId,
             position: "top-left"
         });
         dl_db.write({
@@ -61,9 +61,9 @@ let presetFunc = {
             Description: payload.Description,
             Seller: payload.Seller,
             SupportVerify: payload.SupportVerify,
-            MetaDataExtension: payload.MetaDataExtension,
-            ProofDataExtensions: payload.ProofDataExtensions,
-            PublishID: payload.PublishID    // keyPath
+            MetaDataExtension: payload.extensions.metaDataExtension,
+            ProofDataExtensions: payload.extensions.proofDataExtensions,
+            PublishId: payload.PublishId    // keyPath
         }, function () {
             dl_db.init(_this);
         });
@@ -78,7 +78,7 @@ let presetFunc = {
     },
     onProofFilesExtensions: function (payload, _this) {
         dl_db.read(payload, function (dlInstance) {
-            connect.send({ Name:"extensions", Payload: {extensions: dlInstance.ProofDataExtensions}}, function () {},
+            connect.send({ Name:"extensions", Payload: {extensions: {proofDataExtensions: dlInstance.ProofDataExtensions}}}, function () {},
                 function (payload, _this) {
                     _this.$alert(payload, "获取证明文件扩展名失败！", {
                         confirmButtonText: "关闭",
@@ -92,10 +92,10 @@ let presetFunc = {
         console.log("选择验证者事件回调：", payload);
         _this.$notify({
             title: "选择验证者事件回调：",
-            message: "你已被选中成为 ID: " + payload.TransactionID + " 交易 的验证者。",
+            message: "你已被选中成为 ID: " + payload.TransactionId + " 交易 的验证者。",
             position: "top-left"
         });
-        dl_db.read(payload.PublishID, function (dataDetails) {
+        dl_db.read(payload.PublishId, function (dataDetails) {
             tx_db.write({
                 Title: dataDetails.Title,
                 Price: dataDetails.Price,
@@ -103,19 +103,19 @@ let presetFunc = {
                 Description: dataDetails.Description,
                 Buyer: "",
                 Seller: dataDetails.Seller,
-                State: payload.TxState, // -
+                State: payload.TransactionState, // -
                 SupportVerify: dataDetails.SupportVerify,
                 StartVerify: true, // - !
                 MetaDataExtension: dataDetails.MetaDataExtension,
                 ProofDataExtensions: dataDetails.ProofDataExtensions,
-                MetaDataIDEncWithSeller: "",
-                MetaDataIDEncWithBuyer: "",
-                MetaDataIDEncWithArbitrator: "",
+                MetaDataIdEncWithSeller: "",
+                MetaDataIdEncWithBuyer: "",
+                MetaDataIdEncWithArbitrator: "",
                 Verifier1Response: "",
                 Verifier2Response: "",
                 ArbitrateResult: "",
-                PublishID: dataDetails.PublishID,
-                TransactionID: payload.TransactionID,    // keyPath
+                PublishId: dataDetails.PublishId,
+                TransactionId: payload.TransactionId,    // keyPath
                 Identify: 2
             }, function () {
                 tx_db.initVerifier(_this);
@@ -134,10 +134,10 @@ let presetFunc = {
         console.log("创建交易事件回调：", payload);
         _this.$notify({
             title: "创建交易事件回调：",
-            message: "创建交易(ID：" + payload.TransactionID + ")成功",
+            message: "创建交易(ID：" + payload.TransactionId + ")成功",
             position: "top-left"
         });
-        dl_db.read(payload.PublishID, function (dataDetails) {
+        dl_db.read(payload.PublishId, function (dataDetails) {
             let param = {
                 Title: dataDetails.Title,
                 Price: dataDetails.Price,
@@ -145,22 +145,22 @@ let presetFunc = {
                 Description: dataDetails.Description,
                 Buyer: payload.Buyer, // -
                 Seller: dataDetails.Seller,
-                State: payload.TxState, // -
+                State: payload.TransactionState, // -
                 SupportVerify: dataDetails.SupportVerify,
                 StartVerify: payload.StartVerify, // -
                 MetaDataExtension: dataDetails.MetaDataExtension,
                 ProofDataExtensions: dataDetails.ProofDataExtensions,
-                MetaDataIDEncWithSeller: "",
-                MetaDataIDEncWithBuyer: "",
-                MetaDataIDEncWithArbitrator: "",
+                MetaDataIdEncWithSeller: "",
+                MetaDataIdEncWithBuyer: "",
+                MetaDataIdEncWithArbitrator: "",
                 Verifier1Response: "",
                 Verifier2Response: "",
                 ArbitrateResult: "",
-                PublishID: dataDetails.PublishID,
-                TransactionID: payload.TransactionID,    // keyPath
+                PublishId: dataDetails.PublishId,
+                TransactionId: payload.TransactionId,    // keyPath
                 Identify: 0
             };
-            switch (_this.$store.state.account) {
+            switch (_this.$store.state.account.toLowerCase()) {
                 case dataDetails.Seller.toLowerCase():
                     tx_db.write(param, function () {
                         tx_db.initSeller(_this);
@@ -185,10 +185,10 @@ let presetFunc = {
         console.log("购买数据事件回调：", payload);
         _this.$notify({
             title: "购买数据事件回调：",
-            message: "交易(ID: " + payload.TransactionID + ")已确认购买。",
+            message: "交易(ID: " + payload.TransactionId + ")已确认购买。",
             position: "top-left"
         });
-        tx_db.read(payload.TransactionID, function (txDetailsOnPurchase) {
+        tx_db.read(payload.TransactionId, function (txDetailsOnPurchase) {
             let param = {
                 Title: txDetailsOnPurchase.Title,
                 Price: txDetailsOnPurchase.Price,
@@ -196,22 +196,22 @@ let presetFunc = {
                 Description: txDetailsOnPurchase.Description,
                 Buyer: txDetailsOnPurchase.Buyer,
                 Seller: txDetailsOnPurchase.Seller,
-                State: payload.TxState, // -
+                State: payload.TransactionState, // -
                 SupportVerify: txDetailsOnPurchase.SupportVerify,
                 StartVerify: txDetailsOnPurchase.StartVerify,
                 MetaDataExtension: txDetailsOnPurchase.MetaDataExtension,
                 ProofDataExtensions: txDetailsOnPurchase.ProofDataExtensions,
-                MetaDataIDEncWithSeller: payload.MetaDataIdEncWithSeller, // -
-                MetaDataIDEncWithBuyer: txDetailsOnPurchase.MetaDataIDEncWithBuyer,
-                MetaDataIDEncWithArbitrator: txDetailsOnPurchase.MetaDataIDEncWithArbitrator,
+                MetaDataIdEncWithSeller: payload.EncryptedId.EncryptedId, // -
+                MetaDataIdEncWithBuyer: txDetailsOnPurchase.MetaDataIdEncWithBuyer,
+                MetaDataIdEncWithArbitrator: txDetailsOnPurchase.MetaDataIdEncWithArbitrator,
                 Verifier1Response: txDetailsOnPurchase.Verifier1Response,
                 Verifier2Response: txDetailsOnPurchase.Verifier2Response,
                 ArbitrateResult: txDetailsOnPurchase.ArbitrateResult,
-                PublishID: txDetailsOnPurchase.PublishID,
-                TransactionID: txDetailsOnPurchase.TransactionID, // keyPath
+                PublishId: txDetailsOnPurchase.PublishId,
+                TransactionId: txDetailsOnPurchase.TransactionId, // keyPath
                 Identify: 0
             };
-            switch (_this.$store.state.account) {
+            switch (_this.$store.state.account.toLowerCase()) {
                 case txDetailsOnPurchase.Seller.toLowerCase():
                     tx_db.write(param, function () {
                         tx_db.initSeller(_this);
@@ -241,10 +241,10 @@ let presetFunc = {
         console.log("再加密数据事件回调：", payload);
         _this.$notify({
             title: "再加密数据事件回调：",
-            message: "交易(ID: " + payload.TransactionID + ")已重新加密。",
+            message: "交易(ID: " + payload.TransactionId + ")已重新加密。",
             position: "top-left"
         });
-        tx_db.read(payload.TransactionID, function (txDetailsOnRFD) {
+        tx_db.read(payload.TransactionId, function (txDetailsOnRFD) {
             let param = {
                 Title: txDetailsOnRFD.Title,
                 Price: txDetailsOnRFD.Price,
@@ -252,19 +252,19 @@ let presetFunc = {
                 Description: txDetailsOnRFD.Description,
                 Buyer: txDetailsOnRFD.Buyer,
                 Seller: txDetailsOnRFD.Seller,
-                State: payload.TxState, // -
+                State: payload.TransactionState, // -
                 SupportVerify: txDetailsOnRFD.SupportVerify,
                 StartVerify: txDetailsOnRFD.StartVerify,
                 MetaDataExtension: txDetailsOnRFD.MetaDataExtension,
                 ProofDataExtensions: txDetailsOnRFD.ProofDataExtensions,
-                MetaDataIDEncWithSeller: txDetailsOnRFD.MetaDataIDEncWithSeller,
-                MetaDataIDEncWithBuyer: payload.MetaDataIdEncWithBuyer, // -
-                MetaDataIDEncWithArbitrator: txDetailsOnRFD.MetaDataIDEncWithArbitrator,
+                MetaDataIdEncWithSeller: txDetailsOnRFD.MetaDataIdEncWithSeller,
+                MetaDataIdEncWithBuyer: payload.EncryptedId.EncryptedId, // -
+                MetaDataIdEncWithArbitrator: txDetailsOnRFD.MetaDataIdEncWithArbitrator,
                 Verifier1Response: txDetailsOnRFD.Verifier1Response,
                 Verifier2Response: txDetailsOnRFD.Verifier2Response,
                 ArbitrateResult: txDetailsOnRFD.ArbitrateResult,
-                PublishID: txDetailsOnRFD.PublishID,
-                TransactionID: txDetailsOnRFD.TransactionID,
+                PublishId: txDetailsOnRFD.PublishId,
+                TransactionId: txDetailsOnRFD.TransactionId,
                 Identify: 0
             };
             switch (_this.$store.state.account) {
@@ -292,10 +292,10 @@ let presetFunc = {
         console.log("交易关闭事件回调：", payload);
         _this.$notify({
             title: "交易关闭事件回调：",
-            message: "交易(ID: " + payload.TransactionID + ")已关闭。",
+            message: "交易(ID: " + payload.TransactionId + ")已关闭。",
             position: "top-left"
         });
-        tx_db.read(payload.TransactionID, function (txDetailsOnC) {
+        tx_db.read(payload.TransactionId, function (txDetailsOnC) {
             let param = {
                 Title: txDetailsOnC.Title,
                 Price: txDetailsOnC.Price,
@@ -303,19 +303,19 @@ let presetFunc = {
                 Description: txDetailsOnC.Description,
                 Buyer: txDetailsOnC.Buyer,
                 Seller: txDetailsOnC.Seller,
-                State: payload.TxState, // -
+                State: payload.TransactionState, // -
                 SupportVerify: txDetailsOnC.SupportVerify,
                 StartVerify: txDetailsOnC.StartVerify,
                 MetaDataExtension: txDetailsOnC.MetaDataExtension,
                 ProofDataExtensions: txDetailsOnC.ProofDataExtensions,
-                MetaDataIDEncWithSeller: txDetailsOnC.MetaDataIDEncWithSeller,
-                MetaDataIDEncWithBuyer: txDetailsOnC.MetaDataIDEncWithBuyer,
-                MetaDataIDEncWithArbitrator: txDetailsOnC.MetaDataIDEncWithArbitrator,
+                MetaDataIdEncWithSeller: txDetailsOnC.MetaDataIdEncWithSeller,
+                MetaDataIdEncWithBuyer: txDetailsOnC.MetaDataIdEncWithBuyer,
+                MetaDataIdEncWithArbitrator: txDetailsOnC.MetaDataIdEncWithArbitrator,
                 Verifier1Response: txDetailsOnC.Verifier1Response,
                 Verifier2Response: txDetailsOnC.Verifier2Response,
                 ArbitrateResult: txDetailsOnC.ArbitrateResult,
-                PublishID: txDetailsOnC.PublishID,
-                TransactionID: txDetailsOnC.TransactionID,
+                PublishId: txDetailsOnC.PublishId,
+                TransactionId: txDetailsOnC.TransactionId,
                 Identify: 0
             };
             switch (_this.$store.state.account) {
@@ -364,10 +364,10 @@ let presetFunc = {
         console.log("验证者验证事件回调：", payload);
         _this.$notify({
             title: "验证者验证事件回调：",
-            message: "收到新的验证者回复，交易ID：" + payload.TransactionID,
+            message: "收到新的验证者回复，交易ID：" + payload.TransactionId,
             position: "top-left"
         });
-        tx_db.read(payload.TransactionID, function (txDetailsOnV) {
+        tx_db.read(payload.TransactionId, function (txDetailsOnV) {
             let param = {
                 Title: txDetailsOnV.Title,
                 Price: txDetailsOnV.Price,
@@ -375,33 +375,34 @@ let presetFunc = {
                 Description: txDetailsOnV.Description,
                 Buyer: txDetailsOnV.Buyer,
                 Seller: txDetailsOnV.Seller,
-                State: payload.TxState, // -
+                State: payload.TransactionState, // -
                 SupportVerify: txDetailsOnV.SupportVerify,
                 StartVerify: txDetailsOnV.StartVerify,
                 MetaDataExtension: txDetailsOnV.MetaDataExtension,
                 ProofDataExtensions: txDetailsOnV.ProofDataExtensions,
-                MetaDataIDEncWithSeller: txDetailsOnV.MetaDataIDEncWithSeller,
-                MetaDataIDEncWithBuyer: txDetailsOnV.MetaDataIDEncWithBuyer,
-                MetaDataIDEncWithArbitrator: txDetailsOnV.MetaDataIDEncWithArbitrator,
+                MetaDataIdEncWithSeller: txDetailsOnV.MetaDataIdEncWithSeller,
+                MetaDataIdEncWithBuyer: txDetailsOnV.MetaDataIdEncWithBuyer,
+                MetaDataIdEncWithArbitrator: txDetailsOnV.MetaDataIdEncWithArbitrator,
                 Verifier1Response: txDetailsOnV.Verifier1Response, // -
                 Verifier2Response: txDetailsOnV.Verifier2Response, // -
                 ArbitrateResult: txDetailsOnV.ArbitrateResult,
-                PublishID: txDetailsOnV.PublishID,
-                TransactionID: txDetailsOnV.TransactionID,
+                PublishId: txDetailsOnV.PublishId,
+                TransactionId: txDetailsOnV.TransactionId,
                 Identify: 1
             };
-            switch (payload.VerifierIndex) { // payload.VerifierResponse
-                case "0":
+            switch (parseInt(payload.VerifyResult.VerifierIndex)) {
+                case 0:
+                    param.Identify = 2;
                     tx_db.write(param, function () {
                         tx_db.initVerifier(_this);
                     });break;
-                case "1":
-                    param.Verifier1Response = payload.VerifierResponse;
+                case 1:
+                    param.Verifier1Response = payload.VerifyResult.VerifierResponse;
                     tx_db.write(param, function () {
                         tx_db.initBuyer(_this);
                     });break;
-                case "2":
-                    param.Verifier2Response = payload.VerifierResponse;
+                case 2:
+                    param.Verifier2Response = payload.VerifyResult.VerifierResponse;
                     tx_db.write(param, function () {
                         tx_db.initBuyer(_this);
                     });break;
@@ -420,7 +421,7 @@ let presetFunc = {
         console.log("取消验证者验证资格事件回调：", payload);
         _this.$notify({
             title: "取消验证者验证资格事件回调：",
-            message: "验证者： " + payload.Verifier + "被取消验证资格。",
+            message: "验证者： " + payload.VerifierDisabled.VerifierAddress + "被取消验证资格。",
             position: "top-left"
         });
         acc_db.read(_this.$store.state.account, function (accInstance) {
@@ -452,14 +453,14 @@ let presetFunc = {
                 StartVerify: true, // - !
                 MetaDataExtension: dataDetails.MetaDataExtension,
                 ProofDataExtensions: dataDetails.ProofDataExtensions,
-                MetaDataIDEncWithSeller: "",
-                MetaDataIDEncWithBuyer: "",
-                MetaDataIDEncWithArbitrator: payload.MetaDataIdEncWithArbitrator,
+                MetaDataIdEncWithSeller: "",
+                MetaDataIdEncWithBuyer: "",
+                MetaDataIdEncWithArbitrator: payload.MetaDataIdEncWithArbitrator,
                 Verifier1Response: "",
                 Verifier2Response: "",
                 ArbitrateResult: "",
-                PublishID: dataDetails.PublishID,
-                TransactionID: payload.TransactionId,    // keyPath
+                PublishId: dataDetails.PublishId,
+                TransactionId: payload.TransactionId,    // keyPath
                 Identify: 3
             }, function () {
                 tx_db.initArbitrator(_this);
@@ -478,10 +479,10 @@ let presetFunc = {
         console.log("仲裁结果事件回调：", payload);
         _this.$notify({
             title: "仲裁结果事件回调：",
-            message: "交易(ID: " + payload.TransactionId + ")已完成仲裁，仲裁结果为：" + payload.ArbitrateResult + " 。",
+            message: "交易(ID: " + payload.TransactionId + ")已完成仲裁，仲裁结果为：" + payload.Arbitrate.ArbitrateResult + " 。",
             position: "top-left"
         });
-        tx_db.read(payload.TransactionID, function (txDetailsOAR) {
+        tx_db.read(payload.TransactionId, function (txDetailsOAR) {
             let param = {
                 Title: txDetailsOAR.Title,
                 Price: txDetailsOAR.Price,
@@ -494,14 +495,14 @@ let presetFunc = {
                 StartVerify: txDetailsOAR.StartVerify,
                 MetaDataExtension: txDetailsOAR.MetaDataExtension,
                 ProofDataExtensions: txDetailsOAR.ProofDataExtensions,
-                MetaDataIDEncWithSeller: txDetailsOAR.MetaDataIDEncWithSeller,
-                MetaDataIDEncWithBuyer: txDetailsOAR.MetaDataIDEncWithBuyer,
-                MetaDataIDEncWithArbitrator: txDetailsOAR.MetaDataIDEncWithArbitrator,
+                MetaDataIdEncWithSeller: txDetailsOAR.MetaDataIdEncWithSeller,
+                MetaDataIdEncWithBuyer: txDetailsOAR.MetaDataIdEncWithBuyer,
+                MetaDataIdEncWithArbitrator: txDetailsOAR.MetaDataIdEncWithArbitrator,
                 Verifier1Response: txDetailsOAR.Verifier1Response,
                 Verifier2Response: txDetailsOAR.Verifier2Response,
-                ArbitrateResult: payload.ArbitrateResult, // -
-                PublishID: txDetailsOAR.PublishID,
-                TransactionID: txDetailsOAR.TransactionID, // keyPath
+                ArbitrateResult: payload.Arbitrate.ArbitrateResult, // -
+                PublishId: txDetailsOAR.PublishId,
+                TransactionId: txDetailsOAR.TransactionId, // keyPath
                 Identify: 0
             };
             switch (_this.$store.state.account) {

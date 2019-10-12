@@ -32,17 +32,19 @@ export default {
                     Title: "",
                     Keys: "",
                     Description: "",
-                    MetaDataExtension: "",
-                    ProofDataExtensions: [],
-                    Seller: ""
+                    Seller: "",
+                    extensions: {
+                        metaDataExtension: "",
+                        proofDataExtensions: []
+                    }
                 },
                 Price: Number
             },
             SupportVerify: false,
-            IDs: {
-                metaDataID: "",
-                proofDataIDs: [],
-                detailsID: "",
+            Ids: {
+                metaDataId: "",
+                proofDataIds: [],
+                detailsId: "",
             },
             password: "",
             count: 0
@@ -53,19 +55,19 @@ export default {
             this.password = pwd;
             this.count = this.$refs.selectedProofs.files.length;
             this.pubData.details.Seller = this.$store.state.account;
-            this.setDataID();
-            this.setProofIDs();
+            this.setDataId();
+            this.setProofIds();
         },
-        setDataID: function () {
-            this.IDs.metaDataID = "";
+        setDataId: function () {
+            this.Ids.metaDataId = "";
             let _this = this;
             let data = this.$refs.selectedData.files[0];
-            this.pubData.details.MetaDataExtension = data.name.slice(data.name.indexOf("."));
+            this.pubData.details.extensions.metaDataExtension = data.name.slice(data.name.indexOf("."));
             let reader = new FileReader();
             reader.readAsArrayBuffer(data);
             reader.onload = function (evt) {
                 connect.ipfs.add(Buffer.from(evt.target.result, "utf-8")).then(function (result) {
-                    _this.IDs.metaDataID = result[0].hash;
+                    _this.Ids.metaDataId = result[0].hash;
                     _this.count--;
                 }).catch(function (err) {
                     console.log("IPFS上传失败：", err);
@@ -77,18 +79,18 @@ export default {
                 });
             }
         },
-        setProofIDs: function () {
-            this.IDs.proofDataIDs = [];
-            this.pubData.details.ProofDataExtensions = [];
+        setProofIds: function () {
+            this.Ids.proofDataIds = [];
+            this.pubData.details.extensions.proofDataExtensions = [];
             let _this = this;
             let proofs = this.$refs.selectedProofs.files;
             for (let i=0;i<proofs.length;i++) {
-                this.pubData.details.ProofDataExtensions.push( proofs[i].name.slice(proofs[i].name.indexOf(".")) );
+                this.pubData.details.extensions.proofDataExtensions.push( proofs[i].name.slice(proofs[i].name.indexOf(".")) );
                 let reader = new FileReader();
                 reader.readAsArrayBuffer(proofs[i]);
                 reader.onload = function (evt) {
                     connect.ipfs.add(Buffer.from(evt.target.result, "utf-8")).then(function (result) {
-                        _this.IDs.proofDataIDs.push(result[0].hash);
+                        _this.Ids.proofDataIds.push(result[0].hash);
                         _this.count--;
                     }).catch(function (err) {
                         console.log("IPFS上传失败：", err);
@@ -101,10 +103,10 @@ export default {
                 }
             }
         },
-        setDetailsID: function () {
+        setDetailsId: function () {
             let _this = this;
             connect.ipfs.add(Buffer.from(JSON.stringify(this.pubData.details), "utf-8")).then(function (result) {
-                _this.IDs.detailsID = result[0].hash;
+                _this.Ids.detailsId = result[0].hash;
                 _this.count--;
             }).catch(function (err) {
                 console.log("IPFS上传失败：", err);
@@ -119,7 +121,7 @@ export default {
             let pwd = this.password;
             this.password = "";
             connect.send({Name:"publish", Payload: {password: pwd, supportVerify: this.SupportVerify,
-                    price: this.pubData.Price, IDs: this.IDs}},
+                    price: this.pubData.Price, Ids: this.Ids}},
                 function (payload, _this) {
                 console.log("发布新数据成功", payload);
             }, function (payload, _this) {
@@ -138,7 +140,7 @@ export default {
     watch: {
         count: function () {
             if (this.count === -1) {
-                this.setDetailsID();
+                this.setDetailsId();
             }
             if (this.count === -2) {
                 this.pub();
