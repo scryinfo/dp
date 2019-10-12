@@ -21,7 +21,7 @@ type Preset struct {
     PresetMsgNames    []string
     PresetMsgHandlers []server.PresetFunc
     CurUser           scry2.Client
-    Deployer          *definition.AccInfo
+    Deployer          *definition.Preset
     config            presetConfig
     Bin               *binary.Binary `dot:""`
     CBs               *cec.Callbacks `dot:""`
@@ -46,8 +46,8 @@ const (
 )
 
 func (p *Preset) Create(l dot.Line) error {
-    p.Deployer = &definition.AccInfo{
-        Account:  "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8",
+    p.Deployer = &definition.Preset{
+        Address:  "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8",
         Password: "111111",
     }
 
@@ -139,19 +139,19 @@ func PreTypeLive() []*dot.TypeLives {
 }
 
 func (p *Preset) LoginVerify(mi *server.MessageIn) (payload interface{}, err error) {
-   var ai definition.AccInfo
-   if err = json.Unmarshal(mi.Payload, &ai); err != nil {
+   var lv definition.Preset
+   if err = json.Unmarshal(mi.Payload, &lv); err != nil {
        return
    }
 
    var client scry2.Client
-   if client = scry2.NewScryClient(ai.Account, p.Bin.ChainWrapper()); client == nil {
+   if client = scry2.NewScryClient(lv.Address, p.Bin.ChainWrapper()); client == nil {
        err = errors.New("Call NewScryClient failed. ")
        return
    }
 
    var login bool
-   if login, err = client.Authenticate(ai.Password); err != nil {
+   if login, err = client.Authenticate(lv.Password); err != nil {
        err = errors.Wrap(err, "Authenticate user information failed. ")
        return
    }
@@ -168,13 +168,13 @@ func (p *Preset) LoginVerify(mi *server.MessageIn) (payload interface{}, err err
 }
 
 func (p *Preset) CreateNewAccount(mi *server.MessageIn) (payload interface{}, err error) {
-   var pwd definition.AccInfo
-   if err = json.Unmarshal(mi.Payload, &pwd); err != nil {
+   var cna definition.Preset
+   if err = json.Unmarshal(mi.Payload, &cna); err != nil {
        return
    }
 
    var client scry2.Client
-   if client, err = scry2.CreateScryClient(pwd.Password, p.Bin.ChainWrapper()); err != nil {
+   if client, err = scry2.CreateScryClient(cna.Password, p.Bin.ChainWrapper()); err != nil {
        err = errors.Wrap(err, "Create new user failed. ")
        return
    }
@@ -192,8 +192,8 @@ func (p *Preset) BlockSet(mi *server.MessageIn) (payload interface{}, err error)
        return
    }
 
-   var sid definition.SDKInitData
-   if err = json.Unmarshal(mi.Payload, &sid); err != nil {
+   var bs definition.Preset
+   if err = json.Unmarshal(mi.Payload, &bs); err != nil {
        return
    }
 
@@ -209,10 +209,10 @@ func (p *Preset) BlockSet(mi *server.MessageIn) (payload interface{}, err error)
        }
    }
 
-   p.Bin.Listener.SetFromBlock(uint64(sid.FromBlock))
+   p.Bin.Listener.SetFromBlock(uint64(bs.FromBlock))
 
    // when an user login success, he will get 10,000,000 eth and tokens for test. in 'block.set' case.
-   if err = p.CurUser.TransferEthFrom(common.HexToAddress(p.Deployer.Account),
+   if err = p.CurUser.TransferEthFrom(common.HexToAddress(p.Deployer.Address),
        p.Deployer.Password,
        big.NewInt(10000000),
        p.Bin.ChainWrapper().Conn(),
@@ -222,7 +222,7 @@ func (p *Preset) BlockSet(mi *server.MessageIn) (payload interface{}, err error)
    }
 
    txParam := transaction.TxParams{
-       From:     common.HexToAddress(p.Deployer.Account),
+       From:     common.HexToAddress(p.Deployer.Address),
        Password: p.Deployer.Password,
        Value:    big.NewInt(0),
        Pending:  false,
@@ -263,19 +263,19 @@ func (p *Preset) Publish(mi *server.MessageIn) (payload interface{}, err error) 
        return
    }
 
-   var pd definition.PublishData
-   if err = json.Unmarshal(mi.Payload, &pd); err != nil {
+   var publish definition.Preset
+   if err = json.Unmarshal(mi.Payload, &publish); err != nil {
        return
    }
 
    if payload, err = p.Bin.ChainWrapper().Publish(
-       p.makeTxParams(pd.Password),
-       big.NewInt(int64(pd.Price)),
-       []byte(pd.IDs.MetaDataID),
-       pd.IDs.ProofDataIDs,
-       int32(len(pd.IDs.ProofDataIDs)),
-       pd.IDs.DetailsID,
-       pd.SupportVerify,
+       p.makeTxParams(publish.Password),
+       big.NewInt(int64(publish.Price)),
+       []byte(publish.Ids.MetaDataId),
+       publish.Ids.ProofDataIds,
+       int32(len(publish.Ids.ProofDataIds)),
+       publish.Ids.DetailsId,
+       publish.SupportVerify,
    ); err != nil {
        return
    }
@@ -289,17 +289,17 @@ func (p *Preset) AdvancePurchase(mi *server.MessageIn) (payload interface{}, err
        return
    }
 
-   var bd definition.BuyData
-   if err = json.Unmarshal(mi.Payload, &bd); err != nil {
+   var ap definition.Preset
+   if err = json.Unmarshal(mi.Payload, &ap); err != nil {
        return
    }
 
-   fee := int64(bd.SelectedData.Price)
-   if bd.StartVerify {
+   fee := int64(ap.Price)
+   if ap.StartVerify {
        fee += int64(verifierNum*verifierBonus) + int64(arbitratorNum*arbitratorBonus)
    }
 
-   if err = p.Bin.ChainWrapper().ApproveTransfer(p.makeTxParams(bd.Password),
+   if err = p.Bin.ChainWrapper().ApproveTransfer(p.makeTxParams(ap.Password),
        common.HexToAddress(p.Bin.Config().ProtocolContractAddr),
        big.NewInt(fee),
    ); err != nil {
@@ -309,7 +309,7 @@ func (p *Preset) AdvancePurchase(mi *server.MessageIn) (payload interface{}, err
 
    time.Sleep(5 * time.Second)
 
-   if err = p.Bin.ChainWrapper().AdvancePurchase(p.makeTxParams(bd.Password), bd.SelectedData.PublishID, bd.StartVerify); err != nil {
+   if err = p.Bin.ChainWrapper().AdvancePurchase(p.makeTxParams(ap.Password), ap.PublishId, ap.StartVerify); err != nil {
        err = errors.Wrap(err, "Advance purchase failed. ")
        return
    }
@@ -320,11 +320,12 @@ func (p *Preset) AdvancePurchase(mi *server.MessageIn) (payload interface{}, err
 }
 
 func (p *Preset) Extensions(mi *server.MessageIn) (payload interface{}, err error) {
-   var ppd definition.Prepared
-   if err = json.Unmarshal(mi.Payload, &ppd); err != nil {
+   var ext definition.Preset
+   if err = json.Unmarshal(mi.Payload, &ext); err != nil {
        return
    }
-   p.CBs.ExtChan <- ppd.Extensions
+
+   p.CBs.ExtChan <- ext.Extensions.ProofDataExtensions
    payload = true
 
    return
@@ -336,18 +337,18 @@ func (p *Preset) ConfirmPurchase(mi *server.MessageIn) (payload interface{}, err
        return
    }
 
-   var pd definition.PurchaseData
-   if err = json.Unmarshal(mi.Payload, &pd); err != nil {
+   var cp definition.Preset
+   if err = json.Unmarshal(mi.Payload, &cp); err != nil {
        return
    }
 
-   tID, ok := new(big.Int).SetString(pd.SelectedTx.TransactionID, 10)
+   tId, ok := new(big.Int).SetString(cp.TransactionId, 10)
    if !ok {
        err = errors.New("Set to *big.Int failed. ")
        return
    }
 
-   if err = p.Bin.ChainWrapper().ConfirmPurchase(p.makeTxParams(pd.Password), tID); err != nil {
+   if err = p.Bin.ChainWrapper().ConfirmPurchase(p.makeTxParams(cp.Password), tId); err != nil {
        err = errors.Wrap(err, "Confirm purchase failed. ")
        return
    }
@@ -363,19 +364,19 @@ func (p *Preset) ReEncrypt(mi *server.MessageIn) (payload interface{}, err error
        return
    }
 
-   var re definition.ReEncryptData
+   var re definition.Preset
    if err = json.Unmarshal(mi.Payload, &re); err != nil {
        return
    }
 
    txParam := p.makeTxParams(re.Password)
-   tID, ok := new(big.Int).SetString(re.SelectedTx.TransactionID, 10)
+   tId, ok := new(big.Int).SetString(re.TransactionId, 10)
    if !ok {
        err = errors.New("Set to *big.Int failed. ")
        return
    }
 
-   if err = p.Bin.ChainWrapper().ReEncrypt(txParam, tID, re.SelectedTx.MetaDataIDEncWithSeller); err != nil {
+   if err = p.Bin.ChainWrapper().ReEncrypt(txParam, tId, re.EncryptedId.EncryptedId); err != nil {
        err = errors.Wrap(err, "Re-encrypt failed. ")
        return
    }
@@ -391,18 +392,18 @@ func (p *Preset) CancelPurchase(mi *server.MessageIn) (payload interface{}, err 
        return
    }
 
-   var pd definition.PurchaseData
-   if err = json.Unmarshal(mi.Payload, &pd); err != nil {
+   var cp definition.Preset
+   if err = json.Unmarshal(mi.Payload, &cp); err != nil {
        return
    }
 
-   tID, ok := new(big.Int).SetString(pd.SelectedTx.TransactionID, 10)
+   tId, ok := new(big.Int).SetString(cp.TransactionId, 10)
    if !ok {
        err = errors.New("Set to *big.Int failed. ")
        return
    }
 
-   if err = p.Bin.ChainWrapper().CancelPurchase(p.makeTxParams(pd.Password), tID); err != nil {
+   if err = p.Bin.ChainWrapper().CancelPurchase(p.makeTxParams(cp.Password), tId); err != nil {
        err = errors.Wrap(err, "Cancel purchase failed. ")
        return
    }
@@ -418,25 +419,25 @@ func (p *Preset) Decrypt(mi *server.MessageIn) (payload interface{}, err error) 
        return
    }
 
-   var dd definition.DecryptData
-   if err = json.Unmarshal(mi.Payload, &dd); err != nil {
+   var decrypt definition.Preset
+   if err = json.Unmarshal(mi.Payload, &decrypt); err != nil {
        return
    }
 
    var oldFileName string
    {
-       var metaDataIDByte []byte
-       if metaDataIDByte, err = p.Bin.Account.Decrypt(dd.SelectedTx.MetaDataIDEncrypt, dd.SelectedTx.User, dd.Password); err != nil {
-           return "", errors.Wrap(err, "Decrypt encrypted meta data ID failed. ")
+       var metaDataIdByte []byte
+       if metaDataIdByte, err = p.Bin.Account.Decrypt(decrypt.EncryptedId.EncryptedId, decrypt.Address, decrypt.Password); err != nil {
+           return "", errors.Wrap(err, "Decrypt encrypted meta data Id failed. ")
        }
        outDir := p.config.MetaDataOutDir
-       if err = p.Bin.Storage.Get(string(metaDataIDByte), outDir); err != nil {
+       if err = p.Bin.Storage.Get(string(metaDataIdByte), outDir); err != nil {
            return "", errors.Wrap(err, "Get meta data from IPFS failed. ")
        }
-       oldFileName = outDir + "/" + string(metaDataIDByte)
+       oldFileName = outDir + "/" + string(metaDataIdByte)
    }
 
-   newFileName := oldFileName + dd.SelectedTx.MetaDataExtension
+   newFileName := oldFileName + decrypt.Extensions.MetaDataExtension
    if err = os.Rename(oldFileName, newFileName); err != nil {
        return "", errors.Wrap(err, "Add extension to meta data failed. ")
    }
@@ -452,18 +453,18 @@ func (p *Preset) ConfirmData(mi *server.MessageIn) (payload interface{}, err err
        return
    }
 
-   var cd definition.ConfirmData
+   var cd definition.Preset
    if err = json.Unmarshal(mi.Payload, &cd); err != nil {
        return
    }
 
-   tID, ok := new(big.Int).SetString(cd.SelectedTx.TransactionID, 10)
+   tId, ok := new(big.Int).SetString(cd.TransactionId, 10)
    if !ok {
        err = errors.New("Set to *big.Int failed. ")
        return
    }
 
-   if err = p.Bin.ChainWrapper().ConfirmData(p.makeTxParams(cd.Password), tID, cd.Truth); err != nil {
+   if err = p.Bin.ChainWrapper().ConfirmData(p.makeTxParams(cd.Password), tId, cd.Confirm.Truth); err != nil {
        err = errors.Wrap(err, "Confirm data failed. ")
        return
    }
@@ -479,12 +480,12 @@ func (p *Preset) Register(mi *server.MessageIn) (payload interface{}, err error)
        return
    }
 
-   var rvd definition.RegisterVerifierData
-   if err = json.Unmarshal(mi.Payload, &rvd); err != nil {
+   var register definition.Preset
+   if err = json.Unmarshal(mi.Payload, &register); err != nil {
        return
    }
 
-   if err = p.Bin.ChainWrapper().ApproveTransfer(p.makeTxParams(rvd.Password),
+   if err = p.Bin.ChainWrapper().ApproveTransfer(p.makeTxParams(register.Password),
        common.HexToAddress(p.Bin.Config().ProtocolContractAddr),
        big.NewInt(registerAsVerifierCost),
    ); err != nil {
@@ -494,7 +495,7 @@ func (p *Preset) Register(mi *server.MessageIn) (payload interface{}, err error)
 
    time.Sleep(5 * time.Second)
 
-   if err = p.Bin.ChainWrapper().RegisterAsVerifier(p.makeTxParams(rvd.Password)); err != nil {
+   if err = p.Bin.ChainWrapper().RegisterAsVerifier(p.makeTxParams(register.Password)); err != nil {
        err = errors.Wrap(err, "Register as verifier failed. ")
        return
    }
@@ -510,18 +511,18 @@ func (p *Preset) Vote(mi *server.MessageIn) (payload interface{}, err error) {
        return
    }
 
-   var vd definition.VerifyData
-   if err = json.Unmarshal(mi.Payload, &vd); err != nil {
+   var vote definition.Preset
+   if err = json.Unmarshal(mi.Payload, &vote); err != nil {
        return
    }
 
-   tID, ok := new(big.Int).SetString(vd.TransactionID, 10)
+   tId, ok := new(big.Int).SetString(vote.TransactionId, 10)
    if !ok {
        err = errors.New("Set to *big.Int failed. ")
        return
    }
 
-   if err = p.Bin.ChainWrapper().Vote(p.makeTxParams(vd.Password), tID, vd.Verify.Suggestion, vd.Verify.Comment); err != nil {
+   if err = p.Bin.ChainWrapper().Vote(p.makeTxParams(vote.Password), tId, vote.Verify.Suggestion, vote.Verify.Comment); err != nil {
        err = errors.Wrap(err, "Vote failed. ")
        return
    }
@@ -537,28 +538,28 @@ func (p *Preset) GradeToVerifier(mi *server.MessageIn) (payload interface{}, err
        return
    }
 
-   var cd definition.CreditData
-   if err = json.Unmarshal(mi.Payload, &cd); err != nil {
+   var gtv definition.Preset
+   if err = json.Unmarshal(mi.Payload, &gtv); err != nil {
        return
    }
-   tID, ok := new(big.Int).SetString(cd.SelectedTx.TransactionID, 10)
+   tId, ok := new(big.Int).SetString(gtv.TransactionId, 10)
    if !ok {
        err = errors.New("Set to *big.Int failed. ")
        return
    }
 
-   txParam := p.makeTxParams(cd.Password)
+   txParam := p.makeTxParams(gtv.Password)
 
-   if cd.Credit.Verifier1Revert {
-       credit := uint8(cd.Credit.Verifier1Credit)
-       if err = p.Bin.ChainWrapper().GradeToVerifier(txParam, tID, 0, credit); err != nil {
+   if gtv.Grade.Verifier1Revert {
+       credit := uint8(gtv.Grade.Verifier1Grade)
+       if err = p.Bin.ChainWrapper().GradeToVerifier(txParam, tId, 0, credit); err != nil {
            err = errors.Wrap(err, "Grade verifier1 failed. ")
            return
        }
    }
-   if cd.Credit.Verifier2Revert {
-       credit := uint8(cd.Credit.Verifier2Credit)
-       if err = p.Bin.ChainWrapper().GradeToVerifier(txParam, tID, 1, credit); err != nil {
+   if gtv.Grade.Verifier2Revert {
+       credit := uint8(gtv.Grade.Verifier2Grade)
+       if err = p.Bin.ChainWrapper().GradeToVerifier(txParam, tId, 1, credit); err != nil {
            err = errors.Wrap(err, "Grade verifier2 failed. ")
            return
        }
@@ -575,17 +576,17 @@ func (p *Preset) Arbitrate(mi *server.MessageIn) (payload interface{}, err error
        return
    }
 
-   var ad definition.ArbitrateData
+   var ad definition.Preset
    if err = json.Unmarshal(mi.Payload, &ad); err != nil {
        return
    }
-   tID, ok := new(big.Int).SetString(ad.SelectedTx.TransactionId, 10)
+   tId, ok := new(big.Int).SetString(ad.TransactionId, 10)
    if !ok {
        err = errors.New("Set to *big.Int failed. ")
        return
    }
 
-   if err = p.Bin.ChainWrapper().Arbitrate(p.makeTxParams(ad.Password), tID, ad.ArbitrateResult); err != nil {
+   if err = p.Bin.ChainWrapper().Arbitrate(p.makeTxParams(ad.Password), tId, ad.Arbitrate.ArbitrateResult); err != nil {
        err = errors.Wrap(err, "Arbitrate failed. ")
        return
    }
@@ -595,14 +596,9 @@ func (p *Preset) Arbitrate(mi *server.MessageIn) (payload interface{}, err error
    return
 }
 
-func (p *Preset) GetEthBalance(mi *server.MessageIn) (payload interface{}, err error) {
+func (p *Preset) GetEthBalance(_ *server.MessageIn) (payload interface{}, err error) {
    if p.CurUser == nil {
        err = errors.New("Current user is nil. ")
-       return
-   }
-
-   var pwd definition.AccInfo
-   if err = json.Unmarshal(mi.Payload, &pwd); err != nil {
        return
    }
 
@@ -623,13 +619,13 @@ func (p *Preset) GetTokenBalance(mi *server.MessageIn) (payload interface{}, err
        return
    }
 
-   var pwd definition.AccInfo
-   if err = json.Unmarshal(mi.Payload, &pwd); err != nil {
+   var gtb definition.Preset
+   if err = json.Unmarshal(mi.Payload, &gtb); err != nil {
        return
    }
 
    var balance *big.Int
-   if balance, err = p.Bin.ChainWrapper().GetTokenBalance(p.makeTxParams(pwd.Password), common.HexToAddress(p.CurUser.Account().Addr));err != nil {
+   if balance, err = p.Bin.ChainWrapper().GetTokenBalance(p.makeTxParams(gtb.Password), common.HexToAddress(p.CurUser.Account().Addr));err != nil {
        err = errors.Wrap(err, "Get token balance failed. ")
        return
    }

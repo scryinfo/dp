@@ -57,10 +57,10 @@ export default {
         pubPrepare: function () {
             this.count = this.$refs.selectedProofs.$refs.input.files.length;
             this.pubData.details.Seller = this.$store.state.account;
-            this.setDataID();
+            this.setDataId();
             this.setProofIDs();
         },
-        setDataID: function () {
+        setDataId: function () {
             this.IDs.metaDataID = "";
             let _this = this;
             let data = this.$refs.selectedData.$refs.input.files[0];

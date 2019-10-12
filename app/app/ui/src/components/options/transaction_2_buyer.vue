@@ -12,13 +12,13 @@
                 <p v-if="!supportVerify">判断原始数据真实性，点击“输入密码”按钮完成交易。</p>
                 <p><el-switch v-model="confirmDataResult" active-text="真" inactive-text="假"></el-switch></p>
             </c-f-t>
-            <c-f-t button-name="评价验证者" dialog-title="评价验证者：" @password="gradeToVerifier" @pre="creditPre" :button-disabled="buttonDisabled(4)"
+            <c-f-t button-name="评价验证者" dialog-title="评价验证者：" @password="gradeToVerifier" @pre="gradePre" :button-disabled="buttonDisabled(4)"
                    :pre-params="[this.selectedTx.Verifier1Response !== '', this.selectedTx.Verifier2Response !== '']">
                 <p>验证者1:</p>
-                <p><el-slider v-model="verifier1Credit" max="5" v-if="verifier1Revert" show-input></el-slider>
+                <p><el-slider v-model="verifier1Grade" max="5" v-if="verifier1Revert" show-input></el-slider>
                 <span v-if="!verifier1Revert">交易未进入验证流程或验证者未回复</span></p>
                 <p>验证者2:</p>
-                <p><el-slider v-model="verifier2Credit" max="5" v-if="verifier2Revert" show-input></el-slider>
+                <p><el-slider v-model="verifier2Grade" max="5" v-if="verifier2Revert" show-input></el-slider>
                 <span v-if="!verifier2Revert">交易未进入验证流程或验证者未回复</span></p>
             </c-f-t>
         </el-col>
@@ -30,8 +30,8 @@
                   highlight-current-row border :height=height @current-change="currentChange">
             <el-table-column type="expand">
                 <el-form slot-scope="props" label-position="left" class="tx-table-expand">
-                    <el-form-item label="数据ID"><span>{{ props.row.PublishID }}</span></el-form-item>
-                    <el-form-item label="交易ID"><span>{{ props.row.TransactionID}}</span></el-form-item>
+                    <el-form-item label="数据ID"><span>{{ props.row.PublishId }}</span></el-form-item>
+                    <el-form-item label="交易ID"><span>{{ props.row.TransactionId}}</span></el-form-item>
                     <el-form-item label="标题"><span>{{ props.row.Title }}</span></el-form-item>
                     <el-form-item label="价格"><span>{{ props.row.Price }}</span></el-form-item>
                     <el-form-item label="标签"><span>{{ props.row.Keys }}</span></el-form-item>
@@ -64,7 +64,7 @@ export default {
     name: "transaction_2_buyer.vue",
     data () {
         return {
-            selectedTx: {},  // {tID: "", User: "", MetaDataIDEncrypt: "", MetaDataExtension: "",
+            selectedTx: {},  // {tId: "", address: "", MetaDataIdEncrypt: "", MetaDataExtension: "",
                              //  Verifier1Response: "", Verifier2Response: "", SupportVerify: false}
             curPage: 1,
             pageSize: 6,
@@ -74,9 +74,9 @@ export default {
             supportVerify: false,
             confirmDataResult: true,
             verifier1Revert: false,
-            verifier1Credit: 5,
+            verifier1Grade: 5,
             verifier2Revert: false,
-            verifier2Credit: 5
+            verifier2Grade: 5
         }
     },
     methods: {
@@ -84,10 +84,10 @@ export default {
         setPageSize: function (newPageSize) { this.pageSize = newPageSize; },
         currentChange: function (curRow) {
             this.selectedTx = {
-                TransactionID: curRow.TransactionID,
-                User: curRow.Buyer,
+                TransactionId: curRow.TransactionId,
+                address: curRow.Buyer,
                 Price: curRow.Price,
-                MetaDataIDEncrypt: curRow.MetaDataIDEncWithBuyer,
+                MetaDataIdEncrypt: curRow.MetaDataIdEncWithBuyer,
                 MetaDataExtension: curRow.MetaDataExtension,
                 SupportVerify: curRow.SupportVerify,
                 Verifier1Response: curRow.Verifier1Response,
@@ -102,7 +102,7 @@ export default {
             tx_db.initBuyer(this);
         },
         cancelBuying: function (pwd) {
-            connect.send({Name:"cancelPurchase", Payload:{password: pwd, tID: this.selectedTx}}, function (payload, _this) {
+            connect.send({Name:"cancelPurchase", Payload:{password: pwd, TransactionId: this.selectedTx.TransactionId}}, function (payload, _this) {
                 console.log("取消交易成功", payload);
             }, function (payload, _this) {
                 console.log("取消交易失败：", payload);
@@ -114,7 +114,7 @@ export default {
             });
         },
         confirmPurchase: function (pwd) {
-            connect.send({Name:"confirmPurchase", Payload:{password: pwd, tID: this.selectedTx}}, function (payload, _this) {
+            connect.send({Name:"confirmPurchase", Payload:{password: pwd, TransactionId: this.selectedTx.TransactionId}}, function (payload, _this) {
                 console.log("购买数据成功", payload);
             }, function (payload, _this) {
                 console.log("购买数据失败：", payload);
@@ -126,7 +126,9 @@ export default {
             });
         },
         decrypt: function (pwd) {
-            connect.send({Name:"decrypt", Payload:{password: pwd, tID: this.selectedTx}}, function (payload, _this) {
+            connect.send({Name:"decrypt", Payload:{password: pwd, address: this.selectedTx.address,
+                    encryptedId: {encryptedMetaDataId: this.selectedTx.MetaDataIdEncrypt},
+                    extensions: {metaDataExtension: this.selectedTx.MetaDataExtension}}}, function (payload, _this) {
                 console.log("解密数据成功", payload);
                 _this.$alert(payload, "原始数据：", {
                     customClass: "longText",
@@ -148,7 +150,8 @@ export default {
             this.supportVerify = array[0];
         },
         confirmData: function (pwd) {
-            connect.send({Name:"confirmData", Payload:{password: pwd, tID: this.selectedTx, confirmData: this.confirmDataResult}}, function (payload, _this) {
+            connect.send({Name:"confirmData", Payload:{password: pwd, TransactionId: this.selectedTx.TransactionId,
+                    confirm: {confirmResult: this.confirmDataResult}}}, function (payload, _this) {
                 _this.supportVerify = false;
                 console.log("确认数据成功", payload);
             }, function (payload, _this) {
@@ -160,14 +163,14 @@ export default {
                 });
             });
         },
-        creditPre: function (array) {
+        gradePre: function (array) {
             this.verifier1Revert = array[0];
             this.verifier2Revert = array[1];
         },
         gradeToVerifier: function (pwd) {
-            connect.send({Name:"gradeToVerifier", Payload:{password: pwd, tID: this.selectedTx, credit: {
-                        verifier1Revert: this.verifier1Revert, verifier1Credit: this.verifier1Credit,
-                        verifier2Revert: this.verifier2Revert, verifier2Credit: this.verifier2Credit}}},
+            connect.send({Name:"gradeToVerifier", Payload:{password: pwd, TransactionId: this.selectedTx.TransactionId, grade: {
+                        verifier1Revert: this.verifier1Revert, verifier1Grade: this.verifier1Grade,
+                        verifier2Revert: this.verifier2Revert, verifier2Grade: this.verifier2Grade}}},
                 function (payload, _this) {
                     _this.verifier1Revert = false;
                     _this.verifier2Revert = false;

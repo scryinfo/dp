@@ -108,7 +108,7 @@ func CBsTypeLive() []*dot.TypeLives {
 }
 
 func (c *Callbacks) onPublish(event event.Event) bool {
-    var op definition.OnPublish
+    var op definition.Callbacks
     {
         var err error
         if op, err = c.getPubDataDetails(event.Data.Get("despDataId").(string)); err != nil {
@@ -116,7 +116,7 @@ func (c *Callbacks) onPublish(event event.Event) bool {
         }
         op.Block = event.BlockNumber
         op.Price = event.Data.Get("price").(*big.Int).String()
-        op.PublishID = event.Data.Get("publishId").(string)
+        op.PublishId = event.Data.Get("publishId").(string)
         op.SupportVerify = event.Data.Get("supportVerify").(bool)
     }
 
@@ -127,7 +127,7 @@ func (c *Callbacks) onPublish(event event.Event) bool {
     return true
 }
 
-func (c *Callbacks) getPubDataDetails(ipfsID string) (detailsData definition.OnPublish, err error) {
+func (c *Callbacks) getPubDataDetails(ipfsId string) (detailsData definition.Callbacks, err error) {
     defer func() {
         if er := recover(); er != nil {
             dot.Logger().Errorln("", zap.Any("onPublish.callback: get publish data details failed. ", er))
@@ -137,11 +137,11 @@ func (c *Callbacks) getPubDataDetails(ipfsID string) (detailsData definition.OnP
     var fileName string
     {
         outDir := c.config.ProofsOutDir
-        if err = c.Storage.Get(ipfsID, outDir); err != nil {
+        if err = c.Storage.Get(ipfsId, outDir); err != nil {
             return
         }
 
-        oldFileName := outDir + "/" + ipfsID
+        oldFileName := outDir + "/" + ipfsId
         fileName = oldFileName + ".txt"
 
         if err = os.Rename(oldFileName, fileName); err != nil {
@@ -171,20 +171,20 @@ func (c *Callbacks) onApprove(_ event.Event) bool {
 }
 
 func (c *Callbacks) onVerifiersChosen(event event.Event) bool {
-    var ovc definition.OnVerifiersChosen
+    var ovc definition.Callbacks
     {
-        ovc.PublishID = event.Data.Get("publishId").(string)
-        if err := c.WS.SendMessage("onProofFilesExtensions", ovc.PublishID); err != nil {
+        ovc.PublishId = event.Data.Get("publishId").(string)
+        if err := c.WS.SendMessage("onProofFilesExtensions", ovc.PublishId); err != nil {
             dot.Logger().Errorln("", zap.NamedError("onProofFilesExtensions"+server.EventSendFailed, err))
         }
 
         ovc.Block = event.BlockNumber
-        ovc.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
-        ovc.TxState = setTxState(event.Data.Get("state").(uint8))
+        ovc.TransactionId = event.Data.Get("transactionId").(*big.Int).String()
+        ovc.TransactionState = setTxState(event.Data.Get("state").(uint8))
 
         extensions := <- c.ExtChan
         var err error
-        if ovc.ProofFileNames, err = c.getAndRenameProofFiles(event.Data.Get("proofIds").([][32]uint8), extensions); err != nil {
+        if err = c.getAndRenameProofFiles(event.Data.Get("proofIds").([][32]uint8), extensions); err != nil {
             dot.Logger().Errorln("", zap.NamedError("Node - onVC.callback: get and rename proof files failed. ", err))
         }
     }
@@ -197,23 +197,24 @@ func (c *Callbacks) onVerifiersChosen(event event.Event) bool {
 }
 
 func (c *Callbacks) onAdvancePurchase(event event.Event) bool {
-    var otc definition.OnTransactionCreate
+    var otc definition.Callbacks
     {
-        otc.PublishID = event.Data.Get("publishId").(string)
-        if err := c.WS.SendMessage("onProofFilesExtensions", otc.PublishID); err != nil {
+        otc.PublishId = event.Data.Get("publishId").(string)
+        if err := c.WS.SendMessage("onProofFilesExtensions", otc.PublishId); err != nil {
             dot.Logger().Errorln("", zap.NamedError("onProofFilesExtensions"+server.EventSendFailed, err))
         }
 
         otc.Block = event.BlockNumber
-        otc.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
+        otc.TransactionId = event.Data.Get("transactionId").(*big.Int).String()
         otc.Buyer = event.Data.Get("users").([]common.Address)[1].String()
         otc.StartVerify = event.Data.Get("needVerify").(bool)
-        otc.TxState = setTxState(event.Data.Get("state").(uint8))
+        otc.TransactionState = setTxState(event.Data.Get("state").(uint8))
 
         extensions := <- c.ExtChan
         var err error
-        if otc.ProofFileNames, err = c.getAndRenameProofFiles(event.Data.Get("proofIds").([][32]uint8), extensions); err != nil {
-            dot.Logger().Errorln("", zap.Strings("show extensions: ", extensions), zap.NamedError("Node - onTC.callback: get and rename proof files failed. ", err))
+        if err = c.getAndRenameProofFiles(event.Data.Get("proofIds").([][32]uint8), extensions); err != nil {
+            dot.Logger().Errorln("", zap.Strings("show extensions: ", extensions),
+                zap.NamedError("Node - onAP.callback: get and rename proof files failed. ", err))
         }
     }
 
@@ -224,36 +225,33 @@ func (c *Callbacks) onAdvancePurchase(event event.Event) bool {
     return true
 }
 
-func (c *Callbacks) getAndRenameProofFiles(ipfsIDs [][32]byte, extensions []string) ([]string, error) {
-    if len(ipfsIDs) != len(extensions) {
-        return nil, errors.New("Quantity of IPFS IDs or extensions is wrong. " + strconv.Itoa(len(ipfsIDs)) + ", " + strconv.Itoa(len(extensions)))
-    }
-
+func (c *Callbacks) getAndRenameProofFiles(ipfsIds [][32]byte, extensions []string) error {
     defer func() {
         if er := recover(); er != nil {
             dot.Logger().Errorln("", zap.Any("in callback: get and rename proof files failed. ", er))
         }
     }()
 
-    var proofs = make([]string, len(ipfsIDs))
+    if len(ipfsIds) != len(extensions) {
+        return errors.New("Quantity of IPFS Ids or extensions is wrong. " + strconv.Itoa(len(ipfsIds)) + ", " + strconv.Itoa(len(extensions)))
+    }
 
     outDir := c.config.ProofsOutDir
-    for i := 0; i < len(ipfsIDs); i++ {
-        ipfsID := ipfsBytes32ToHash(ipfsIDs[i])
-        if err := c.Storage.Get(ipfsID, outDir); err != nil {
+    for i := 0; i < len(ipfsIds); i++ {
+        ipfsId := ipfsBytes32ToHash(ipfsIds[i])
+        if err := c.Storage.Get(ipfsId, outDir); err != nil {
             err = errors.Wrap(err, "Node - callback: IPFS get failed. ")
             break
         }
-        oldFileName := outDir + "/" + ipfsID
+        oldFileName := outDir + "/" + ipfsId
         newFileName := oldFileName + extensions[i]
         if err := os.Rename(oldFileName, newFileName); err != nil {
             err = errors.Wrap(err, "Node - callback: rename proof file failed. ")
             break
         }
-        proofs[i] = newFileName
     }
 
-    return proofs, nil
+    return nil
 }
 func ipfsBytes32ToHash(ipfsb [32]byte) string {
     byte34 := make([]byte, 34)
@@ -265,13 +263,13 @@ func ipfsBytes32ToHash(ipfsb [32]byte) string {
 }
 
 func (c *Callbacks) onConfirmPurchase(event event.Event) bool {
-    var op definition.OnPurchase
+    var op definition.Callbacks
     {
         op.Block = event.BlockNumber
-        op.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
-        op.MetaDataIdEncWithSeller = event.Data.Get("metaDataIdEncSeller").([]byte)
-        op.PublishID = event.Data.Get("publishId").(string)
-        op.TxState = setTxState(event.Data.Get("state").(uint8))
+        op.TransactionId = event.Data.Get("transactionId").(*big.Int).String()
+        op.EncryptedId.EncryptedId = event.Data.Get("metaDataIdEncSeller").([]byte)
+        op.PublishId = event.Data.Get("publishId").(string)
+        op.TransactionState = setTxState(event.Data.Get("state").(uint8))
     }
 
     if err := c.WS.SendMessage("onConfirmPurchase", op); err != nil {
@@ -282,12 +280,12 @@ func (c *Callbacks) onConfirmPurchase(event event.Event) bool {
 }
 
 func (c *Callbacks) onReEncrypt(event event.Event) bool {
-    var orfd definition.OnReadyForDownload
+    var orfd definition.Callbacks
     {
         orfd.Block = event.BlockNumber
-        orfd.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
-        orfd.MetaDataIdEncWithBuyer = event.Data.Get("metaDataIdEncBuyer").([]byte)
-        orfd.TxState = setTxState(event.Data.Get("state").(uint8))
+        orfd.TransactionId = event.Data.Get("transactionId").(*big.Int).String()
+        orfd.EncryptedId.EncryptedId = event.Data.Get("metaDataIdEncBuyer").([]byte)
+        orfd.TransactionState = setTxState(event.Data.Get("state").(uint8))
     }
 
     if err := c.WS.SendMessage("onReEncrypt", orfd); err != nil {
@@ -298,11 +296,11 @@ func (c *Callbacks) onReEncrypt(event event.Event) bool {
 }
 
 func (c *Callbacks) onFinishPurchase(event event.Event) bool {
-    var oc definition.OnClose
+    var oc definition.Callbacks
     {
         oc.Block = event.BlockNumber
-        oc.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
-        oc.TxState = setTxState(event.Data.Get("state").(uint8))
+        oc.TransactionId = event.Data.Get("transactionId").(*big.Int).String()
+        oc.TransactionState = setTxState(event.Data.Get("state").(uint8))
     }
 
     if err := c.WS.SendMessage("onFinishPurchase", oc); err != nil {
@@ -313,7 +311,7 @@ func (c *Callbacks) onFinishPurchase(event event.Event) bool {
 }
 
 func (c *Callbacks) onRegisterAsVerifier(event event.Event) bool {
-    var orav definition.OnRegisterAsVerifier
+    var orav definition.Callbacks
     {
         orav.Block = event.BlockNumber
     }
@@ -326,16 +324,16 @@ func (c *Callbacks) onRegisterAsVerifier(event event.Event) bool {
 }
 
 func (c *Callbacks) onVoteResult(event event.Event) bool {
-    var ov definition.OnVote
+    var ov definition.Callbacks
     {
         ov.Block = event.BlockNumber
-        ov.VerifierIndex = strconv.Itoa(int(event.Data.Get("index").(uint8)))
-        ov.TransactionID = event.Data.Get("transactionId").(*big.Int).String()
-        ov.TxState = setTxState(event.Data.Get("state").(uint8))
+        ov.VerifyResult.VerifierIndex = strconv.Itoa(int(event.Data.Get("index").(uint8)))
+        ov.TransactionId = event.Data.Get("transactionId").(*big.Int).String()
+        ov.TransactionState = setTxState(event.Data.Get("state").(uint8))
 
         judge := event.Data.Get("judge").(bool)
         comment := event.Data.Get("comments").(string)
-        ov.VerifierResponse = setJudge(judge) + ", " + comment
+        ov.VerifyResult.VerifierResponse = setJudge(judge) + ", " + comment
     }
 
     if err := c.WS.SendMessage("onVoteResult", ov); err != nil {
@@ -346,9 +344,9 @@ func (c *Callbacks) onVoteResult(event event.Event) bool {
 }
 
 func (c *Callbacks) onVerifierDisable(event event.Event) bool {
-    var ovd definition.OnVerifierDisable
+    var ovd definition.Callbacks
     {
-        ovd.Verifier = event.Data.Get("verifier").(common.Address).String()
+        ovd.VerifierDisabled.VerifierAddress = event.Data.Get("verifier").(common.Address).String()
         ovd.Block = event.BlockNumber
     }
 
@@ -360,7 +358,7 @@ func (c *Callbacks) onVerifierDisable(event event.Event) bool {
 }
 
 func (c *Callbacks) onArbitrationBegin(event event.Event) bool {
-    var oab definition.OnArbitrationBegin
+    var oab definition.Callbacks
     {
         oab.PublishId = event.Data.Get("publishId").(string)
         if err := c.WS.SendMessage("onProofFilesExtensions", oab.PublishId); err != nil {
@@ -368,12 +366,12 @@ func (c *Callbacks) onArbitrationBegin(event event.Event) bool {
         }
 
         oab.TransactionId = event.Data.Get("transactionId").(*big.Int).String()
-        oab.MetaDataIdEncWithArbitrator = event.Data.Get("metaDataIdEncArbitrator").([]byte)
+        oab.EncryptedId.EncryptedId = event.Data.Get("metaDataIdEncArbitrator").([]byte)
         oab.Block = event.BlockNumber
 
         extensions := <- c.ExtChan
         var err error
-        if oab.ProofFileNames, err = c.getAndRenameProofFiles(event.Data.Get("proofIds").([][32]uint8), extensions); err != nil {
+        if err = c.getAndRenameProofFiles(event.Data.Get("proofIds").([][32]uint8), extensions); err != nil {
             dot.Logger().Errorln("", zap.NamedError("Node - onVC.callback: get and rename proof files failed. ", err))
         }
     }
@@ -386,10 +384,10 @@ func (c *Callbacks) onArbitrationBegin(event event.Event) bool {
 }
 
 func (c *Callbacks) onArbitrationResult(event event.Event) bool {
-    var oar definition.OnArbitrationResult
+    var oar definition.Callbacks
     {
         oar.TransactionId = event.Data.Get("transactionId").(*big.Int).String()
-        oar.ArbitrateResult = setArbitrateResult(event.Data.Get("judge").(bool))
+        oar.Arbitrate.ArbitrateResult = event.Data.Get("judge").(bool)
         oar.Block = event.BlockNumber
     }
 
@@ -427,15 +425,4 @@ func setJudge(judge bool) (str string) {
     }
 
     return
-}
-
-func setArbitrateResult(result bool) string {
-    str := "Arbitrate Result: "
-    if result {
-        str += "true. "
-    } else {
-        str += "false. "
-    }
-
-    return str
 }

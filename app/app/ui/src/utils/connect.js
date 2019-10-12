@@ -21,7 +21,7 @@ let connect = {
             console.log("connection onopen. ", evt);
         };
         connect.ws.onmessage = function (evt) {
-            console.log(evt.data);
+            console.log("received   : ", evt.data);
             let obj = JSON.parse(evt.data);
             connect.msgHandle(obj, _this);
         };
@@ -81,6 +81,8 @@ let connect = {
         if (!connect.ws) { return; }
         if (!!cbs) { connect.addCallbackFunc(obj.Name + ".callback", cbs); }
         if (!!cbf) { connect.addCallbackFunc(obj.Name + ".callback.error", cbf); }
+
+        console.log("before send: ", JSON.stringify(obj));
 
         connect.ws.send(JSON.stringify(obj));
     },

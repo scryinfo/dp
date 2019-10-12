@@ -13,8 +13,8 @@
                   highlight-current-row border :height=height @current-change="currentChange">
             <el-table-column type="expand">
                 <el-form slot-scope="props" label-position="left" class="tx-table-expand">
-                    <el-form-item label="数据ID"><span>{{ props.row.PublishID }}</span></el-form-item>
-                    <el-form-item label="交易ID"><span>{{ props.row.TransactionID}}</span></el-form-item>
+                    <el-form-item label="数据ID"><span>{{ props.row.PublishId }}</span></el-form-item>
+                    <el-form-item label="交易ID"><span>{{ props.row.TransactionId}}</span></el-form-item>
                     <el-form-item label="标题"><span>{{ props.row.Title }}</span></el-form-item>
                     <el-form-item label="价格"><span>{{ props.row.Price }}</span></el-form-item>
                     <el-form-item label="标签"><span>{{ props.row.Keys }}</span></el-form-item>
@@ -41,7 +41,7 @@ export default {
     name: "transaction_1_seller.vue",
     data () {
         return {
-            selectedTx: {},  // {tID: "", Seller: "", MetaDataIDEncWithSeller: "", pID: ""}
+            selectedTx: {},  // {tId: "", Seller: "", MetaDataIdEncWithSeller: "", pId: ""}
             curPage: 1,
             pageSize: 6,
             total: 0,
@@ -54,10 +54,10 @@ export default {
         setPageSize: function (newPageSize) { this.pageSize = newPageSize; },
         currentChange: function (curRow) {
             this.selectedTx = {
-                TransactionID: curRow.TransactionID,
+                TransactionId: curRow.TransactionId,
                 Seller: curRow.Seller,
-                PublishID: curRow.PublishID,
-                MetaDataIDEncWithSeller: curRow.MetaDataIDEncWithSeller // WSConnect between go and js buy not show out to user.
+                PublishId: curRow.PublishId,
+                MetaDataIdEncWithSeller: curRow.MetaDataIdEncWithSeller // WSConnect between go and js buy not show out to user.
             };
             this.txState = curRow.State;
         },
@@ -68,7 +68,8 @@ export default {
             tx_db.initSeller(this);
         },
         reEncrypt:function (pwd) {
-            connect.send({ Name:"reEncrypt", Payload:{password: pwd, tID: this.selectedTx}}, function (payload, _this) {
+            connect.send({ Name:"reEncrypt", Payload:{password: pwd, TransactionId: this.selectedTx.TransactionId,
+                    encryptedId: {encryptedMetaDataId: this.selectedTx.MetaDataIdEncWithSeller}}}, function (payload, _this) {
                 console.log("再加密数据成功", payload);
             }, function (payload, _this) {
                 console.log("再加密数据失败：", payload);

@@ -19,8 +19,6 @@ type Server interface {
 type MessageIn struct {
 	Name    string          `json:"Name"`
 	Payload json.RawMessage `json:"Payload"`
-	//CommonPayload     json.RawMessage `json:"CommonPayload"`
-	//ParticularPayload json.RawMessage `json:"ParticularPayload"`
 }
 
 type MessageOut struct {
