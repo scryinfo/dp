@@ -201,7 +201,7 @@ let presetFunc = {
                 StartVerify: txDetailsOnPurchase.StartVerify,
                 MetaDataExtension: txDetailsOnPurchase.MetaDataExtension,
                 ProofDataExtensions: txDetailsOnPurchase.ProofDataExtensions,
-                MetaDataIdEncWithSeller: payload.EncryptedId.EncryptedId, // -
+                MetaDataIdEncWithSeller: payload.EncryptedId.encryptedMetaDataId, // -
                 MetaDataIdEncWithBuyer: txDetailsOnPurchase.MetaDataIdEncWithBuyer,
                 MetaDataIdEncWithArbitrator: txDetailsOnPurchase.MetaDataIdEncWithArbitrator,
                 Verifier1Response: txDetailsOnPurchase.Verifier1Response,
@@ -258,7 +258,7 @@ let presetFunc = {
                 MetaDataExtension: txDetailsOnRFD.MetaDataExtension,
                 ProofDataExtensions: txDetailsOnRFD.ProofDataExtensions,
                 MetaDataIdEncWithSeller: txDetailsOnRFD.MetaDataIdEncWithSeller,
-                MetaDataIdEncWithBuyer: payload.EncryptedId.EncryptedId, // -
+                MetaDataIdEncWithBuyer: payload.EncryptedId.encryptedMetaDataId, // -
                 MetaDataIdEncWithArbitrator: txDetailsOnRFD.MetaDataIdEncWithArbitrator,
                 Verifier1Response: txDetailsOnRFD.Verifier1Response,
                 Verifier2Response: txDetailsOnRFD.Verifier2Response,
@@ -455,7 +455,7 @@ let presetFunc = {
                 ProofDataExtensions: dataDetails.ProofDataExtensions,
                 MetaDataIdEncWithSeller: "",
                 MetaDataIdEncWithBuyer: "",
-                MetaDataIdEncWithArbitrator: payload.MetaDataIdEncWithArbitrator,
+                MetaDataIdEncWithArbitrator: payload.EncryptedId.encryptedMetaDataId,
                 Verifier1Response: "",
                 Verifier2Response: "",
                 ArbitrateResult: "",

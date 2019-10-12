@@ -85,6 +85,7 @@ export default {
                     extensions: {metaDataExtension: this.selectedTx.MetaDataExtension}}}, function (payload, _this) {
                 console.log("解密数据成功", payload);
                 _this.$alert(payload, "原始数据：", {
+                    customClass: "longText",
                     confirmButtonText: "关闭",
                     showClose: false,
                     type: "info"
@@ -134,6 +135,8 @@ export default {
 }
 </script>
 
-<style scoped>
-
+<style>
+.longText {
+    width: auto !important;
+}
 </style>
