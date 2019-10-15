@@ -21,7 +21,8 @@ type Preset struct {
 	Grade       Grade       `json:"grade"`
 	Arbitrate   Arbitrate   `json:"arbitrate"`
 
-	Extensions Extensions `json:"extensions"`
+	Extensions Extensions          `json:"extensions"`
+	Contract   ModifyContractParam `json:"modifyContractParam"`
 	Balance    Balance
 }
 
@@ -50,4 +51,9 @@ type Confirm struct {
 type Balance struct {
 	Balance   string
 	TimeStamp string
+}
+
+type ModifyContractParam struct {
+	ParamName  string `json:"paramName"`
+	ParamValue string `json:"paramValue"`
 }

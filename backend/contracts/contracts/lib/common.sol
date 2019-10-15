@@ -98,4 +98,8 @@ library common {
         uint256 transactionSeq;
         uint256 encryptedIdLen;
     }
+
+    function modifyVerifierNum(DataSet storage ds, uint8 _value) external {
+        ds.conf.verifierNum = _value;
+    }
 }

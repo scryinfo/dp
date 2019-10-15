@@ -72,6 +72,7 @@ func (p *Preset) Create(l dot.Line) error {
         "getTokenBalance",
         "accountsBackup",
         "accountsRestore",
+        "modifyContractParam",
     }
 
     p.PresetMsgHandlers = []server.PresetFunc{
@@ -95,6 +96,7 @@ func (p *Preset) Create(l dot.Line) error {
         p.GetTokenBalance,
         p.Backup,
         p.Restore,
+        p.ModifyContractParam,
     }
 
     return nil
@@ -641,6 +643,25 @@ func (p *Preset) Backup(mi *server.MessageIn) (interface{}, error) {
 
 func (p *Preset) Restore(_ *server.MessageIn) (interface{}, error) {
    return ioutil.ReadFile(p.config.AccsBackupFile)
+}
+
+func (p *Preset) ModifyContractParam(mi *server.MessageIn) (payload interface{}, err error) {
+    var mcp definition.Preset
+    if err = json.Unmarshal(mi.Payload, &mcp); err != nil {
+        return
+    }
+
+    if err = p.Bin.ChainWrapper().ModifyContractParam(&transaction.TxParams{
+        From: common.HexToAddress(p.Deployer.Address),
+        Password: p.Deployer.Password,
+        Value: big.NewInt(0),
+        Pending: false,
+    }, mcp.Contract.ParamName, mcp.Contract.ParamValue); err != nil {
+        err = errors.New("Unknown contract param or param is not allowed to modify. ")
+        return
+    }
+
+    return
 }
 
 func (p *Preset) makeTxParams(password string) *transaction.TxParams {

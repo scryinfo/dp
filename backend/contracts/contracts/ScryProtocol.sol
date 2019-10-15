@@ -138,4 +138,9 @@ contract ScryProtocol {
     function getArbitrators(uint256 txId) external view returns (address[]) {
         return transaction.getArbitrators(dataSet, txId);
     }
+
+    function modifyVerifierNum(uint8 _value) external {
+        require(msg.sender == owner, "Invalid caller");
+        common.modifyVerifierNum(dataSet, _value);
+    }
 }
