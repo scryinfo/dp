@@ -7,6 +7,7 @@ import (
     "errors"
     "github.com/btcsuite/btcutil/base58"
     "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/core/types"
     "github.com/ethereum/go-ethereum/ethclient"
     "github.com/scryinfo/dot/dot"
     "github.com/scryinfo/dp/dots/auth"
@@ -15,6 +16,7 @@ import (
     "github.com/scryinfo/dp/util"
     "go.uber.org/zap"
     "math/big"
+    "strconv"
 )
 
 type chainWrapperImp struct {
@@ -300,4 +302,21 @@ func (c *chainWrapperImp) TransferTokens(txParams *tx.TxParams, to common.Addres
 
 func (c *chainWrapperImp) GetTokenBalance(txParams *tx.TxParams, owner common.Address) (*big.Int, error) {
     return c.token.BalanceOf(c.Tx.BuildCallOpts(txParams), owner)
+}
+
+func (c *chainWrapperImp) ModifyContractParam(txParams *tx.TxParams, paramName, paramValue string) (err error) {
+    var t *types.Transaction
+    switch paramName {
+    case "VerifierNum":
+        value, _ := strconv.Atoi(paramValue)
+        t, err = c.protocol.ModifyVerifierNum(c.Tx.BuildTransactOpts(txParams), uint8(value))
+    default:
+        err = errors.New("Unknown contract param or param is not allowed to modify. ")
+        return
+    }
+    if err == nil {
+        dot.Logger().Debugln("ModifyContractParam: tx hash:"+t.Hash().String(), zap.Binary(" tx data:", t.Data()))
+    }
+
+    return
 }

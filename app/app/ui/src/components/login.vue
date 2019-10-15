@@ -9,10 +9,8 @@
             <el-col :span="8">
                 <div class="left">
                     <div class="left-explain">选择账户：</div>
-                    <el-select class="left-account" v-model="account" placeholder="账户"
-                        clearable allow-create filterable>
-                        <el-option v-for="acc in this.$store.state.accounts" :key="acc.address"
-                                   :value="acc.address" :label="acc.address"></el-option>
+                    <el-select class="left-account" v-model="account" placeholder="账户" clearable allow-create filterable>
+                        <el-option v-for="acc in this.$store.state.accounts" :key="acc.address" :value="acc.address" :label="acc.address"></el-option>
                     </el-select>
                     <div class="left-button-margin">
                         <el-button class="left-button" @click="right('登录')">登录</el-button>

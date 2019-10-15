@@ -30,4 +30,5 @@ type ChainWrapper interface {
 
     TransferTokens(txParams *tx.TxParams, to common.Address, value *big.Int) error
     GetTokenBalance(txParams *tx.TxParams, owner common.Address) (*big.Int, error)
+    ModifyContractParam(txParams *tx.TxParams, paramName, paramValue string) error
 }

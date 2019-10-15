@@ -9,17 +9,36 @@
             <el-button size="mini" type="primary" @click="welcome">Welcome</el-button></el-col>
         <el-col :span="24" class="section-item">
             <el-button size="mini" type="primary" @click="resetChain">ResetChain</el-button></el-col>
+        <div>
+            <el-col :span="5" class="section-item">
+                <el-select size="mini" v-model="modifyItem" placeholder="Choose param" clearable allow-create filterable>
+                    <el-option v-for="item in modifyList" :key="item.paramName" :value="item.paramName" :label="item.paramName"></el-option>
+                </el-select>
+            </el-col>
+            <el-col :span="9" class="section-item">
+                <el-input size="mini" v-model="newParamValue" placeholder="new param value" clearable></el-input>
+            </el-col>
+            <el-col :span="10" class="section-item">
+                <el-button size="mini" type="primary" @click="modifyParam">ModifyParam</el-button>
+            </el-col>
+        </div>
     </section>
 </template>
 
 <script>
 import {dl_db, acc_db, db_options} from "../../utils/DBoptions.js";
-import {tx_db} from "../../utils/DBoptions";
+import {connect} from "../../utils/connect.js";
 export default {
     name: "ES_administrator.vue",
     data () {
         return {
-
+            modifyItem: "",
+            newParamValue: "", // avoid param bigger than float64.max, json unmarshal in go will wrong.
+            modifyList: [
+                {
+                    paramName: "VerifierNum"
+                }
+            ]
         }
     },
     methods: {
@@ -47,12 +66,20 @@ export default {
                     cursor.continue();
                 }
             }
+        },
+        modifyParam: function () {
+            connect.send({Name: "modifyContractParam", Payload: {modifyContractParam: {paramName: this.modifyItem, paramValue: this.newParamValue}}},
+                function (payload, _this) {
+                    console.log("modify param success: ", payload); // payload is nothing now :(
+                }, function (payload, _this) {
+                    console.log("modify param failed! ", payload);
+                });
         }
     }
 }
 </script>
 
-<style scoped>
+<style>
 .administrator {
     background-color: lightgrey;
 }
