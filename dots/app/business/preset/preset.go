@@ -35,6 +35,7 @@ type presetConfig struct {
 const (
     PreTypeId = "13d73d73-da19-4d39-9dca-3018fbf0ec30"
 
+    // todo: params get from contract.
     verifierNum            = 2
     verifierBonus          = 300
     registerAsVerifierCost = 10000
@@ -133,10 +134,10 @@ func PreTypeLive() []*dot.TypeLives {
             },
         },
     }
-    
+
     t = append(t, binary.BinTypeLiveWithoutGrpc()...)
     t = append(t, cec.CBsTypeLive()...)
-    
+
     return t
 }
 
@@ -254,6 +255,9 @@ func (p *Preset) Logout(_ *server.MessageIn) (payload interface{}, err error) {
 
    p.CurUser = nil
 
+   p.CBs.ExtChan = nil
+   p.CBs.FlagChan = nil
+
    payload = true
 
    return
@@ -309,7 +313,7 @@ func (p *Preset) AdvancePurchase(mi *server.MessageIn) (payload interface{}, err
        return
    }
 
-   time.Sleep(5 * time.Second)
+    <- p.CBs.FlagChan
 
    if err = p.Bin.ChainWrapper().AdvancePurchase(p.makeTxParams(ap.Password), ap.PublishId, ap.StartVerify); err != nil {
        err = errors.Wrap(err, "Advance purchase failed. ")
@@ -495,7 +499,7 @@ func (p *Preset) Register(mi *server.MessageIn) (payload interface{}, err error)
        return
    }
 
-   time.Sleep(5 * time.Second)
+    <- p.CBs.FlagChan
 
    if err = p.Bin.ChainWrapper().RegisterAsVerifier(p.makeTxParams(register.Password)); err != nil {
        err = errors.Wrap(err, "Register as verifier failed. ")
