@@ -22,6 +22,7 @@ type Callbacks struct {
     EventNames   []string
     EventHandler []event.Callback
     ExtChan      chan []string
+    FlagChan chan bool // flag for scanned approval event.
     config       cbsConfig
     WS           *app.WSServer  `dot:""`
     Storage      *storage.Ipfs `dot:""`
@@ -37,6 +38,7 @@ const (
 
 func (c *Callbacks) Create(l dot.Line) error {
     c.ExtChan = make(chan []string, 10)
+    c.FlagChan = make(chan bool, 10)
 
     c.EventNames = []string{
         "Approval",
@@ -167,6 +169,7 @@ func (c *Callbacks) getPubDataDetails(ipfsId string) (detailsData definition.Cal
 }
 
 func (c *Callbacks) onApprove(_ event.Event) bool {
+    c.FlagChan <- true
     return true
 }
 
