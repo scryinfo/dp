@@ -53,6 +53,7 @@ require (
 	github.com/ipfs/go-ipfs-api v0.0.1
 	github.com/ipfs/go-ipfs-files v0.0.3 // indirect
 	github.com/jackpal/go-nat-pmp v1.0.1 // indirect
+	github.com/jinzhu/gorm v1.9.11
 	github.com/karalabe/hid v1.0.0 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/libp2p/go-libp2p-core v0.0.3 // indirect
@@ -81,10 +82,10 @@ require (
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45 // indirect
 	golang.org/x/time v0.0.0-20190308202827-9d24e82272b4 // indirect
 	golang.org/x/tools v0.0.0-20190606050223-4d9ae51c2468 // indirect
-	google.golang.org/appengine v1.6.0 // indirect
 	google.golang.org/genproto v0.0.0-20190605220351-eb0b1bdb6ae6 // indirect
 	google.golang.org/grpc v1.21.1
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	gopkg.in/urfave/cli.v1 v1.20.0 // indirect
 	honnef.co/go/tools v0.0.0-20190605142022-0a11fc526260 // indirect
+	xorm.io/xorm v0.8.0 // indirect
 )

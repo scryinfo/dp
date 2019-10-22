@@ -11,7 +11,7 @@ let state = {
 
     datalist: [],
     // {Title: "", Price: 0, Keys: "", Description: "", Seller: "", SupportVerify: false, pId: "",
-    //     MetaDataExtension: "", ProofDataExtensions: []}  
+    //     MetaDataExtension: "", ProofDataExtensions: []} = 9
     //  primary key: PublishId.
 
     transactionsell: [],
@@ -22,11 +22,11 @@ let state = {
     // identify match: 0 -> seller, 1 -> buyer, 2 -> verifier, 3 -> arbitrator
     //
     // transaction's data dictionary = [datalist] + {Buyer, State, StartVerify, MetaDataIdEncWithSeller, MetaDataIdEncWithBuyer, MetaDataIdEncWithArbitrator,
-    //     Verifier1Response, Verifier2Response, ArbitrateResult, tId} = 9 + 10 = 19
+    //     Verifier1Response, Verifier2Response, ArbitrateResult, tId, identify} = 9 + 11 = 20
     //  primary key: TransactionId.
 
     transactionbuy: [],
-    // [txs] + {SVDisplay} = 20
+    // [txs] + {SVDisplay} = 21
     
     transactionverifier: [],
     // the same as txs, all tx arrays use the same item in database.
