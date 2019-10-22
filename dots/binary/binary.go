@@ -17,7 +17,7 @@ import (
     "github.com/scryinfo/dp/dots/eth/event/listen"
     "github.com/scryinfo/dp/dots/eth/event/subscribe"
     "github.com/scryinfo/dp/dots/grpc"
-    "github.com/scryinfo/dp/dots/storage"
+    "github.com/scryinfo/dp/dots/storage/ipfs"
     "go.uber.org/zap"
 )
 

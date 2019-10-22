@@ -1,10 +1,9 @@
-package app
+package server
 
 import (
     "encoding/json"
     "github.com/pkg/errors"
     "github.com/scryinfo/dot/dot"
-    "github.com/scryinfo/dp/dots/app/server"
     "go.uber.org/zap"
     "golang.org/x/net/websocket"
     "net/http"
@@ -13,7 +12,7 @@ import (
 
 type WSServer struct {
     connParams *websocket.Conn
-    funcMap    map[string]server.PresetFunc
+    funcMap    map[string]PresetFunc
     config     serverConfig
 }
 
@@ -24,7 +23,7 @@ type serverConfig struct {
 
 const WebSocketTypeId = "40ef6679-5cfc-4436-a1f6-7f39870bc5ef"
 
-var _ server.Server = (*WSServer)(nil)
+var _ Server = (*WSServer)(nil)
 
 func newWebSocketDot(conf interface{}) (dot.Dot, error) {
     var err error
@@ -58,7 +57,7 @@ func WebSocketTypeLive() *dot.TypeLives {
 }
 
 func (ws *WSServer) Create(l dot.Line) error {
-    ws.funcMap = make(map[string]server.PresetFunc)
+    ws.funcMap = make(map[string]PresetFunc)
 
     return nil
 }
@@ -104,7 +103,7 @@ func (ws *WSServer) handleMessages(conn *websocket.Conn) {
     var err error
     for {
         // receive message and check if handle function is exist.
-        var mi server.MessageIn
+        var mi MessageIn
         {
             // receive from client
             var reply []byte
@@ -144,7 +143,7 @@ func (ws *WSServer) handleMessages(conn *websocket.Conn) {
 
             // send
             if err = ws.SendMessage(name, payload); err != nil {
-                logger.Errorln("", zap.NamedError(name+server.EventSendFailed, err))
+                logger.Errorln("", zap.NamedError(name+EventSendFailed, err))
             }
         }
     }
@@ -152,9 +151,9 @@ func (ws *WSServer) handleMessages(conn *websocket.Conn) {
 
 func (ws *WSServer) SendMessage(name string, payload interface{}) error {
     if bs, ok := payload.([]byte); ok {
-        payload = string(bs) // []byte will be base58 encode
+        payload = string(bs) // []byte will be base58 encode first
     }
-    mo := server.MessageOut{
+    mo := MessageOut{
         Name:    name,
         Payload: payload,
     }
@@ -169,7 +168,7 @@ func (ws *WSServer) SendMessage(name string, payload interface{}) error {
     return websocket.Message.Send(ws.connParams, string(b))
 }
 
-func (ws *WSServer) PresetMsgHandleFuncs(name []string, presetFunc []server.PresetFunc) error {
+func (ws *WSServer) PresetMsgHandleFuncs(name []string, presetFunc []PresetFunc) error {
     if len(name) != len(presetFunc) {
         return errors.New("Quantities of name and function are not equal. ")
     }
