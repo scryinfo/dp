@@ -1,6 +1,9 @@
 package definition
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type Account struct {
 	Address    string `gorm:"primary_key"`
@@ -57,4 +60,15 @@ type Event struct {
 	EventPayload string
 
 	CreatedAt time.Time // from gorm
+}
+
+// show use for hooks
+func (dl *DataList) AfterCreate() error {
+	fmt.Println("-------Show Use For Hooks (After Create).-------")
+	return nil
+}
+
+func (dl *DataList) AfterUpdate() error {
+	fmt.Println("-------Show Use For Hooks (After Update).-------")
+	return nil
 }
