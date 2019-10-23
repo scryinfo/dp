@@ -63,11 +63,6 @@ type Event struct {
 }
 
 // show use for hooks
-func (dl *DataList) AfterCreate() error {
-	fmt.Println("-------Show Use For Hooks (After Create).-------")
-	return nil
-}
-
 func (dl *DataList) AfterUpdate() error {
 	fmt.Println("-------Show Use For Hooks (After Update).-------")
 	return nil
