@@ -52,7 +52,7 @@ func (s *SQLite) Init() error {
     return nil
 }
 
-// CRUD (one item)
+// Basic CRUD
 func (s *SQLite) Create(v interface{}) error {
     db, err := gorm.Open(DB, DBName)
     if err != nil {
@@ -63,48 +63,56 @@ func (s *SQLite) Create(v interface{}) error {
     return db.Create(v).Error
 }
 
-func (s *SQLite) Read(out interface{}, sql ...interface{}) error {
+func (s *SQLite) Read(out interface{}, order, query string, sql ...interface{}) (int64, error) {
     db, err := gorm.Open(DB, DBName)
     if err != nil {
-        dot.Logger().Errorln("Database connect failed. ", zap.NamedError("in Read()", err))
+        dot.Logger().Errorln("Database connect failed. ", zap.NamedError("in ReadWithOrder()", err))
     }
     defer db.Close()
 
-    return db.First(out, sql...).Error
+    t := db.Order(order).Where(query, sql).Find(out)
+
+    return t.RowsAffected, t.Error
 }
 
-func (s *SQLite) Update(m map[string]interface{}, out interface{}, sql ...interface{}) error {
+func (s *SQLite) Update(out interface{}, m map[string]interface{}, query string, sql ...interface{}) (int64, error) {
     db, err := gorm.Open(DB, DBName)
     if err != nil {
-        dot.Logger().Errorln("Database connect failed. ", zap.NamedError("in Update()", err))
+        dot.Logger().Errorln("Database connect failed. ", zap.NamedError("in UpdateOneItemWithHooks()", err))
     }
     defer db.Close()
 
-    return db.First(out, sql...).Updates(m).Error
+    t := db.Where(query, sql).Find(out).Updates(m)
+
+    return t.RowsAffected, t.Error
 }
 
-func (s *SQLite) Delete(type_ interface{}, sql ...interface{}) error {
+func (s *SQLite) Delete(type_ interface{}, query string, sql ...interface{}) (int64, error) {
     db, err := gorm.Open(DB, DBName)
     if err != nil {
         dot.Logger().Errorln("Database connect failed. ", zap.NamedError("in Delete()", err))
     }
     defer db.Close()
 
-    return db.Delete(type_, sql...).Error
+    t := db.Where(query, sql).Delete(type_)
+
+    return t.RowsAffected, t.Error
 }
 
-// FindPage, GetSummary
+// todo: wait js implement
 func (s *SQLite) ReadPage() error {
     return nil
 }
 
-// FindSome (sorted)
-func (s *SQLite) ReadSome(order string, out interface{}, sql ...interface{}) error {
+// update without hooks
+func (s *SQLite) UpdateWithoutHooks(type_ interface{}, m map[string]interface{}, query string, sql ...interface{}) (int64, error) {
     db, err := gorm.Open(DB, DBName)
     if err != nil {
-        dot.Logger().Errorln("Database connect failed. ", zap.NamedError("in ReadSome()", err))
+        dot.Logger().Errorln("Database connect failed. ", zap.NamedError("in Update()", err))
     }
     defer db.Close()
 
-    return db.Order(order).Find(out, sql...).Error
+    t := db.Model(type_).Where(query, sql).Updates(m)
+
+    return t.RowsAffected, t.Error
 }
