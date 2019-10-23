@@ -9,7 +9,6 @@ import (
 )
 
 type SQLite struct {
-
 }
 
 // todo: configuration
