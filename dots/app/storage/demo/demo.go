@@ -62,6 +62,8 @@ func create() {
     if err != nil {
         panic("error in json serialize. " + err.Error())
     }
+
+    data := make([]definition.DataList, 0)
     for i := 1; i < 10; i++ {
         t := definition.DataList{
             PublishId: strconv.Itoa(i),
@@ -79,10 +81,15 @@ func create() {
             t.Price = strconv.Itoa(500)
         }
 
-        if err = db.Create(&t); err != nil {
-            panic("error in create. " + err.Error())
-        }
+        data = append(data, t)
     }
+
+    createNum, err := db.Create(data)
+    if err != nil {
+        panic("error in create. " + err.Error())
+    }
+
+    fmt.Printf("Create %d items. \n", createNum)
 
     return
 }

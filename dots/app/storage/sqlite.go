@@ -3,9 +3,12 @@ package storage
 import (
     "github.com/jinzhu/gorm"
     _ "github.com/jinzhu/gorm/dialects/sqlite"
+    "github.com/pkg/errors"
     "github.com/scryinfo/dot/dot"
     "github.com/scryinfo/dp/dots/app/storage/definition"
     "go.uber.org/zap"
+    "reflect"
+    "strconv"
 )
 
 type SQLite struct {
@@ -53,14 +56,31 @@ func (s *SQLite) Init() error {
 }
 
 // Basic CRUD
-func (s *SQLite) Create(v interface{}) error {
+func (s *SQLite) Create(v interface{}) (int64, error) {
     db, err := gorm.Open(DB, DBName)
     if err != nil {
         dot.Logger().Errorln("Database connect failed. ", zap.NamedError("in Create()", err))
     }
     defer db.Close()
 
-    return db.Create(v).Error
+    value := reflect.ValueOf(v)
+    num := 1
+    if value.Kind() != reflect.Slice {
+        if err = db.Create(v).Error; err != nil {
+            num = 0
+        }
+    } else {
+        var i int
+        for i = 0; i < value.Len(); i++ {
+            if err = db.Create(value.Index(i).Interface()).Error; err != nil {
+                break
+            }
+        }
+
+        num = i
+    }
+
+    return int64(num), errors.Wrap(err, " error number: " + strconv.Itoa(num) + "th item. ")
 }
 
 func (s *SQLite) Read(out interface{}, order, query string, sql ...interface{}) (int64, error) {
