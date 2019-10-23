@@ -6,11 +6,10 @@ import (
     "github.com/ethereum/go-ethereum/common"
     "github.com/pkg/errors"
     "github.com/scryinfo/dot/dot"
-    "github.com/scryinfo/dp/dots/app"
     "github.com/scryinfo/dp/dots/app/business/definition"
     "github.com/scryinfo/dp/dots/app/server"
     "github.com/scryinfo/dp/dots/eth/event"
-    "github.com/scryinfo/dp/dots/storage"
+    "github.com/scryinfo/dp/dots/storage/ipfs"
     "go.uber.org/zap"
     "io/ioutil"
     "math/big"
@@ -24,7 +23,7 @@ type Callbacks struct {
     ExtChan      chan []string
     FlagChan chan bool // flag for scanned approval event.
     config       cbsConfig
-    WS           *app.WSServer  `dot:""`
+    WS           *server.WSServer  `dot:""`
     Storage      *storage.Ipfs `dot:""`
 }
 
@@ -104,7 +103,7 @@ func CBsTypeLive() []*dot.TypeLives {
                 },
             },
         },
-        app.WebSocketTypeLive(),
+        server.WebSocketTypeLive(),
         storage.IpfsTypeLive(),
     }
 }
