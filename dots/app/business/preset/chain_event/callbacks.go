@@ -8,6 +8,7 @@ import (
     "github.com/scryinfo/dot/dot"
     "github.com/scryinfo/dp/dots/app/business/definition"
     "github.com/scryinfo/dp/dots/app/server"
+    database "github.com/scryinfo/dp/dots/app/storage"
     "github.com/scryinfo/dp/dots/eth/event"
     "github.com/scryinfo/dp/dots/storage/ipfs"
     "go.uber.org/zap"
@@ -25,6 +26,7 @@ type Callbacks struct {
     config       cbsConfig
     WS           *server.WSServer  `dot:""`
     Storage      *storage.Ipfs `dot:""`
+    DB *database.SQLite `dot:""`
 }
 
 type cbsConfig struct {
@@ -105,6 +107,7 @@ func CBsTypeLive() []*dot.TypeLives {
         },
         server.WebSocketTypeLive(),
         storage.IpfsTypeLive(),
+        database.SQLiteTypeLive(),
     }
 }
 

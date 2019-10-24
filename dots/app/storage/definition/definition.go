@@ -2,6 +2,7 @@ package definition
 
 import (
 	"fmt"
+	"github.com/scryinfo/dot/dot"
 	"time"
 )
 
@@ -65,5 +66,6 @@ type Event struct {
 // show use for hooks
 func (dl *DataList) AfterUpdate() error {
 	fmt.Println("-------Show Use For Hooks (After Update).-------")
+	dot.Logger().Infoln("-------Show Use For Hooks (After Update).-------")
 	return nil
 }
