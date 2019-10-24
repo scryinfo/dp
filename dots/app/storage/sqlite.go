@@ -12,43 +12,89 @@ import (
 )
 
 type SQLite struct {
+    TableNames []string 
+    TableStructure []interface{}
+
+    config sqlConfig
+}
+
+type sqlConfig struct {
+    DBName string `json:"DBName"`
 }
 
 // todo: configuration
 const (
+    SQLiteTypeId = "cd947210-6790-4e9f-b73f-63aeba484beb"
     DB = "sqlite3"
-    DBName = "app.db"
-)
-
-var (
-    tableName = []string{
-        "accounts",
-        "data_lists",
-        "transactions",
-        "events",
-    }
-    tableStructure = []interface{}{
-        &definition.Account{},
-        &definition.DataList{},
-        &definition.Transaction{},
-        &definition.Event{},
-    }
 )
 
 // check if 'SQLite' struct implements 'Database' interface
 var _ Database = (*SQLite)(nil)
 
+func (s *SQLite) Create(l dot.Line) error {
+    s.TableNames = []string{
+        "accounts",
+        "data_lists",
+        "transactions",
+        "events",
+    }
+    s.TableStructure = []interface{}{
+        &definition.Account{},
+        &definition.DataList{},
+        &definition.Transaction{},
+        &definition.Event{},
+    }
+
+    return nil
+}
+
+//construct dot
+func newSQLiteDot(conf interface{}) (dot.Dot, error) {
+    var err error
+    var bs []byte
+    if bt, ok := conf.([]byte); ok {
+        bs = bt
+    } else {
+        return nil, dot.SError.Parameter
+    }
+
+    dConf := &sqlConfig{}
+    err = dot.UnMarshalConfig(bs, dConf)
+    if err != nil {
+        return nil, err
+    }
+
+    d := &SQLite{config: *dConf}
+
+    return d, err
+}
+
+func SQLiteTypeLive() *dot.TypeLives {
+    return &dot.TypeLives{
+        Meta: dot.Metadata{
+            TypeId: SQLiteTypeId,
+            NewDoter: func(conf interface{}) (dot.Dot, error) {
+                return newSQLiteDot(conf)
+            },
+        },
+    }
+}
+
+func (s *SQLite) Start(ignore bool) error {
+    return s.Init()
+}
+
 // create tables if not exist
 func (s *SQLite) Init() error {
-    db, err := gorm.Open(DB, DBName)
+    db, err := gorm.Open(DB, s.config.DBName)
     if err != nil {
         dot.Logger().Errorln("Database connect failed. ", zap.NamedError("in Init()", err))
     }
     defer db.Close()
 
-    for i := range tableName {
-        if !db.HasTable(tableName[i]) {
-            db.AutoMigrate(tableStructure[i])
+    for i := range s.TableNames {
+        if !db.HasTable(s.TableNames[i]) {
+            db.AutoMigrate(s.TableStructure[i])
         }
     }
 
@@ -56,15 +102,15 @@ func (s *SQLite) Init() error {
 }
 
 // Basic CRUD
-func (s *SQLite) Create(v interface{}) (int64, error) {
-    db, err := gorm.Open(DB, DBName)
+func (s *SQLite) Insert(v interface{}) (int64, error) {
+    db, err := gorm.Open(DB, s.config.DBName)
     if err != nil {
         dot.Logger().Errorln("Database connect failed. ", zap.NamedError("in Create()", err))
     }
     defer db.Close()
 
     value := reflect.ValueOf(v)
-    num := 1
+    var num int64 = 1
     if value.Kind() != reflect.Slice {
         if err = db.Create(v).Error; err != nil {
             num = 0
@@ -77,14 +123,14 @@ func (s *SQLite) Create(v interface{}) (int64, error) {
             }
         }
 
-        num = i
+        num = int64(i)
     }
 
-    return int64(num), errors.Wrap(err, " error number: " + strconv.Itoa(num) + "th item. ")
+    return num, errors.Wrap(err, " error number: " + strconv.FormatInt(num+1, 10) + "th item. ")
 }
 
 func (s *SQLite) Read(out interface{}, order, query string, sql ...interface{}) (int64, error) {
-    db, err := gorm.Open(DB, DBName)
+    db, err := gorm.Open(DB, s.config.DBName)
     if err != nil {
         dot.Logger().Errorln("Database connect failed. ", zap.NamedError("in ReadWithOrder()", err))
     }
@@ -96,9 +142,9 @@ func (s *SQLite) Read(out interface{}, order, query string, sql ...interface{}) 
 }
 
 func (s *SQLite) Update(out interface{}, m map[string]interface{}, query string, sql ...interface{}) (int64, error) {
-    db, err := gorm.Open(DB, DBName)
+    db, err := gorm.Open(DB, s.config.DBName)
     if err != nil {
-        dot.Logger().Errorln("Database connect failed. ", zap.NamedError("in UpdateOneItemWithHooks()", err))
+        dot.Logger().Errorln("Database connect failed. ", zap.NamedError("in Update()", err))
     }
     defer db.Close()
 
@@ -108,7 +154,7 @@ func (s *SQLite) Update(out interface{}, m map[string]interface{}, query string,
 }
 
 func (s *SQLite) Delete(type_ interface{}, query string, sql ...interface{}) (int64, error) {
-    db, err := gorm.Open(DB, DBName)
+    db, err := gorm.Open(DB, s.config.DBName)
     if err != nil {
         dot.Logger().Errorln("Database connect failed. ", zap.NamedError("in Delete()", err))
     }
@@ -126,9 +172,9 @@ func (s *SQLite) ReadPage() error {
 
 // update without hooks
 func (s *SQLite) UpdateWithoutHooks(type_ interface{}, m map[string]interface{}, query string, sql ...interface{}) (int64, error) {
-    db, err := gorm.Open(DB, DBName)
+    db, err := gorm.Open(DB, s.config.DBName)
     if err != nil {
-        dot.Logger().Errorln("Database connect failed. ", zap.NamedError("in Update()", err))
+        dot.Logger().Errorln("Database connect failed. ", zap.NamedError("in UpdateWithoutHooks()", err))
     }
     defer db.Close()
 
