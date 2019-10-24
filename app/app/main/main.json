@@ -91,6 +91,20 @@
           }
         }
       ]
+    },
+    {
+      "metaData": {
+        "name": "app database",
+        "typeId": "cd947210-6790-4e9f-b73f-63aeba484beb"
+      },
+      "lives": [
+        {
+          "liveId": "cd947210-6790-4e9f-b73f-63aeba484beb",
+          "json": {
+            "dbName": "app.db"
+          }
+        }
+      ]
     }
   ]
 }
