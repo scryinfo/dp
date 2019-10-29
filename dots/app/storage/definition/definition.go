@@ -8,7 +8,7 @@ import (
 
 type Account struct {
 	Address    string `gorm:"primary_key"`
-	NickName   string
+	Nickname   string
 	FromBlock  int64
 	IsVerifier bool
 	Verify     []byte // []string, json serialize
@@ -22,10 +22,10 @@ type DataList struct {
 	Description         string
 	Seller              string
 	SupportVerify       bool
-	MetaDataExtension   string
-	ProofDataExtensions []byte // []string, json serialize
+	MetaDataExtension   string `json:"-"`
+	ProofDataExtensions []byte  `json:"-"`// []string, json serialize
 
-	CreatedAt time.Time // from gorm
+	CreatedAt time.Time `json:"-"` // from gorm
 }
 
 type Transaction struct {
@@ -33,9 +33,9 @@ type Transaction struct {
 	Buyer                       string
 	State                       int
 	StartVerify                 bool
-	MetaDataIdEncWithSeller     string
-	MetaDataIdEncWithBuyer      string
-	MetaDataIdEncWithArbitrator string
+	MetaDataIdEncWithSeller     string `json:"-"`
+	MetaDataIdEncWithBuyer      string `json:"-"`
+	MetaDataIdEncWithArbitrator string `json:"-"`
 	Verifier1Response           string
 	Verifier2Response           string
 	ArbitrateResult             bool
@@ -47,20 +47,22 @@ type Transaction struct {
 	Description         string
 	Seller              string
 	SupportVerify       bool
-	MetaDataExtension   string
-	ProofDataExtensions []byte // []string, json serialize
+	MetaDataExtension   string `json:"-"`
+	ProofDataExtensions []byte   `json:"-"`// []string, json serialize
 
-	CreatedAt time.Time // from gorm
+	Identify int
+
+	CreatedAt time.Time `json:"-"` // from gorm
 }
 
 type Event struct {
 	Id           int    `gorm:"primary_key"`
 	NotifyTo     []byte // []string, json serialize
-	EventName    int    // enum
+	EventName    int    // enum(iota)
 	EventKeyword string
 	EventPayload string
 
-	CreatedAt time.Time // from gorm
+	CreatedAt time.Time `json:"-"`// from gorm
 }
 
 // show use for hooks

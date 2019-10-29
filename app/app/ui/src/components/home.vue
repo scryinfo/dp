@@ -39,7 +39,6 @@
 </template>
 
 <script>
-import {db_options, acc_db} from "../utils/DBoptions.js";
 import {connect} from "../utils/connect.js";
 import {utils} from "../utils/utils.js";
 export default {
@@ -68,7 +67,6 @@ export default {
             });
         },
         logout: function () {
-            db_options.userDBClose();
             let _home = this;
             connect.send({Name:"logout", Payload: ""}, function (payload, _this) {
                 connect.cleanFuncMap();
@@ -88,25 +86,23 @@ export default {
     },
     created() {
         utils.init();
-        db_options.utilsDBInit(this);
-        db_options.userDBInit(this.$route.params.acc);
+        // db_options.utilsDBInit(this);
+        // db_options.userDBInit(this.$route.params.acc);
 
         let _home = this;
-        acc_db.read(this.$route.params.acc, function (accInstance) {
-            _home.$store.state.account = accInstance.address;
-            _home.$store.state.nickname = accInstance.nickname;
-            connect.send({Name:"blockSet", Payload: {fromBlock: accInstance.fromBlock}}, function (payload, _this) {
-                console.log("设置初始区块成功", payload);
-                db_options.txDBsDataUpdate(_this);
-            }, function (payload, _this) {
-                console.log("设置初始区块失败：", payload);
-                _this.$alert(payload, "设置初始区块失败！", {
-                    confirmButtonText: "关闭",
-                    showClose: false,
-                    type: "error"
-                }).then(() => {
-                    _this.$router.push("/");
-                });
+        _home.$store.state.account = this.$route.params.acc;
+        connect.send({Name:"currentUserDataUpdate", Payload: {address: this.$route.params.acc}}, function (payload, _this) {
+            console.log("用户信息更新成功！", payload);
+            _home.$store.state.nickname = payload;
+            // db_options.txDBsDataUpdate(_this);
+        }, function (payload, _this) {
+            console.log("用户信息更新失败：", payload);
+            _this.$alert(payload, "用户信息更新失败！", {
+                confirmButtonText: "关闭",
+                showClose: false,
+                type: "error"
+            }).then(() => {
+                _this.$router.push("/");
             });
         });
     }

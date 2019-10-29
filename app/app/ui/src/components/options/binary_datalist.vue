@@ -32,7 +32,6 @@
 
 <script>
 import {connect} from "../../utils/connect";
-import {dl_db} from "../../utils/DBoptions";
 import CFT from "../templates/complex_function_template.vue"
 export default {
     name: "datalist.vue",
@@ -57,11 +56,11 @@ export default {
             };
         },
         initDL: function () {
-            dl_db.init(this);
+            // dl_db.init(this);
         },
         advancePurchase: function (pwd) {
             connect.send({Name:"advancePurchase",Payload:{password: pwd, startVerify: this.startVerify,
-                        PublishId: this.selectedData.PublishId, price: this.selectedData.Price}},
+                        PublishId: this.selectedData.PublishId, price: this.selectedData.Price.toString()}},
                 function (payload, _this) {
                 console.log("预购买成功", payload);
             }, function (payload, _this) {

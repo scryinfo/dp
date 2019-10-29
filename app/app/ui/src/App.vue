@@ -8,12 +8,11 @@
 </template>
 
 <script>
-import {db_options} from "./utils/DBoptions.js";
 import {connect} from "./utils/connect.js";
 export default {
 	name: "app",
 	created () {
-        db_options.utilsDBInit(this);
+        // db_options.utilsDBInit(this);
         connect.WSConnect(this);
 
         if (sessionStorage.getItem("store") ) {

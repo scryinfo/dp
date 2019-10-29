@@ -148,7 +148,7 @@ func (s *SQLite) Update(out interface{}, m map[string]interface{}, query string,
     }
     defer db.Close()
 
-    t := db.Where(query, sql).Find(out).Updates(m)
+    t := db.Where(query, sql).Find(out).Updates(m).Find(out)
 
     return t.RowsAffected, t.Error
 }

@@ -26,7 +26,6 @@
 </template>
 
 <script>
-import {dl_db, acc_db, db_options} from "../../utils/DBoptions.js";
 import {connect} from "../../utils/connect.js";
 export default {
     name: "ES_administrator.vue",
@@ -49,28 +48,20 @@ export default {
                 message: '谢谢你使用我的程序!&nbsp;<strong>:)</strong>',
                 position: "top-left"
             });
-            acc_db.init(this);
         },
         resetChain: async function () {
-            dl_db.reset();
-            acc_db.reset();
-            await this.resetTxDBs();
-            console.log("已重置app全部数据");
+            // dl_db.reset();
+            // acc_db.reset();
+            // await this.resetTxDBs();
+            // console.log("已重置app全部数据");
         },
         resetTxDBs: function () {
-            let c = acc_db.db.transaction(acc_db.db_store_name,"readwrite").objectStore(acc_db.db_store_name).openCursor();
-            c.onsuccess = function (evt) {
-                let cursor = evt.target.result;
-                if (cursor) {
-                    db_options.clearTxObjectStore(cursor.value.address);
-                    cursor.continue();
-                }
-            }
+            // - ?
         },
         modifyParam: function () {
             connect.send({Name: "modifyContractParam", Payload: {modifyContractParam: {paramName: this.modifyItem, paramValue: this.newParamValue}}},
                 function (payload, _this) {
-                    console.log("modify param success: ", payload); // payload is nothing now :(
+                    console.log("modify param success: ", payload); // payload is nothing now :( think if it need some param from go?
                 }, function (payload, _this) {
                     console.log("modify param failed! ", payload);
                 });

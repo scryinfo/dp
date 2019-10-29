@@ -6,9 +6,11 @@ import (
     "github.com/ethereum/go-ethereum/common"
     "github.com/pkg/errors"
     "github.com/scryinfo/dot/dot"
-    "github.com/scryinfo/dp/dots/app/business/definition"
+    def "github.com/scryinfo/dp/dots/app/business/definition"
     "github.com/scryinfo/dp/dots/app/server"
     database "github.com/scryinfo/dp/dots/app/storage"
+    "github.com/scryinfo/dp/dots/app/storage/definition"
+    scry2 "github.com/scryinfo/dp/dots/binary/scry"
     "github.com/scryinfo/dp/dots/eth/event"
     "github.com/scryinfo/dp/dots/storage/ipfs"
     "go.uber.org/zap"
@@ -16,12 +18,13 @@ import (
     "math/big"
     "os"
     "strconv"
+    "strings"
 )
 
 type Callbacks struct {
+    CurUser           scry2.Client
     EventNames   []string
     EventHandler []event.Callback
-    ExtChan      chan []string
     FlagChan chan bool // flag for scanned approval event.
     config       cbsConfig
     WS           *server.WSServer  `dot:""`
@@ -38,7 +41,6 @@ const (
 )
 
 func (c *Callbacks) Create(l dot.Line) error {
-    c.ExtChan = make(chan []string, 10)
     c.FlagChan = make(chan bool, 10)
 
     c.EventNames = []string{
@@ -48,7 +50,7 @@ func (c *Callbacks) Create(l dot.Line) error {
         "AdvancePurchase",
         "ConfirmPurchase",
         "ReEncrypt",
-        "FinishPurchase",
+        "TransactionClose",
         "RegisterVerifier",
         "VoteResult",
         "VerifierDisable",
@@ -63,14 +65,18 @@ func (c *Callbacks) Create(l dot.Line) error {
         c.onAdvancePurchase,
         c.onConfirmPurchase,
         c.onReEncrypt,
-        c.onFinishPurchase,
+        c.onTransactionClose,
         c.onRegisterAsVerifier,
         c.onVoteResult,
         c.onVerifierDisable,
         c.onArbitrationBegin,
         c.onArbitrationResult,
     }
-    
+
+    if len(c.EventNames) != len(c.EventHandler) {
+        return errors.New("Quantities of name and function are not matched. (callbacks) ")
+    }
+
     return nil
 }
 
@@ -112,26 +118,54 @@ func CBsTypeLive() []*dot.TypeLives {
 }
 
 func (c *Callbacks) onPublish(event event.Event) bool {
-    var op definition.Callbacks
+    var dl definition.DataList
     {
-        var err error
-        if op, err = c.getPubDataDetails(event.Data.Get("despDataId").(string)); err != nil {
+        dl.Price = event.Data.Get("price").(*big.Int).String()
+        dl.PublishId = event.Data.Get("publishId").(string)
+        dl.SupportVerify = event.Data.Get("supportVerify").(bool)
+
+        var (
+            t def.Callbacks
+            err error
+        )
+        if t, err = c.getPubDataDetails(event.Data.Get("despDataId").(string)); err != nil {
             dot.Logger().Errorln("", zap.NamedError("onPublish: get publish data details failed. ", err))
         }
-        op.Block = event.BlockNumber
-        op.Price = event.Data.Get("price").(*big.Int).String()
-        op.PublishId = event.Data.Get("publishId").(string)
-        op.SupportVerify = event.Data.Get("supportVerify").(bool)
+
+        dl.Title = t.Title
+        dl.Keys = t.Keys
+        dl.Description = t.Description
+        dl.Seller = t.Seller
+        dl.MetaDataExtension = t.MetaDataExtension
+
+        if dl.ProofDataExtensions, err = json.Marshal(t.ProofDataExtensions); err != nil {
+            dot.Logger().Errorln("json marshal failed", zap.NamedError("[]string to []byte", err))
+            return false
+        }
     }
 
-    if err := c.WS.SendMessage("onPublish", op); err != nil {
-        dot.Logger().Errorln("", zap.NamedError("onPublish"+server.EventSendFailed, err))
+    if num, err := c.DB.Read(&definition.DataList{}, "", "publish_id = ?", dl.PublishId); num == 0 && err == nil {
+        if num, err := c.DB.Insert(&dl); num != 1 || err != nil {
+            dot.Logger().Errorln("db insert failed", zap.Int64("affect rows number", num) ,zap.NamedError("error", err))
+            return false
+        }
+    } else if num != 1 {
+        dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num) ,zap.NamedError("error", err))
+        return false
+    }
+
+    if !c.updateFromBlock(event.BlockNumber) {
+        return false
+    }
+
+    if err := c.WS.SendMessage("onPublish", dl); err != nil {
+        dot.Logger().Errorln(server.EventSendFailed, zap.NamedError("onPublish", err))
     }
 
     return true
 }
 
-func (c *Callbacks) getPubDataDetails(ipfsId string) (detailsData definition.Callbacks, err error) {
+func (c *Callbacks) getPubDataDetails(ipfsId string) (detailsData def.Callbacks, err error) {
     defer func() {
         if er := recover(); er != nil {
             dot.Logger().Errorln("", zap.Any("onPublish.callback: get publish data details failed. ", er))
@@ -164,7 +198,7 @@ func (c *Callbacks) getPubDataDetails(ipfsId string) (detailsData definition.Cal
     }
 
     if err = os.Remove(fileName); err != nil {
-        dot.Logger().Debugln("", zap.NamedError("onPublish.callback: delete details file failed. ", err))
+       dot.Logger().Debugln("", zap.NamedError("onPublish.callback: delete details file failed. ", err))
     }
 
     return
@@ -176,25 +210,40 @@ func (c *Callbacks) onApprove(_ event.Event) bool {
 }
 
 func (c *Callbacks) onVerifiersChosen(event event.Event) bool {
-    var ovc definition.Callbacks
+    var tx definition.Transaction
     {
-        ovc.PublishId = event.Data.Get("publishId").(string)
-        if err := c.WS.SendMessage("onProofFilesExtensions", ovc.PublishId); err != nil {
-            dot.Logger().Errorln("", zap.NamedError("onProofFilesExtensions"+server.EventSendFailed, err))
-        }
+        tx.PublishId = event.Data.Get("publishId").(string)
+        tx.TransactionId = event.Data.Get("transactionId").(*big.Int).String()
+        tx.State = int(event.Data.Get("state").(uint8))
 
-        ovc.Block = event.BlockNumber
-        ovc.TransactionId = event.Data.Get("transactionId").(*big.Int).String()
-        ovc.TransactionState = setTxState(event.Data.Get("state").(uint8))
-
-        extensions := <- c.ExtChan
-        var err error
-        if err = c.getAndRenameProofFiles(event.Data.Get("proofIds").([][32]uint8), extensions); err != nil {
+        if err := c.getAndRenameProofFiles(event.Data.Get("proofIds").([][32]uint8), c.getProofFileExtensions(tx.PublishId)); err != nil {
             dot.Logger().Errorln("", zap.NamedError("Node - onVC.callback: get and rename proof files failed. ", err))
+            return false
         }
     }
 
-    if err := c.WS.SendMessage("onVerifiersChosen", ovc); err != nil {
+    if !c.makeTxWithDataDetails(&tx, tx.PublishId) {
+        return false
+    }
+
+    // update acc info
+    {
+        var acc definition.Account
+        if num, err := c.DB.Read(&acc, "", "address = ?", c.CurUser.Account().Addr); num != 1 || err != nil {
+            dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num) ,zap.NamedError("error", err))
+            return false
+        }
+        acc.Verify = append(acc.Verify, tx.TransactionId...)
+        if num, err := c.DB.Update(&acc, map[string]interface{}{
+            "verify": acc.Verify,
+            "from_block": event.BlockNumber,
+        }, "address = ?", c.CurUser.Account().Addr); num != 1 || err != nil {
+            dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num) ,zap.NamedError("error", err))
+            return false
+        }
+    }
+
+    if err := c.WS.SendMessage("onVerifiersChosen", tx); err != nil {
         dot.Logger().Errorln("", zap.NamedError("onVerifiersChosen"+server.EventSendFailed, err))
     }
 
@@ -202,28 +251,42 @@ func (c *Callbacks) onVerifiersChosen(event event.Event) bool {
 }
 
 func (c *Callbacks) onAdvancePurchase(event event.Event) bool {
-    var otc definition.Callbacks
+    var tx definition.Transaction
     {
-        otc.PublishId = event.Data.Get("publishId").(string)
-        if err := c.WS.SendMessage("onProofFilesExtensions", otc.PublishId); err != nil {
-            dot.Logger().Errorln("", zap.NamedError("onProofFilesExtensions"+server.EventSendFailed, err))
-        }
+        tx.PublishId = event.Data.Get("publishId").(string)
+        tx.TransactionId = event.Data.Get("transactionId").(*big.Int).String()
+        tx.Buyer = event.Data.Get("users").([]common.Address)[1].String()
+        tx.StartVerify = event.Data.Get("needVerify").(bool)
+        tx.State = int(event.Data.Get("state").(uint8))
 
-        otc.Block = event.BlockNumber
-        otc.TransactionId = event.Data.Get("transactionId").(*big.Int).String()
-        otc.Buyer = event.Data.Get("users").([]common.Address)[1].String()
-        otc.StartVerify = event.Data.Get("needVerify").(bool)
-        otc.TransactionState = setTxState(event.Data.Get("state").(uint8))
-
-        extensions := <- c.ExtChan
-        var err error
-        if err = c.getAndRenameProofFiles(event.Data.Get("proofIds").([][32]uint8), extensions); err != nil {
-            dot.Logger().Errorln("", zap.Strings("show extensions: ", extensions),
-                zap.NamedError("Node - onAP.callback: get and rename proof files failed. ", err))
+        if err := c.getAndRenameProofFiles(event.Data.Get("proofIds").([][32]uint8), c.getProofFileExtensions(tx.PublishId)); err != nil {
+            dot.Logger().Errorln("", zap.NamedError("Node - onAP.callback: get and rename proof files failed. ", err))
         }
     }
 
-    if err := c.WS.SendMessage("onAdvancePurchase", otc); err != nil {
+    if !c.makeTxWithDataDetails(&tx, tx.PublishId) {
+        return false
+    }
+
+    tx.Identify = 1
+    if strings.ToLower(tx.Buyer) == strings.ToLower(c.CurUser.Account().Addr) {
+        tx.Identify = 2
+        if num, err := c.DB.Read(&definition.Transaction{}, "", "transaction_id = ?", tx.TransactionId); num == 0 && err == nil {
+            if num, err := c.DB.Insert(&tx); num != 1 || err != nil {
+                dot.Logger().Errorln("db insert failed", zap.Int64("affect rows number", num) ,zap.NamedError("error", err))
+                return false
+            }
+        } else if num != 1 {
+            dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num) ,zap.NamedError("error", err))
+            return false
+        }
+    }
+
+    if !c.updateFromBlock(event.BlockNumber) {
+        return false
+    }
+
+    if err := c.WS.SendMessage("onAdvancePurchase", tx); err != nil {
         dot.Logger().Errorln("", zap.NamedError("onTransactionCreate"+server.EventSendFailed, err))
     }
 
@@ -268,16 +331,29 @@ func ipfsBytes32ToHash(ipfsb [32]byte) string {
 }
 
 func (c *Callbacks) onConfirmPurchase(event event.Event) bool {
-    var op definition.Callbacks
-    {
-        op.Block = event.BlockNumber
-        op.TransactionId = event.Data.Get("transactionId").(*big.Int).String()
-        op.EncryptedId.EncryptedId = event.Data.Get("metaDataIdEncSeller").([]byte)
-        op.PublishId = event.Data.Get("publishId").(string)
-        op.TransactionState = setTxState(event.Data.Get("state").(uint8))
+    var tx definition.Transaction
+    if num, err := c.DB.Update(&tx, map[string]interface{}{
+        "meta_data_id_enc_with_seller": string(event.Data.Get("metaDataIdEncSeller").([]byte)),
+        "state": int(event.Data.Get("state").(uint8)),
+    }, "transaction_id = ?", event.Data.Get("transactionId").(*big.Int).String()); num != 1 || err != nil {
+        dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num) ,zap.NamedError("error", err))
+        return false
     }
 
-    if err := c.WS.SendMessage("onConfirmPurchase", op); err != nil {
+    switch strings.ToLower(c.CurUser.Account().Addr) {
+    case strings.ToLower(tx.Seller):
+        tx.Identify = 1
+    case strings.ToLower(tx.Buyer):
+        tx.Identify = 2
+    default:
+        tx.Identify = 3
+    }
+
+    if !c.updateFromBlock(event.BlockNumber) {
+        return false
+    }
+
+    if err := c.WS.SendMessage("onConfirmPurchase", tx); err != nil {
         dot.Logger().Errorln("", zap.NamedError("onPurchase"+server.EventSendFailed, err))
     }
 
@@ -285,30 +361,58 @@ func (c *Callbacks) onConfirmPurchase(event event.Event) bool {
 }
 
 func (c *Callbacks) onReEncrypt(event event.Event) bool {
-    var orfd definition.Callbacks
-    {
-        orfd.Block = event.BlockNumber
-        orfd.TransactionId = event.Data.Get("transactionId").(*big.Int).String()
-        orfd.EncryptedId.EncryptedId = event.Data.Get("metaDataIdEncBuyer").([]byte)
-        orfd.TransactionState = setTxState(event.Data.Get("state").(uint8))
+    var tx definition.Transaction
+    if num, err := c.DB.Update(&tx, map[string]interface{}{
+        "meta_data_id_enc_with_buyer": string(event.Data.Get("metaDataIdEncBuyer").([]byte)),
+        "state": int(event.Data.Get("state").(uint8)),
+    }, "transaction_id = ?", event.Data.Get("transactionId").(*big.Int).String()); num != 1 || err != nil {
+        dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num) ,zap.NamedError("error", err))
+        return false
     }
 
-    if err := c.WS.SendMessage("onReEncrypt", orfd); err != nil {
+    switch strings.ToLower(c.CurUser.Account().Addr) {
+    case strings.ToLower(tx.Seller):
+        tx.Identify = 1
+    case strings.ToLower(tx.Buyer):
+        tx.Identify = 2
+    default:
+        dot.Logger().Errorln("Invalid identify! (on re-encrypt)")
+    }
+
+    if !c.updateFromBlock(event.BlockNumber) {
+        return false
+    }
+
+    if err := c.WS.SendMessage("onReEncrypt", tx); err != nil {
         dot.Logger().Errorln("", zap.NamedError("onReadyForDownload"+server.EventSendFailed, err))
     }
 
     return true
 }
 
-func (c *Callbacks) onFinishPurchase(event event.Event) bool {
-    var oc definition.Callbacks
-    {
-        oc.Block = event.BlockNumber
-        oc.TransactionId = event.Data.Get("transactionId").(*big.Int).String()
-        oc.TransactionState = setTxState(event.Data.Get("state").(uint8))
+func (c *Callbacks) onTransactionClose(event event.Event) bool {
+    var tx definition.Transaction
+    if num, err := c.DB.Update(&tx, map[string]interface{}{
+        "state": int(event.Data.Get("state").(uint8)),
+    }, "transaction_id = ?", event.Data.Get("transactionId").(*big.Int).String()); num != 1 || err != nil {
+        dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num) ,zap.NamedError("error", err))
+        return false
     }
 
-    if err := c.WS.SendMessage("onFinishPurchase", oc); err != nil {
+    switch strings.ToLower(c.CurUser.Account().Addr) {
+    case strings.ToLower(tx.Seller):
+        tx.Identify = 1
+    case strings.ToLower(tx.Buyer):
+        tx.Identify = 2
+    default:
+        tx.Identify = 3
+    }
+
+    if !c.updateFromBlock(event.BlockNumber) {
+        return false
+    }
+
+    if err := c.WS.SendMessage("onTransactionClose", tx); err != nil {
         dot.Logger().Errorln("", zap.NamedError("onClose"+server.EventSendFailed, err))
     }
 
@@ -316,12 +420,15 @@ func (c *Callbacks) onFinishPurchase(event event.Event) bool {
 }
 
 func (c *Callbacks) onRegisterAsVerifier(event event.Event) bool {
-    var orav definition.Callbacks
-    {
-        orav.Block = event.BlockNumber
+    if num, err := c.DB.Update(&definition.Account{}, map[string]interface{}{
+        "from_block": int64(event.BlockNumber + 1),
+        "is_verifier": true,
+    }, "address = ?", c.CurUser.Account().Addr); num != 1 || err != nil {
+        dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num) ,zap.NamedError("error", err))
+        return false
     }
 
-    if err := c.WS.SendMessage("onRegisterVerifier", orav); err != nil {
+    if err := c.WS.SendMessage("onRegisterVerifier", ""); err != nil {
         dot.Logger().Errorln("", zap.NamedError("onRegisterVerifier"+server.EventSendFailed, err))
     }
 
@@ -329,19 +436,36 @@ func (c *Callbacks) onRegisterAsVerifier(event event.Event) bool {
 }
 
 func (c *Callbacks) onVoteResult(event event.Event) bool {
-    var ov definition.Callbacks
-    {
-        ov.Block = event.BlockNumber
-        ov.VerifyResult.VerifierIndex = strconv.Itoa(int(event.Data.Get("index").(uint8)))
-        ov.TransactionId = event.Data.Get("transactionId").(*big.Int).String()
-        ov.TransactionState = setTxState(event.Data.Get("state").(uint8))
+    var tx definition.Transaction
 
-        judge := event.Data.Get("judge").(bool)
-        comment := event.Data.Get("comments").(string)
-        ov.VerifyResult.VerifierResponse = setJudge(judge) + ", " + comment
+    switch int(event.Data.Get("index").(uint8)) {
+    case 0:
+        tx.Identify = 2
+    case 1:
+        tx.Identify = 3
+        if num, err := c.DB.Update(&tx, map[string]interface{}{
+            "verifier1_response": setJudge(event.Data.Get("judge").(bool)) + ". " + event.Data.Get("comments").(string),
+            "state": int(event.Data.Get("state").(uint8)),
+        }, "transaction_id = ?", event.Data.Get("transactionId").(*big.Int).String()); num != 1 || err != nil {
+            dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num) ,zap.NamedError("error", err))
+            return false
+        }
+    case 2:
+        tx.Identify = 3
+        if num, err := c.DB.Update(&tx, map[string]interface{}{
+            "verifier2_response": setJudge(event.Data.Get("judge").(bool)) + ". " + event.Data.Get("comments").(string),
+            "state": int(event.Data.Get("state").(uint8)),
+        }, "transaction_id = ?", event.Data.Get("transactionId").(*big.Int).String()); num != 1 || err != nil {
+            dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num) ,zap.NamedError("error", err))
+            return false
+        }
     }
 
-    if err := c.WS.SendMessage("onVoteResult", ov); err != nil {
+    if !c.updateFromBlock(event.BlockNumber) {
+        return false
+    }
+
+    if err := c.WS.SendMessage("onVoteResult", tx); err != nil {
         dot.Logger().Errorln("", zap.NamedError("onVote"+server.EventSendFailed, err))
     }
 
@@ -349,13 +473,16 @@ func (c *Callbacks) onVoteResult(event event.Event) bool {
 }
 
 func (c *Callbacks) onVerifierDisable(event event.Event) bool {
-    var ovd definition.Callbacks
+    var acc definition.Account
     {
-        ovd.VerifierDisabled.VerifierAddress = event.Data.Get("verifier").(common.Address).String()
-        ovd.Block = event.BlockNumber
+        acc.Address = event.Data.Get("verifier").(common.Address).String()
     }
 
-    if err := c.WS.SendMessage("onVerifierDisable", ovd); err != nil {
+    if !c.updateFromBlock(event.BlockNumber) {
+        return false
+    }
+
+    if err := c.WS.SendMessage("onVerifierDisable", acc); err != nil {
         dot.Logger().Errorln("", zap.NamedError("onVerifierDisable"+server.EventSendFailed, err))
     }
 
@@ -363,25 +490,24 @@ func (c *Callbacks) onVerifierDisable(event event.Event) bool {
 }
 
 func (c *Callbacks) onArbitrationBegin(event event.Event) bool {
-    var oab definition.Callbacks
-    {
-        oab.PublishId = event.Data.Get("publishId").(string)
-        if err := c.WS.SendMessage("onProofFilesExtensions", oab.PublishId); err != nil {
-            dot.Logger().Errorln("", zap.NamedError("onProofFilesExtensions"+server.EventSendFailed, err))
-        }
+    var tx definition.Transaction
 
-        oab.TransactionId = event.Data.Get("transactionId").(*big.Int).String()
-        oab.EncryptedId.EncryptedId = event.Data.Get("metaDataIdEncArbitrator").([]byte)
-        oab.Block = event.BlockNumber
-
-        extensions := <- c.ExtChan
-        var err error
-        if err = c.getAndRenameProofFiles(event.Data.Get("proofIds").([][32]uint8), extensions); err != nil {
-            dot.Logger().Errorln("", zap.NamedError("Node - onVC.callback: get and rename proof files failed. ", err))
-        }
+    if err := c.getAndRenameProofFiles(event.Data.Get("proofIds").([][32]uint8), c.getProofFileExtensions(event.Data.Get("publishId").(string))); err != nil {
+        dot.Logger().Errorln("", zap.NamedError("Node - onVC.callback: get and rename proof files failed. ", err))
     }
 
-    if err := c.WS.SendMessage("onArbitrationBegin", oab); err != nil {
+    if num, err := c.DB.Update(&tx, map[string]interface{}{
+        "meta_data_id_enc_with_arbitrator": string(event.Data.Get("metaDataIdEncArbitrator").([]byte)),
+    }, "transaction_id = ?", event.Data.Get("transactionId").(*big.Int).String()); num != 1 || err != nil {
+        dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num) ,zap.NamedError("error", err))
+        return false
+    }
+
+    if !c.updateFromBlock(event.BlockNumber) {
+        return false
+    }
+
+    if err := c.WS.SendMessage("onArbitrationBegin", tx); err != nil {
         dot.Logger().Errorln("", zap.NamedError("onArbitrationBegin"+server.EventSendFailed, err))
     }
 
@@ -389,37 +515,81 @@ func (c *Callbacks) onArbitrationBegin(event event.Event) bool {
 }
 
 func (c *Callbacks) onArbitrationResult(event event.Event) bool {
-    var oar definition.Callbacks
-    {
-        oar.TransactionId = event.Data.Get("transactionId").(*big.Int).String()
-        oar.Arbitrate.ArbitrateResult = event.Data.Get("judge").(bool)
-        oar.Block = event.BlockNumber
+    var tx definition.Transaction
+
+    if num, err := c.DB.Update(&tx, map[string]interface{}{
+        "arbitrate_result": event.Data.Get("judge").(bool),
+    }, "transaction_id = ?", event.Data.Get("transactionId").(*big.Int).String()); num != 1 || err != nil {
+        dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num) ,zap.NamedError("error", err))
+        return false
     }
 
-    if err := c.WS.SendMessage("onArbitrationResult", oar); err != nil {
+    switch strings.ToLower(c.CurUser.Account().Addr) {
+    case strings.ToLower(tx.Seller):
+        tx.Identify = 1
+    case strings.ToLower(tx.Buyer):
+        tx.Identify = 2
+    }
+
+    if !c.updateFromBlock(event.BlockNumber) {
+        return false
+    }
+
+    if err := c.WS.SendMessage("onArbitrationResult", tx); err != nil {
         dot.Logger().Errorln("", zap.NamedError("onArbitrationResult"+server.EventSendFailed, err))
     }
 
     return true
 }
 
-func setTxState(state byte) (str string) {
-    switch state {
-    case 1:
-        str = "Created"
-    case 2:
-        str = "Voted"
-    case 3:
-        str = "Buying"
-    case 4:
-        str = "ReadyForDownload"
-    case 5:
-        str = "Closed"
-    default:
-        str = "Unknown TxState!"
+func (c *Callbacks) updateFromBlock(blockNumber uint64) bool {
+    if num, err := c.DB.Update(&definition.Account{}, map[string]interface{}{"from_block": int64(blockNumber + 1)}, "address = ?", c.CurUser.Account().Addr); num != 1 || err != nil {
+        dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num) ,zap.NamedError("error", err))
+        return false
+    }
+
+    return true
+}
+
+func (c *Callbacks) getProofFileExtensions(pubId string) (extensions []string) {
+    var dl definition.DataList
+    if num, err := c.DB.Read(&dl, "", "publish_id = ?", pubId); num != 1 || err != nil {
+        dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num) ,zap.NamedError("error", err))
+        return
+    }
+
+    t := make([]string, 0)
+    if err := json.Unmarshal(dl.ProofDataExtensions, &t); err != nil {
+        dot.Logger().Errorln("json unmarshal failed", zap.NamedError("in getProofFileExtensions", err))
+        return
+    }
+    for i := range t {
+        if i % 2 == 0 {
+            extensions = append(extensions, t[i])
+        }
     }
 
     return
+}
+
+func (c *Callbacks) makeTxWithDataDetails(tx *definition.Transaction, pubId string) bool {
+    var dl definition.DataList
+    if num, err := c.DB.Read(&dl, "", "publish_id = ?", pubId); num != 1 || err != nil {
+        dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num) ,zap.NamedError("error", err))
+        return false
+    }
+
+    tx.PublishId = dl.PublishId
+    tx.Title = dl.Title
+    tx.Price = dl.Price
+    tx.Keys = dl.Keys
+    tx.Description = dl.Description
+    tx.Seller = dl.Seller
+    tx.SupportVerify = dl.SupportVerify
+    tx.MetaDataExtension = dl.MetaDataExtension
+    tx.ProofDataExtensions = dl.ProofDataExtensions
+
+    return true
 }
 
 func setJudge(judge bool) (str string) {
