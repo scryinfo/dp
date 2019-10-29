@@ -7,7 +7,7 @@ library transaction {
     event Publish(string seqNo, string publishId, uint256 price, string despDataId, bool supportVerify, address[] users);
     event AdvancePurchase(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool needVerify, uint8 state, address[] users);
     event ConfirmPurchase(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, uint8 state, address[] users);
-    event FinishPurchase(string seqNo, uint256 transactionId, uint8 state, address[] users);
+    event TransactionClose(string seqNo, uint256 transactionId, uint8 state, address[] users);
     event VerifiersChosen(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, uint8 state, address[] users);
     event ReEncrypt(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, uint8 state, address[] users);
     event ArbitrationBegin(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bytes metaDataIdEncArbitrator, address[] users);
@@ -267,7 +267,7 @@ library transaction {
             users[i + 2] = txItem.verifiers[i];
         }
 
-        emit FinishPurchase(seqNo, txId, uint8(txItem.state), users);
+        emit TransactionClose(seqNo, txId, uint8(txItem.state), users);
     }
 
     function revertToBuyer(common.TransactionItem storage txItem, ERC20 token) internal {

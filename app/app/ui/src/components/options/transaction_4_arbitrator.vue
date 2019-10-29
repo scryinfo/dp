@@ -9,8 +9,8 @@
         </div>
         <div v-if="showControl">
             <el-col :span="21" class="section-item">
-                <s-f-t button-name="解密数据" @password="decrypt" :button-disabled="buttonDisabled(3)"></s-f-t>
-                <c-f-t button-name="仲裁数据" dialog-title="仲裁数据：" @password="arbitrate" :button-disabled="buttonDisabled(3)">
+                <s-f-t button-name="解密数据" @password="decrypt"></s-f-t>
+                <c-f-t button-name="仲裁数据" dialog-title="仲裁数据：" @password="arbitrate">
                     <p>判断数据真实性：</p>
                     <p><el-switch v-model="arbitrateResult" active-text="真" inactive-text="假"></el-switch></p>
                 </c-f-t>
@@ -37,15 +37,13 @@
 
 <script>
 import {connect} from "../../utils/connect.js";
-import {acc_db, tx_db} from "../../utils/DBoptions.js";
-import {utils} from "../../utils/utils.js";
 import SFT from "../templates/simple_function_template.vue";
 import CFT from "../templates/complex_function_template.vue";
 export default {
     name: "transaction_4_arbitrator.vue",
     data () {
         return {
-            selectedTx: {},     // {txId: "", address: "", MetaDataIdEncrypt: "", MetaDataExtension: ""}
+            selectedTx: "",     // txId: ""
             arbitrateResult: false,
             height: window.innerHeight - 170,
             showControl: false,
@@ -59,30 +57,14 @@ export default {
         setCurPage: function (curPageReturn) { this.curPage = curPageReturn; },
         setPageSize: function (newPageSize) { this.pageSize = newPageSize; },
         currentChange: function (curRow) {
-            this.selectedTx = {
-                TransactionId: curRow.TransactionId,
-                address: this.$store.state.account,
-                MetaDataIdEncrypt: curRow.MetaDataIdEncWithArbitrator,
-                MetaDataExtension: curRow.MetaDataExtension
-            };
+            this.selectedTx = curRow.TransactionId;
             this.txState = curRow.State;
         },
-        buttonDisabled: function (funcNum) {
-            return utils.functionDisabled(funcNum, this.txState);
-        },
         initTxA: function () {
-            tx_db.initArbitrator(this);
-        },
-        refresh: function () {
-            let _this = this;
-            acc_db.read(this.$store.state.account, function (accInstance) {
-                _this.showControl = accInstance.isVerifier;
-            })
+            // tx.arbitrator request
         },
         decrypt: function (pwd) {
-            connect.send({Name:"decrypt", Payload:{password: pwd, address: this.selectedTx.address, 
-                    encryptedId: {encryptedMetaDataId: this.selectedTx.MetaDataIdEncrypt}, 
-                    extensions: {metaDataExtension: this.selectedTx.MetaDataExtension}}}, function (payload, _this) {
+            connect.send({Name:"decrypt", Payload:{password: pwd, TransactionId: this.selectedTx}}, function (payload, _this) {
                 console.log("解密数据成功", payload);
                 _this.$alert(payload, "原始数据：", {
                     customClass: "longText",
@@ -100,7 +82,7 @@ export default {
             });
         },
         arbitrate: function (pwd) {
-            connect.send({Name: "arbitrate", Payload: {password: pwd, TransactionId: this.selectedTx.TransactionId,
+            connect.send({Name: "arbitrate", Payload: {password: pwd, TransactionId: this.selectedTx,
                     arbitrate: {arbitrateResult: this.arbitrateResult}}}, function (payload, _this) {
                 console.log("仲裁成功", payload);
             }, function (payload, _this) {
@@ -130,7 +112,18 @@ export default {
     },
     created () {
         this.total = this.$store.state.transactionarbitrator.length;
-        this.refresh();
+        let _arbitrate = this;
+        connect.send({Name:"isVerifier", Payload:{}}, function (payload, _this) {
+            _arbitrate.showControl = payload;
+            console.log("当前用户验证者身份查询成功：", payload);
+        }, function (payload, _this) {
+            console.log("当前用户验证者身份查询失败!", payload);
+            _this.$alert(payload, "当前用户不是验证者！", {
+                confirmButtonText: "关闭",
+                showClose: false,
+                type: "error"
+            });
+        });
     }
 }
 </script>

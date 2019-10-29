@@ -7,12 +7,13 @@ type Preset struct {
 	PublishId     string `json:"PublishId"`
 	TransactionId string `json:"TransactionId"`
 
-	Address       string  `json:"address"`
-	Password      string  `json:"password"`
-	FromBlock     float64 `json:"fromBlock"`
-	Price         float64 `json:"price"`
-	SupportVerify bool    `json:"supportVerify"`
-	StartVerify   bool    `json:"startVerify"`
+	Address             string   `json:"address"`
+	Password            string   `json:"password"`
+	Price               string  `json:"price"`
+	SupportVerify       bool     `json:"supportVerify"`
+	StartVerify         bool     `json:"startVerify"`
+	MetaDataExtension   string   `json:"MetaDataExtension"`
+	ProofDataExtensions []string `json:"ProofDataExtensions"`
 
 	Ids         Ids         `json:"Ids"`
 	EncryptedId EncryptedId `json:"encryptedId"`
@@ -21,9 +22,10 @@ type Preset struct {
 	Grade       Grade       `json:"grade"`
 	Arbitrate   Arbitrate   `json:"arbitrate"`
 
-	Extensions Extensions          `json:"extensions"`
-	Contract   ModifyContractParam `json:"modifyContractParam"`
-	Balance    Balance
+	Contract ModifyContractParam `json:"modifyContractParam"`
+	Balance  Balance
+
+	CurrentUser User
 }
 
 type Ids struct {

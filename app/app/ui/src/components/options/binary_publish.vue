@@ -33,10 +33,8 @@ export default {
                     Keys: "",
                     Description: "",
                     Seller: "",
-                    extensions: {
-                        metaDataExtension: "",
-                        proofDataExtensions: []
-                    }
+                    MetaDataExtension: "",
+                    ProofDataExtensions: []
                 },
                 Price: Number
             },
@@ -62,7 +60,7 @@ export default {
             this.Ids.metaDataId = "";
             let _this = this;
             let data = this.$refs.selectedData.files[0];
-            this.pubData.details.extensions.metaDataExtension = data.name.slice(data.name.indexOf("."));
+            this.pubData.details.MetaDataExtension = data.name.slice(data.name.indexOf("."));
             let reader = new FileReader();
             reader.readAsArrayBuffer(data);
             reader.onload = function (evt) {
@@ -81,11 +79,11 @@ export default {
         },
         setProofIds: function () {
             this.Ids.proofDataIds = [];
-            this.pubData.details.extensions.proofDataExtensions = [];
+            this.pubData.details.ProofDataExtensions = [];
             let _this = this;
             let proofs = this.$refs.selectedProofs.files;
             for (let i=0;i<proofs.length;i++) {
-                this.pubData.details.extensions.proofDataExtensions.push( proofs[i].name.slice(proofs[i].name.indexOf(".")) );
+                this.pubData.details.ProofDataExtensions.push( proofs[i].name.slice(proofs[i].name.indexOf(".")), "utf-8" );
                 let reader = new FileReader();
                 reader.readAsArrayBuffer(proofs[i]);
                 reader.onload = function (evt) {
