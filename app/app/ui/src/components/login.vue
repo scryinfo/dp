@@ -1,7 +1,7 @@
 <!-- Scry Info.  All rights reserved.-->
 <!-- license that can be found in the license file.-->
 <template>
-    <div>
+    <div v-if="isReload">
         <el-row>
             <el-col :span="24"><div class="top">Dapp</div></el-col>
         </el-row>
@@ -44,7 +44,6 @@
 </template>
 
 <script>
-import {acc_db} from "../utils/DBoptions.js";
 import {connect} from "../utils/connect.js";
 export default {
     name: "login.vue",
@@ -52,6 +51,7 @@ export default {
         return {
             account: "",
             password: "",
+            isReload: false,
             showControl1: false,
             showControl2: false,
             buttonControl: true,
@@ -67,18 +67,16 @@ export default {
             }
             this.describe = description + ":";
         },
+
         hide: function () {this.showControl1 = false; this.showControl2 = false; this.password = "";},
+
         submit_login: function () {
+            let acc = this.account;
+            this.account = "";
             let pwd = this.password;
             this.password = "";
-            let _login = this;
-            if (!(this.account.length === 42 && this.account.split("0x")[0] === "")) {
-                acc_db.readIndex(acc_db.db_index_name, this.account, function (accInstance) {
-                    _login.account = accInstance.nickname;
-                });
-            }
-            connect.send({Name: "loginVerify", Payload: {address: this.account, password: pwd}}, function (payload, _this) {
-                _this.$router.push({ name: "home", params: {acc: _login.account}});
+            connect.send({Name: "loginVerify", Payload: {address: acc, password: pwd}}, function (payload, _this) {
+                _this.$router.push({ name: "home", params: {acc: acc}});
             }, function (payload, _this) {
                 console.log("登录验证失败：", payload);
                 _this.$alert(payload, "用户名或密码错误！", {
@@ -88,17 +86,12 @@ export default {
                 });
             });
         },
+
         submit_new: function () {
             let pwd = this.password;
             this.password = "";
             let _login = this;
             connect.send({Name: "createNewAccount", Payload: {password: pwd}}, function (payload, _this) {
-                acc_db.write({
-                    address: payload,
-                    nickname: payload,
-                    fromBlock: 1,
-                    isVerifier: false
-                });
                 _login.account = payload;
                 _login.showControl1 = false;
                 _login.showControl2 = true;
@@ -111,13 +104,18 @@ export default {
                 });
             });
         },
+
         submit_keystore: function () {
             this.password = "";
             this.$router.push({ name: "home", params: {acc: this.account}});
         }
     },
     created() {
-        this.password = "";this.describe = "";this.account = "";
+        window.sessionStorage.clear();
+        if (this.$store.state.account !== "") {
+            return window.location.reload();
+        }
+        this.isReload = true;
     }
 }
 </script>

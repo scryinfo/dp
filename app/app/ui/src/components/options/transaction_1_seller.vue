@@ -20,6 +20,8 @@
                     <el-form-item label="标签"><span>{{ props.row.Keys }}</span></el-form-item>
                     <el-form-item label="描述"><span>{{ props.row.Description }}</span></el-form-item>
                     <el-form-item label="状态"><span>{{ props.row.State }}</span></el-form-item>
+                    <el-form-item label="是否支持验证"><span>{{ props.row.SVDisplay }}</span></el-form-item>
+                    <el-form-item label="是否启用验证"><span>{{ props.row.NVDisplay }}</span></el-form-item>
                     <el-form-item label="仲裁结果"><span>{{ props.row.ArbitrateResult }}</span></el-form-item>
                 </el-form>
             </el-table-column>
@@ -34,14 +36,13 @@
 
 <script>
 import {connect} from "../../utils/connect.js";
-import {tx_db} from "../../utils/DBoptions.js";
 import {utils} from "../../utils/utils.js";
 import SFT from "../templates/simple_function_template.vue";
 export default {
     name: "transaction_1_seller.vue",
     data () {
         return {
-            selectedTx: {},  // {tId: "", Seller: "", MetaDataIdEncWithSeller: "", pId: ""}
+            selectedTx: "",  // tId: ""
             curPage: 1,
             pageSize: 6,
             total: 0,
@@ -51,25 +52,47 @@ export default {
     },
     methods: {
         setCurPage: function (curPageReturn) { this.curPage = curPageReturn; },
+
         setPageSize: function (newPageSize) { this.pageSize = newPageSize; },
+
         currentChange: function (curRow) {
-            this.selectedTx = {
-                TransactionId: curRow.TransactionId,
-                Seller: curRow.Seller,
-                PublishId: curRow.PublishId,
-                MetaDataIdEncWithSeller: curRow.MetaDataIdEncWithSeller // WSConnect between go and js buy not show out to user.
-            };
+            this.selectedTx = curRow.TransactionId;
             this.txState = curRow.State;
         },
+
         buttonDisabled: function (funcNum) {
             return utils.functionDisabled(funcNum, this.txState);
         },
+
         initTxS: function () {
-            tx_db.initSeller(this);
+            connect.send({Name: "getTxSell", Payload: ""}, function (payload, _this) {
+                _this.$store.state.transactionsell = [];
+                for (let i = 0; i < payload.length; i++) {
+                    _this.$store.state.transactionsell.push({
+                        PublishId: payload[i].PublishId,
+                        TransactionId: payload[i].TransactionId,
+                        State: utils.stateEnum[parseInt(payload[i].State)],
+                        Title: payload[i].Title,
+                        Price: payload[i].Price,
+                        Keys: payload[i].Keys,
+                        Description: payload[i].Description,
+                        ArbitrateResult: false,
+                        SVDisplay: utils.setSupportVerify(payload[i].SupportVerify),
+                        NVDisplay: utils.setNeedVerify(payload[i].StartVerify)
+                    })
+                }
+            }, function (payload, _this) {
+                console.log("获取当前用户为卖方的交易列表失败：", payload);
+                _this.$alert(payload, "获取当前用户为卖方的交易列表失败！", {
+                    confirmButtonText: "关闭",
+                    showClose: false,
+                    type: "error"
+                });
+            });
         },
+
         reEncrypt:function (pwd) {
-            connect.send({ Name:"reEncrypt", Payload:{password: pwd, TransactionId: this.selectedTx.TransactionId,
-                    encryptedId: {encryptedMetaDataId: this.selectedTx.MetaDataIdEncWithSeller}}}, function (payload, _this) {
+            connect.send({ Name:"reEncrypt", Payload:{password: pwd, TransactionId: this.selectedTx}}, function (payload, _this) {
                 console.log("再加密数据成功", payload);
             }, function (payload, _this) {
                 console.log("再加密数据失败：", payload);
@@ -97,6 +120,8 @@ export default {
     },
     created () {
         this.total = this.$store.state.transactionsell.length;
+
+        this.initTxS();
     }
 }
 </script>

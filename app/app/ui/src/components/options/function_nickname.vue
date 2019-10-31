@@ -12,7 +12,7 @@
                 用户昵称：{{ this.$store.state.nickname }}
             </el-col>
             <el-col :span="9">
-                <el-input v-model="nickName" placeholder="nickname, suggest different structure from address"></el-input>
+                <el-input v-model="nickname" placeholder="nickname, suggest different structure from address"></el-input>
             </el-col>
             <el-col :span="3" >
                 <el-button size="mini" type="primary" class="section-item-right" @click="modifyNickname">修改昵称</el-button>
@@ -28,84 +28,40 @@
 </template>
 
 <script>
-import {acc_db} from "../../utils/DBoptions";
 import {connect} from "../../utils/connect";
 export default {
     name: "nickname.vue",
     data () {
         return {
-            nickName: "",
-            accBackup: []
+            nickname: "",
         }
     },
     methods: {
         modifyNickname: function () {
-            let _nickname = this;
-            if (_nickname.validNickname()) {
-                _nickname.$alert("请勿使用标准地址类型（以'0x'开头的40位十六进制数）作为昵称。", "非法昵称！", {
+            if (this.validNickname()) {
+                this.$alert("请勿使用标准地址类型（以'0x'开头的40位十六进制数）作为昵称。", "非法昵称！", {
                     confirmButtonText: "关闭",
                     showClose: false,
                     type: "error"
                 });
                 return;
             }
-            this.$store.state.nickname = this.nickName;
-            acc_db.read(this.$store.state.account, function (accInstance) {
-                acc_db.write({
-                    address: accInstance.address,
-                    nickname: _nickname.nickName,
-                    fromBlock: accInstance.fromBlock,
-                    isVerifier: accInstance.isVerifier
-                });
-            })
-        },
-        validNickname: function () {
-            let reg = /^0x(\d|[a-f]){40}$/i; // match standard 40 digits Hexadecimal number
-            return reg.test(this.nickName);
-        },
-        DBBackup: function () {
-            let _this = this;
-            acc_db.readAll(function (accs) {
-                for (let i = 0; i < accs.length; i++) {
-                    _this.accBackup.push({
-                        "address": accs[i].address,
-                        "nickname": accs[i].nickname
-                    });
-                }
-                connect.send({Name:"accountsBackup",Payload:{"accounts": _this.accBackup}}, function (payload, _this) {
-                    console.log("用户信息备份成功", payload);
-                    _this.accBackup = [];
-                }, function (payload, _this) {
-                    console.log("用户信息备份失败：", payload);
-                    _this.accBackup = [];
-                    _this.$alert(payload, "用户信息备份失败！", {
-                        confirmButtonText: "关闭",
-                        showClose: false,
-                        type: "error"
-                    });
-                })
-            });
-        },
-        DBRestore: function () {
-            connect.send({Name:"accountsRestore",Payload:{}}, function (payload, _this) {
-                let accs = JSON.parse(payload);
-                console.log("用户信息还原成功", accs.accounts);
-                for (let i = 0; i < accs.accounts.length; i++) {
-                    acc_db.write({
-                        "address": accs.accounts[i].address,
-                        "nickname": accs.accounts[i].nickname,
-                        "fromBlock": 1,
-                        "isVerifier": false
-                    });
-                }
+            connect.send({Name:"modifyNickname",Payload:{Nickname: this.nickname}}, function (payload, _this) {
+                console.log("修改昵称成功：", payload);
+                _this.$store.state.nickname = _this.nickname;
             }, function (payload, _this) {
-                console.log("用户信息还原失败：", payload);
-                _this.$alert(payload, "用户信息还原失败！", {
+                console.log("修改昵称失败！", payload);
+                _this.$alert(payload, "修改昵称失败！", {
                     confirmButtonText: "关闭",
                     showClose: false,
                     type: "error"
                 });
             });
+        },
+
+        validNickname: function () {
+            let reg = /^0x(\d|[a-f]){40}$/i; // match standard 40 digits Hexadecimal number
+            return reg.test(this.nickname);
         }
     }
 }

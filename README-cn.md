@@ -30,7 +30,7 @@
 ### 连接ipfs：
 > 我们假设你已经完成了ipfs的下载与安装。
 - 修改配置文件，在你的ipfs下载路径中，找到config文件。如下所示，为其一级配置项"API"添加下面三条"Access..."配置：  
-```json
+```json  
 "API": {
   "HTTPHeaders": {
     "Server": [

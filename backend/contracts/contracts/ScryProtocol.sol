@@ -14,7 +14,7 @@ contract ScryProtocol {
     event Publish(string seqNo, string publishId, uint256 price, string despDataId, bool supportVerify, address[] users);
     event AdvancePurchase(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool needVerify, uint8 state, address[] users);
     event ConfirmPurchase(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, uint8 state, address[] users);
-    event FinishPurchase(string seqNo, uint256 transactionId, uint8 state, address[] users);
+    event TransactionClose(string seqNo, uint256 transactionId, uint8 state, address[] users);
     event VerifiersChosen(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, uint8 state, address[] users);
     event ReEncrypt(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, uint8 state, address[] users);
     event ArbitrationBegin(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bytes metaDataIdEncArbitrator, address[] users);

@@ -7,29 +7,29 @@ type Preset struct {
 	PublishId     string `json:"PublishId"`
 	TransactionId string `json:"TransactionId"`
 
-	Address       string  `json:"address"`
-	Password      string  `json:"password"`
-	FromBlock     float64 `json:"fromBlock"`
-	Price         float64 `json:"price"`
-	SupportVerify bool    `json:"supportVerify"`
-	StartVerify   bool    `json:"startVerify"`
+	Address       string `json:"address"`
+	Password      string `json:"password"`
+	Price         string `json:"price"`
+	SupportVerify bool   `json:"supportVerify"`
+	StartVerify   bool   `json:"startVerify"`
 
-	Ids         Ids         `json:"Ids"`
-	EncryptedId EncryptedId `json:"encryptedId"`
-	Confirm     Confirm     `json:"confirm"`
-	Verify      Verify      `json:"verify"`
-	Grade       Grade       `json:"grade"`
-	Arbitrate   Arbitrate   `json:"arbitrate"`
+	Ids       Ids       `json:"Ids"`
+	Confirm   Confirm   `json:"confirm"`
+	Verify    Verify    `json:"verify"`
+	Grade     Grade     `json:"grade"`
+	Arbitrate Arbitrate `json:"arbitrate"`
 
-	Extensions Extensions          `json:"extensions"`
-	Contract   ModifyContractParam `json:"modifyContractParam"`
-	Balance    Balance
+	Contract ModifyContractParam `json:"modifyContractParam"`
 }
 
 type Ids struct {
 	MetaDataId   string   `json:"metaDataId"`
 	ProofDataIds []string `json:"proofDataIds"`
 	DetailsId    string   `json:"detailsId"`
+}
+
+type Confirm struct {
+	Truth bool `json:"confirmResult"`
 }
 
 type Verify struct {
@@ -44,13 +44,8 @@ type Grade struct {
 	Verifier2Grade  float64 `json:"verifier2Grade"`
 }
 
-type Confirm struct {
-	Truth bool `json:"confirmResult"`
-}
-
-type Balance struct {
-	Balance   string
-	TimeStamp string
+type Arbitrate struct {
+	ArbitrateResult bool `json:"arbitrateResult,omitempty"`
 }
 
 type ModifyContractParam struct {
