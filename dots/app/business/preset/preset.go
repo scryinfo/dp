@@ -5,10 +5,10 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"github.com/scryinfo/dot/dot"
-	def "github.com/scryinfo/dp/dots/app/business/definition"
+	PreDef "github.com/scryinfo/dp/dots/app/business/definition"
 	"github.com/scryinfo/dp/dots/app/business/preset/chain_event"
 	"github.com/scryinfo/dp/dots/app/server"
-	"github.com/scryinfo/dp/dots/app/storage/definition"
+	DBDef "github.com/scryinfo/dp/dots/app/storage/definition"
 	"github.com/scryinfo/dp/dots/binary"
 	scry2 "github.com/scryinfo/dp/dots/binary/scry"
 	"github.com/scryinfo/dp/dots/eth/transaction"
@@ -23,7 +23,7 @@ import (
 type Preset struct {
 	PresetMsgNames    []string
 	PresetMsgHandlers []server.PresetFunc
-	Deployer          *def.Preset
+	Deployer          *PreDef.Preset
 	config            presetConfig
 	Bin               *binary.Binary `dot:""`
 	CBs               *cec.Callbacks `dot:""`
@@ -37,7 +37,7 @@ type presetConfig struct {
 const (
 	PreTypeId = "13d73d73-da19-4d39-9dca-3018fbf0ec30"
 
-	// todo: params get from db.
+	// todo: params get from db, modify request change db the same time.
 	verifierNum            = 2
 	verifierBonus          = 300
 	registerAsVerifierCost = 10000
@@ -49,7 +49,7 @@ const (
 )
 
 func (p *Preset) Create(l dot.Line) error {
-	p.Deployer = &def.Preset{
+	p.Deployer = &PreDef.Preset{
 		Address:  "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8",
 		Password: "111111",
 	}
@@ -64,7 +64,7 @@ func (p *Preset) Create(l dot.Line) error {
 		"advancePurchase",
 		"confirmPurchase",
 		"reEncrypt",
-		"finishPurchase",
+		"cancelPurchase",
 		"decrypt",
 		"confirmData",
 		"register",
@@ -96,7 +96,7 @@ func (p *Preset) Create(l dot.Line) error {
 		p.AdvancePurchase,
 		p.ConfirmPurchase,
 		p.ReEncrypt,
-		p.FinishPurchase,
+		p.CancelPurchase,
 		p.Decrypt,
 		p.ConfirmData,
 		p.Register,
@@ -164,7 +164,7 @@ func PreTypeLive() []*dot.TypeLives {
 }
 
 func (p *Preset) LoginVerify(mi *server.MessageIn) (payload interface{}, err error) {
-	var lv def.Preset
+	var lv PreDef.Preset
 	if err = json.Unmarshal(mi.Payload, &lv); err != nil {
 		return
 	}
@@ -193,7 +193,7 @@ func (p *Preset) LoginVerify(mi *server.MessageIn) (payload interface{}, err err
 }
 
 func (p *Preset) CreateNewAccount(mi *server.MessageIn) (payload interface{}, err error) {
-	var cna def.Preset
+	var cna PreDef.Preset
 	if err = json.Unmarshal(mi.Payload, &cna); err != nil {
 		return
 	}
@@ -209,12 +209,13 @@ func (p *Preset) CreateNewAccount(mi *server.MessageIn) (payload interface{}, er
 	payload = client.Account().Addr
 
 	var num int64
-	if num, err = p.CBs.DB.Insert(&definition.Account{
+	if num, err = p.CBs.DB.Insert(&DBDef.Account{
 		Address:    client.Account().Addr,
 		Nickname:   client.Account().Addr,
 		FromBlock:  1,
 		IsVerifier: false,
 		Verify:     nil,
+		Arbitrate: nil,
 	}); num != 1 || err != nil {
 		err = errors.Wrap(err, "in create new account")
 		return
@@ -229,7 +230,7 @@ func (p *Preset) CurrentUserDataUpdate(mi *server.MessageIn) (payload interface{
 		return
 	}
 
-	var bs def.Preset
+	var bs PreDef.Preset
 	if err = json.Unmarshal(mi.Payload, &bs); err != nil {
 		return
 	}
@@ -241,7 +242,7 @@ func (p *Preset) CurrentUserDataUpdate(mi *server.MessageIn) (payload interface{
 		}
 	}
 
-	var acc definition.Account
+	var acc DBDef.Account
 	// set from block
 	{
 		var num int64
@@ -308,7 +309,7 @@ func (p *Preset) Publish(mi *server.MessageIn) (payload interface{}, err error) 
 		return
 	}
 
-	var publish def.Preset
+	var publish PreDef.Preset
 	if err = json.Unmarshal(mi.Payload, &publish); err != nil {
 		return
 	}
@@ -339,23 +340,23 @@ func (p *Preset) AdvancePurchase(mi *server.MessageIn) (payload interface{}, err
 		return
 	}
 
-	var ap def.Preset
+	var ap PreDef.Preset
 	if err = json.Unmarshal(mi.Payload, &ap); err != nil {
 		return
 	}
 
-	price, err := strconv.Atoi(ap.Price)
-	if err != nil {
+	fee, ok := new(big.Int).SetString(ap.Price, 10)
+	if !ok {
+		err = errors.New("Set to *big.Int failed. ")
 		return
 	}
-	fee := int64(price)
 	if ap.StartVerify {
-		fee += int64(verifierNum*verifierBonus) + int64(arbitratorNum*arbitratorBonus)
+		fee = fee.Add(fee, big.NewInt(int64(verifierNum*verifierBonus) + int64(arbitratorNum*arbitratorBonus)))
 	}
 
 	if err = p.Bin.ChainWrapper().ApproveTransfer(p.makeTxParams(ap.Password),
 		common.HexToAddress(p.Bin.Config().ProtocolContractAddr),
-		big.NewInt(fee),
+		fee,
 	); err != nil {
 		err = errors.Wrap(err, "Contract transfer token from buyer failed. ")
 		return
@@ -379,7 +380,7 @@ func (p *Preset) ConfirmPurchase(mi *server.MessageIn) (payload interface{}, err
 		return
 	}
 
-	var cp def.Preset
+	var cp PreDef.Preset
 	if err = json.Unmarshal(mi.Payload, &cp); err != nil {
 		return
 	}
@@ -406,7 +407,7 @@ func (p *Preset) ReEncrypt(mi *server.MessageIn) (payload interface{}, err error
 		return
 	}
 
-	var re def.Preset
+	var re PreDef.Preset
 	if err = json.Unmarshal(mi.Payload, &re); err != nil {
 		return
 	}
@@ -418,7 +419,7 @@ func (p *Preset) ReEncrypt(mi *server.MessageIn) (payload interface{}, err error
 		return
 	}
 
-	var tx definition.Transaction
+	var tx DBDef.Transaction
 	// get meta data id enc with seller
 	{
 		var num int64
@@ -438,13 +439,13 @@ func (p *Preset) ReEncrypt(mi *server.MessageIn) (payload interface{}, err error
 	return
 }
 
-func (p *Preset) FinishPurchase(mi *server.MessageIn) (payload interface{}, err error) {
+func (p *Preset) CancelPurchase(mi *server.MessageIn) (payload interface{}, err error) {
 	if p.CBs.CurUser == nil {
 		err = errors.New("Current user is nil. ")
 		return
 	}
 
-	var cp def.Preset
+	var cp PreDef.Preset
 	if err = json.Unmarshal(mi.Payload, &cp); err != nil {
 		return
 	}
@@ -471,12 +472,12 @@ func (p *Preset) Decrypt(mi *server.MessageIn) (payload interface{}, err error) 
 		return
 	}
 
-	var decrypt def.Preset
+	var decrypt PreDef.Preset
 	if err = json.Unmarshal(mi.Payload, &decrypt); err != nil {
 		return
 	}
 
-	var tx definition.Transaction
+	var tx DBDef.Transaction
 	// get meta data id enc with seller
 	{
 		var num int64
@@ -486,7 +487,15 @@ func (p *Preset) Decrypt(mi *server.MessageIn) (payload interface{}, err error) 
 		}
 	}
 
-	var oldFileName string
+	if payload, err = p.getMetaDataFileName(tx, decrypt.Password); err != nil {
+		return
+	}
+
+	return
+}
+
+func (p *Preset) getMetaDataFileName(tx DBDef.Transaction, pwd string) (fileName string, err error) {
+	var fileId string
 	{
 		var metaDataIdByte []byte
 		{
@@ -496,22 +505,22 @@ func (p *Preset) Decrypt(mi *server.MessageIn) (payload interface{}, err error) 
 				metaDataIdByte = []byte(tx.MetaDataIdEncWithArbitrator)
 			}
 		}
-		if metaDataIdByte, err = p.Bin.Account.Decrypt(metaDataIdByte, p.CBs.CurUser.Account().Addr, decrypt.Password); err != nil {
+		if metaDataIdByte, err = p.Bin.Account.Decrypt(metaDataIdByte, p.CBs.CurUser.Account().Addr, pwd); err != nil {
 			return "", errors.Wrap(err, "Decrypt encrypted meta data Id failed. ")
 		}
+
 		outDir := p.config.MetaDataOutDir
 		if err = p.Bin.Storage.Get(string(metaDataIdByte), outDir); err != nil {
 			return "", errors.Wrap(err, "Get meta data from IPFS failed. ")
 		}
-		oldFileName = outDir + "/" + string(metaDataIdByte)
+
+		fileId = outDir + "/" + string(metaDataIdByte)
 	}
 
-	newFileName := oldFileName + tx.MetaDataExtension
-	if err = os.Rename(oldFileName, newFileName); err != nil {
+	fileName = fileId + tx.MetaDataExtension
+	if err = os.Rename(fileId, fileName); err != nil {
 		return "", errors.Wrap(err, "Add extension to meta data failed. ")
 	}
-
-	payload = newFileName
 
 	return
 }
@@ -522,7 +531,7 @@ func (p *Preset) ConfirmData(mi *server.MessageIn) (payload interface{}, err err
 		return
 	}
 
-	var cd def.Preset
+	var cd PreDef.Preset
 	if err = json.Unmarshal(mi.Payload, &cd); err != nil {
 		return
 	}
@@ -549,7 +558,7 @@ func (p *Preset) Register(mi *server.MessageIn) (payload interface{}, err error)
 		return
 	}
 
-	var register def.Preset
+	var register PreDef.Preset
 	if err = json.Unmarshal(mi.Payload, &register); err != nil {
 		return
 	}
@@ -580,7 +589,7 @@ func (p *Preset) Vote(mi *server.MessageIn) (payload interface{}, err error) {
 		return
 	}
 
-	var vote def.Preset
+	var vote PreDef.Preset
 	if err = json.Unmarshal(mi.Payload, &vote); err != nil {
 		return
 	}
@@ -607,7 +616,7 @@ func (p *Preset) GradeToVerifier(mi *server.MessageIn) (payload interface{}, err
 		return
 	}
 
-	var gtv def.Preset
+	var gtv PreDef.Preset
 	if err = json.Unmarshal(mi.Payload, &gtv); err != nil {
 		return
 	}
@@ -645,7 +654,7 @@ func (p *Preset) Arbitrate(mi *server.MessageIn) (payload interface{}, err error
 		return
 	}
 
-	var ad def.Preset
+	var ad PreDef.Preset
 	if err = json.Unmarshal(mi.Payload, &ad); err != nil {
 		return
 	}
@@ -655,32 +664,8 @@ func (p *Preset) Arbitrate(mi *server.MessageIn) (payload interface{}, err error
 		return
 	}
 
-	// update acc info
-	{
-		var (
-			acc definition.Account
-			num int64
-			bs  []byte
-		)
-
-		if num, err = p.CBs.DB.Read(&acc, "", "address = ?", p.CBs.CurUser.Account().Addr); num != 1 || err != nil {
-			dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
-			return
-		}
-
-		if bs, err = cec.DeleteSlice(acc.Arbitrate, ad.TransactionId); err == nil {
-			acc.Arbitrate = bs
-		} else {
-			dot.Logger().Errorln("delete from arbitrate failed. ", zap.NamedError("error", err))
-			return
-		}
-
-		if num, err = p.CBs.DB.Update(&acc, map[string]interface{}{
-			"arbitrate": acc.Arbitrate,
-		}, "address = ?", p.CBs.CurUser.Account().Addr); num != 1 || err != nil {
-			dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
-			return
-		}
+	if err = p.updateAccInfo(ad.TransactionId); err != nil {
+		return
 	}
 
 	if err = p.Bin.ChainWrapper().Arbitrate(p.makeTxParams(ad.Password), tId, ad.Arbitrate.ArbitrateResult); err != nil {
@@ -689,6 +674,35 @@ func (p *Preset) Arbitrate(mi *server.MessageIn) (payload interface{}, err error
 	}
 
 	payload = tId
+
+	return
+}
+
+func (p *Preset) updateAccInfo(txId string) (err error) {
+	var (
+		acc DBDef.Account
+		num int64
+		bs  []byte
+	)
+
+	if num, err = p.CBs.DB.Read(&acc, "", "address = ?", p.CBs.CurUser.Account().Addr); num != 1 || err != nil {
+		dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
+		return
+	}
+
+	if bs, err = cec.UpdateSlice(acc.Arbitrate, txId, "delete"); err == nil {
+		acc.Arbitrate = bs
+	} else {
+		dot.Logger().Errorln("delete from arbitrate failed. ", zap.NamedError("error", err))
+		return
+	}
+
+	if num, err = p.CBs.DB.Update(&acc, map[string]interface{}{
+		"arbitrate": acc.Arbitrate,
+	}, "address = ?", p.CBs.CurUser.Account().Addr); num != 1 || err != nil {
+		dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
+		return
+	}
 
 	return
 }
@@ -716,7 +730,7 @@ func (p *Preset) GetTokenBalance(mi *server.MessageIn) (payload interface{}, err
 		return
 	}
 
-	var gtb def.Preset
+	var gtb PreDef.Preset
 	if err = json.Unmarshal(mi.Payload, &gtb); err != nil {
 		return
 	}
@@ -734,7 +748,7 @@ func (p *Preset) GetTokenBalance(mi *server.MessageIn) (payload interface{}, err
 
 func (p *Preset) IsVerifier(_ *server.MessageIn) (payload interface{}, err error) {
 	var (
-		acc definition.Account
+		acc DBDef.Account
 		num int64
 	)
 	if num, err = p.CBs.DB.Read(&acc, "", "address = ?", p.CBs.CurUser.Account().Addr); num != 1 || err != nil {
@@ -749,7 +763,7 @@ func (p *Preset) IsVerifier(_ *server.MessageIn) (payload interface{}, err error
 
 func (p *Preset) GetAccountsList(_ *server.MessageIn) (payload interface{}, err error) {
 	var (
-		accs []definition.Account
+		accs []DBDef.Account
 		num  int64
 	)
 	if num, err = p.CBs.DB.Read(&accs, "", ""); err != nil {
@@ -764,7 +778,7 @@ func (p *Preset) GetAccountsList(_ *server.MessageIn) (payload interface{}, err 
 
 func (p *Preset) GetDataList(_ *server.MessageIn) (payload interface{}, err error) {
 	var (
-		dls []definition.DataList
+		dls []DBDef.DataList
 		num int64
 	)
 	if num, err = p.CBs.DB.Read(&dls, "", ""); err != nil {
@@ -779,7 +793,7 @@ func (p *Preset) GetDataList(_ *server.MessageIn) (payload interface{}, err erro
 
 func (p *Preset) GetTxSell(_ *server.MessageIn) (payload interface{}, err error) {
 	var (
-		txs []definition.Transaction
+		txs []DBDef.Transaction
 		num int64
 	)
 	if num, err = p.CBs.DB.Read(&txs, "", "seller = ?", strings.ToLower(p.CBs.CurUser.Account().Addr)); err != nil {
@@ -794,7 +808,7 @@ func (p *Preset) GetTxSell(_ *server.MessageIn) (payload interface{}, err error)
 
 func (p *Preset) GetTxBuy(_ *server.MessageIn) (payload interface{}, err error) {
 	var (
-		txs []definition.Transaction
+		txs []DBDef.Transaction
 		num int64
 	)
 	if num, err = p.CBs.DB.Read(&txs, "", "buyer = ?", strings.ToLower(p.CBs.CurUser.Account().Addr)); err != nil {
@@ -809,10 +823,10 @@ func (p *Preset) GetTxBuy(_ *server.MessageIn) (payload interface{}, err error) 
 
 func (p *Preset) GetTxVerify(_ *server.MessageIn) (payload interface{}, err error) {
 	var (
-		txs []definition.Transaction
-		acc definition.Account
+		txs []DBDef.Transaction
+		acc DBDef.Account
 		num int64
-		ss  = make([]string, 0)
+		ss    = make([]string, 0)
 	)
 
 	if num, err = p.CBs.DB.Read(&acc, "", "address = ?", strings.ToLower(p.CBs.CurUser.Account().Addr)); num != 1 || err != nil {
@@ -840,10 +854,10 @@ func (p *Preset) GetTxVerify(_ *server.MessageIn) (payload interface{}, err erro
 
 func (p *Preset) GetTxArbitrate(_ *server.MessageIn) (payload interface{}, err error) {
 	var (
-		txs []definition.Transaction
-		acc definition.Account
+		txs []DBDef.Transaction
+		acc DBDef.Account
 		num int64
-		ss  = make([]string, 0)
+		ss    = make([]string, 0)
 	)
 
 	if num, err = p.CBs.DB.Read(&acc, "", "address = ?", strings.ToLower(p.CBs.CurUser.Account().Addr)); num != 1 || err != nil {
@@ -871,7 +885,7 @@ func (p *Preset) GetTxArbitrate(_ *server.MessageIn) (payload interface{}, err e
 
 func (p *Preset) ModifyNickname(mi *server.MessageIn) (payload interface{}, err error) {
 	var (
-		acc definition.Account
+		acc DBDef.Account
 		num int64
 	)
 	if err = json.Unmarshal(mi.Payload, &acc); err != nil {
@@ -889,7 +903,7 @@ func (p *Preset) ModifyNickname(mi *server.MessageIn) (payload interface{}, err 
 }
 
 func (p *Preset) ModifyContractParam(mi *server.MessageIn) (payload interface{}, err error) {
-	var mcp def.Preset
+	var mcp PreDef.Preset
 	if err = json.Unmarshal(mi.Payload, &mcp); err != nil {
 		return
 	}

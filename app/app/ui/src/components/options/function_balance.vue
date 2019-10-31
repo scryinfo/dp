@@ -53,6 +53,7 @@ export default {
                 });
             });
         },
+
         getTokenBalance: function (pwd) {
             let _balance = this;
             connect.send({Name: "getTokenBalance", Payload: {password: pwd}}, function (payload, _this) {

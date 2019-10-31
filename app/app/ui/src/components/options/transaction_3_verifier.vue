@@ -57,11 +57,14 @@ export default {
     },
     methods: {
         setCurPage: function (curPageReturn) { this.curPage = curPageReturn; },
+
         setPageSize: function (newPageSize) { this.pageSize = newPageSize; },
+
         currentChange: function (curRow) {
             this.selectedTx = curRow.TransactionId;
             this.txState = curRow.State;
         },
+
         initTxV: function () {
             connect.send({Name: "getTxVerify", Payload: ""}, function (payload, _this) {
                 _this.$store.state.transactionverifier = [];
@@ -86,6 +89,7 @@ export default {
                 });
             });
         },
+
         register: function (pwd) {
             connect.send({Name:"register", Payload:{password: pwd}}, function (payload, _this) {
                 console.log("注册成为验证者成功", payload);
@@ -98,6 +102,7 @@ export default {
                 });
             });
         },
+
         vote: function (pwd) {
             connect.send({Name:"vote", Payload:{password: pwd, TransactionId: this.selectedTx, verify: this.verify}},
                 function (payload, _this) {

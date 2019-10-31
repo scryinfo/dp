@@ -52,14 +52,18 @@ export default {
     },
     methods: {
         setCurPage: function (curPageReturn) { this.curPage = curPageReturn; },
+
         setPageSize: function (newPageSize) { this.pageSize = newPageSize; },
+
         currentChange: function (curRow) {
             this.selectedTx = curRow.TransactionId;
             this.txState = curRow.State;
         },
+
         buttonDisabled: function (funcNum) {
             return utils.functionDisabled(funcNum, this.txState);
         },
+
         initTxS: function () {
             connect.send({Name: "getTxSell", Payload: ""}, function (payload, _this) {
                 _this.$store.state.transactionsell = [];
@@ -86,6 +90,7 @@ export default {
                 });
             });
         },
+
         reEncrypt:function (pwd) {
             connect.send({ Name:"reEncrypt", Payload:{password: pwd, TransactionId: this.selectedTx}}, function (payload, _this) {
                 console.log("再加密数据成功", payload);

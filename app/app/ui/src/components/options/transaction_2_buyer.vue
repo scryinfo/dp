@@ -3,7 +3,7 @@
 <template>
     <section>
         <el-col :span="21" class="section-item">
-            <s-f-t button-name="取消交易" button-type="danger" @password="finishPurchase" :button-disabled="buttonDisabled(1)"></s-f-t>
+            <s-f-t button-name="取消交易" button-type="danger" @password="cancelPurchase" :button-disabled="buttonDisabled(1)"></s-f-t>
             <s-f-t button-name="购买数据" @password="confirmPurchase" :button-disabled="buttonDisabled(2)"></s-f-t>
             <s-f-t button-name="解密数据" @password="decrypt" :button-disabled="buttonDisabled(3)"></s-f-t>
             <c-f-t button-name="确认数据" dialog-title="判断原始数据真实性：" @password="confirmData"
@@ -79,7 +79,9 @@ export default {
     },
     methods: {
         setCurPage: function (curPageReturn) { this.curPage = curPageReturn; },
+
         setPageSize: function (newPageSize) { this.pageSize = newPageSize; },
+
         currentChange: function (curRow) {
             this.selectedTx = {
                 TransactionId: curRow.TransactionId,
@@ -89,9 +91,11 @@ export default {
             };
             this.txState = curRow.State;
         },
+
         buttonDisabled: function (funcNum) {
             return utils.functionDisabled(funcNum, this.txState);
         },
+
         initTxB: function () {
             connect.send({Name: "getTxBuy", Payload: ""}, function (payload, _this) {
                 _this.$store.state.transactionbuy = [];
@@ -121,8 +125,9 @@ export default {
                 });
             });
         },
-        finishPurchase: function (pwd) {
-            connect.send({Name:"finishPurchase", Payload:{password: pwd, TransactionId: this.selectedTx.TransactionId}}, function (payload, _this) {
+
+        cancelPurchase: function (pwd) {
+            connect.send({Name:"cancelPurchase", Payload:{password: pwd, TransactionId: this.selectedTx.TransactionId}}, function (payload, _this) {
                 console.log("取消交易成功", payload);
             }, function (payload, _this) {
                 console.log("取消交易失败：", payload);
@@ -133,6 +138,7 @@ export default {
                 });
             });
         },
+
         confirmPurchase: function (pwd) {
             connect.send({Name:"confirmPurchase", Payload:{password: pwd, TransactionId: this.selectedTx.TransactionId}}, function (payload, _this) {
                 console.log("购买数据成功", payload);
@@ -145,6 +151,7 @@ export default {
                 });
             });
         },
+
         decrypt: function (pwd) {
             connect.send({Name:"decrypt", Payload:{password: pwd, TransactionId: this.selectedTx.TransactionId}}, function (payload, _this) {
                 console.log("解密数据成功", payload);
@@ -163,9 +170,11 @@ export default {
                 });
             });
         },
+
         confirmDataPre: function (array) {
             this.supportVerify = array[0];
         },
+
         confirmData: function (pwd) {
             connect.send({Name:"confirmData", Payload:{password: pwd, TransactionId: this.selectedTx.TransactionId,
                     confirm: {confirmResult: this.confirmDataResult}}}, function (payload, _this) {
@@ -180,10 +189,12 @@ export default {
                 });
             });
         },
+
         gradePre: function (array) {
             this.verifier1Revert = array[0];
             this.verifier2Revert = array[1];
         },
+
         gradeToVerifier: function (pwd) {
             connect.send({Name:"gradeToVerifier", Payload:{password: pwd, TransactionId: this.selectedTx.TransactionId, grade: {
                         verifier1Revert: this.verifier1Revert, verifier1Grade: this.verifier1Grade,

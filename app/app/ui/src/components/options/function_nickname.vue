@@ -58,6 +58,7 @@ export default {
                 });
             });
         },
+
         validNickname: function () {
             let reg = /^0x(\d|[a-f]){40}$/i; // match standard 40 digits Hexadecimal number
             return reg.test(this.nickname);

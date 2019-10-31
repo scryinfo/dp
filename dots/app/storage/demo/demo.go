@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/scryinfo/dot/dot"
 	"github.com/scryinfo/dot/dots/line"
 	"github.com/scryinfo/dp/dots/app/storage"
@@ -11,6 +10,7 @@ import (
 	"go.uber.org/zap"
 	"os"
 	"strconv"
+	"time"
 )
 
 var (
@@ -92,20 +92,17 @@ func start() {
 }
 
 func deleteAll() {
-	fmt.Printf("-------Delete all ")
-
 	deleteNum, err := db.Delete(definition.DataList{}, "")
 	if err != nil {
 		panic("error in delete. " + err.Error())
 	}
-	fmt.Println(deleteNum, "items. ")
+
 	dot.Logger().Infoln("-------Delete all " + strconv.FormatInt(deleteNum, 10) + " items.")
 
 	return
 }
 
 func create() {
-	fmt.Println("-------Create: ")
 	dot.Logger().Infoln("-------Create: ")
 
 	r, err := serialize([]string{".jpg", ".avi"})
@@ -125,13 +122,15 @@ func create() {
 			SupportVerify:       true,
 			MetaDataExtension:   ".txt",
 			ProofDataExtensions: r,
-			// CreateAt init by gorm
+			CreatedTime: time.Now().Unix(),
 		}
 		if i > 5 {
 			t.Price = strconv.Itoa(500)
 		}
 
 		data = append(data, t)
+
+		time.Sleep(1000)
 	}
 
 	createNum, err := db.Insert(data)
@@ -139,23 +138,18 @@ func create() {
 		panic("error in create. " + err.Error())
 	}
 
-	fmt.Printf("Create %d items. \n", createNum)
 	dot.Logger().Infoln("Create " + strconv.FormatInt(createNum, 10) + " items.")
 
 	return
 }
 
 func readWithSQL() {
-	fmt.Printf("-------Read with sql ")
-
 	readNum, err := db.Read(&dls, "", "Price = ?", "500")
 	if err != nil {
 		panic("error in read with sql. " + err.Error())
 	}
-	fmt.Println(readNum, "items. ")
 	dot.Logger().Infoln("-------Read with sql " + strconv.FormatInt(readNum, 10) + " items.")
 	for i := range dls {
-		fmt.Printf("%+v\n", dls[i])
 		dot.Logger().Infoln("", zap.Any("", dls[i]))
 	}
 
@@ -163,16 +157,13 @@ func readWithSQL() {
 }
 
 func readAllDESC() {
-	fmt.Printf("-------Read all desc ")
 
 	readNum, err := db.Read(&dls, "publish_id desc", "")
 	if err != nil {
 		panic("error in read all desc. " + err.Error())
 	}
-	fmt.Println(readNum, "items. ")
 	dot.Logger().Infoln("-------Read all desc " + strconv.FormatInt(readNum, 10) + " items.")
 	for i := range dls {
-		fmt.Printf("%+v\n", dls[i])
 		dot.Logger().Infoln("", zap.Any("", dls[i]))
 	}
 
@@ -180,7 +171,6 @@ func readAllDESC() {
 }
 
 func update() {
-	fmt.Println("-------Update: ")
 	dot.Logger().Infoln("-------Update: ")
 
 	updateMap := make(map[string]interface{})
@@ -191,12 +181,10 @@ func update() {
 	if err != nil {
 		panic("error in update. " + err.Error())
 	}
-	fmt.Printf("Update %d items. \n", updateNum)
 	dot.Logger().Infoln("Update " + strconv.FormatInt(updateNum, 10) + " items.")
 
 	db.Read(&dls, "", "")
 	for i := range dls {
-		fmt.Printf("%+v\n", dls[i])
 		dot.Logger().Infoln("", zap.Any("", dls[i]))
 	}
 
@@ -204,8 +192,6 @@ func update() {
 }
 
 func updateWithoutHooks() {
-	fmt.Printf("-------Update without hooks ")
-
 	updateMap := make(map[string]interface{})
 	updateMap["Title"] = "Update"
 	updateMap["Keys"] = "update"
@@ -215,12 +201,10 @@ func updateWithoutHooks() {
 	if err != nil {
 		panic("error in update without hooks. " + err.Error())
 	}
-	fmt.Println(updateNum, "items. ")
 	dot.Logger().Infoln("-------Update without hooks " + strconv.FormatInt(updateNum, 10) + " items.")
 
 	db.Read(&dls, "", "")
 	for i := range dls {
-		fmt.Printf("%+v\n", dls[i])
 		dot.Logger().Infoln("", zap.Any("", dls[i]))
 	}
 
@@ -228,22 +212,15 @@ func updateWithoutHooks() {
 }
 
 func readAllToCheck() {
-	fmt.Printf("-------Read all ")
-
 	readNum, _ := db.Read(&dls, "", "")
-	fmt.Println(readNum, "items. ")
 	dot.Logger().Infoln("-------Read all " + strconv.FormatInt(readNum, 10) + " items.")
 
-	fmt.Println("-------Result: ")
 	dot.Logger().Infoln("-------Result: ")
 	if readNum == 0 {
-		fmt.Println("> demo passed. ")
 		dot.Logger().Infoln("> demo passed. ")
 	} else {
-		fmt.Println(len(dls))
 		dot.Logger().Infoln("> demo failed! ", zap.Int("len(dls) not 0 as expect but is: ", len(dls)))
 		for i := range dls {
-			fmt.Printf("%+v\n", dls[i])
 			dot.Logger().Infoln("", zap.Any("", dls[i]))
 		}
 		panic("> delete not run as expect, result is above not nil. ")

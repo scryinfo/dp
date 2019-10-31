@@ -7,11 +7,11 @@ import (
 	"github.com/pkg/errors"
 	"github.com/scryinfo/dot/dot"
 	"github.com/scryinfo/dp/dots/app/server"
-	database "github.com/scryinfo/dp/dots/app/storage"
+	SQLite "github.com/scryinfo/dp/dots/app/storage"
 	"github.com/scryinfo/dp/dots/app/storage/definition"
 	scry2 "github.com/scryinfo/dp/dots/binary/scry"
 	"github.com/scryinfo/dp/dots/eth/event"
-	"github.com/scryinfo/dp/dots/storage/ipfs"
+	ipfs "github.com/scryinfo/dp/dots/storage/ipfs"
 	"go.uber.org/zap"
 	"io/ioutil"
 	"math/big"
@@ -28,8 +28,8 @@ type Callbacks struct {
 	FlagChan     chan bool // flag for scanned approval event.
 	config       cbsConfig
 	WS           *server.WSServer `dot:""`
-	Storage      *storage.Ipfs    `dot:""`
-	DB           *database.SQLite `dot:""`
+	Storage      *ipfs.Ipfs       `dot:""`
+	DB           *SQLite.SQLite   `dot:""`
 }
 
 type cbsConfig struct {
@@ -112,18 +112,9 @@ func CBsTypeLive() []*dot.TypeLives {
 			},
 		},
 		server.WebSocketTypeLive(),
-		storage.IpfsTypeLive(),
-		database.SQLiteTypeLive(),
+		ipfs.IpfsTypeLive(),
+		SQLite.SQLiteTypeLive(),
 	}
-}
-
-type Details struct {
-	Title               string   `json:"Title,omitempty"`
-	Keys                string   `json:"Keys,omitempty"`
-	Description         string   `json:"Description,omitempty"`
-	Seller              string   `json:"Seller,omitempty"`
-	MetaDataExtension   string   `json:"MetaDataExtension,omitempty"`
-	ProofDataExtensions []string `json:"ProofDataExtensions,omitempty"`
 }
 
 func (c *Callbacks) onPublish(event event.Event) bool {
@@ -134,23 +125,8 @@ func (c *Callbacks) onPublish(event event.Event) bool {
 		dl.PublishId = event.Data.Get("publishId").(string)
 		dl.SupportVerify = event.Data.Get("supportVerify").(bool)
 
-		var (
-			details Details
-			err     error
-		)
-		if details, err = c.getPubDataDetails(event.Data.Get("despDataId").(string)); err != nil {
+		if err := c.getPubDataDetails(&dl, event.Data.Get("despDataId").(string)); err != nil {
 			dot.Logger().Errorln("", zap.NamedError("onPublish: get publish data details failed. ", err))
-		}
-
-		dl.Title = details.Title
-		dl.Keys = details.Keys
-		dl.Description = details.Description
-		dl.Seller = strings.ToLower(details.Seller)
-		dl.MetaDataExtension = details.MetaDataExtension
-
-		if dl.ProofDataExtensions, err = json.Marshal(details.ProofDataExtensions); err != nil {
-			dot.Logger().Errorln("json marshal failed", zap.NamedError("[]string to []byte", err))
-			return false
 		}
 	}
 
@@ -175,7 +151,7 @@ func (c *Callbacks) onPublish(event event.Event) bool {
 	return true
 }
 
-func (c *Callbacks) getPubDataDetails(ipfsId string) (detailsData Details, err error) {
+func (c *Callbacks) getPubDataDetails(dl *definition.DataList, ipfsId string) (err error) {
 	defer func() {
 		if er := recover(); er != nil {
 			dot.Logger().Errorln("", zap.Any("onPublish.callback: get publish data details failed. ", er))
@@ -197,18 +173,43 @@ func (c *Callbacks) getPubDataDetails(ipfsId string) (detailsData Details, err e
 		}
 	}
 
-	{
-		var details []byte
-		if details, err = ioutil.ReadFile(fileName); err != nil {
-			return
-		}
-		if err = json.Unmarshal(details, &detailsData); err != nil {
-			return
-		}
+	if err = getDetails(dl, fileName); err != nil {
+		return
 	}
 
 	if err = os.Remove(fileName); err != nil {
 		dot.Logger().Debugln("", zap.NamedError("onPublish.callback: delete details file failed. ", err))
+	}
+
+	return
+}
+
+func getDetails(dl *definition.DataList, fileName string) (err error) {
+	var detailsData struct {
+		Title               string   `json:"Title"`
+		Keys                string   `json:"Keys"`
+		Description         string   `json:"Description"`
+		Seller              string   `json:"Seller"`
+		MetaDataExtension   string   `json:"MetaDataExtension"`
+		ProofDataExtensions []string `json:"ProofDataExtensions"`
+	}
+
+	var details []byte
+	if details, err = ioutil.ReadFile(fileName); err != nil {
+		return
+	}
+	if err = json.Unmarshal(details, &detailsData); err != nil {
+		return
+	}
+
+	dl.Title = detailsData.Title
+	dl.Keys = detailsData.Keys
+	dl.Description = detailsData.Description
+	dl.Seller = strings.ToLower(detailsData.Seller)
+	dl.MetaDataExtension = detailsData.MetaDataExtension
+
+	if dl.ProofDataExtensions, err = json.Marshal(detailsData.ProofDataExtensions); err != nil {
+		return
 	}
 
 	return
@@ -236,29 +237,9 @@ func (c *Callbacks) onVerifiersChosen(event event.Event) bool {
 		return false
 	}
 
-	// update acc info
-	{
-		var acc definition.Account
-
-		if num, err := c.DB.Read(&acc, "", "address = ?", c.CurUser.Account().Addr); num != 1 || err != nil {
-			dot.Logger().Errorln("id not in slice", zap.Int64("affect rows number", num), zap.NamedError("error", err))
-			return false
-		}
-
-		if bs, err := appendSlice(acc.Verify, tx.TransactionId); err == nil {
-			acc.Verify = bs
-		} else {
-			dot.Logger().Errorln("append verify failed. ", zap.NamedError("error", err))
-			return false
-		}
-
-		if num, err := c.DB.Update(&acc, map[string]interface{}{
-			"verify":     acc.Verify,
-			"from_block": event.BlockNumber,
-		}, "address = ?", c.CurUser.Account().Addr); num != 1 || err != nil {
-			dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
-			return false
-		}
+	if err := c.updateVerifierArray(tx.TransactionId, event.BlockNumber, "add"); err != nil {
+		dot.Logger().Errorln("", zap.NamedError("update verifier info", err))
+		return false
 	}
 
 	if err := c.WS.SendMessage("onVerifiersChosen", tx); err != nil {
@@ -266,6 +247,32 @@ func (c *Callbacks) onVerifiersChosen(event event.Event) bool {
 	}
 
 	return true
+}
+
+func (c *Callbacks) updateVerifierArray(txId string, blockNumber uint64, mode string) (err error) {
+	var acc definition.Account
+
+	if num, err := c.DB.Read(&acc, "", "address = ?", c.CurUser.Account().Addr); num != 1 || err != nil {
+		dot.Logger().Errorln("id not in slice", zap.Int64("affect rows number", num), zap.NamedError("error", err))
+		return
+	}
+
+	if bs, err := UpdateSlice(acc.Verify, txId, mode); err == nil {
+		acc.Verify = bs
+	} else {
+		dot.Logger().Errorln("append verify failed. ", zap.NamedError("error", err))
+		return
+	}
+
+	if num, err := c.DB.Update(&acc, map[string]interface{}{
+		"verify":     acc.Verify,
+		"from_block": blockNumber,
+	}, "address = ?", c.CurUser.Account().Addr); num != 1 || err != nil {
+		dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
+		return
+	}
+
+	return
 }
 
 func (c *Callbacks) onAdvancePurchase(event event.Event) bool {
@@ -312,7 +319,7 @@ func (c *Callbacks) onAdvancePurchase(event event.Event) bool {
 	return true
 }
 
-func (c *Callbacks) getAndRenameProofFiles(ipfsIds [][32]byte, extensions []string) error {
+func (c *Callbacks) getAndRenameProofFiles(ipfsIds [][32]byte, extensions []string) (err error) {
 	defer func() {
 		if er := recover(); er != nil {
 			dot.Logger().Errorln("", zap.Any("in callback: get and rename proof files failed. ", er))
@@ -320,25 +327,26 @@ func (c *Callbacks) getAndRenameProofFiles(ipfsIds [][32]byte, extensions []stri
 	}()
 
 	if len(ipfsIds) != len(extensions) {
-		return errors.New("Quantity of IPFS Ids or extensions is wrong. " + strconv.Itoa(len(ipfsIds)) + ", " + strconv.Itoa(len(extensions)))
+		err = errors.New("Quantity of IPFS Ids or extensions is wrong. " + strconv.Itoa(len(ipfsIds)) + ", " + strconv.Itoa(len(extensions)))
+		return
 	}
 
 	outDir := c.config.ProofsOutDir
 	for i := 0; i < len(ipfsIds); i++ {
 		ipfsId := ipfsBytes32ToHash(ipfsIds[i])
-		if err := c.Storage.Get(ipfsId, outDir); err != nil {
+		if err = c.Storage.Get(ipfsId, outDir); err != nil {
 			err = errors.Wrap(err, "Node - callback: IPFS get failed. ")
 			break
 		}
 		oldFileName := outDir + "/" + ipfsId
 		newFileName := oldFileName + extensions[i]
-		if err := os.Rename(oldFileName, newFileName); err != nil {
+		if err = os.Rename(oldFileName, newFileName); err != nil {
 			err = errors.Wrap(err, "Node - callback: rename proof file failed. ")
 			break
 		}
 	}
 
-	return nil
+	return
 }
 func ipfsBytes32ToHash(ipfsb [32]byte) string {
 	byte34 := make([]byte, 34)
@@ -368,29 +376,8 @@ func (c *Callbacks) onConfirmPurchase(event event.Event) bool {
 		tx.Identify = 3
 	}
 
-	// update acc info
-	{
-		var acc definition.Account
-
-		if num, err := c.DB.Read(&acc, "", "address = ?", c.CurUser.Account().Addr); num != 1 || err != nil {
-			dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
-			return false
-		}
-
-		if bs, err := DeleteSlice(acc.Verify, tx.TransactionId); err == nil {
-			acc.Verify = bs
-		} else {
-			dot.Logger().Errorln("delete verify failed. ", zap.NamedError("error", err))
-			return false
-		}
-
-		if num, err := c.DB.Update(&acc, map[string]interface{}{
-			"verify":     acc.Verify,
-			"from_block": event.BlockNumber,
-		}, "address = ?", c.CurUser.Account().Addr); num != 1 || err != nil {
-			dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
-			return false
-		}
+	if err := c.updateVerifierArray(tx.TransactionId, event.BlockNumber, "delete"); err != nil {
+		dot.Logger().Errorln("", zap.NamedError("delete verifier array", err))
 	}
 
 	if err := c.WS.SendMessage("onConfirmPurchase", tx); err != nil {
@@ -499,6 +486,8 @@ func (c *Callbacks) onVoteResult(event event.Event) bool {
 			dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
 			return false
 		}
+	default:
+		dot.Logger().Errorln("Invalid identify! (on vote result)")
 	}
 
 	if !c.updateFromBlock(event.BlockNumber) {
@@ -543,29 +532,8 @@ func (c *Callbacks) onArbitrationBegin(event event.Event) bool {
 		return false
 	}
 
-	// update acc info
-	{
-		var acc definition.Account
-
-		if num, err := c.DB.Read(&acc, "", "address = ?", c.CurUser.Account().Addr); num != 1 || err != nil {
-			dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
-			return false
-		}
-
-		if bs, err := appendSlice(acc.Arbitrate, tx.TransactionId); err == nil {
-			acc.Arbitrate = bs
-		} else {
-			dot.Logger().Errorln("append arbitrate failed. ", zap.NamedError("error", err))
-			return false
-		}
-
-		if num, err := c.DB.Update(&acc, map[string]interface{}{
-			"arbitrate":  acc.Arbitrate,
-			"from_block": event.BlockNumber,
-		}, "address = ?", c.CurUser.Account().Addr); num != 1 || err != nil {
-			dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
-			return false
-		}
+	if err := c.updateArbitratorArray(tx.TransactionId, event.BlockNumber, "add"); err != nil {
+		dot.Logger().Errorln("", zap.NamedError("add arbitrator array", err))
 	}
 
 	if err := c.WS.SendMessage("onArbitrationBegin", tx); err != nil {
@@ -573,6 +541,32 @@ func (c *Callbacks) onArbitrationBegin(event event.Event) bool {
 	}
 
 	return true
+}
+
+func (c *Callbacks) updateArbitratorArray(txId string, blockNumber uint64, mode string) error {
+	var acc definition.Account
+
+	if num, err := c.DB.Read(&acc, "", "address = ?", c.CurUser.Account().Addr); num != 1 || err != nil {
+		dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
+		return err
+	}
+
+	if bs, err := UpdateSlice(acc.Arbitrate, txId, mode); err == nil {
+		acc.Arbitrate = bs
+	} else {
+		dot.Logger().Errorln("append arbitrate failed. ", zap.NamedError("error", err))
+		return err
+	}
+
+	if num, err := c.DB.Update(&acc, map[string]interface{}{
+		"arbitrate":  acc.Arbitrate,
+		"from_block": blockNumber,
+	}, "address = ?", c.CurUser.Account().Addr); num != 1 || err != nil {
+		dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
+		return err
+	}
+
+	return nil
 }
 
 func (c *Callbacks) onArbitrationResult(event event.Event) bool {
@@ -590,6 +584,8 @@ func (c *Callbacks) onArbitrationResult(event event.Event) bool {
 		tx.Identify = 1
 	case strings.ToLower(tx.Buyer):
 		tx.Identify = 2
+	default:
+		dot.Logger().Errorln("Invalid identify! (on arbitration result)")
 	}
 
 	if !c.updateFromBlock(event.BlockNumber) {
@@ -647,17 +643,7 @@ func (c *Callbacks) makeTxWithDataDetails(tx *definition.Transaction, pubId stri
 	return true
 }
 
-func setJudge(judge bool) (str string) {
-	if judge {
-		str = "Suggest to buy"
-	} else {
-		str = "Not suggest to buy"
-	}
-
-	return
-}
-
-func appendSlice(bs []byte, str string) (result []byte, err error) {
+func UpdateSlice(bs []byte, str, mode string) (result []byte, err error) {
 	var ss []string
 	if bs != nil {
 		if err = json.Unmarshal(bs, &ss); err != nil {
@@ -666,28 +652,18 @@ func appendSlice(bs []byte, str string) (result []byte, err error) {
 		}
 	}
 
-	if index := getIndex(ss, str); index == -1 {
-		ss = append(ss, str)
-	}
-	if result, err = json.Marshal(ss); err != nil {
-		err = errors.Wrap(err, "json marshal failed. ")
-		return
-	}
-
-	return
-}
-
-func DeleteSlice(bs []byte, str string) (result []byte, err error) {
-	var ss []string
-	if bs != nil {
-		if err = json.Unmarshal(bs, &ss); err != nil {
-			err = errors.Wrap(err, "json unmarshal failed. ")
-			return
+	index := getIndex(ss, str)
+	switch mode {
+	case "add":
+		if index == -1 {
+			ss = append(ss, str) // add if not exist
 		}
-	}
-
-	if index := getIndex(ss, str); index != -1 {
-		ss = append(ss[:index], ss[index+1:]...)
+	case "delete":
+		if index != -1 {
+			ss = append(ss[:index], ss[index+1:]...) // del if exist
+		}
+	default:
+		dot.Logger().Errorln("Invalid mode! (on update slice)")
 	}
 
 	if result, err = json.Marshal(ss); err != nil {
@@ -698,6 +674,7 @@ func DeleteSlice(bs []byte, str string) (result []byte, err error) {
 	return
 }
 
+// think: if it is necessary, using reflect make it accept any type?
 func getIndex(ss []string, str string) int {
 	for i := range ss {
 		if str == ss[i] {
@@ -706,4 +683,14 @@ func getIndex(ss []string, str string) int {
 	}
 
 	return -1
+}
+
+func setJudge(judge bool) (str string) {
+	if judge {
+		str = "Suggest to buy"
+	} else {
+		str = "Not suggest to buy"
+	}
+
+	return
 }

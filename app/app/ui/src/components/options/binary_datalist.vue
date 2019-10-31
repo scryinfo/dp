@@ -48,7 +48,9 @@ export default {
     },
     methods: {
         setCurPage: function (curPageReturn) {this.curPage = curPageReturn;},
+
         setPageSize: function (newPageSize) {this.pageSize = newPageSize;},
+
         currentChange: function (curRow) {
             this.selectedData = {
                 PublishId: curRow.PublishId,
@@ -56,6 +58,7 @@ export default {
                 Price: curRow.Price
             };
         },
+
         initDL: function () {
             connect.send({Name: "getDataList", Payload: ""}, function (payload, _this) {
                 _this.$store.state.datalist = [];
@@ -80,6 +83,7 @@ export default {
                 });
             });
         },
+
         advancePurchase: function (pwd) {
             connect.send({Name:"advancePurchase",Payload:{password: pwd, startVerify: this.startVerify,
                         PublishId: this.selectedData.PublishId, price: this.selectedData.Price.toString()}},

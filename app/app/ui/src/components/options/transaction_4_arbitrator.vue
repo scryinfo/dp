@@ -55,11 +55,14 @@ export default {
     },
     methods: {
         setCurPage: function (curPageReturn) { this.curPage = curPageReturn; },
+
         setPageSize: function (newPageSize) { this.pageSize = newPageSize; },
+
         currentChange: function (curRow) {
             this.selectedTx = curRow.TransactionId;
             this.txState = curRow.State;
         },
+
         initTxA: function () {
             connect.send({Name: "getTxArbitrate", Payload: ""}, function (payload, _this) {
                 _this.$store.state.transactionarbitrator = [];
@@ -84,6 +87,7 @@ export default {
                 });
             });
         },
+
         decrypt: function (pwd) {
             connect.send({Name:"decrypt", Payload:{password: pwd, TransactionId: this.selectedTx}}, function (payload, _this) {
                 console.log("解密数据成功", payload);
@@ -102,6 +106,7 @@ export default {
                 });
             });
         },
+
         arbitrate: function (pwd) {
             connect.send({Name: "arbitrate", Payload: {password: pwd, TransactionId: this.selectedTx,
                     arbitrate: {arbitrateResult: this.arbitrateResult}}}, function (payload, _this) {
