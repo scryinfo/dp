@@ -61,7 +61,28 @@ export default {
             this.txState = curRow.State;
         },
         initTxA: function () {
-            // tx.arbitrator request
+            connect.send({Name: "getTxArbitrate", Payload: ""}, function (payload, _this) {
+                _this.$store.state.transactionarbitrator = [];
+                if (payload.length > 0) {
+                    for (let i = 0; i < payload.length; i++) {
+                        _this.$store.state.transactionarbitrator.push({
+                            PublishId: payload[i].PublishId,
+                            TransactionId: payload[i].TransactionId,
+                            Title: payload[i].Title,
+                            Price: payload[i].Price,
+                            Keys: payload[i].Keys,
+                            Description: payload[i].Description,
+                        })
+                    }
+                }
+            }, function (payload, _this) {
+                console.log("获取当前用户为仲裁者的交易列表失败：", payload);
+                _this.$alert(payload, "获取当前用户为仲裁者的交易列表失败！", {
+                    confirmButtonText: "关闭",
+                    showClose: false,
+                    type: "error"
+                });
+            });
         },
         decrypt: function (pwd) {
             connect.send({Name:"decrypt", Payload:{password: pwd, TransactionId: this.selectedTx}}, function (payload, _this) {
@@ -85,6 +106,13 @@ export default {
             connect.send({Name: "arbitrate", Payload: {password: pwd, TransactionId: this.selectedTx,
                     arbitrate: {arbitrateResult: this.arbitrateResult}}}, function (payload, _this) {
                 console.log("仲裁成功", payload);
+                _this.$store.state.transactionarbitrator.forEach(function (item, index, arr) {
+                    if (item.TransactionId === payload) {
+                        // delete item[index]
+                        arr[index] = arr[0];
+                        arr.shift();
+                    }
+                });
             }, function (payload, _this) {
                 console.log("仲裁失败：", payload);
                 _this.$alert(payload, "仲裁失败！", {
@@ -113,6 +141,7 @@ export default {
     created () {
         this.total = this.$store.state.transactionarbitrator.length;
         let _arbitrate = this;
+
         connect.send({Name:"isVerifier", Payload:{}}, function (payload, _this) {
             _arbitrate.showControl = payload;
             console.log("当前用户验证者身份查询成功：", payload);
@@ -124,6 +153,8 @@ export default {
                 type: "error"
             });
         });
+
+        this.initTxA();
     }
 }
 </script>

@@ -1,17 +1,18 @@
 // Scry Info.  All rights reserved.
 // license that can be found in the license file.
 
-import {utils} from "./utils.js";
-
 let connect = {
     ws: WebSocket,
+    count: 0,
+    MAX: 1000,
+    t: setTimeout(function() {connect.reconnect();}, 200),
+
     ipfs: require("ipfs-http-client")({host: 'localhost', port: '5001', protocol: 'http'}),
+
     map: {},
     msgMutex: true,
     msgParams: [],
-    count: 0,
-    MAX: 1000,
-    t: setTimeout(function() {connect.reconnect();}, 100),
+
     WSConnect: function (_this) {
         // url: 'http://127.0.0.1:9822/#/'
         let port = window.location.href.split(":")[2].split("/")[0];
@@ -19,6 +20,7 @@ let connect = {
         connect.ws = new WebSocket("ws://127.0.0.1:"+ port + "/ws", "ws");
         connect.ws.onopen = function (evt) {
             console.log("connection onopen. ", evt);
+            initAccs();
         };
         connect.ws.onmessage = function (evt) {
             console.log("received   : ", evt.data);
@@ -53,7 +55,7 @@ let connect = {
         if (connect.msgMutex) {
             connect.msgMutex = false;
             await connect.map[obj.Name](obj.Payload, _this);
-            await utils.timeout(250);
+            await timeout(250);
             connect.msgMutex = true;
             if (connect.msgParams.length > 0) {
                 connect.msgHandle(connect.msgParams.shift(), _this);
@@ -93,5 +95,28 @@ let connect = {
         connect.map = {};
     }
 };
+
+function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
+function initAccs() {
+    connect.send({Name: "getAccountsList", Payload: ""}, function (payload, _this) {
+        _this.$store.state.accounts = [];
+        for (let i = 0; i < payload.length; i++) {
+            _this.$store.state.accounts.push({
+                address: payload[i].Address
+            })
+        }
+    }, function (payload, _this) {
+        console.log("获取历史用户列表失败：", payload);
+        _this.$alert(payload, "获取历史用户列表失败！", {
+            confirmButtonText: "关闭",
+            showClose: false,
+            type: "error"
+        });
+    });
+}
 
 export { connect };

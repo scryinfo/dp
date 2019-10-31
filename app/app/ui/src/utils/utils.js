@@ -5,8 +5,8 @@ let utils = {
     state: [ // tx state -> func state, means func button can or can't click
         [false, false, false,  true, false, false], // 0 seller: re-encrypt
         [false,  true,  true,  true, false, false], // 1 buyer: cancel
-        [false,  true,  true, false, false, false], // 2 buyer: confirmPurchase & verifier: vote
-        [false, false, false, false,  true, false], // 3 buyer: decrypt/confirmData & arbitrator: decrypt/arbitrate
+        [false,  true,  true, false, false, false], // 2 buyer: confirmPurchase
+        [false, false, false, false,  true, false], // 3 buyer: decrypt/confirmData
         [false, false,  true,  true,  true,  true]  // 4 buyer: grade
     ],
     init: function () {
@@ -21,13 +21,6 @@ let utils = {
         connect.addCallbackFunc("onVerifierDisable", presetFunc.onVerifierDisable);
         connect.addCallbackFunc("onArbitrationBegin", presetFunc.onArbitrationBegin);
         connect.addCallbackFunc("onArbitrationResult", presetFunc.onArbitrationResult);
-    },
-    setDefaultBalance: function (_this) {
-        _this.$store.state.balance[0] = { Balance: "-", Time: "-"};
-        _this.$store.state.balance[1] = { Balance: "-", Time: "-"};
-    },
-    timeout: function (ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
     },
     setStateString: function (str) {
         let index;

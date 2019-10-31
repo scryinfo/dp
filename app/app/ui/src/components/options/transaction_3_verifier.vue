@@ -63,7 +63,28 @@ export default {
             this.txState = curRow.State;
         },
         initTxV: function () {
-            // tx_db.initVerifier(this);
+            connect.send({Name: "getTxVerify", Payload: ""}, function (payload, _this) {
+                _this.$store.state.transactionverifier = [];
+                if (payload.length > 0) {
+                    for (let i = 0; i < payload.length; i++) {
+                        _this.$store.state.transactionverifier.push({
+                            PublishId: payload[i].PublishId,
+                            TransactionId: payload[i].TransactionId,
+                            Title: payload[i].Title,
+                            Price: payload[i].Price,
+                            Keys: payload[i].Keys,
+                            Description: payload[i].Description,
+                        })
+                    }
+                }
+            }, function (payload, _this) {
+                console.log("获取当前用户为验证者的交易列表失败：", payload);
+                _this.$alert(payload, "获取当前用户为验证者的交易列表失败！", {
+                    confirmButtonText: "关闭",
+                    showClose: false,
+                    type: "error"
+                });
+            });
         },
         register: function (pwd) {
             connect.send({Name:"register", Payload:{password: pwd}}, function (payload, _this) {
@@ -121,6 +142,8 @@ export default {
                 type: "error"
             });
         });
+
+        this.initTxV();
     }
 }
 </script>

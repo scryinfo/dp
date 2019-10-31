@@ -1,65 +1,64 @@
 package business
 
 import (
-    "github.com/pkg/errors"
-    "github.com/scryinfo/dot/dot"
-    "github.com/scryinfo/dp/dots/app/business/preset"
-    "github.com/scryinfo/dp/dots/binary"
-    "go.uber.org/zap"
+	"github.com/pkg/errors"
+	"github.com/scryinfo/dot/dot"
+	"github.com/scryinfo/dp/dots/app/business/preset"
+	"github.com/scryinfo/dp/dots/binary"
+	"go.uber.org/zap"
 )
 
 type Business struct {
-    Pre *preset.Preset `dot:""`
+	Pre *preset.Preset `dot:""`
 }
 
 const (
-    BusTypeId = "64a3ff50-50de-447c-b0b9-401fff8c4fa4"
-    BusLiveId = "64a3ff50-50de-447c-b0b9-401fff8c4fa4"
+	BusTypeId = "64a3ff50-50de-447c-b0b9-401fff8c4fa4"
+	BusLiveId = "64a3ff50-50de-447c-b0b9-401fff8c4fa4"
 )
 
 func (b *Business) Create(l dot.Line) error {
-    return nil
+	return nil
 }
 
 func (b *Business) Start(ignore bool) error {
-    if err := b.Pre.CBs.WS.PresetMsgHandleFuncs(b.Pre.PresetMsgNames, b.Pre.PresetMsgHandlers); err != nil {
-        return err
-    }
+	if err := b.Pre.CBs.WS.PresetMsgHandleFuncs(b.Pre.PresetMsgNames, b.Pre.PresetMsgHandlers); err != nil {
+		return err
+	}
 
-    if err := b.Pre.CBs.WS.ListenAndServe(); err != nil {
-        dot.Logger().Errorln("Start http web server failed. ", zap.NamedError("error", err))
-        return errors.New("Start http web server failed. ")
-    }
+	if err := b.Pre.CBs.WS.ListenAndServe(); err != nil {
+		dot.Logger().Errorln("Start http web server failed. ", zap.NamedError("error", err))
+		return errors.New("Start http web server failed. ")
+	}
 
-    return nil
+	return nil
 }
 
 //construct dot
 func newBusDot(_ interface{}) (dot.Dot, error) {
-    var err error
-    d := &Business{}
+	var err error
+	d := &Business{}
 
-    return d, err
+	return d, err
 }
 
 func BusTypeLive() []*dot.TypeLives {
-    t := []*dot.TypeLives{
-        {
-            Meta: dot.Metadata{
-                TypeId: BusTypeId,
-                NewDoter: func(conf interface{}) (dot.Dot, error) {
-                    return newBusDot(conf)
-                },
-            },
-            Lives: []dot.Live{{
-                LiveId:    BusLiveId,
-                RelyLives: map[string]dot.LiveId{"binary": binary.BinLiveId},
-            }},
-        },
-    }
+	t := []*dot.TypeLives{
+		{
+			Meta: dot.Metadata{
+				TypeId: BusTypeId,
+				NewDoter: func(conf interface{}) (dot.Dot, error) {
+					return newBusDot(conf)
+				},
+			},
+			Lives: []dot.Live{{
+				LiveId:    BusLiveId,
+				RelyLives: map[string]dot.LiveId{"binary": binary.BinLiveId},
+			}},
+		},
+	}
 
-    t = append(t, preset.PreTypeLive()...)
+	t = append(t, preset.PreTypeLive()...)
 
-    return t
+	return t
 }
-

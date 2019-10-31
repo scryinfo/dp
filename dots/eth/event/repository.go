@@ -4,16 +4,15 @@
 package event
 
 import (
-    "sync"
+	"sync"
 )
 
 type Callback func(event Event) bool
 
 type Repository struct {
-    MapEventCallback sync.Map
+	MapEventCallback sync.Map
 }
 
 func NewRepository() *Repository {
-    return &Repository{
-    }
+	return &Repository{}
 }

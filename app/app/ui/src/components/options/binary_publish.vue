@@ -83,7 +83,7 @@ export default {
             let _this = this;
             let proofs = this.$refs.selectedProofs.files;
             for (let i=0;i<proofs.length;i++) {
-                this.pubData.details.ProofDataExtensions.push( proofs[i].name.slice(proofs[i].name.indexOf(".")), "utf-8" );
+                this.pubData.details.ProofDataExtensions.push(proofs[i].name.slice(proofs[i].name.indexOf(".")));
                 let reader = new FileReader();
                 reader.readAsArrayBuffer(proofs[i]);
                 reader.onload = function (evt) {
@@ -119,7 +119,7 @@ export default {
             let pwd = this.password;
             this.password = "";
             connect.send({Name:"publish", Payload: {password: pwd, supportVerify: this.SupportVerify,
-                    price: this.pubData.Price, Ids: this.Ids}},
+                    price: this.pubData.Price.toString(), Ids: this.Ids}},
                 function (payload, _this) {
                 console.log("发布新数据成功", payload);
             }, function (payload, _this) {

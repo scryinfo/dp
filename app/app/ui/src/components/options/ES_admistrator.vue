@@ -7,8 +7,6 @@
     <section class="administrator">
         <el-col :span="24" class="section-item">
             <el-button size="mini" type="primary" @click="welcome">Welcome</el-button></el-col>
-        <el-col :span="24" class="section-item">
-            <el-button size="mini" type="primary" @click="resetChain">ResetChain</el-button></el-col>
         <div>
             <el-col :span="5" class="section-item">
                 <el-select size="mini" v-model="modifyItem" placeholder="Choose param" clearable allow-create filterable>
@@ -32,7 +30,7 @@ export default {
     data () {
         return {
             modifyItem: "",
-            newParamValue: "", // avoid param bigger than float64.max, json unmarshal in go will wrong.
+            newParamValue: "", // avoid param bigger than float64.MAX, json unmarshal in go will wrong.
             modifyList: [
                 {
                     paramName: "VerifierNum"
@@ -48,15 +46,6 @@ export default {
                 message: '谢谢你使用我的程序!&nbsp;<strong>:)</strong>',
                 position: "top-left"
             });
-        },
-        resetChain: async function () {
-            // dl_db.reset();
-            // acc_db.reset();
-            // await this.resetTxDBs();
-            // console.log("已重置app全部数据");
-        },
-        resetTxDBs: function () {
-            // - ?
         },
         modifyParam: function () {
             connect.send({Name: "modifyContractParam", Payload: {modifyContractParam: {paramName: this.modifyItem, paramValue: this.newParamValue}}},
