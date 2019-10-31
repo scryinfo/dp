@@ -56,6 +56,7 @@ export default {
             this.setDataId();
             this.setProofIds();
         },
+
         setDataId: function () {
             this.Ids.metaDataId = "";
             let _this = this;
@@ -77,6 +78,7 @@ export default {
                 });
             }
         },
+
         setProofIds: function () {
             this.Ids.proofDataIds = [];
             this.pubData.details.ProofDataExtensions = [];
@@ -101,6 +103,7 @@ export default {
                 }
             }
         },
+
         setDetailsId: function () {
             let _this = this;
             connect.ipfs.add(Buffer.from(JSON.stringify(this.pubData.details), "utf-8")).then(function (result) {
@@ -115,6 +118,7 @@ export default {
                 });
             });
         },
+
         pub: function () {
             let pwd = this.password;
             this.password = "";
@@ -145,6 +149,7 @@ export default {
                 this.count = 0;
             }
         },
+
         height: function () {
             this.height = window.innerHeight - 20;
         }

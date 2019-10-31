@@ -137,7 +137,7 @@ func (ws *WSServer) handleMessages(conn *websocket.Conn) {
 			name := mi.Name + ".callback"
 			if err != nil {
 				name += ".error"
-				payload = errors.Wrap(err, mi.Name+" failed. ")
+				payload = errors.Wrap(err, mi.Name+" failed. ").Error()
 				logger.Errorln("", zap.Any("", payload))
 			}
 
@@ -151,8 +151,9 @@ func (ws *WSServer) handleMessages(conn *websocket.Conn) {
 
 func (ws *WSServer) SendMessage(name string, payload interface{}) error {
 	if bs, ok := payload.([]byte); ok {
-		payload = string(bs) // []byte will be base58 encode first
+		payload = string(bs) // []byte will be base58 encode first, in json marshal
 	}
+
 	mo := MessageOut{
 		Name:    name,
 		Payload: payload,
@@ -165,7 +166,7 @@ func (ws *WSServer) SendMessage(name string, payload interface{}) error {
 
 	dot.Logger().Debugln("before send:", zap.Any("message out: ", mo))
 
-	return websocket.Message.Send(ws.connParams, string(b))
+	return websocket.Message.Send(ws.connParams, string(b)) // avoid base58 encode
 }
 
 func (ws *WSServer) PresetMsgHandleFuncs(name []string, presetFunc []PresetFunc) error {

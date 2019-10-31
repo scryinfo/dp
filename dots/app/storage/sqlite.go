@@ -22,7 +22,6 @@ type sqlConfig struct {
 	DBName string `json:"DBName"`
 }
 
-// todo: configuration
 const (
 	SQLiteTypeId = "cd947210-6790-4e9f-b73f-63aeba484beb"
 	DB           = "sqlite3"

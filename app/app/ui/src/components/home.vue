@@ -50,8 +50,11 @@ export default {
     },
     methods: {
         getBalance: function () { this.$router.push("/blc"); },
+
         nickName: function () { this.$router.push("/ncn"); },
+
         message: function () { this.$router.push("/msg"); },
+
         logoutMsg: function () {
             this.$confirm("确定退出登录吗？", "提示：", {
                 confirmButtonText: "确认",
@@ -66,6 +69,7 @@ export default {
                 });
             });
         },
+
         logout: function () {
             connect.send({Name:"logout", Payload: ""}, function (payload, _this) {
                 connect.cleanFuncMap();

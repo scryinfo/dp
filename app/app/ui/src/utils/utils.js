@@ -9,6 +9,7 @@ let utils = {
         [false, false, false, false,  true, false], // 3 buyer: decrypt/confirmData
         [false, false,  true,  true,  true,  true]  // 4 buyer: grade
     ],
+
     init: function () {
         connect.addCallbackFunc("onPublish", presetFunc.onPublish);
         connect.addCallbackFunc("onVerifiersChosen", presetFunc.onVerifiersChosen);
@@ -22,6 +23,7 @@ let utils = {
         connect.addCallbackFunc("onArbitrationBegin", presetFunc.onArbitrationBegin);
         connect.addCallbackFunc("onArbitrationResult", presetFunc.onArbitrationResult);
     },
+
     setStateString: function (str) {
         let index;
         for (let i = 0; i < utils.stateEnum.length; i++) {
@@ -32,9 +34,11 @@ let utils = {
         }
         return index;
     },
+
     functionDisabled: function (funcNum, stateStr) {
         return !utils.state[funcNum][utils.setStateString(stateStr)];
     },
+
     setSupportVerify: function (sv) {
         let result = "";
         if (sv) {
@@ -45,6 +49,7 @@ let utils = {
 
         return result;
     },
+
     setNeedVerify: function (nv) {
         let result = "";
         if (nv) {
@@ -76,6 +81,7 @@ let presetFunc = {
             PublishId: payload.PublishId
         });
     },
+
     onVerifiersChosen: function (payload, _this) {
         console.log("选择验证者事件回调：", payload);
         _this.$notify({
@@ -92,6 +98,7 @@ let presetFunc = {
             Description: payload.Description
         });
     },
+
     onAdvancePurchase: function (payload, _this) {
         console.log("创建交易事件回调：", payload);
         _this.$notify({
@@ -126,6 +133,7 @@ let presetFunc = {
                 break;
         }
     },
+
     onConfirmPurchase: function (payload, _this) {
         console.log("购买数据事件回调：", payload);
         _this.$notify({
@@ -159,6 +167,7 @@ let presetFunc = {
                 break;
         }
     },
+
     onReEncrypt: function (payload, _this) {
         console.log("再加密数据事件回调：", payload);
         _this.$notify({
@@ -183,6 +192,7 @@ let presetFunc = {
                 break;
         }
     },
+
     onTransactionClose: function (payload, _this) {
         console.log("交易关闭事件回调：", payload);
         _this.$notify({
@@ -220,6 +230,7 @@ let presetFunc = {
                 break;
         }
     },
+
     onRegisterVerifier: function (payload, _this) {
         console.log("注册成为验证者事件回调。");
         _this.$notify({
@@ -228,6 +239,7 @@ let presetFunc = {
             position: "top-left"
         });
     },
+
     onVoteResult: function (payload, _this) {
         console.log("验证者验证事件回调：", payload);
         _this.$notify({
@@ -252,6 +264,7 @@ let presetFunc = {
                 break;
         }
     },
+
     onVerifierDisable: function (payload, _this) {
         console.log("取消验证者验证资格事件回调：", payload);
         _this.$notify({
@@ -260,6 +273,7 @@ let presetFunc = {
             position: "top-left"
         });
     },
+
     onArbitrationBegin: function (payload, _this) {
         console.log("仲裁开始事件回调：", payload);
         _this.$notify({
@@ -276,6 +290,7 @@ let presetFunc = {
             Description: payload.Description
         });
     },
+
     onArbitrationResult: function (payload, _this) {
         console.log("仲裁结果事件回调：", payload);
         _this.$notify({

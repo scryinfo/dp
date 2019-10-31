@@ -51,6 +51,7 @@ let connect = {
             connect.ws.close();
         };
     },
+
     msgHandle: async function (obj, _this) {
         if (connect.msgMutex) {
             connect.msgMutex = false;
@@ -64,6 +65,7 @@ let connect = {
             connect.msgParams.push(obj);
         }
     },
+
     reconnect: function () {
         connect.count++;
         console.log("reconnection...【" + connect.count + "】");
@@ -76,9 +78,10 @@ let connect = {
                 connect.WSConnect();
             }
             // 0: trying connect to server, 2: closing connection with server
-            connect.t = setTimeout(function() {connect.reconnect();}, 100);
+            connect.t = setTimeout(function() {connect.reconnect();}, 200);
         }
     },
+
     send: function (obj, cbs, cbf) {
         if (!connect.ws) { return; }
         if (!!cbs) { connect.addCallbackFunc(obj.Name + ".callback", cbs); }
@@ -88,9 +91,11 @@ let connect = {
 
         connect.ws.send(JSON.stringify(obj));
     },
+
     addCallbackFunc: function (name, func) {
         connect.map[name] = func;
     },
+
     cleanFuncMap: function () {
         connect.map = {};
     }
@@ -99,7 +104,6 @@ let connect = {
 function timeout(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-
 
 function initAccs() {
     connect.send({Name: "getAccountsList", Payload: ""}, function (payload, _this) {

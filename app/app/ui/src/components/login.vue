@@ -67,7 +67,9 @@ export default {
             }
             this.describe = description + ":";
         },
+
         hide: function () {this.showControl1 = false; this.showControl2 = false; this.password = "";},
+
         submit_login: function () {
             let acc = this.account;
             this.account = "";
@@ -84,6 +86,7 @@ export default {
                 });
             });
         },
+
         submit_new: function () {
             let pwd = this.password;
             this.password = "";
@@ -101,6 +104,7 @@ export default {
                 });
             });
         },
+
         submit_keystore: function () {
             this.password = "";
             this.$router.push({ name: "home", params: {acc: this.account}});

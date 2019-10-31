@@ -47,6 +47,7 @@ export default {
                 position: "top-left"
             });
         },
+
         modifyParam: function () {
             connect.send({Name: "modifyContractParam", Payload: {modifyContractParam: {paramName: this.modifyItem, paramValue: this.newParamValue}}},
                 function (payload, _this) {
