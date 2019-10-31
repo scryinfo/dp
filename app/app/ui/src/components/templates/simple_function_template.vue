@@ -55,6 +55,7 @@ export default {
                 this.$emit("pre", result)
             }
         },
+
         cancelFunc: function (name) {
             this.dialog = false;
             this.$message({
@@ -62,6 +63,7 @@ export default {
                 message: "取消" + name
             });
         },
+
         submitFunc: function () {
             this.dialog = false;
             let pwd = this.password;

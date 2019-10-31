@@ -68,6 +68,7 @@ export default {
                 this.$emit("pre", result)
             }
         },
+
         cancelFunc: function (name) {
             if (name === "输入密码") {
                 this.dialogInner = false;
@@ -79,6 +80,7 @@ export default {
                 message: "取消" + name
             });
         },
+
         submitFunc: function () {
             this.dialogInner = false;
             this.dialog = false;
