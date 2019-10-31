@@ -93,7 +93,33 @@ export default {
             return utils.functionDisabled(funcNum, this.txState);
         },
         initTxB: function () {
-            // tx.buyer request
+            connect.send({Name: "getTxBuy", Payload: ""}, function (payload, _this) {
+                _this.$store.state.transactionbuy = [];
+                for (let i = 0; i < payload.length; i++) {
+                    _this.$store.state.transactionbuy.push({
+                        PublishId: payload[i].PublishId,
+                        TransactionId: payload[i].TransactionId,
+                        State: utils.stateEnum[parseInt(payload[i].State)],
+                        Title: payload[i].Title,
+                        Price: payload[i].Price,
+                        Keys: payload[i].Keys,
+                        Description: payload[i].Description,
+                        Verifier1Response: payload[i].Verifier1Response,
+                        Verifier2Response: payload[i].Verifier2Response,
+                        SupportVerify: payload[i].SupportVerify,
+                        ArbitrateResult: payload[i].Description,
+                        SVDisplay: utils.setSupportVerify(payload[i].SupportVerify),
+                        NVDisplay: utils.setNeedVerify(payload[i].StartVerify),
+                    })
+                }
+            }, function (payload, _this) {
+                console.log("获取当前用户为买方的交易列表失败：", payload);
+                _this.$alert(payload, "获取当前用户为买方的交易列表失败！", {
+                    confirmButtonText: "关闭",
+                    showClose: false,
+                    type: "error"
+                });
+            });
         },
         finishPurchase: function (pwd) {
             connect.send({Name:"finishPurchase", Payload:{password: pwd, TransactionId: this.selectedTx.TransactionId}}, function (payload, _this) {
@@ -127,7 +153,6 @@ export default {
                     confirmButtonText: "关闭",
                     showClose: false,
                     type: "info",
-                    width:"500px",
                 });
             }, function (payload, _this) {
                 console.log("解密数据失败：", payload);
@@ -194,6 +219,8 @@ export default {
     },
     created () {
         this.total = this.$store.state.transactionbuy.length;
+
+        this.initTxB();
     }
 }
 </script>

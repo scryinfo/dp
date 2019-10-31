@@ -3,7 +3,6 @@ package definition
 import (
 	"fmt"
 	"github.com/scryinfo/dot/dot"
-	"time"
 )
 
 type Account struct {
@@ -12,6 +11,7 @@ type Account struct {
 	FromBlock  int64
 	IsVerifier bool
 	Verify     []byte // []string, json serialize
+	Arbitrate  []byte // []string, json serialize
 }
 
 type DataList struct {
@@ -23,9 +23,9 @@ type DataList struct {
 	Seller              string
 	SupportVerify       bool
 	MetaDataExtension   string `json:"-"`
-	ProofDataExtensions []byte  `json:"-"`// []string, json serialize
+	ProofDataExtensions []byte `json:"-"` // []string, json serialize
 
-	CreatedAt time.Time `json:"-"` // from gorm
+	CreatedTime int64 `json:"-"`
 }
 
 type Transaction struct {
@@ -48,11 +48,11 @@ type Transaction struct {
 	Seller              string
 	SupportVerify       bool
 	MetaDataExtension   string `json:"-"`
-	ProofDataExtensions []byte   `json:"-"`// []string, json serialize
+	ProofDataExtensions []byte `json:"-"` // []string, json serialize
 
 	Identify int
 
-	CreatedAt time.Time `json:"-"` // from gorm
+	CreatedTime int64 `json:"-"`
 }
 
 type Event struct {
@@ -62,7 +62,7 @@ type Event struct {
 	EventKeyword string
 	EventPayload string
 
-	CreatedAt time.Time `json:"-"`// from gorm
+	CreatedTime int64 `json:"-"`
 }
 
 // show use for hooks

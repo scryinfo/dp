@@ -1,7 +1,7 @@
 <!-- Scry Info.  All rights reserved.-->
 <!-- license that can be found in the license file.-->
 <template>
-    <div>
+    <div v-if="isReload">
         <el-row>
             <el-col :span="24"><div class="top">Dapp</div></el-col>
         </el-row>
@@ -51,6 +51,7 @@ export default {
         return {
             account: "",
             password: "",
+            isReload: false,
             showControl1: false,
             showControl2: false,
             buttonControl: true,
@@ -106,7 +107,11 @@ export default {
         }
     },
     created() {
-        this.password = "";this.describe = "";this.account = "";
+        window.sessionStorage.clear();
+        if (this.$store.state.account !== "") {
+            return window.location.reload();
+        }
+        this.isReload = true;
     }
 }
 </script>

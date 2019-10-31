@@ -6,7 +6,7 @@
             <el-col :span="24" class="top">
                 <el-col :span="18">Dapp</el-col>
                 <el-col :span="6">
-                    <el-dropdown class="top-dropdown" trigger="click">
+                    <el-dropdown class="top-dropdown" show-timeout=200 trigger="hover">
                         <span>{{ this.$store.state.nickname }}</span>
                         <el-dropdown-menu slot="dropdown">
                             <el-dropdown-item @click.native="getBalance">余额查询</el-dropdown-item>
@@ -67,10 +67,8 @@ export default {
             });
         },
         logout: function () {
-            let _home = this;
             connect.send({Name:"logout", Payload: ""}, function (payload, _this) {
                 connect.cleanFuncMap();
-                utils.setDefaultBalance(_home);
                 setTimeout(function () {
                     _this.$router.push("/");
                 }, 500);
@@ -86,15 +84,13 @@ export default {
     },
     created() {
         utils.init();
-        // db_options.utilsDBInit(this);
-        // db_options.userDBInit(this.$route.params.acc);
 
         let _home = this;
         _home.$store.state.account = this.$route.params.acc;
+
         connect.send({Name:"currentUserDataUpdate", Payload: {address: this.$route.params.acc}}, function (payload, _this) {
             console.log("用户信息更新成功！", payload);
             _home.$store.state.nickname = payload;
-            // db_options.txDBsDataUpdate(_this);
         }, function (payload, _this) {
             console.log("用户信息更新失败：", payload);
             _this.$alert(payload, "用户信息更新失败！", {
