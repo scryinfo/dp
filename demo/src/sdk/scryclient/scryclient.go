@@ -14,19 +14,19 @@ import (
 	"math/big"
 )
 
-// ScryClient
+// ScryClient scry client
 type ScryClient struct {
 	Account *accounts.Account
 }
 
-// NewScryClient
+// NewScryClient create a scry client with pub key
 func NewScryClient(publicKey string) *ScryClient {
 	return &ScryClient{
 		Account: &accounts.Account{publicKey},
 	}
 }
 
-// CreateScryClient
+// CreateScryClient create a new scry client
 func CreateScryClient(password string) (*ScryClient, error) {
 	account, err := ser.CreateAccount(password)
 	if err != nil {
@@ -39,22 +39,22 @@ func CreateScryClient(password string) (*ScryClient, error) {
 	}, nil
 }
 
-// SubscribeEvent
+// SubscribeEvent subscribe
 func (client ScryClient) SubscribeEvent(eventName string, callback chainevents.EventCallback) error {
 	return chainevents.SubscribeExternal(common.HexToAddress(client.Account.Address), eventName, callback)
 }
 
-// UnSubscribeEvent
+// UnSubscribeEvent unsubscribe
 func (client ScryClient) UnSubscribeEvent(eventName string) error {
 	return chainevents.UnSubscribeExternal(common.HexToAddress(client.Account.Address), eventName)
 }
 
-// Authenticate
+// Authenticate authenticate
 func (client ScryClient) Authenticate(password string) (bool, error) {
 	return accounts.GetAMInstance().AuthAccount(client.Account.Address, password)
 }
 
-// TransferEthFrom
+// TransferEthFrom transfer eth from
 func (client ScryClient) TransferEthFrom(from common.Address, password string, value *big.Int, ec *ethclient.Client) error {
 	tx, err := chainoperations.TransferEth(from, password, common.HexToAddress(client.Account.Address), value, ec)
 	if err == nil {
@@ -64,7 +64,7 @@ func (client ScryClient) TransferEthFrom(from common.Address, password string, v
 	return err
 }
 
-// TransferTokenFrom
+// TransferTokenFrom transfer token from
 func (client ScryClient) TransferTokenFrom(from common.Address, password string, value *big.Int) error {
 	txParam := &chainoperations.TransactParams{From: from, Password: password, Value: value}
 	return chaininterfacewrapper.TransferTokens(txParam,
@@ -72,12 +72,12 @@ func (client ScryClient) TransferTokenFrom(from common.Address, password string,
 		value)
 }
 
-// GetEth
+// GetEth get eth
 func (client ScryClient) GetEth(owner common.Address, ec *ethclient.Client) (*big.Int, error) {
 	return chainoperations.GetEthBalance(owner, ec)
 }
 
-// GetScryToken
+// GetScryToken get scry token
 func (client ScryClient) GetScryToken(owner common.Address) (*big.Int, error) {
 	from := common.HexToAddress(client.Account.Address)
 	txParam := &chainoperations.TransactParams{From: from, Pending: true}

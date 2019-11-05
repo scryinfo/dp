@@ -223,7 +223,7 @@ func initClients() {
 	time.Sleep(sleepTime)
 }
 
-// CreateClientWithToken
+// CreateClientWithToken create client with token
 func CreateClientWithToken(token *big.Int, eth *big.Int) (*scryclient.ScryClient, error) {
 	client, err := scryclient.CreateScryClient(clientPassword)
 	if err != nil {
@@ -250,7 +250,7 @@ func CreateClientWithToken(token *big.Int, eth *big.Int) (*scryclient.ScryClient
 	return client, nil
 }
 
-// SellerPublishData
+// SellerPublishData publish
 func SellerPublishData(supportVerify bool) {
 	//publish data
 	metaData := []byte("QmcHXkMXwgvZP56tsUJNtcfedojHkqrDsgkC4fbsBM1zre")
@@ -261,7 +261,7 @@ func SellerPublishData(supportVerify bool) {
 	cif.Publish(&txParam, big.NewInt(1000), metaData, proofData, 2, despData, supportVerify)
 }
 
-// VerifierApproveTransfer
+// VerifierApproveTransfer approve
 func VerifierApproveTransfer(verifier *scryclient.ScryClient) {
 	txParam := chainoperations.TransactParams{common.HexToAddress(verifier.Account.Address), clientPassword, big.NewInt(0), false}
 	err := cif.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(10000))
@@ -270,7 +270,7 @@ func VerifierApproveTransfer(verifier *scryclient.ScryClient) {
 	}
 }
 
-// RegisterAsVerifier
+// RegisterAsVerifier register
 func RegisterAsVerifier(verifier *scryclient.ScryClient) {
 	txParam := chainoperations.TransactParams{common.HexToAddress(verifier.Account.Address), clientPassword, big.NewInt(0), false}
 	err := cif.RegisterAsVerifier(&txParam)
@@ -279,7 +279,7 @@ func RegisterAsVerifier(verifier *scryclient.ScryClient) {
 	}
 }
 
-// Vote
+// Vote vote
 func Vote(verifier *scryclient.ScryClient) {
 	txParam := chainoperations.TransactParams{common.HexToAddress(verifier.Account.Address), clientPassword, big.NewInt(0), false}
 	err := cif.Vote(&txParam, txId, true, "This could be real from "+verifier.Account.Address)
@@ -288,7 +288,7 @@ func Vote(verifier *scryclient.ScryClient) {
 	}
 }
 
-// CreditsToVerifier
+// CreditsToVerifier credit
 func CreditsToVerifier(to common.Address) {
 	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword, big.NewInt(0), false}
 	err := cif.CreditsToVerifier(&txParam, txId, 1, 5)
@@ -297,7 +297,7 @@ func CreditsToVerifier(to common.Address) {
 	}
 }
 
-// BuyerApproveTransfer
+// BuyerApproveTransfer approve
 func BuyerApproveTransfer() {
 	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword, big.NewInt(0), false}
 	err := cif.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(1600))
@@ -306,7 +306,7 @@ func BuyerApproveTransfer() {
 	}
 }
 
-// PrepareToBuy
+// PrepareToBuy prepare
 func PrepareToBuy(publishId string, startVerify bool) {
 	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword,
 		big.NewInt(0), false}
@@ -316,7 +316,7 @@ func PrepareToBuy(publishId string, startVerify bool) {
 	}
 }
 
-// Buy
+// Buy buy
 func Buy(txId *big.Int) {
 	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword, big.NewInt(0), false}
 	err := cif.BuyData(&txParam, txId)
@@ -325,7 +325,7 @@ func Buy(txId *big.Int) {
 	}
 }
 
-// SubmitMetaDataIdEncWithBuyer
+// SubmitMetaDataIdEncWithBuyer submit
 func SubmitMetaDataIdEncWithBuyer(txId *big.Int) {
 	txParam := chainoperations.TransactParams{common.HexToAddress(seller.Account.Address), clientPassword, big.NewInt(0), false}
 	err := cif.SubmitMetaDataIdEncWithBuyer(&txParam, txId, metaDataIdEncWithBuyer)
@@ -334,7 +334,7 @@ func SubmitMetaDataIdEncWithBuyer(txId *big.Int) {
 	}
 }
 
-// ConfirmDataTruth
+// ConfirmDataTruth confirm
 func ConfirmDataTruth(txId *big.Int) {
 	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address),
 		clientPassword, big.NewInt(0), false}
@@ -437,7 +437,7 @@ func onPublish(event events.Event) bool {
 	return true
 }
 
-// OnRegisterVerifier
+// OnRegisterVerifier on register
 func OnRegisterVerifier(event events.Event) bool {
 	fmt.Println("OnRegisterVerifier: ", event)
 

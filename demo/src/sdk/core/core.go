@@ -13,13 +13,13 @@ import (
 	rlog "github.com/sirupsen/logrus"
 )
 
-// Connector
+// Connector connector
 type Connector struct {
 	ctx  context.Context
 	conn *ethclient.Client
 }
 
-// StartEngine start
+// StartEngine start SDK
 func StartEngine(ethNodeAddr string,
 	asServiceAddr string,
 	contracts []chainevents.ContractInfo,
@@ -54,7 +54,7 @@ func StartEngine(ethNodeAddr string,
 	return connector.conn, nil
 }
 
-// StartScan
+// StartScan start scan
 func StartScan(fromBlock uint64) {
 	chainevents.SetFromBlock(fromBlock)
 }

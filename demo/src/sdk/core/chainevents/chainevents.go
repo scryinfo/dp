@@ -18,7 +18,7 @@ var (
 	errorChannel       = make(chan error, 1)
 )
 
-// StartEventProcessing
+// StartEventProcessing start execute and listen goroutine
 func StartEventProcessing(
 	conn *ethclient.Client,
 	contracts []ContractInfo,
@@ -31,7 +31,7 @@ func StartEventProcessing(
 	rlog.Info("finished event processing.")
 }
 
-// SubscribeExternal
+// SubscribeExternal subscribe
 func SubscribeExternal(
 	clientAddr common.Address,
 	eventName string,
@@ -61,7 +61,7 @@ func subscribe(
 	return nil
 }
 
-// UnSubscribeExternal
+// UnSubscribeExternal unsubscribe
 func UnSubscribeExternal(
 	clientAddr common.Address,
 	eventName string,

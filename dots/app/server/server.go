@@ -16,20 +16,20 @@ type Server interface {
 	PresetMsgHandleFuncs(name []string, presetFunc []PresetFunc) error
 }
 
-// MessageIn
+// MessageIn unified structure deserialize msg from client
 type MessageIn struct {
 	Name    string          `json:"Name"`
 	Payload json.RawMessage `json:"Payload"`
 }
 
-// MessageOut
+// MessageOut unified structure serialize msg send to client
 type MessageOut struct {
 	Name    string      `json:"Name"`
 	Payload interface{} `json:"Payload,omitempty"`
 }
 
-// PresetFunc
+// PresetFunc preset system functions' handler
 type PresetFunc = func(*MessageIn) (interface{}, error)
 
-// EventSendFailed
+// EventSendFailed common error extend msg
 const EventSendFailed = " event send failed. "

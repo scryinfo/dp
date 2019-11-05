@@ -28,7 +28,7 @@ var (
 	reflectBigInt  = reflect.TypeOf(new(big.Int))
 )
 
-// Event
+// Event event
 type Event struct {
 	BlockNumber uint64
 	TxHash      common.Hash
@@ -37,13 +37,12 @@ type Event struct {
 	Data        JSONObj
 }
 
-// Progress
+// Progress progress
 type Progress struct {
 	From uint64
 	To   uint64
 }
 
-// String
 func (evt Event) String() string {
 	return fmt.Sprintf(
 		`block: %v,tx: %s,address: %s,event: %s,data: %s`,
@@ -55,20 +54,20 @@ func (evt Event) String() string {
 	)
 }
 
-// Builder
+// Builder builder
 type Builder struct {
 	es       *eventScanner
 	interval time.Duration
 }
 
-// NewScanBuilder
+// NewScanBuilder new scan builder
 func NewScanBuilder() *Builder {
 	return &Builder{
 		es: &eventScanner{Contracts: make(contractMap)},
 	}
 }
 
-// SetClient
+// SetClient set client
 func (b *Builder) SetClient(conn *ethclient.Client) *Builder {
 	b.es.conn = conn
 	return b
@@ -84,55 +83,55 @@ func (b *Builder) SetContract(addr common.Address, abiStr string, evtNames ...st
 	return b
 }
 
-// SetGracefullExit
-func (b *Builder) SetGracefullExit(yes bool) *Builder {
+// SetGracefullyExit set gracefully exit
+func (b *Builder) SetGracefullyExit(yes bool) *Builder {
 	b.es.GracefullExit = yes
 	return b
 }
 
-// SetBlockMargin
+// SetBlockMargin set block margin
 func (b *Builder) SetBlockMargin(margin uint64) *Builder {
 	b.es.marginBlock = margin
 	return b
 }
 
-// SetFrom
+// SetFrom set from
 func (b *Builder) SetFrom(f uint64) *Builder {
 	b.es.From = f
 	return b
 }
 
-// SetStep
+// SetStep set step
 func (b *Builder) SetStep(f uint64) *Builder {
 	b.es.StepLength = f
 	return b
 }
 
-// SetTo
+// SetTo set to
 func (b *Builder) SetTo(f uint64) *Builder {
 	b.es.To = f
 	return b
 }
 
-// SetProgressChan
+// SetProgressChan set progress chan
 func (b *Builder) SetProgressChan(pc chan<- Progress) *Builder {
 	b.es.ProgressChan = pc
 	return b
 }
 
-// SetDataChan
+// SetDataChan set data chan
 func (b *Builder) SetDataChan(dataCh chan<- Event, errChan chan<- error) *Builder {
 	b.es.DataChan, b.es.ErrChan = dataCh, errChan
 	return b
 }
 
-// SetInterval
+// SetInterval set interval
 func (b *Builder) SetInterval(interval time.Duration) *Builder {
 	b.interval = interval
 	return b
 }
 
-// BuildAndRun
+// BuildAndRun build and run
 func (b *Builder) BuildAndRun() (*redo.Receipt, error) {
 	if err := b.Build(); err != nil {
 		return nil, err
@@ -146,7 +145,7 @@ func (b *Builder) BuildAndRun() (*redo.Receipt, error) {
 	return recipet, nil
 }
 
-// Build
+// Build build
 func (b *Builder) Build() error {
 	if b.es.DataChan == nil {
 		return errors.New("data channel should not be empty")

@@ -7,15 +7,15 @@ import (
 	"sync"
 )
 
-// Callback
+// Callback contract event handler
 type Callback func(event Event) bool
 
-// Repository
+// Repository map match user,event and event handler
 type Repository struct {
 	MapEventCallback sync.Map
 }
 
-// NewRepository
+// NewRepository create a default Repository
 func NewRepository() *Repository {
 	return &Repository{}
 }

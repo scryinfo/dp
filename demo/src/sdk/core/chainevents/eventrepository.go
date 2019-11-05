@@ -8,15 +8,15 @@ import (
 	"github.com/scryinfo/dp/demo/src/sdk/core/ethereum/events"
 )
 
-// EventCallback
+// EventCallback event scanned handler
 type EventCallback func(event events.Event) bool
 
-// EventRepository
+// EventRepository event repository
 type EventRepository struct {
 	mapEventSubscribe map[string]map[common.Address]EventCallback
 }
 
-// NewEventRepository
+// NewEventRepository create a new repository
 func NewEventRepository() *EventRepository {
 	return &EventRepository{
 		mapEventSubscribe: make(map[string]map[common.Address]EventCallback),

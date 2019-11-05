@@ -16,17 +16,12 @@ const (
 	SubsTypeId = "5535a065-0d90-46f4-9776-26630676c4c5"
 )
 
-// Subscribe
+// Subscribe contains a event repository
 type Subscribe struct {
 	eventRepo *event.Repository
 }
 
-// Create
-func (c *Subscribe) Create(l dot.Line) error {
-	return nil
-}
-
-// SetRepo
+// SetRepo set repo
 func (c *Subscribe) SetRepo(r *event.Repository) {
 	c.eventRepo = r
 }
@@ -38,7 +33,7 @@ func newSubsDot(conf interface{}) (dot.Dot, error) {
 	return d, nil
 }
 
-//Data structure needed when generating newer component
+// SubsTypeLive Data structure needed when generating newer component
 func SubsTypeLive() *dot.TypeLives {
 	return &dot.TypeLives{
 		Meta: dot.Metadata{TypeId: SubsTypeId,
@@ -48,7 +43,7 @@ func SubsTypeLive() *dot.TypeLives {
 	}
 }
 
-// Subscribe
+// Subscribe subscribe
 func (c *Subscribe) Subscribe(
 	clientAddr common.Address,
 	eventName string,
@@ -70,7 +65,7 @@ func (c *Subscribe) Subscribe(
 	return nil
 }
 
-// UnSubscribe
+// UnSubscribe unsubscribe
 func (c *Subscribe) UnSubscribe(
 	clientAddr common.Address,
 	eventName string,

@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// Business
+// Business encapsulate system functions
 type Business struct {
 	Pre *preset.Preset `dot:""`
 }
@@ -19,7 +19,7 @@ const (
 	BusLiveId = "64a3ff50-50de-447c-b0b9-401fff8c4fa4"
 )
 
-// Start
+// Start load preset msg handlers and start web server
 func (b *Business) Start(ignore bool) error {
 	if err := b.Pre.CBs.WS.PresetMsgHandleFuncs(b.Pre.PresetMsgNames, b.Pre.PresetMsgHandlers); err != nil {
 		return err
@@ -41,7 +41,7 @@ func newBusDot(_ interface{}) (dot.Dot, error) {
 	return d, err
 }
 
-// BusTypeLive
+// BusTypeLive add a dot component to dot.line with 'line.PreAdd()'
 func BusTypeLive() []*dot.TypeLives {
 	t := []*dot.TypeLives{
 		{

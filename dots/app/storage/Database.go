@@ -1,6 +1,6 @@
 package storage
 
-// Database
+// Database define functions a db instance need to implement
 type Database interface {
 	// connect and init
 	Init() error

@@ -8,7 +8,7 @@ import (
 	"sync"
 )
 
-// JobState
+// JobState job state
 type JobState int
 
 // const
@@ -20,7 +20,7 @@ const (
 	JobStopping
 )
 
-// Receipt
+// Receipt receipt
 type Receipt struct {
 	done        chan struct{}
 	plsExit     chan struct{}
@@ -42,7 +42,7 @@ func newReceipt() *Receipt {
 	}
 }
 
-// Stop
+// Stop stop
 func (m *Receipt) Stop() bool {
 	return m.stopWithRequest(StopUser)
 }
@@ -73,31 +73,31 @@ func (m *Receipt) requestStopChan() <-chan struct{} {
 	return m.plsExit
 }
 
-// WaitChan
+// WaitChan wait chan
 func (m *Receipt) WaitChan() <-chan struct{} {
 	return m.done
 }
 
-// Wait
+// Wait wait
 func (m *Receipt) Wait() string {
 	<-m.WaitChan()
 	return m.stopType
 }
 
-// Concat
+// Concat concat
 func (m *Receipt) Concat(others ...*Receipt) *CombiReceipt {
 	rs := append([]*Receipt{m}, others...)
 	return NewCombiReceipt(rs...)
 }
 
-// CombiReceipt
+// CombiReceipt combi receipt
 type CombiReceipt struct {
 	receipts []*Receipt
 	allDone  chan struct{}
 	once     *sync.Once
 }
 
-// NewCombiReceipt
+// NewCombiReceipt new combi receipt
 func NewCombiReceipt(list ...*Receipt) *CombiReceipt {
 	var unsafeReceipts []*Receipt
 	for i, r := range list {
@@ -118,7 +118,7 @@ func NewCombiReceipt(list ...*Receipt) *CombiReceipt {
 	}
 }
 
-// Stop
+// Stop stop
 func (cr *CombiReceipt) Stop() bool {
 	var ok bool
 	for _, r := range cr.receipts {
@@ -127,13 +127,13 @@ func (cr *CombiReceipt) Stop() bool {
 	return ok
 }
 
-// Wait
+// Wait wait
 func (cr *CombiReceipt) Wait() string {
 	<-cr.WaitChan()
 	return cr.receipts[0].stopType
 }
 
-// WaitChan
+// WaitChan wait chan
 func (cr *CombiReceipt) WaitChan() <-chan struct{} {
 	cr.once.Do(func() {
 		go func() {

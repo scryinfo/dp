@@ -600,7 +600,7 @@ const (
 
 var err error
 
-// Init
+// Init init user service, contracts and SDK instance
 func Init(
 	ethNodeAddr string,
 	keyServiceAddr string,

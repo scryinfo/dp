@@ -24,10 +24,10 @@ const (
 	ScanEventInterval      = 200 //milli seconds
 )
 
-// ChanEvent
+// ChanEvent chan event
 type ChanEvent chan event.Event
 
-// BinaryGrpcServerImp
+// BinaryGrpcServerImp binary grpc server imp
 type BinaryGrpcServerImp struct {
 	config       binaryGrpcServerConfig
 	eventChanMap sync.Map
@@ -86,30 +86,20 @@ func BinaryGrpcServerImpTypeLive() []*dot.TypeLives {
 	return t
 }
 
-// Create
+// Create dot.Create
 func (c *BinaryGrpcServerImp) Create(l dot.Line) error {
 	//c.eventChan = make(map[string]ChanEvent)
 
 	return nil
 }
 
-// Start
+// Start dot.Start
 func (c *BinaryGrpcServerImp) Start(ignore bool) error {
 	api.RegisterBinaryServiceServer(c.ServerNobl.Server(), c)
 	return nil
 }
 
-// Stop
-func (c *BinaryGrpcServerImp) Stop(ignore bool) error {
-	return nil
-}
-
-// Destroy
-func (c *BinaryGrpcServerImp) Destroy(ignore bool) error {
-	return nil
-}
-
-// SetChainWrapper
+// SetChainWrapper set chain wrapper
 func (c *BinaryGrpcServerImp) SetChainWrapper(w scry.ChainWrapper) {
 	c.chainWrapper = w
 }
@@ -118,7 +108,7 @@ func makeResult(s bool, e string) *api.Result {
 	return &api.Result{Success: s, ErrMsg: e}
 }
 
-// SubscribeEvent
+// SubscribeEvent subscribe
 func (c *BinaryGrpcServerImp) SubscribeEvent(ctx context.Context, info *api.SubscribeInfo) (*api.Result, error) {
 	rs := makeResult(true, "")
 
@@ -161,7 +151,7 @@ func (c *BinaryGrpcServerImp) SubscribeEvent(ctx context.Context, info *api.Subs
 	return rs, nil
 }
 
-// UnSubscribeEvent
+// UnSubscribeEvent unsubscribe
 func (c *BinaryGrpcServerImp) UnSubscribeEvent(
 	ctx context.Context,
 	info *api.SubscribeInfo,
@@ -267,7 +257,7 @@ func makeProtoEvent(e *event.Event) (*api.Event, error) {
 	return pe, nil
 }
 
-// Publish
+// Publish publish
 func (c *BinaryGrpcServerImp) Publish(ctx context.Context, params *api.PublishParams) (*api.PublishResult, error) {
 	var pr *api.PublishResult
 	makePublishResult(&pr, "", "", true)
@@ -328,7 +318,7 @@ func makePublishResult(r **api.PublishResult, pid, e string, s bool) {
 	}
 }
 
-// CreateAccount
+// CreateAccount create account
 func (c *BinaryGrpcServerImp) CreateAccount(
 	ctx context.Context,
 	in *api.CreateAccountParams,
@@ -364,7 +354,7 @@ func makeAccountResult(r **api.AccountResult, aid, e string, s bool) {
 	}
 }
 
-// Authenticate
+// Authenticate authenticate
 func (c *BinaryGrpcServerImp) Authenticate(
 	ctx context.Context,
 	in *api.ClientInfo,
@@ -388,7 +378,7 @@ func (c *BinaryGrpcServerImp) Authenticate(
 	return makeResult(true, ""), nil
 }
 
-// TransferEth
+// TransferEth transfer eth
 func (c *BinaryGrpcServerImp) TransferEth(
 	ctx context.Context,
 	in *api.TransferEthParams,
@@ -417,7 +407,7 @@ func (c *BinaryGrpcServerImp) TransferEth(
 	return makeResult(true, ""), nil
 }
 
-// GetEthBalance
+// GetEthBalance get eth balance
 func (c *BinaryGrpcServerImp) GetEthBalance(
 	ctx context.Context,
 	in *api.EthBalanceParams,
@@ -463,7 +453,7 @@ func makeEthBalanceResult(r **api.EthBalanceResult, e string, s bool, b int64) {
 	}
 }
 
-// TransferTokens
+// TransferTokens transfer tokens
 func (c *BinaryGrpcServerImp) TransferTokens(
 	ctx context.Context,
 	params *api.TransferTokenParams,
@@ -491,7 +481,7 @@ func (c *BinaryGrpcServerImp) TransferTokens(
 	return makeResult(true, ""), nil
 }
 
-// GetTokenBalance
+// GetTokenBalance get token balance
 func (c *BinaryGrpcServerImp) GetTokenBalance(
 	ctx context.Context,
 	params *api.TokenBalanceParams,
@@ -530,7 +520,7 @@ func makeTokenBalanceResult(r **api.TokenBalanceResult, e string, s bool, b int6
 	}
 }
 
-// PrepareToBuy
+// PrepareToBuy prepare to buy
 func (c *BinaryGrpcServerImp) PrepareToBuy(
 	ctx context.Context,
 	params *api.PrepareParams,
@@ -558,7 +548,7 @@ func (c *BinaryGrpcServerImp) PrepareToBuy(
 	return makeResult(true, ""), nil
 }
 
-// BuyData
+// BuyData buy
 func (c *BinaryGrpcServerImp) BuyData(
 	ctx context.Context,
 	params *api.BuyParams,
@@ -585,7 +575,7 @@ func (c *BinaryGrpcServerImp) BuyData(
 	return makeResult(true, ""), nil
 }
 
-// CancelTransaction
+// CancelTransaction cancel tx
 func (c *BinaryGrpcServerImp) CancelTransaction(
 	ctx context.Context,
 	params *api.CancelTxParams,
@@ -641,7 +631,7 @@ func (c *BinaryGrpcServerImp) ReEncryptMetaDataId(
 	return makeResult(true, ""), nil
 }
 
-// ConfirmDataTruth
+// ConfirmDataTruth confirm
 func (c *BinaryGrpcServerImp) ConfirmDataTruth(
 	ctx context.Context,
 	params *api.DataConfirmParams,
@@ -669,7 +659,7 @@ func (c *BinaryGrpcServerImp) ConfirmDataTruth(
 	return makeResult(true, ""), nil
 }
 
-// ApproveTransfer
+// ApproveTransfer approve
 func (c *BinaryGrpcServerImp) ApproveTransfer(
 	ctx context.Context,
 	params *api.ApproveTransferParams,
@@ -697,7 +687,7 @@ func (c *BinaryGrpcServerImp) ApproveTransfer(
 	return makeResult(true, ""), nil
 }
 
-// Vote
+// Vote vote
 func (c *BinaryGrpcServerImp) Vote(
 	ctx context.Context,
 	params *api.VoteParams,
@@ -726,7 +716,7 @@ func (c *BinaryGrpcServerImp) Vote(
 	return makeResult(true, ""), nil
 }
 
-// RegisterAsVerifier
+// RegisterAsVerifier register
 func (c *BinaryGrpcServerImp) RegisterAsVerifier(
 	ctx context.Context,
 	params *api.RegisterVerifierParams,
@@ -753,7 +743,7 @@ func (c *BinaryGrpcServerImp) RegisterAsVerifier(
 	return makeResult(true, ""), nil
 }
 
-// CreditsToVerifier
+// CreditsToVerifier credits to verifier
 func (c *BinaryGrpcServerImp) CreditsToVerifier(
 	ctx context.Context,
 	params *api.CreditVerifierParams,

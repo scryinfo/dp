@@ -3,7 +3,7 @@
 
 package event
 
-// ContractInfo
+// ContractInfo contains contract address, abi and events
 type ContractInfo struct {
 	Address string
 	Abi     string
