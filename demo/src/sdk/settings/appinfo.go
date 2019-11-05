@@ -14,22 +14,22 @@ var (
 	logPath   = logDir + "scry_sdk.log"
 )
 
-// SetAppId
+// SetAppId set appId
 func SetAppId(v string) {
 	appId = v
 }
 
-// GetAppId
+// GetAppId get appId
 func GetAppId() string {
 	return appId
 }
 
-// SetLogPath
+// SetLogPath set log path
 func SetLogPath(d string) {
 	logPath = d
 }
 
-// GetLogPath
+// GetLogPath get log path
 func GetLogPath() string {
 	return logPath
 }

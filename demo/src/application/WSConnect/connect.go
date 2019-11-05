@@ -14,12 +14,12 @@ import (
 	"os/exec"
 )
 
-// WSServer
+// WSServer start a http server and listen given port
 type WSServer struct {
 	Port string
 }
 
-// ResourcesDir
+// ResourcesDir record dir of UI resources file
 const ResourcesDir = "D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/dp/demo/src/application/resources/app"
 
 var (
@@ -28,7 +28,7 @@ var (
 	err        error
 )
 
-// WebsocketConnect
+// WebsocketConnect start a http server and listen given port
 func WebsocketConnect(port string) error {
 	ws := WSServer{
 		Port: port,
@@ -40,8 +40,7 @@ func (ws *WSServer) start() error {
 	fmt.Println("> Start listening ... ")
 	http.HandleFunc("/", bindHTMLFile)
 	http.Handle("/ws", websocket.Handler(ws.handleMessages))
-	spfsd := http.StripPrefix("/static/", http.FileServer(http.Dir(ResourcesDir+"/static")))
-	http.Handle("/static/", spfsd)
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(ResourcesDir+"/static"))))
 	fmt.Println("> Listening at http://127.0.0.1:" + ws.Port)
 	if err = exec.Command("cmd", "/c start http://127.0.0.1:"+ws.Port).Start(); err != nil {
 		err = errors.Wrap(err, "auto-open url failed, port: "+ws.Port+". ")

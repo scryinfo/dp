@@ -3,7 +3,7 @@
 
 package definition
 
-// Preset
+// Preset pre-define structure for deserialize msg from client
 type Preset struct {
 	PublishId     string `json:"PublishId"`
 	TransactionId string `json:"TransactionId"`
@@ -23,25 +23,25 @@ type Preset struct {
 	Contract ModifyContractParam `json:"modifyContractParam"`
 }
 
-// Ids
+// Ids specific structure for publish func
 type Ids struct {
 	MetaDataId   string   `json:"metaDataId"`
 	ProofDataIds []string `json:"proofDataIds"`
 	DetailsId    string   `json:"detailsId"`
 }
 
-// Confirm
+// Confirm specific structure for confirm func
 type Confirm struct {
 	Truth bool `json:"confirmResult"`
 }
 
-// Verify
+// Verify specific structure for vote func
 type Verify struct {
 	Suggestion bool   `json:"suggestion"`
 	Comment    string `json:"comment"`
 }
 
-// Grade
+// Grade specific structure for grade func
 type Grade struct {
 	Verifier1Revert bool    `json:"verifier1Revert"`
 	Verifier1Grade  float64 `json:"verifier1Grade"`
@@ -49,12 +49,12 @@ type Grade struct {
 	Verifier2Grade  float64 `json:"verifier2Grade"`
 }
 
-// Arbitrate
+// Arbitrate specific structure for arbitrate func
 type Arbitrate struct {
 	ArbitrateResult bool `json:"arbitrateResult,omitempty"`
 }
 
-// ModifyContractParam
+// ModifyContractParam specific structure for MCP func
 type ModifyContractParam struct {
 	ParamName  string `json:"paramName"`
 	ParamValue string `json:"paramValue"`

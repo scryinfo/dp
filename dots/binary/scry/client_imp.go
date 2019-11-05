@@ -66,7 +66,7 @@ func getAccountComponent() (*auth.Account, error) {
 	return a, nil
 }
 
-// CreateScryClient
+// CreateScryClient create a new Client with a new address
 func CreateScryClient(password string, chainWrapper ChainWrapper) (Client, error) {
 	a, err := getAccountComponent()
 	if err != nil {

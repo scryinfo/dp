@@ -21,7 +21,7 @@ import (
 	"time"
 )
 
-// Callbacks
+// Callbacks encapsulate event handler, current user and some components
 type Callbacks struct {
 	CurUser      scry2.Client
 	EventNames   []string
@@ -38,11 +38,11 @@ type cbsConfig struct {
 }
 
 const (
-	// CBsTypeId
+	// CBsTypeId callbacks type id
 	CBsTypeId = "36b2b9b7-1559-4d57-a388-f8224072a5d1"
 )
 
-// Create
+// Create dot.Create
 func (c *Callbacks) Create(l dot.Line) error {
 	c.FlagChan = make(chan bool, 10)
 
@@ -104,7 +104,7 @@ func newCBsDot(conf interface{}) (dot.Dot, error) {
 	return d, err
 }
 
-// CBsTypeLive
+// CBsTypeLive add a dot component to dot.line with 'line.PreAdd()'
 func CBsTypeLive() []*dot.TypeLives {
 	return []*dot.TypeLives{
 		{
@@ -647,7 +647,7 @@ func (c *Callbacks) makeTxWithDataDetails(tx *definition.Transaction, pubId stri
 	return true
 }
 
-// UpdateSlice
+// UpdateSlice update slice
 func UpdateSlice(bs []byte, str, mode string) (result []byte, err error) {
 	var ss []string
 	if bs != nil {

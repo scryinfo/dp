@@ -3,7 +3,7 @@
 
 package storage
 
-// Storage
+// Storage define storage's behaviours
 type Storage interface {
 	Init(nodeAddr string) error
 	Save(value []byte) (string, error)

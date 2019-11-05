@@ -19,7 +19,7 @@ const (
 	TOKEN_EVT_APPROVAL = "Approval"
 )
 
-// ExecuteEvents
+// ExecuteEvents execute event scanned
 func ExecuteEvents(dataChannel chan events.Event, externalEventRepo *EventRepository) {
 	defer func() {
 		if err := recover(); err != nil {

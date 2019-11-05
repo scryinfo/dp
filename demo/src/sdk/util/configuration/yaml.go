@@ -10,7 +10,7 @@ import (
 	"reflect"
 )
 
-// GetYAMLStructure
+// GetYAMLStructure get yaml structure
 func GetYAMLStructure(fileAddr string, v interface{}) (interface{}, error) {
 	yf, err := ioutil.ReadFile(fileAddr)
 	if err != nil {
@@ -27,7 +27,7 @@ func GetYAMLStructure(fileAddr string, v interface{}) (interface{}, error) {
 	return conf, nil
 }
 
-/* SaveChanges
+/* SaveChanges save changes
    This function will delete items in .yaml file which not in structure.go,
    so make sure items in structure.go is not less than in .yaml file.
 */

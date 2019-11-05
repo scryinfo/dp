@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	// ListenerTypeId
+	// ListenerTypeId listener type id
 	ListenerTypeId = "9ff2cb44-e73a-4a53-add4-3166954983d7"
 )
 
@@ -40,7 +40,7 @@ func ListenerTypeLive() *dot.TypeLives {
 	}
 }
 
-// Create
+// Create dot.Create
 func (c *Listener) Create(l dot.Line) error {
 	c.builder = NewScanBuilder()
 	return nil
@@ -90,7 +90,7 @@ func (c *Listener) ListenEvent(
 	return true
 }
 
-// SetFromBlock
+// SetFromBlock set from block
 func (c *Listener) SetFromBlock(from uint64) {
 	if c.builder != nil {
 		c.builder.SetFrom(from)

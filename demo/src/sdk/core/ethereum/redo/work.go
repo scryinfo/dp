@@ -12,10 +12,10 @@ import (
 	"time"
 )
 
-// Job
+// Job job
 type Job func(*RedoCtx)
 
-// RedoCtx
+// RedoCtx redo ctx
 type RedoCtx struct {
 	delayBeforeNextLoop time.Duration
 	stopRedo            bool
@@ -28,22 +28,22 @@ func newCtx(duration time.Duration) *RedoCtx {
 	}
 }
 
-// SetDelayBeforeNext
+// SetDelayBeforeNext set delay before next
 func (ctx *RedoCtx) SetDelayBeforeNext(newDuration time.Duration) {
 	ctx.delayBeforeNextLoop = newDuration
 }
 
-// StartNextRightNow
+// StartNextRightNow set delay before next = 0
 func (ctx *RedoCtx) StartNextRightNow() {
 	ctx.SetDelayBeforeNext(time.Duration(0))
 }
 
-// StopRedo
+// StopRedo stop redo
 func (ctx *RedoCtx) StopRedo() {
 	ctx.stopRedo = true
 }
 
-// WrapFunc
+// WrapFunc wrap func
 func WrapFunc(work func()) Job {
 	return func(ctx *RedoCtx) {
 		work()

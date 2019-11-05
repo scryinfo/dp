@@ -29,13 +29,13 @@ var (
 	reflectBigInt  = reflect.TypeOf(new(big.Int))
 )
 
-// Progress
+// Progress progress
 type Progress struct {
 	From uint64
 	To   uint64
 }
 
-// Builder
+// Builder builder
 type Builder struct {
 	es       *eventScanner
 	interval time.Duration
@@ -48,7 +48,7 @@ func NewScanBuilder() *Builder {
 	}
 }
 
-// SetClient
+// SetClient set client
 func (b *Builder) SetClient(conn *ethclient.Client) *Builder {
 	b.es.conn = conn
 	return b
@@ -68,43 +68,43 @@ func (b *Builder) SetContract(
 	return b
 }
 
-// SetGracefulExit
+// SetGracefulExit set graceful exit
 func (b *Builder) SetGracefulExit(yes bool) *Builder {
 	b.es.GracefulExit = yes
 	return b
 }
 
-// SetBlockMargin
+// SetBlockMargin set block margin
 func (b *Builder) SetBlockMargin(margin uint64) *Builder {
 	b.es.marginBlock = margin
 	return b
 }
 
-// SetFrom
+// SetFrom set from
 func (b *Builder) SetFrom(f uint64) *Builder {
 	b.es.From = f
 	return b
 }
 
-// SetStep
+// SetStep set step
 func (b *Builder) SetStep(f uint64) *Builder {
 	b.es.StepLength = f
 	return b
 }
 
-// SetTo
+// SetTo set to
 func (b *Builder) SetTo(f uint64) *Builder {
 	b.es.To = f
 	return b
 }
 
-// SetProgressChan
+// SetProgressChan set progress chan
 func (b *Builder) SetProgressChan(pc chan<- Progress) *Builder {
 	b.es.ProgressChan = pc
 	return b
 }
 
-// SetDataChan
+// SetDataChan set data chan
 func (b *Builder) SetDataChan(
 	dataCh chan<- event.Event,
 	errChan chan<- error,
@@ -113,13 +113,13 @@ func (b *Builder) SetDataChan(
 	return b
 }
 
-// SetInterval
+// SetInterval set interval
 func (b *Builder) SetInterval(interval time.Duration) *Builder {
 	b.interval = interval
 	return b
 }
 
-// BuildAndRun
+// BuildAndRun build and run
 func (b *Builder) BuildAndRun() (*Receipt, error) {
 	if err := b.Build(); err != nil {
 		return nil, err
@@ -133,7 +133,7 @@ func (b *Builder) BuildAndRun() (*Receipt, error) {
 	return recipet, nil
 }
 
-// Build
+// Build build
 func (b *Builder) Build() error {
 	if b.es.DataChan == nil {
 		dot.Logger().Errorln("data channel should not be empty")

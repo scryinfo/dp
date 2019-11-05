@@ -21,7 +21,7 @@ const (
 	TokenEvtApproval = "Approval"
 )
 
-// Executor
+// Executor executor
 type Executor struct {
 	eventChan chan event.Event
 	repo      *event.Repository
@@ -46,12 +46,7 @@ func ExecutorTypeLive() *dot.TypeLives {
 	}
 }
 
-// Create
-func (c *Executor) Create(l dot.Line) error {
-	return nil
-}
-
-// ExecuteEvents
+// ExecuteEvents execute events
 func (c *Executor) ExecuteEvents(ce chan event.Event, r *event.Repository, appId string) {
 	defer func() {
 		if er := recover(); er != nil {

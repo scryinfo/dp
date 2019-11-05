@@ -7,31 +7,30 @@ import (
 	"encoding/json"
 )
 
-// JSONObj
+// JSONObj json obj
 type JSONObj map[string]interface{}
 
-// NewJSONObj
+// NewJSONObj create a new JSONObj
 func NewJSONObj() JSONObj {
 	return make(JSONObj)
 }
 
-// Set
+// Set add k-v to map
 func (obj JSONObj) Set(name string, val interface{}) {
 	obj[name] = val
 }
 
-// Get
+// Get value from map
 func (obj JSONObj) Get(name string) interface{} {
 	return obj[name]
 }
 
-// String
 func (obj JSONObj) String() string {
 	data, _ := json.Marshal(obj)
 	return string(data)
 }
 
-// Unmarshal
+// Unmarshal unmarshal
 func (obj JSONObj) Unmarshal(objPtr interface{}) error {
 	data, err := json.Marshal(obj)
 	if err != nil {

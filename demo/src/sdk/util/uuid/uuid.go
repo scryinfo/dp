@@ -7,7 +7,7 @@ import (
 	"github.com/chilts/sid"
 )
 
-// GenerateUUID
+// GenerateUUID generate uuid
 func GenerateUUID() string {
 	return sid.Id()
 }

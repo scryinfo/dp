@@ -4,7 +4,7 @@ import (
 	"github.com/scryinfo/dot/dot"
 )
 
-// Account
+// Account accounts
 type Account struct {
 	Address    string `gorm:"primary_key"`
 	Nickname   string
@@ -14,7 +14,7 @@ type Account struct {
 	Arbitrate  []byte // []string, json serialize
 }
 
-// DataList
+// DataList data_lists
 type DataList struct {
 	PublishId           string `gorm:"primary_key"`
 	Title               string
@@ -29,7 +29,7 @@ type DataList struct {
 	CreatedTime int64 `json:"-"`
 }
 
-// Transaction
+// Transaction transactions
 type Transaction struct {
 	TransactionId               string `gorm:"primary_key"`
 	Buyer                       string
@@ -57,7 +57,7 @@ type Transaction struct {
 	CreatedTime int64 `json:"-"`
 }
 
-// Event
+// Event events
 type Event struct {
 	Id           int    `gorm:"primary_key"`
 	NotifyTo     []byte // []string, json serialize

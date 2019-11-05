@@ -15,14 +15,14 @@ var (
 	builder *events.Builder
 )
 
-// ContractInfo
+// ContractInfo contains contract address, abi and events
 type ContractInfo struct {
 	Address string
 	Abi     string
 	Events  []string
 }
 
-// ListenEvent
+// ListenEvent listen event
 func ListenEvent(conn *ethclient.Client, contracts []ContractInfo, fromBlock uint64, interval time.Duration,
 	dataChannel chan events.Event, errorChannel chan error) bool {
 	rv := true
@@ -48,7 +48,7 @@ func ListenEvent(conn *ethclient.Client, contracts []ContractInfo, fromBlock uin
 	recp, err := builder.SetClient(conn).
 		SetFrom(fromBlock).
 		SetTo(0).
-		SetGracefullExit(true).
+        SetGracefullyExit(true).
 		SetDataChan(dataChannel, errorChannel).
 		SetInterval(interval).
 		BuildAndRun()
@@ -62,7 +62,7 @@ func ListenEvent(conn *ethclient.Client, contracts []ContractInfo, fromBlock uin
 	return rv
 }
 
-// SetFromBlock
+// SetFromBlock set from block
 func SetFromBlock(from uint64) {
 	if builder != nil {
 		builder.SetFrom(from)

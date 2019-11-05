@@ -12,7 +12,7 @@ import (
 	"strconv"
 )
 
-// SQLite
+// SQLite is an implement of Database, use SQLite
 type SQLite struct {
 	TableNames     []string
 	TableStructure []interface{}
@@ -33,7 +33,7 @@ const (
 // check if 'SQLite' struct implements 'Database' interface
 var _ Database = (*SQLite)(nil)
 
-// Create
+// Create dot.Create
 func (s *SQLite) Create(l dot.Line) error {
 	s.TableNames = []string{
 		"accounts",
@@ -72,7 +72,7 @@ func newSQLiteDot(conf interface{}) (dot.Dot, error) {
 	return d, err
 }
 
-// SQLiteTypeLive
+// SQLiteTypeLive add a dot component to dot.line with 'line.PreAdd()'
 func SQLiteTypeLive() *dot.TypeLives {
 	return &dot.TypeLives{
 		Meta: dot.Metadata{
@@ -84,7 +84,7 @@ func SQLiteTypeLive() *dot.TypeLives {
 	}
 }
 
-// Start
+// Start dot.Start
 func (s *SQLite) Start(ignore bool) error {
 	return s.Init()
 }
@@ -106,8 +106,9 @@ func (s *SQLite) Init() error {
 	return nil
 }
 
-// Basic CRUD
-// Insert
+// Basic CRUD, support one item and a slice of items
+
+// Insert add record(s) to db
 func (s *SQLite) Insert(v interface{}) (int64, error) {
 	db, err := gorm.Open(DB, s.config.DBName)
 	if err != nil {
@@ -135,7 +136,7 @@ func (s *SQLite) Insert(v interface{}) (int64, error) {
 	return num, errors.Wrap(err, " error number: "+strconv.FormatInt(num+1, 10)+"th item. ")
 }
 
-// Read
+// Read find records matched from db
 func (s *SQLite) Read(out interface{}, order, query string, sql ...interface{}) (int64, error) {
 	db, err := gorm.Open(DB, s.config.DBName)
 	if err != nil {
@@ -148,7 +149,7 @@ func (s *SQLite) Read(out interface{}, order, query string, sql ...interface{}) 
 	return t.RowsAffected, t.Error
 }
 
-// Update
+// Update update specific item(s) on matched record(s)
 func (s *SQLite) Update(out interface{}, m map[string]interface{}, query string, sql ...interface{}) (int64, error) {
 	db, err := gorm.Open(DB, s.config.DBName)
 	if err != nil {
@@ -161,7 +162,7 @@ func (s *SQLite) Update(out interface{}, m map[string]interface{}, query string,
 	return t.RowsAffected, t.Error
 }
 
-// Delete
+// Delete remove matched records
 func (s *SQLite) Delete(typ interface{}, query string, sql ...interface{}) (int64, error) {
 	db, err := gorm.Open(DB, s.config.DBName)
 	if err != nil {
@@ -174,20 +175,20 @@ func (s *SQLite) Delete(typ interface{}, query string, sql ...interface{}) (int6
 	return t.RowsAffected, t.Error
 }
 
-// ReadPage todo: wait js implement
+// ReadPage todo: wait client implement
 func (s *SQLite) ReadPage() error {
 	return nil
 }
 
 // UpdateWithoutHooks update without hooks
-func (s *SQLite) UpdateWithoutHooks(type_ interface{}, m map[string]interface{}, query string, sql ...interface{}) (int64, error) {
+func (s *SQLite) UpdateWithoutHooks(typ interface{}, m map[string]interface{}, query string, sql ...interface{}) (int64, error) {
 	db, err := gorm.Open(DB, s.config.DBName)
 	if err != nil {
 		dot.Logger().Errorln("Database connect failed. ", zap.NamedError("in UpdateWithoutHooks()", err))
 	}
 	defer db.Close()
 
-	t := db.Model(type_).Where(query, sql...).Updates(m)
+	t := db.Model(typ).Where(query, sql...).Updates(m)
 
 	return t.RowsAffected, t.Error
 }

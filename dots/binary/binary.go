@@ -34,7 +34,7 @@ const (
 	maxChannelEventNum        = 10000
 )
 
-// Binary
+// Binary encapsulate SDK
 type Binary struct {
 	chainWrapper scry.ChainWrapper
 	config       BinaryConfig
@@ -50,7 +50,7 @@ type Binary struct {
 	Grpc         grpc.BinaryGrpcServer `dot:"96a6e2b5-f0b6-48dc-b0ff-2d9f2c5c9f1d"`
 }
 
-// BinaryConfig
+// BinaryConfig config
 type BinaryConfig struct {
 	AppId                string `json:"appId"`
 	EthSrvAddr           string `json:"ethServiceAddr"`
@@ -123,7 +123,7 @@ func BinTypeLiveWithGrpc() []*dot.TypeLives {
 	return t
 }
 
-// Create
+// Create dot.Create
 func (c *Binary) Create(l dot.Line) error {
 	c.contracts = c.getContracts(c.config.ProtocolContractAddr, c.config.TokenContractAddr)
 	c.subsRepo = event.NewRepository()
@@ -133,12 +133,12 @@ func (c *Binary) Create(l dot.Line) error {
 	return nil
 }
 
-// Config
+// Config get config
 func (c *Binary) Config() BinaryConfig {
 	return c.config
 }
 
-// Start
+// Start start SDK
 func (c *Binary) Start(ignore bool) error {
 	c.Subscriber.SetRepo(c.subsRepo)
 
@@ -174,17 +174,7 @@ func (c *Binary) Start(ignore bool) error {
 	return nil
 }
 
-// Stop
-func (c *Binary) Stop(ignore bool) error {
-	return nil
-}
-
-// Destroy
-func (c *Binary) Destroy(ignore bool) error {
-	return nil
-}
-
-// ChainWrapper
+// ChainWrapper get chain wrapper
 func (c *Binary) ChainWrapper() scry.ChainWrapper {
 	return c.chainWrapper
 }
@@ -216,7 +206,7 @@ func (c *Binary) getContracts(
 	return contracts
 }
 
-// StartEngine
+// StartEngine start execute and listen event
 func (c *Binary) StartEngine() (*ethclient.Client, error) {
 	logger := dot.Logger()
 
@@ -244,7 +234,7 @@ func (c *Binary) StartEngine() (*ethclient.Client, error) {
 	return connector.conn, nil
 }
 
-// Connector
+// Connector connector
 type Connector struct {
 	ctx  context.Context
 	conn *ethclient.Client

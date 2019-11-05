@@ -18,11 +18,11 @@ import (
 )
 
 var (
-	// GAS_LIMIT
+	// GAS_LIMIT gas limit
 	GAS_LIMIT uint64 = 21000
 )
 
-// TransactParams
+// TransactParams tx params in go
 type TransactParams struct {
 	From     common.Address
 	Password string
@@ -30,7 +30,7 @@ type TransactParams struct {
 	Pending  bool
 }
 
-// DecodeKeystoreAddress
+// DecodeKeystoreAddress decode keystore address
 func DecodeKeystoreAddress(keyJsonStr []byte) string {
 	addr := struct {
 		Address string `json:"address"`
@@ -44,7 +44,7 @@ func DecodeKeystoreAddress(keyJsonStr []byte) string {
 	return addr.Address
 }
 
-// BuildTransactOpts
+// BuildTransactOpts build txOpts from txParams
 func BuildTransactOpts(txParams *TransactParams) *bind.TransactOpts {
 	opts := &bind.TransactOpts{
 		From:  txParams.From,
@@ -62,7 +62,7 @@ func BuildTransactOpts(txParams *TransactParams) *bind.TransactOpts {
 	return opts
 }
 
-// SignTransaction
+// SignTransaction sign tx
 func SignTransaction(signer types.Signer, address common.Address,
 	transaction *types.Transaction, password string) (*types.Transaction, error) {
 	h := signer.Hash(transaction)
@@ -78,7 +78,7 @@ func SignTransaction(signer types.Signer, address common.Address,
 	return transaction.WithSignature(signer, sign)
 }
 
-// BuildCallOpts
+// BuildCallOpts build callOpts
 func BuildCallOpts(txParams *TransactParams) *bind.CallOpts {
 	opts := &bind.CallOpts{
 		Pending:     txParams.Pending,
@@ -90,7 +90,7 @@ func BuildCallOpts(txParams *TransactParams) *bind.CallOpts {
 	return opts
 }
 
-// TransferEth
+// TransferEth transfer eth
 func TransferEth(from common.Address,
 	password string,
 	to common.Address,
@@ -152,7 +152,7 @@ func transact(opts *bind.TransactOpts, to common.Address, client *ethclient.Clie
 	return signedTx, nil
 }
 
-// GetEthBalance
+// GetEthBalance get eth balance
 func GetEthBalance(owner common.Address, client *ethclient.Client) (*big.Int, error) {
 	return client.BalanceAt(context.Background(), owner, nil)
 }

@@ -15,7 +15,7 @@ import (
 var accountManager *AccountManager
 var once sync.Once
 
-// GetAMInstance
+// GetAMInstance get am instance
 func GetAMInstance() *AccountManager {
 	once.Do(func() {
 		accountManager = &AccountManager{}
@@ -24,18 +24,18 @@ func GetAMInstance() *AccountManager {
 	return accountManager
 }
 
-// Account
+// Account account
 type Account struct {
 	Address string
 }
 
-// AccountManager
+// AccountManager manage accounts
 type AccountManager struct {
 	client   scryinfo.KeyServiceClient
 	accounts []*Account
 }
 
-// Initialize
+// Initialize dial ac node with grpc
 func (am *AccountManager) Initialize(asNodeAddr string) error {
 	cn, err := grpc.Dial(asNodeAddr, grpc.WithInsecure())
 	if err != nil {
@@ -51,7 +51,7 @@ func (am *AccountManager) Initialize(asNodeAddr string) error {
 	return nil
 }
 
-// CreateAccount
+// CreateAccount create a new account
 func (am *AccountManager) CreateAccount(password string) (*Account, error) {
 
 	defer func() {
@@ -82,7 +82,7 @@ func (am *AccountManager) CreateAccount(password string) (*Account, error) {
 	return newAccount, nil
 }
 
-// AuthAccount
+// AuthAccount verify address and password given is matched
 func (am AccountManager) AuthAccount(address string, password string) (bool, error) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -109,12 +109,12 @@ func (am AccountManager) AuthAccount(address string, password string) (bool, err
 	return rv, nil
 }
 
-// GetAccounts
+// GetAccounts get accounts
 func (am AccountManager) GetAccounts() []*Account {
 	return am.accounts
 }
 
-// AccountValid
+// AccountValid verify if an address is valid
 func (am AccountManager) AccountValid(address string) bool {
 	for _, v := range am.accounts {
 		if v.Address == address {
@@ -125,7 +125,7 @@ func (am AccountManager) AccountValid(address string) bool {
 	return false
 }
 
-// Encrypt
+// Encrypt encrypt plain text
 func (am AccountManager) Encrypt(
 	plainText []byte,
 	address string) ([]byte, error) {
@@ -155,7 +155,7 @@ func (am AccountManager) Encrypt(
 	return out.Data, nil
 }
 
-// Decrypt
+// Decrypt decrypt cipher text
 func (am AccountManager) Decrypt(
 	cipherText []byte,
 	address string,
@@ -191,7 +191,7 @@ func (am AccountManager) Decrypt(
 	return out.Data, nil
 }
 
-// ReEncrypt
+// ReEncrypt decrypt cipher text and re-encrypt it with the other address
 func (am AccountManager) ReEncrypt(
 	cipherText []byte,
 	address1 string,
@@ -236,7 +236,7 @@ func (am AccountManager) ReEncrypt(
 	return out.Data, nil
 }
 
-// SignTransaction
+// SignTransaction sign tx
 func (am AccountManager) SignTransaction(message []byte, address string, password string) ([]byte, error) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -269,7 +269,7 @@ func (am AccountManager) SignTransaction(message []byte, address string, passwor
 	return out.Data, nil
 }
 
-// ImportAccount
+// ImportAccount import account from key(json)
 func (am AccountManager) ImportAccount(
 	keyJson []byte,
 	oldPassword string,

@@ -22,19 +22,18 @@ const (
 	DefaultGasLimit = 3000000
 )
 
-// Transaction
+// Transaction contains gas price, gas limit and use account component
 type Transaction struct {
 	Config  configTransaction
 	Account *auth.Account `dot:"ca1c6ce4-182b-430a-9813-caeccf83f8ab"`
 }
 
-// configTransaction
 type configTransaction struct {
 	DefaultGasPrice *big.Int `json:"gasPrice"`
 	DefaultGasLimit uint64   `json:"gasLimit"`
 }
 
-// TxParams
+// TxParams define what a tx like in go
 type TxParams struct {
 	From     common.Address
 	Password string
@@ -77,12 +76,12 @@ func TxTypeLive() []*dot.TypeLives {
 	}
 }
 
-// Create
+// Create dot.Create
 func (c *Transaction) Create(l dot.Line) error {
 	return nil
 }
 
-// BuildTransactOpts
+// BuildTransactOpts make txOpts from txParams
 func (c *Transaction) BuildTransactOpts(txParams *TxParams) *bind.TransactOpts {
 	gp := txParams.GasPrice
 	if gp == nil {
@@ -114,7 +113,7 @@ func (c *Transaction) BuildTransactOpts(txParams *TxParams) *bind.TransactOpts {
 	return opts
 }
 
-// SignTransaction
+// SignTransaction sign tx
 func (c *Transaction) SignTransaction(
 	signer types.Signer,
 	address common.Address,
@@ -134,7 +133,7 @@ func (c *Transaction) SignTransaction(
 	return transaction.WithSignature(signer, sign)
 }
 
-// BuildCallOpts
+// BuildCallOpts build call opts
 func (c *Transaction) BuildCallOpts(txParams *TxParams) *bind.CallOpts {
 	opts := &bind.CallOpts{
 		Pending:     txParams.Pending,
@@ -146,7 +145,7 @@ func (c *Transaction) BuildCallOpts(txParams *TxParams) *bind.CallOpts {
 	return opts
 }
 
-// Transact
+// Transact send a transaction
 func (c *Transaction) Transact(
 	opts *bind.TransactOpts,
 	to common.Address,

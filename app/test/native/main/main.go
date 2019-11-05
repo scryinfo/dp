@@ -71,7 +71,7 @@ func main() {
 	})
 }
 
-// Start
+// Start start test console
 func Start() {
 	InitUsers()
 
@@ -80,7 +80,7 @@ func Start() {
 	StartTestingWithoutVerify()
 }
 
-// InitUsers
+// InitUsers init users with eth and token
 func InitUsers() {
 	var err error
 	seller, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(10000000))
@@ -109,13 +109,13 @@ func InitUsers() {
 	//}
 }
 
-// StartTestingWithoutVerify
+// StartTestingWithoutVerify start test without verify
 func StartTestingWithoutVerify() {
 	subscribeAllEvents()
 	SellerPublishData()
 }
 
-// CreateClientWithToken
+// CreateClientWithToken create a scry Client with eth and token
 func CreateClientWithToken(token *big.Int, eth *big.Int) (scry.Client, error) {
 	client, err := scry.CreateScryClient(clientPassword, chain)
 	if err != nil {
@@ -152,7 +152,7 @@ func CreateClientWithToken(token *big.Int, eth *big.Int) (scry.Client, error) {
 	return client, nil
 }
 
-// SellerPublishData
+// SellerPublishData simulate seller publish data
 func SellerPublishData() {
 	//publish data
 	metaData := []byte("QmcHXkMXwgvZP56tsUJNtcfedojHkqrDsgkC4fbsBM1zre")
@@ -190,7 +190,7 @@ func subscribeAllEvents() {
 	_ = buyer.SubscribeEvent("TransactionCreate", onTransactionCreate)
 }
 
-// BuyerApproveTransfer
+// BuyerApproveTransfer simulate buyer approve contract transfer token from him
 func BuyerApproveTransfer() {
 	txParam := transaction.TxParams{
 		From:     common.HexToAddress(buyer.Account().Addr),
@@ -205,7 +205,7 @@ func BuyerApproveTransfer() {
 	}
 }
 
-// PrepareToBuy
+// PrepareToBuy simulate buyer create a tx
 func PrepareToBuy(publishId string) {
 	txParam := transaction.TxParams{
 		From:     common.HexToAddress(buyer.Account().Addr),
@@ -219,7 +219,7 @@ func PrepareToBuy(publishId string) {
 	}
 }
 
-// Buy
+// Buy simulate buyer confirm to purchase specific data
 func Buy(txId *big.Int) {
 	txParam := transaction.TxParams{
 		From:     common.HexToAddress(buyer.Account().Addr),

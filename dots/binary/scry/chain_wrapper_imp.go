@@ -31,7 +31,7 @@ type chainWrapperImp struct {
 // check if 'chainWrapperImp' implements 'ChainWrapper' interface.
 var _ ChainWrapper = (*chainWrapperImp)(nil)
 
-// NewChainWrapper
+// NewChainWrapper create a new chain wrapper
 func NewChainWrapper(protocolcontractinterfaceAddress common.Address,
 	tokencontractinterfaceAddress common.Address,
 	clientConn *ethclient.Client,
@@ -118,7 +118,7 @@ func ipfsHashToBytes32(src string) ([32]byte, error) {
 	return hashArray2, nil
 }
 
-// Bytes32ToIpfsHash
+// Bytes32ToIpfsHash bytes32 to ipfs hash
 func Bytes32ToIpfsHash(value [32]byte) (string, error) {
 	byteArray := [34]byte{18, 32}
 	copy(byteArray[2:], value[:])

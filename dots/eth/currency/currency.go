@@ -14,11 +14,11 @@ import (
 )
 
 const (
-	// CurrTypeId
+	// CurrTypeId currency type id
 	CurrTypeId = "f76a1aac-ff18-479b-9d51-0166a858bec9"
 )
 
-// Currency
+// Currency use tx component
 type Currency struct {
 	Tx *transaction.Transaction `dot:"a3e1a88e-f84e-4285-b5ff-54a16fdcd44c"`
 }
@@ -45,12 +45,7 @@ func CurrTypeLive() []*dot.TypeLives {
 	return t
 }
 
-// Create
-func (c *Currency) Create(l dot.Line) error {
-	return nil
-}
-
-// TransferEth
+// TransferEth transfer eth
 func (c *Currency) TransferEth(
 	from common.Address,
 	password string,
@@ -72,7 +67,7 @@ func (c *Currency) TransferEth(
 	return tx, err
 }
 
-// GetEthBalance
+// GetEthBalance get eth balance
 func (c *Currency) GetEthBalance(
 	owner common.Address,
 	client *ethclient.Client,

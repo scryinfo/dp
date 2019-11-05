@@ -5,33 +5,33 @@ package definition
 
 import "encoding/json"
 
-// MessageIn
+// MessageIn deserialize msg received from client
 type MessageIn struct {
 	Name    string          `json:"Name"`
 	Payload json.RawMessage `json:"Payload"`
 }
 
-// MessageOut
+// MessageOut serialize msg send to client
 type MessageOut struct {
 	Name    string      `json:"Name"`
 	Payload interface{} `json:"Payload,omitempty"`
 }
 
-// PresetFunc
+// PresetFunc type define
 type PresetFunc = func(*MessageIn) (interface{}, error)
 
-// AccInfo
+// AccInfo acc
 type AccInfo struct {
 	Account  string `json:"interface"`
 	Password string `json:"password"`
 }
 
-// SDKInitData
+// SDKInitData from block
 type SDKInitData struct {
 	FromBlock float64 `json:"fromBlock"`
 }
 
-// PublishData
+// PublishData publish data
 type PublishData struct {
 	Price         float64 `json:"price"`
 	SupportVerify bool    `json:"supportVerify"`
@@ -39,14 +39,14 @@ type PublishData struct {
 	IDs           IDs     `json:"IDs"`
 }
 
-// IDs
+// IDs publish ids
 type IDs struct {
 	MetaDataID   string   `json:"metaDataID"`
 	ProofDataIDs []string `json:"proofDataIDs"`
 	DetailsID    string   `json:"detailsID"`
 }
 
-// OnPublish
+// OnPublish publish event
 type OnPublish struct {
 	Title               string   `json:"Title"`
 	Keys                string   `json:"Keys"`
@@ -60,24 +60,24 @@ type OnPublish struct {
 	Block               uint64
 }
 
-// BuyData
+// BuyData advance purchase
 type BuyData struct {
 	Password     string       `json:"password"`
 	StartVerify  bool         `json:"startVerify"`
 	SelectedData SelectedData `json:"pID"`
 }
 
-// SelectedData
+// SelectedData selected data
 type SelectedData struct {
 	PublishID string `json:"PublishID"`
 }
 
-// OnApprove
+// OnApprove on approve
 type OnApprove struct {
 	Block uint64
 }
 
-// OnVerifiersChosen
+// OnVerifiersChosen on verifiers chosen
 type OnVerifiersChosen struct {
 	TransactionID  string
 	PublishID      string
@@ -86,7 +86,7 @@ type OnVerifiersChosen struct {
 	Block          uint64
 }
 
-// OnTransactionCreate
+// OnTransactionCreate on tc
 type OnTransactionCreate struct {
 	TransactionID  string
 	PublishID      string
@@ -97,23 +97,23 @@ type OnTransactionCreate struct {
 	Block          uint64
 }
 
-// Prepared
+// Prepared deserialize proof file extensions
 type Prepared struct {
 	Extensions []string `json:"extensions"`
 }
 
-// PurchaseData
+// PurchaseData confirm purchase
 type PurchaseData struct {
 	Password   string       `json:"password"`
 	SelectedTx SelectedTxPD `json:"tID"`
 }
 
-// SelectedTxPD
+// SelectedTxPD selected tx
 type SelectedTxPD struct {
 	TransactionID string `json:"TransactionID"`
 }
 
-// OnPurchase
+// OnPurchase on purchase
 type OnPurchase struct {
 	TransactionID           string
 	PublishID               string
@@ -124,13 +124,13 @@ type OnPurchase struct {
 	Block                   uint64
 }
 
-// ReEncryptData
+// ReEncryptData re-encrypt data
 type ReEncryptData struct {
 	Password   string        `json:"password"`
 	SelectedTx SelectedTxRED `json:"tID"`
 }
 
-// SelectedTxRED
+// SelectedTxRED selected tx
 type SelectedTxRED struct {
 	TransactionID           string `json:"TransactionID"`
 	Buyer                   string `json:"Buyer"`
@@ -138,7 +138,7 @@ type SelectedTxRED struct {
 	MetaDataIDEncWithSeller []byte `json:"MetaDataIDEncWithSeller"`
 }
 
-// OnReadyForDownload
+// OnReadyForDownload on RFD
 type OnReadyForDownload struct {
 	TransactionID          string
 	MetaDataIdEncWithBuyer []byte
@@ -147,32 +147,32 @@ type OnReadyForDownload struct {
 	Block                  uint64
 }
 
-// DecryptData
+// DecryptData decrypt data
 type DecryptData struct {
 	Password   string       `json:"password"`
 	SelectedTx SelectedTxDD `json:"tID"`
 }
 
-// SelectedTxDD
+// SelectedTxDD selected tx
 type SelectedTxDD struct {
 	MetaDataIDEncrypt []byte `json:"MetaDataIDEncrypt"`
 	MetaDataExtension string `json:"MetaDataExtension"`
 	User              string `json:"User"`
 }
 
-// ConfirmData
+// ConfirmData confirm data
 type ConfirmData struct {
 	Password   string       `json:"password"`
 	SelectedTx SelectedTxCD `json:"tID"`
 	Truth      bool         `json:"confirmData"`
 }
 
-// SelectedTxCD
+// SelectedTxCD selected tx
 type SelectedTxCD struct {
 	TransactionID string `json:"TransactionID"`
 }
 
-// OnClose
+// OnClose on close
 type OnClose struct {
 	TransactionID string
 	UserIndex     string
@@ -180,30 +180,30 @@ type OnClose struct {
 	Block         uint64
 }
 
-// RegisterVerifierData
+// RegisterVerifierData register
 type RegisterVerifierData struct {
 	Password string `json:"password"`
 }
 
-// OnRegisterAsVerifier
+// OnRegisterAsVerifier on register
 type OnRegisterAsVerifier struct {
 	Block uint64
 }
 
-// VerifyData
+// VerifyData verify
 type VerifyData struct {
 	Password      string `json:"password"`
 	TransactionID string `json:"tID"`
 	Verify        Verify `json:"verify"`
 }
 
-// Verify
+// Verify verify
 type Verify struct {
 	Suggestion bool   `json:"suggestion"`
 	Comment    string `json:"comment"`
 }
 
-// OnVote
+// OnVote on vote
 type OnVote struct {
 	TransactionID    string
 	VerifierResponse string
@@ -212,19 +212,19 @@ type OnVote struct {
 	Block            uint64
 }
 
-// CreditData
+// CreditData credit
 type CreditData struct {
 	Password   string        `json:"password"`
 	SelectedTx SelectedTxCrD `json:"tID"`
 	Credit     Credit        `json:"credit"`
 }
 
-// SelectedTxCrD
+// SelectedTxCrD selected tx
 type SelectedTxCrD struct {
 	TransactionID string `json:"TransactionID"`
 }
 
-// Credit
+// Credit credit
 type Credit struct {
 	Verifier1Revert bool    `json:"verifier1Revert"`
 	Verifier1Credit float64 `json:"verifier1Credit"`
@@ -232,7 +232,7 @@ type Credit struct {
 	Verifier2Credit float64 `json:"verifier2Credit"`
 }
 
-// OnVerifierDisable
+// OnVerifierDisable on verifier disabled
 type OnVerifierDisable struct {
 	Block uint64
 }
