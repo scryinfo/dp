@@ -65,30 +65,7 @@ export default {
         },
 
         initTxS: function () {
-            connect.send({Name: "getTxSell", Payload: ""}, function (payload, _this) {
-                _this.$store.state.transactionsell = [];
-                for (let i = 0; i < payload.length; i++) {
-                    _this.$store.state.transactionsell.push({
-                        PublishId: payload[i].PublishId,
-                        TransactionId: payload[i].TransactionId,
-                        State: utils.stateEnum[parseInt(payload[i].State)],
-                        Title: payload[i].Title,
-                        Price: payload[i].Price,
-                        Keys: payload[i].Keys,
-                        Description: payload[i].Description,
-                        ArbitrateResult: false,
-                        SVDisplay: utils.setSupportVerify(payload[i].SupportVerify),
-                        NVDisplay: utils.setNeedVerify(payload[i].StartVerify)
-                    })
-                }
-            }, function (payload, _this) {
-                console.log("获取当前用户为卖方的交易列表失败：", payload);
-                _this.$alert(payload, "获取当前用户为卖方的交易列表失败！", {
-                    confirmButtonText: "关闭",
-                    showClose: false,
-                    type: "error"
-                });
-            });
+            utils.reacquireData("txs");
         },
 
         reEncrypt:function (pwd) {
@@ -120,8 +97,6 @@ export default {
     },
     created () {
         this.total = this.$store.state.transactionsell.length;
-
-        this.initTxS();
     }
 }
 </script>

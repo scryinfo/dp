@@ -14,7 +14,6 @@ import (
 	"github.com/scryinfo/dp/demo/src/sdk/settings"
 	"github.com/scryinfo/dp/demo/src/sdk/util/accounts"
 	"github.com/scryinfo/dp/demo/src/sdk/util/uuid"
-	"github.com/scryinfo/dp/dots/service"
 	rlog "github.com/sirupsen/logrus"
 	"math/big"
 )
@@ -25,9 +24,8 @@ var (
 	scryToken    *contractinterface.ScryToken
 )
 
-func Initialize(protocolContractAddress common.Address, tokenContractAddress common.Address, clientConn *ethclient.Client) error {
-	var err error = nil
-
+// Initialize
+func Initialize(protocolContractAddress common.Address, tokenContractAddress common.Address, clientConn *ethclient.Client) (err error) {
 	scryProtocol, err = contractinterface.NewScryProtocol(protocolContractAddress, clientConn)
 	if err != nil {
 		rlog.Error("failed to initialize protocol contract interface wrapper.", err)
@@ -44,6 +42,7 @@ func Initialize(protocolContractAddress common.Address, tokenContractAddress com
 	return nil
 }
 
+// Publish
 func Publish(txParams *op.TransactParams, price *big.Int, metaDataID []byte, proofDataIDs []string,
 	proofNum int, detailsID string, supportVerify bool) (string, error) {
 	defer func() {
@@ -56,7 +55,7 @@ func Publish(txParams *op.TransactParams, price *big.Int, metaDataID []byte, pro
 	publishId := uuid.GenerateUUID()
 
 	pdIDs := make([][32]byte, proofNum)
-	var err error = nil
+	var err error
 	for i := 0; i < proofNum; i++ {
 		pdIDs[i], err = ipfsHashToBytes32(proofDataIDs[i])
 		if err != nil {
@@ -65,7 +64,7 @@ func Publish(txParams *op.TransactParams, price *big.Int, metaDataID []byte, pro
 		}
 	}
 
-	encMetaId, err := service.GetAMIns().Encrypt(metaDataID, txParams.From.String())
+	encMetaId, err := accounts.GetAMInstance().Encrypt(metaDataID, txParams.From.String())
 	if err != nil {
 		rlog.Error("failed to encrypt meta data hash, error: ", err)
 		return "", err
@@ -96,6 +95,7 @@ func ipfsHashToBytes32(src string) ([32]byte, error) {
 	return hashArray2, nil
 }
 
+// Bytes32ToIpfsHash
 func Bytes32ToIpfsHash(value [32]byte) (string, error) {
 	byteArray := [34]byte{18, 32}
 	copy(byteArray[2:], value[:])
@@ -107,6 +107,7 @@ func Bytes32ToIpfsHash(value [32]byte) (string, error) {
 	return hash, nil
 }
 
+// PrepareToBuy
 func PrepareToBuy(txParams *op.TransactParams, publishId string, startVerify bool) error {
 	defer func() {
 		if err := recover(); err != nil {
@@ -122,6 +123,7 @@ func PrepareToBuy(txParams *op.TransactParams, publishId string, startVerify boo
 	return err
 }
 
+// BuyData
 func BuyData(txParams *op.TransactParams, txId *big.Int) error {
 	tx, err := scryProtocol.BuyData(op.BuildTransactOpts(txParams), getAppSeqNo(), txId)
 	if err == nil {
@@ -131,6 +133,7 @@ func BuyData(txParams *op.TransactParams, txId *big.Int) error {
 	return err
 }
 
+// CancelTransaction
 func CancelTransaction(txParams *op.TransactParams, txId *big.Int) error {
 	tx, err := scryProtocol.CancelTransaction(op.BuildTransactOpts(txParams), getAppSeqNo(), txId)
 	if err == nil {
@@ -140,6 +143,7 @@ func CancelTransaction(txParams *op.TransactParams, txId *big.Int) error {
 	return err
 }
 
+// SubmitMetaDataIdEncWithBuyer
 func SubmitMetaDataIdEncWithBuyer(txParams *op.TransactParams, txId *big.Int, encyptedMetaDataId []byte) error {
 	tx, err := scryProtocol.SubmitMetaDataIdEncWithBuyer(op.BuildTransactOpts(txParams), getAppSeqNo(), txId, encyptedMetaDataId)
 	if err == nil {
@@ -149,6 +153,7 @@ func SubmitMetaDataIdEncWithBuyer(txParams *op.TransactParams, txId *big.Int, en
 	return err
 }
 
+// ConfirmDataTruth
 func ConfirmDataTruth(txParams *op.TransactParams, txId *big.Int, truth bool) error {
 	tx, err := scryProtocol.ConfirmDataTruth(op.BuildTransactOpts(txParams), getAppSeqNo(), txId, truth)
 	if err == nil {
@@ -158,6 +163,7 @@ func ConfirmDataTruth(txParams *op.TransactParams, txId *big.Int, truth bool) er
 	return err
 }
 
+// ApproveTransfer
 func ApproveTransfer(txParams *op.TransactParams, spender common.Address, value *big.Int) error {
 	tx, err := scryToken.Approve(op.BuildTransactOpts(txParams), spender, value)
 	if err == nil {
@@ -167,6 +173,7 @@ func ApproveTransfer(txParams *op.TransactParams, spender common.Address, value 
 	return err
 }
 
+// Vote
 func Vote(txParams *op.TransactParams, txId *big.Int, judge bool, comments string) error {
 	tx, err := scryProtocol.Vote(op.BuildTransactOpts(txParams), getAppSeqNo(), txId, judge, comments)
 	if err == nil {
@@ -176,6 +183,7 @@ func Vote(txParams *op.TransactParams, txId *big.Int, judge bool, comments strin
 	return err
 }
 
+// RegisterAsVerifier
 func RegisterAsVerifier(txParams *op.TransactParams) error {
 	tx, err := scryProtocol.RegisterAsVerifier(op.BuildTransactOpts(txParams), getAppSeqNo())
 	if err == nil {
@@ -185,6 +193,7 @@ func RegisterAsVerifier(txParams *op.TransactParams) error {
 	return err
 }
 
+// CreditsToVerifier
 func CreditsToVerifier(txParams *op.TransactParams, txId *big.Int, index uint8, credit uint8) error {
 	tx, err := scryProtocol.CreditsToVerifier(op.BuildTransactOpts(txParams), getAppSeqNo(), txId, index, credit)
 	if err == nil {
@@ -194,6 +203,7 @@ func CreditsToVerifier(txParams *op.TransactParams, txId *big.Int, index uint8, 
 	return err
 }
 
+// TransferTokens
 func TransferTokens(txParams *op.TransactParams, to common.Address, value *big.Int) error {
 	tx, err := scryToken.Transfer(op.BuildTransactOpts(txParams), to, value)
 	if err == nil {
@@ -204,10 +214,12 @@ func TransferTokens(txParams *op.TransactParams, to common.Address, value *big.I
 	return err
 }
 
+// GetTokenBalance
 func GetTokenBalance(txParams *op.TransactParams, owner common.Address) (*big.Int, error) {
 	return scryToken.BalanceOf(op.BuildCallOpts(txParams), owner)
 }
 
+// TransferEth
 func TransferEth(from common.Address,
 	password string,
 	to common.Address,
@@ -215,6 +227,7 @@ func TransferEth(from common.Address,
 	return op.TransferEth(from, password, to, value, conn)
 }
 
+// GetEthBalance
 func GetEthBalance(owner common.Address) (*big.Int, error) {
 	return op.GetEthBalance(owner, conn)
 }

@@ -8,18 +8,19 @@ import (
 	"sync"
 )
 
+// JobState
+type JobState int
+
+// const
 const (
 	StopSys  = "SYS"
 	StopUser = "USER"
-)
 
-type JobState int
-
-const (
 	JobRunning JobState = iota
 	JobStopping
 )
 
+// Receipt
 type Receipt struct {
 	done        chan struct{}
 	plsExit     chan struct{}
@@ -30,7 +31,7 @@ type Receipt struct {
 	*sync.Mutex
 }
 
-func newRecipet() *Receipt {
+func newReceipt() *Receipt {
 	return &Receipt{
 		plsExit:     make(chan struct{}, 1),
 		done:        make(chan struct{}, 1),
@@ -41,12 +42,12 @@ func newRecipet() *Receipt {
 	}
 }
 
+// Stop
 func (m *Receipt) Stop() bool {
 	return m.stopWithRequest(StopUser)
 }
 
-func (m *Receipt) stopWithRequest(stopType string) bool {
-	var op bool = false
+func (m *Receipt) stopWithRequest(stopType string) (op bool) {
 	if m.state != JobRunning {
 		return op
 	}
@@ -72,63 +73,71 @@ func (m *Receipt) requestStopChan() <-chan struct{} {
 	return m.plsExit
 }
 
+// WaitChan
 func (m *Receipt) WaitChan() <-chan struct{} {
 	return m.done
 }
 
+// Wait
 func (m *Receipt) Wait() string {
 	<-m.WaitChan()
 	return m.stopType
 }
 
-func (m *Receipt) Concat(others ...*Receipt) *CombiRecipt {
+// Concat
+func (m *Receipt) Concat(others ...*Receipt) *CombiReceipt {
 	rs := append([]*Receipt{m}, others...)
-	return NewCombiRecipt(rs...)
+	return NewCombiReceipt(rs...)
 }
 
-type CombiRecipt struct {
-	recipets []*Receipt
+// CombiReceipt
+type CombiReceipt struct {
+	receipts []*Receipt
 	allDone  chan struct{}
 	once     *sync.Once
 }
 
-func NewCombiRecipt(list ...*Receipt) *CombiRecipt {
-	var unsafeRecipets []*Receipt
+// NewCombiReceipt
+func NewCombiReceipt(list ...*Receipt) *CombiReceipt {
+	var unsafeReceipts []*Receipt
 	for i, r := range list {
 		if !r.catchSignal {
-			unsafeRecipets = append(unsafeRecipets, list[i])
+			unsafeReceipts = append(unsafeReceipts, list[i])
 		}
 	}
-	if len(unsafeRecipets) > 0 && len(unsafeRecipets) < len(list) {
-		for i := range unsafeRecipets {
-			unsafeRecipets[i].catchSignal = true
-			batchCatchSignals(unsafeRecipets[i].sigChan)
+	if len(unsafeReceipts) > 0 && len(unsafeReceipts) < len(list) {
+		for i := range unsafeReceipts {
+			unsafeReceipts[i].catchSignal = true
+			batchCatchSignals(unsafeReceipts[i].sigChan)
 		}
 	}
-	return &CombiRecipt{
-		recipets: list,
+	return &CombiReceipt{
+		receipts: list,
 		allDone:  make(chan struct{}, 1),
 		once:     new(sync.Once),
 	}
 }
 
-func (cr *CombiRecipt) Stop() bool {
+// Stop
+func (cr *CombiReceipt) Stop() bool {
 	var ok bool
-	for _, r := range cr.recipets {
+	for _, r := range cr.receipts {
 		ok = r.Stop()
 	}
 	return ok
 }
 
-func (cr *CombiRecipt) Wait() string {
+// Wait
+func (cr *CombiReceipt) Wait() string {
 	<-cr.WaitChan()
-	return cr.recipets[0].stopType
+	return cr.receipts[0].stopType
 }
 
-func (cr *CombiRecipt) WaitChan() <-chan struct{} {
+// WaitChan
+func (cr *CombiReceipt) WaitChan() <-chan struct{} {
 	cr.once.Do(func() {
 		go func() {
-			for _, r := range cr.recipets {
+			for _, r := range cr.receipts {
 				r.Wait()
 			}
 			close(cr.allDone)

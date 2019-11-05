@@ -26,12 +26,12 @@ var (
 	clientPassword                                 = "888888"
 	suAddress                                      = "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8"
 	suPassword                                     = "111111"
-	seller                  *scryclient.ScryClient = nil
-	buyer                   *scryclient.ScryClient = nil
-	verifier1               *scryclient.ScryClient = nil
-	verifier2               *scryclient.ScryClient = nil
-	verifier3               *scryclient.ScryClient = nil
-	arbitrator              *scryclient.ScryClient = nil
+	seller                  *scryclient.ScryClient
+	buyer                   *scryclient.ScryClient
+	verifier1               *scryclient.ScryClient
+	verifier2               *scryclient.ScryClient
+	verifier3               *scryclient.ScryClient
+	arbitrator              *scryclient.ScryClient
 	sleepTime               time.Duration          = 20000000000
 	startVerify             bool                   = false
 	startTestFromBlock      bool                   = false
@@ -223,6 +223,7 @@ func initClients() {
 	time.Sleep(sleepTime)
 }
 
+// CreateClientWithToken
 func CreateClientWithToken(token *big.Int, eth *big.Int) (*scryclient.ScryClient, error) {
 	client, err := scryclient.CreateScryClient(clientPassword)
 	if err != nil {
@@ -249,6 +250,7 @@ func CreateClientWithToken(token *big.Int, eth *big.Int) (*scryclient.ScryClient
 	return client, nil
 }
 
+// SellerPublishData
 func SellerPublishData(supportVerify bool) {
 	//publish data
 	metaData := []byte("QmcHXkMXwgvZP56tsUJNtcfedojHkqrDsgkC4fbsBM1zre")
@@ -259,6 +261,7 @@ func SellerPublishData(supportVerify bool) {
 	cif.Publish(&txParam, big.NewInt(1000), metaData, proofData, 2, despData, supportVerify)
 }
 
+// VerifierApproveTransfer
 func VerifierApproveTransfer(verifier *scryclient.ScryClient) {
 	txParam := chainoperations.TransactParams{common.HexToAddress(verifier.Account.Address), clientPassword, big.NewInt(0), false}
 	err := cif.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(10000))
@@ -267,6 +270,7 @@ func VerifierApproveTransfer(verifier *scryclient.ScryClient) {
 	}
 }
 
+// RegisterAsVerifier
 func RegisterAsVerifier(verifier *scryclient.ScryClient) {
 	txParam := chainoperations.TransactParams{common.HexToAddress(verifier.Account.Address), clientPassword, big.NewInt(0), false}
 	err := cif.RegisterAsVerifier(&txParam)
@@ -275,6 +279,7 @@ func RegisterAsVerifier(verifier *scryclient.ScryClient) {
 	}
 }
 
+// Vote
 func Vote(verifier *scryclient.ScryClient) {
 	txParam := chainoperations.TransactParams{common.HexToAddress(verifier.Account.Address), clientPassword, big.NewInt(0), false}
 	err := cif.Vote(&txParam, txId, true, "This could be real from "+verifier.Account.Address)
@@ -283,6 +288,7 @@ func Vote(verifier *scryclient.ScryClient) {
 	}
 }
 
+// CreditsToVerifier
 func CreditsToVerifier(to common.Address) {
 	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword, big.NewInt(0), false}
 	err := cif.CreditsToVerifier(&txParam, txId, 1, 5)
@@ -291,6 +297,7 @@ func CreditsToVerifier(to common.Address) {
 	}
 }
 
+// BuyerApproveTransfer
 func BuyerApproveTransfer() {
 	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword, big.NewInt(0), false}
 	err := cif.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(1600))
@@ -299,6 +306,7 @@ func BuyerApproveTransfer() {
 	}
 }
 
+// PrepareToBuy
 func PrepareToBuy(publishId string, startVerify bool) {
 	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword,
 		big.NewInt(0), false}
@@ -308,6 +316,7 @@ func PrepareToBuy(publishId string, startVerify bool) {
 	}
 }
 
+// Buy
 func Buy(txId *big.Int) {
 	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword, big.NewInt(0), false}
 	err := cif.BuyData(&txParam, txId)
@@ -316,6 +325,7 @@ func Buy(txId *big.Int) {
 	}
 }
 
+// SubmitMetaDataIdEncWithBuyer
 func SubmitMetaDataIdEncWithBuyer(txId *big.Int) {
 	txParam := chainoperations.TransactParams{common.HexToAddress(seller.Account.Address), clientPassword, big.NewInt(0), false}
 	err := cif.SubmitMetaDataIdEncWithBuyer(&txParam, txId, metaDataIdEncWithBuyer)
@@ -324,6 +334,7 @@ func SubmitMetaDataIdEncWithBuyer(txId *big.Int) {
 	}
 }
 
+// ConfirmDataTruth
 func ConfirmDataTruth(txId *big.Int) {
 	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address),
 		clientPassword, big.NewInt(0), false}
@@ -426,6 +437,7 @@ func onPublish(event events.Event) bool {
 	return true
 }
 
+// OnRegisterVerifier
 func OnRegisterVerifier(event events.Event) bool {
 	fmt.Println("OnRegisterVerifier: ", event)
 

@@ -3,6 +3,7 @@
 
 package storage
 
+// Storage
 type Storage interface {
 	Init(nodeAddr string) error
 	Save(value []byte) (string, error)

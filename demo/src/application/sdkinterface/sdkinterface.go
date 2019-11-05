@@ -20,6 +20,7 @@ import (
 	"os"
 )
 
+// IPFSOutDir
 const IPFSOutDir = "D:/desktop"
 
 var (
@@ -29,14 +30,17 @@ var (
 	err      error
 )
 
+// SetScryInfo
 func SetScryInfo(si *settings.scryinfo) {
 	scryinfo = si
 }
 
+// SetFromBlock
 func SetFromBlock(fromBlock uint64) {
 	sdk.StartScan(fromBlock)
 }
 
+// CreateUserWithLogin
 func CreateUserWithLogin(password string) (string, error) {
 	var client *scryclient.ScryClient
 	if client, err = scryclient.CreateScryClient(password); err != nil {
@@ -48,6 +52,7 @@ func CreateUserWithLogin(password string) (string, error) {
 	return curUser.Account.Address, nil
 }
 
+// UserLogin
 func UserLogin(address string, password string) (bool, error) {
 	var client *scryclient.ScryClient
 	if client = scryclient.NewScryClient(address); client == nil {
@@ -56,7 +61,7 @@ func UserLogin(address string, password string) (bool, error) {
 
 	var succ bool
 	if succ, err = client.Authenticate(password); err != nil {
-		return false, errors.Wrap(err, "Authenticate user infomation failed. ")
+		return false, errors.Wrap(err, "Authenticate user information failed. ")
 	}
 
 	if succ {
@@ -76,6 +81,7 @@ func importAccount(keyJson string, oldPassword string, newPassword string) (*scr
 	return client, nil
 }
 
+// TransferTokenFromDeployer
 func TransferTokenFromDeployer(token *big.Int) error {
 	if deployer == nil {
 		deployer, err = importAccount(scryinfo.Chain.Contracts.DeployerKeyJson,
@@ -99,6 +105,7 @@ func TransferTokenFromDeployer(token *big.Int) error {
 	return nil
 }
 
+// SubscribeEvents
 func SubscribeEvents(eventName []string, cb ...chainevents.EventCallback) error {
 	if cb == nil || len(cb) != len(eventName) {
 		return errors.New("Quantity of callback functions is wrong. ")
@@ -112,6 +119,7 @@ func SubscribeEvents(eventName []string, cb ...chainevents.EventCallback) error 
 	return nil
 }
 
+// UnsubscribeEvents
 func UnsubscribeEvents(eventName []string) error {
 	for i := 0; i < len(eventName); i++ {
 		if err = curUser.UnSubscribeEvent(eventName[i]); err != nil {
@@ -121,6 +129,7 @@ func UnsubscribeEvents(eventName []string) error {
 	return nil
 }
 
+// PublishData
 func PublishData(data *definition.PublishData) (string, error) {
 	if curUser == nil {
 		return "", errors.New("Current user is nil. ")
@@ -138,10 +147,12 @@ func PublishData(data *definition.PublishData) (string, error) {
 		data.SupportVerify)
 }
 
+// ApproveTransferForRegisterAsVerifier
 func ApproveTransferForRegisterAsVerifier(password string) error {
 	return approveTransfer(password, common.HexToAddress(scryinfo.Chain.Contracts.ProtocolAddr), big.NewInt(10000))
 }
 
+// ApproveTransferForBuying
 func ApproveTransferForBuying(password string) error {
 	return approveTransfer(password, common.HexToAddress(scryinfo.Chain.Contracts.ProtocolAddr), big.NewInt(1600))
 }
@@ -160,6 +171,7 @@ func approveTransfer(password string, protocolContractAddr common.Address, token
 	return nil
 }
 
+// CreateTransaction
 func CreateTransaction(publishId string, password string, startVerify bool) error {
 	if curUser == nil {
 		return errors.New("Current user is nil. ")
@@ -174,6 +186,7 @@ func CreateTransaction(publishId string, password string, startVerify bool) erro
 	return nil
 }
 
+// Buy
 func Buy(txId string, password string) error {
 	if curUser == nil {
 		return errors.New("Current user is nil. ")
@@ -193,6 +206,7 @@ func Buy(txId string, password string) error {
 	return nil
 }
 
+// SubmitMetaDataIdEncWithBuyer
 func SubmitMetaDataIdEncWithBuyer(txId string, password, seller, buyer string, metaDataIDEncSeller []byte) error {
 	var metaDataIdEncWithBuyer []byte
 	if metaDataIdEncWithBuyer, err = service.GetAMIns().ReEncrypt(metaDataIDEncSeller, seller, buyer, password); err != nil {
@@ -211,6 +225,7 @@ func SubmitMetaDataIdEncWithBuyer(txId string, password, seller, buyer string, m
 	return nil
 }
 
+// CancelTransaction
 func CancelTransaction(txId, password string) error {
 	tID, ok := new(big.Int).SetString(txId, 10)
 	if !ok {
@@ -224,6 +239,7 @@ func CancelTransaction(txId, password string) error {
 	return nil
 }
 
+// DecryptAndGetMetaDataFromIPFS
 func DecryptAndGetMetaDataFromIPFS(password string, metaDataIdEncWithBuyer []byte, buyer, extension string) (string, error) {
 	var metaDataIDByte []byte
 	if metaDataIDByte, err = service.GetAMIns().Decrypt(metaDataIdEncWithBuyer, buyer, password); err != nil {
@@ -240,6 +256,7 @@ func DecryptAndGetMetaDataFromIPFS(password string, metaDataIdEncWithBuyer []byt
 	return newFileName, nil
 }
 
+// ConfirmDataTruth
 func ConfirmDataTruth(txId string, password string, truth bool) error {
 	if curUser == nil {
 		return errors.New("Current user is nil. ")
@@ -257,6 +274,7 @@ func ConfirmDataTruth(txId string, password string, truth bool) error {
 	return nil
 }
 
+// RegisterAsVerifier
 func RegisterAsVerifier(password string) error {
 	if curUser == nil {
 		return errors.New("Current user is nil. ")
@@ -270,6 +288,7 @@ func RegisterAsVerifier(password string) error {
 	return nil
 }
 
+// Vote
 func Vote(password, txId string, judge bool, comment string) error {
 	if curUser == nil {
 		return errors.New("Current user is nil. ")
@@ -286,6 +305,7 @@ func Vote(password, txId string, judge bool, comment string) error {
 	return nil
 }
 
+// CreditToVerifiers
 func CreditToVerifiers(creditData *definition.CreditData) error {
 	if curUser == nil {
 		return errors.New("Current user is nil. ")

@@ -3,16 +3,19 @@
 
 package settings
 
+// Scryinfo
 type Scryinfo struct {
 	Chain    Chain    `yaml:"chain"`
 	Services Services `yaml:"services"`
 }
 
+// Chain
 type Chain struct {
 	Contracts Contracts `yaml:"contracts"`
 	Ethereum  Ethereum  `yaml:"ethereum"`
 }
 
+// Contracts
 type Contracts struct {
 	ProtocolAddr     string `yaml:"protocol_contract_addr"`
 	TokenAddr        string `yaml:"token_contract_addr"`
@@ -24,10 +27,12 @@ type Contracts struct {
 	DeployerPassword string `yaml:"deployer_password"`
 }
 
+// Ethereum
 type Ethereum struct {
 	EthNode string `yaml:"node"`
 }
 
+// Services
 type Services struct {
 	Ipfs     string `yaml:"ipfs"`
 	Keystore string `yaml:"keystore"`

@@ -18,6 +18,7 @@ var (
 	errorChannel       = make(chan error, 1)
 )
 
+// StartEventProcessing
 func StartEventProcessing(
 	conn *ethclient.Client,
 	contracts []ContractInfo,
@@ -30,6 +31,7 @@ func StartEventProcessing(
 	rlog.Info("finished event processing.")
 }
 
+// SubscribeExternal
 func SubscribeExternal(
 	clientAddr common.Address,
 	eventName string,
@@ -59,6 +61,7 @@ func subscribe(
 	return nil
 }
 
+// UnSubscribeExternal
 func UnSubscribeExternal(
 	clientAddr common.Address,
 	eventName string,
@@ -82,7 +85,6 @@ func unsubscribe(
 
 	delete(subscribeInfoMap, clientAddr)
 	if len(subscribeInfoMap) == 0 {
-		subscribeInfoMap = nil
 		delete(eventRepo.mapEventSubscribe, eventName)
 	}
 

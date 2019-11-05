@@ -11,10 +11,12 @@ import (
 	"sync"
 )
 
+// IPFSOutDir
 var IPFSOutDir = "D:/desktop"
-var ipaccessor *IpfsAccessor = nil
+var ipaccessor *IpfsAccessor
 var once sync.Once
 
+// GetIAInstance
 func GetIAInstance() *IpfsAccessor {
 	once.Do(func() {
 		ipaccessor = &IpfsAccessor{}
@@ -23,10 +25,12 @@ func GetIAInstance() *IpfsAccessor {
 	return ipaccessor
 }
 
+// IpfsAccessor
 type IpfsAccessor struct {
 	sh *shell.Shell
 }
 
+// Initialize
 func (ia *IpfsAccessor) Initialize(nodeAddr string) error {
 	if ia.sh == nil {
 		ia.sh = shell.NewShell(nodeAddr)
@@ -38,6 +42,7 @@ func (ia *IpfsAccessor) Initialize(nodeAddr string) error {
 	return nil
 }
 
+// SaveToIPFS
 func (ia *IpfsAccessor) SaveToIPFS(content []byte) (string, error) {
 	if ia.sh == nil {
 		rlog.Error("ipfs api shell is nil")
@@ -47,6 +52,7 @@ func (ia *IpfsAccessor) SaveToIPFS(content []byte) (string, error) {
 	return ia.sh.Add(strings.NewReader(string(content)))
 }
 
+// GetFromIPFS
 func (ia *IpfsAccessor) GetFromIPFS(hash string) error {
 	if ia.sh == nil {
 		return errors.New("Get from IPFS failed, IPFS-api shell is nil. ")

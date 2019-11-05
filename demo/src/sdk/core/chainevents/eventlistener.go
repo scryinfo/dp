@@ -12,15 +12,17 @@ import (
 )
 
 var (
-	builder *events.Builder = nil
+	builder *events.Builder
 )
 
+// ContractInfo
 type ContractInfo struct {
 	Address string
 	Abi     string
 	Events  []string
 }
 
+// ListenEvent
 func ListenEvent(conn *ethclient.Client, contracts []ContractInfo, fromBlock uint64, interval time.Duration,
 	dataChannel chan events.Event, errorChannel chan error) bool {
 	rv := true
@@ -60,6 +62,7 @@ func ListenEvent(conn *ethclient.Client, contracts []ContractInfo, fromBlock uin
 	return rv
 }
 
+// SetFromBlock
 func SetFromBlock(from uint64) {
 	if builder != nil {
 		builder.SetFrom(from)

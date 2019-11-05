@@ -10,6 +10,7 @@ import (
 	rlog "github.com/sirupsen/logrus"
 )
 
+// const
 const (
 	BROADCAST_TO_USERS = "0x00"
 	TARGET_USERS       = "users"
@@ -18,6 +19,7 @@ const (
 	TOKEN_EVT_APPROVAL = "Approval"
 )
 
+// ExecuteEvents
 func ExecuteEvents(dataChannel chan events.Event, externalEventRepo *EventRepository) {
 	defer func() {
 		if err := recover(); err != nil {

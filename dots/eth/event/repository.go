@@ -7,12 +7,15 @@ import (
 	"sync"
 )
 
+// Callback
 type Callback func(event Event) bool
 
+// Repository
 type Repository struct {
 	MapEventCallback sync.Map
 }
 
+// NewRepository
 func NewRepository() *Repository {
 	return &Repository{}
 }

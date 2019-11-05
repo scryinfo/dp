@@ -2,6 +2,7 @@ package storage
 
 import (
 	"github.com/jinzhu/gorm"
+	// blank import for SQLite driver
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/pkg/errors"
 	"github.com/scryinfo/dot/dot"
@@ -11,6 +12,7 @@ import (
 	"strconv"
 )
 
+// SQLite
 type SQLite struct {
 	TableNames     []string
 	TableStructure []interface{}
@@ -22,6 +24,7 @@ type sqlConfig struct {
 	DBName string `json:"DBName"`
 }
 
+// const
 const (
 	SQLiteTypeId = "cd947210-6790-4e9f-b73f-63aeba484beb"
 	DB           = "sqlite3"
@@ -30,6 +33,7 @@ const (
 // check if 'SQLite' struct implements 'Database' interface
 var _ Database = (*SQLite)(nil)
 
+// Create
 func (s *SQLite) Create(l dot.Line) error {
 	s.TableNames = []string{
 		"accounts",
@@ -68,6 +72,7 @@ func newSQLiteDot(conf interface{}) (dot.Dot, error) {
 	return d, err
 }
 
+// SQLiteTypeLive
 func SQLiteTypeLive() *dot.TypeLives {
 	return &dot.TypeLives{
 		Meta: dot.Metadata{
@@ -79,11 +84,12 @@ func SQLiteTypeLive() *dot.TypeLives {
 	}
 }
 
+// Start
 func (s *SQLite) Start(ignore bool) error {
 	return s.Init()
 }
 
-// create tables if not exist
+// Init create tables if not exist
 func (s *SQLite) Init() error {
 	db, err := gorm.Open(DB, s.config.DBName)
 	if err != nil {
@@ -101,6 +107,7 @@ func (s *SQLite) Init() error {
 }
 
 // Basic CRUD
+// Insert
 func (s *SQLite) Insert(v interface{}) (int64, error) {
 	db, err := gorm.Open(DB, s.config.DBName)
 	if err != nil {
@@ -128,6 +135,7 @@ func (s *SQLite) Insert(v interface{}) (int64, error) {
 	return num, errors.Wrap(err, " error number: "+strconv.FormatInt(num+1, 10)+"th item. ")
 }
 
+// Read
 func (s *SQLite) Read(out interface{}, order, query string, sql ...interface{}) (int64, error) {
 	db, err := gorm.Open(DB, s.config.DBName)
 	if err != nil {
@@ -140,6 +148,7 @@ func (s *SQLite) Read(out interface{}, order, query string, sql ...interface{}) 
 	return t.RowsAffected, t.Error
 }
 
+// Update
 func (s *SQLite) Update(out interface{}, m map[string]interface{}, query string, sql ...interface{}) (int64, error) {
 	db, err := gorm.Open(DB, s.config.DBName)
 	if err != nil {
@@ -152,24 +161,25 @@ func (s *SQLite) Update(out interface{}, m map[string]interface{}, query string,
 	return t.RowsAffected, t.Error
 }
 
-func (s *SQLite) Delete(type_ interface{}, query string, sql ...interface{}) (int64, error) {
+// Delete
+func (s *SQLite) Delete(typ interface{}, query string, sql ...interface{}) (int64, error) {
 	db, err := gorm.Open(DB, s.config.DBName)
 	if err != nil {
 		dot.Logger().Errorln("Database connect failed. ", zap.NamedError("in Delete()", err))
 	}
 	defer db.Close()
 
-	t := db.Where(query, sql...).Delete(type_)
+	t := db.Where(query, sql...).Delete(typ)
 
 	return t.RowsAffected, t.Error
 }
 
-// todo: wait js implement
+// ReadPage todo: wait js implement
 func (s *SQLite) ReadPage() error {
 	return nil
 }
 
-// update without hooks
+// UpdateWithoutHooks update without hooks
 func (s *SQLite) UpdateWithoutHooks(type_ interface{}, m map[string]interface{}, query string, sql ...interface{}) (int64, error) {
 	db, err := gorm.Open(DB, s.config.DBName)
 	if err != nil {

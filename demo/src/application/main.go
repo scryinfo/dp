@@ -17,7 +17,7 @@ const logPath = "D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/dp/demo/src
 
 var (
 	scryinfo *settings.scryinfo
-	err      error = nil
+	err      error
 	port           = flag.String("port", "9822", "")
 )
 
@@ -36,7 +36,7 @@ func init() {
 
 func main() {
 	flag.Parse()
-	if err = WSConnect.WebsocketConnect(*port); err != nil {
+	if err = wsconnect.WebsocketConnect(*port); err != nil {
 		rlog.Error(errors.Wrap(err, "WebSocket ListenAndServe failed. "))
 	}
 }

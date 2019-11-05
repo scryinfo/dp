@@ -16,20 +16,17 @@ import (
 var (
 	db  *storage.SQLite
 	dls []definition.DataList
+	l   dot.Line
+	err error
 )
 
-// use: go build demo.go, and run 'demo.exe';
+// use: go build example.go, and run 'example.exe';
 //      or config debug items, mainly 'out dir' and 'exec file name'
 func main() {
 	// init
-	var (
-		l   dot.Line
-		err error
-	)
 	{
 		l, err = line.BuildAndStart(func(l dot.Line) error {
-			l.PreAdd(storage.SQLiteTypeLive())
-			return nil
+			return l.PreAdd(storage.SQLiteTypeLive())
 		})
 
 		if err != nil {
@@ -122,7 +119,7 @@ func create() {
 			SupportVerify:       true,
 			MetaDataExtension:   ".txt",
 			ProofDataExtensions: r,
-			CreatedTime: time.Now().Unix(),
+			CreatedTime:         time.Now().Unix(),
 		}
 		if i > 5 {
 			t.Price = strconv.Itoa(500)
@@ -183,7 +180,7 @@ func update() {
 	}
 	dot.Logger().Infoln("Update " + strconv.FormatInt(updateNum, 10) + " items.")
 
-	db.Read(&dls, "", "")
+	_, _ = db.Read(&dls, "", "")
 	for i := range dls {
 		dot.Logger().Infoln("", zap.Any("", dls[i]))
 	}
@@ -203,7 +200,7 @@ func updateWithoutHooks() {
 	}
 	dot.Logger().Infoln("-------Update without hooks " + strconv.FormatInt(updateNum, 10) + " items.")
 
-	db.Read(&dls, "", "")
+	_, _ = db.Read(&dls, "", "")
 	for i := range dls {
 		dot.Logger().Infoln("", zap.Any("", dls[i]))
 	}
@@ -219,7 +216,7 @@ func readAllToCheck() {
 	if readNum == 0 {
 		dot.Logger().Infoln("> demo passed. ")
 	} else {
-		dot.Logger().Infoln("> demo failed! ", zap.Int("len(dls) not 0 as expect but is: ", len(dls)))
+		dot.Logger().Infoln("> example failed! ", zap.Int("len(dls) not 0 as expect but is: ", len(dls)))
 		for i := range dls {
 			dot.Logger().Infoln("", zap.Any("", dls[i]))
 		}

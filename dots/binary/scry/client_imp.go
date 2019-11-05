@@ -27,6 +27,7 @@ type clientImp struct {
 // check if 'clientImp' implements 'Client' interface.
 var _ Client = (*clientImp)(nil)
 
+// NewScryClient create a new ScryClient
 func NewScryClient(address string, chainWrapper ChainWrapper) Client {
 	if address == "" {
 		dot.Logger().Errorln("failed to create client: empty address")
@@ -56,14 +57,16 @@ func getAccountComponent() (*auth.Account, error) {
 		return nil, errors.New("loading Binary component failed")
 	}
 
-	if a, ok := d.(*auth.Account); ok {
-		return a, nil
-	} else {
+	a, ok := d.(*auth.Account)
+	if !ok {
 		logger.Errorln("loading Binary component failed")
 		return nil, errors.New("loading Binary component failed")
 	}
+
+	return a, nil
 }
 
+// CreateScryClient
 func CreateScryClient(password string, chainWrapper ChainWrapper) (Client, error) {
 	a, err := getAccountComponent()
 	if err != nil {

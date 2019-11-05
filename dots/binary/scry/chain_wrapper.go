@@ -10,6 +10,7 @@ import (
 	"math/big"
 )
 
+// ChainWrapper
 type ChainWrapper interface {
 	Conn() *ethclient.Client
 	Publish(txParams *tx.TxParams, price *big.Int, metaDataID []byte, proofDataIDs []string,

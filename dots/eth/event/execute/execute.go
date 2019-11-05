@@ -11,6 +11,7 @@ import (
 	"sync"
 )
 
+// const
 const (
 	ExecTypeId       = "4313210a-5824-4ff1-8dd8-c71ccad711db"
 	BroadcastToAll   = "0x00"
@@ -20,6 +21,7 @@ const (
 	TokenEvtApproval = "Approval"
 )
 
+// Executor
 type Executor struct {
 	eventChan chan event.Event
 	repo      *event.Repository
@@ -34,7 +36,7 @@ func newExecutorDot() (dot.Dot, error) {
 	return d, err
 }
 
-//Data structure needed when generating newer component
+// ExecutorTypeLive Data structure needed when generating newer component
 func ExecutorTypeLive() *dot.TypeLives {
 	return &dot.TypeLives{
 		Meta: dot.Metadata{TypeId: ExecTypeId,
@@ -44,10 +46,12 @@ func ExecutorTypeLive() *dot.TypeLives {
 	}
 }
 
+// Create
 func (c *Executor) Create(l dot.Line) error {
 	return nil
 }
 
+// ExecuteEvents
 func (c *Executor) ExecuteEvents(ce chan event.Event, r *event.Repository, appId string) {
 	defer func() {
 		if er := recover(); er != nil {
@@ -76,11 +80,11 @@ func (c *Executor) executeEvent(e event.Event) bool {
 	}()
 
 	var subs sync.Map
-	if rv, ok := c.repo.MapEventCallback.Load(e.Name); !ok {
+	if rv, ok := c.repo.MapEventCallback.Load(e.Name); ok {
+		subs = rv.(sync.Map)
+	} else {
 		dot.Logger().Warnln("no event was executed, event:" + e.Name)
 		return false
-	} else {
-		subs = rv.(sync.Map)
 	}
 
 	seqNo := e.Data.Get(AppSeqNo)
