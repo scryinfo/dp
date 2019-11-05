@@ -84,7 +84,7 @@ func newBinaryDot(conf interface{}) (dot.Dot, error) {
 // BinTypeLiveWithoutGrpc Data structure needed when generating newer component
 func BinTypeLiveWithoutGrpc() []*dot.TypeLives {
 	t := []*dot.TypeLives{
-		&dot.TypeLives{
+		{
 			Meta: dot.Metadata{TypeId: BinTypeId, NewDoter: func(conf interface{}) (dot.Dot, error) {
 				return newBinaryDot(conf)
 			}},
@@ -104,7 +104,7 @@ func BinTypeLiveWithoutGrpc() []*dot.TypeLives {
 // BinTypeLiveWithGrpc Data structure needed when generating newer component
 func BinTypeLiveWithGrpc() []*dot.TypeLives {
 	t := []*dot.TypeLives{
-		&dot.TypeLives{
+		{
 			Meta: dot.Metadata{TypeId: BinTypeId, NewDoter: func(conf interface{}) (dot.Dot, error) {
 				return newBinaryDot(conf)
 			}},

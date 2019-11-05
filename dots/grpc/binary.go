@@ -65,14 +65,14 @@ func newBinaryGrpcServerDot(conf interface{}) (dot.Dot, error) {
 // BinaryGrpcServerImpTypeLive Data structure needed when generating newer component
 func BinaryGrpcServerImpTypeLive() []*dot.TypeLives {
 	t := []*dot.TypeLives{
-		&dot.TypeLives{
+		{
 			Meta: dot.Metadata{TypeId: BinaryGrpcServerTypeId,
 				NewDoter: func(conf interface{}) (dot dot.Dot, err error) {
 					return newBinaryGrpcServerDot(conf)
 				},
 			},
 			Lives: []dot.Live{
-				dot.Live{
+				{
 					LiveId:    BinaryGrpcServerTypeId,
 					RelyLives: map[string]dot.LiveId{"ServerNobl": gserver.ServerNoblTypeId},
 				},

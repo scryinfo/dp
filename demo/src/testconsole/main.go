@@ -21,20 +21,20 @@ var (
 	txId                    *big.Int = big.NewInt(0)
 	metaDataIdEncWithSeller []byte
 	metaDataIdEncWithBuyer  []byte
-	protocolContractAddr                           = "0x3c4d26e916d79fc3fc925027a79612012462f691"
-	tokenContractAddr                              = "0x5c29f42d640ee25f080cdc648641e8e358459ddc"
-	clientPassword                                 = "888888"
-	suAddress                                      = "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8"
-	suPassword                                     = "111111"
+	protocolContractAddr    = "0x3c4d26e916d79fc3fc925027a79612012462f691"
+	tokenContractAddr       = "0x5c29f42d640ee25f080cdc648641e8e358459ddc"
+	clientPassword          = "888888"
+	suAddress               = "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8"
+	suPassword              = "111111"
 	seller                  *scryclient.ScryClient
 	buyer                   *scryclient.ScryClient
 	verifier1               *scryclient.ScryClient
 	verifier2               *scryclient.ScryClient
 	verifier3               *scryclient.ScryClient
 	arbitrator              *scryclient.ScryClient
-	sleepTime               time.Duration          = 20000000000
-	startVerify             bool                   = false
-	startTestFromBlock      bool                   = false
+	sleepTime               time.Duration = 20000000000
+	startVerify             bool          = false
+	startTestFromBlock      bool          = false
 )
 
 func main() {
