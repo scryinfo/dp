@@ -11,6 +11,7 @@ import (
 	"math/big"
 )
 
+// Client maintain current user's info and give out a group of related methods
 type Client interface {
 	Account() *auth.UserAccount
 	SubscribeEvent(eventName string, callback event.Callback) error

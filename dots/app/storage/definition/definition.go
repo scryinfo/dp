@@ -4,6 +4,7 @@ import (
 	"github.com/scryinfo/dot/dot"
 )
 
+// Account
 type Account struct {
 	Address    string `gorm:"primary_key"`
 	Nickname   string
@@ -13,6 +14,7 @@ type Account struct {
 	Arbitrate  []byte // []string, json serialize
 }
 
+// DataList
 type DataList struct {
 	PublishId           string `gorm:"primary_key"`
 	Title               string
@@ -27,6 +29,7 @@ type DataList struct {
 	CreatedTime int64 `json:"-"`
 }
 
+// Transaction
 type Transaction struct {
 	TransactionId               string `gorm:"primary_key"`
 	Buyer                       string
@@ -54,6 +57,7 @@ type Transaction struct {
 	CreatedTime int64 `json:"-"`
 }
 
+// Event
 type Event struct {
 	Id           int    `gorm:"primary_key"`
 	NotifyTo     []byte // []string, json serialize
@@ -64,7 +68,7 @@ type Event struct {
 	CreatedTime int64 `json:"-"`
 }
 
-// show use for hooks
+// AfterUpdate show use for hooks
 func (dl *DataList) AfterUpdate() error {
 	dot.Logger().Infoln("-------Show Use For Hooks (After Update).-------")
 	return nil

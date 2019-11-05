@@ -12,8 +12,10 @@ import (
 	"time"
 )
 
+// Job
 type Job func(*RedoCtx)
 
+// RedoCtx
 type RedoCtx struct {
 	delayBeforeNextLoop time.Duration
 	stopRedo            bool
@@ -26,30 +28,34 @@ func newCtx(duration time.Duration) *RedoCtx {
 	}
 }
 
+// SetDelayBeforeNext
 func (ctx *RedoCtx) SetDelayBeforeNext(new_duration time.Duration) {
 	ctx.delayBeforeNextLoop = new_duration
 }
 
+// StartNextRightNow
 func (ctx *RedoCtx) StartNextRightNow() {
 	ctx.SetDelayBeforeNext(time.Duration(0))
 }
 
+// StopRedo
 func (ctx *RedoCtx) StopRedo() {
 	ctx.stopRedo = true
 }
 
+// WrapFunc
 func WrapFunc(work func()) Job {
 	return func(ctx *RedoCtx) {
 		work()
 	}
 }
 
-// perform job without graceful exit
+// Perform perform job without graceful exit
 func Perform(once Job, duration time.Duration) *Receipt {
 	return performWork(once, duration, false)
 }
 
-// perform job with graceful exit
+// PerformSafe perform job with graceful exit
 func PerformSafe(once Job, duration time.Duration) *Receipt {
 	return performWork(once, duration, true)
 }
@@ -64,7 +70,7 @@ func performWork(once Job, duration time.Duration, catchSignal bool) *Receipt {
 		once(ctx)
 	}
 
-	r := newRecipet()
+	r := newReceipt()
 	r.catchSignal = catchSignal
 
 	go func(m *Receipt) {

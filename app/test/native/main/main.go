@@ -20,19 +20,19 @@ import (
 )
 
 var (
-	seller    scry.Client = nil
-	buyer     scry.Client = nil
-	verifier1 scry.Client = nil
-	verifier2 scry.Client = nil
-	verifier3 scry.Client = nil
+	seller    scry.Client
+	buyer     scry.Client
+	verifier1 scry.Client
+	verifier2 scry.Client
+	verifier3 scry.Client
 
 	protocolContractAddr = "0x3420c44090c6a2c444ce85cb914087760ac0a78b"
 	clientPassword       = "888888"
 	suAddress            = "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8"
 	suPassword           = "111111"
 
-	bin   *binary.Binary    = nil
-	chain scry.ChainWrapper = nil
+	bin   *binary.Binary
+	chain scry.ChainWrapper
 
 	publishId                        = ""
 	txId                    *big.Int = big.NewInt(0)
@@ -71,6 +71,7 @@ func main() {
 	})
 }
 
+// Start
 func Start() {
 	InitUsers()
 
@@ -79,6 +80,7 @@ func Start() {
 	StartTestingWithoutVerify()
 }
 
+// InitUsers
 func InitUsers() {
 	var err error
 	seller, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(10000000))
@@ -107,11 +109,13 @@ func InitUsers() {
 	//}
 }
 
+// StartTestingWithoutVerify
 func StartTestingWithoutVerify() {
 	subscribeAllEvents()
 	SellerPublishData()
 }
 
+// CreateClientWithToken
 func CreateClientWithToken(token *big.Int, eth *big.Int) (scry.Client, error) {
 	client, err := scry.CreateScryClient(clientPassword, chain)
 	if err != nil {
@@ -148,6 +152,7 @@ func CreateClientWithToken(token *big.Int, eth *big.Int) (scry.Client, error) {
 	return client, nil
 }
 
+// SellerPublishData
 func SellerPublishData() {
 	//publish data
 	metaData := []byte("QmcHXkMXwgvZP56tsUJNtcfedojHkqrDsgkC4fbsBM1zre")
@@ -179,12 +184,13 @@ func SellerPublishData() {
 }
 
 func subscribeAllEvents() {
-	seller.SubscribeEvent("DataPublish", onPublish)
+	_ = seller.SubscribeEvent("DataPublish", onPublish)
 
-	buyer.SubscribeEvent("Approval", onApprovalBuyerTransfer)
-	buyer.SubscribeEvent("TransactionCreate", onTransactionCreate)
+	_ = buyer.SubscribeEvent("Approval", onApprovalBuyerTransfer)
+	_ = buyer.SubscribeEvent("TransactionCreate", onTransactionCreate)
 }
 
+// BuyerApproveTransfer
 func BuyerApproveTransfer() {
 	txParam := transaction.TxParams{
 		From:     common.HexToAddress(buyer.Account().Addr),
@@ -199,6 +205,7 @@ func BuyerApproveTransfer() {
 	}
 }
 
+// PrepareToBuy
 func PrepareToBuy(publishId string) {
 	txParam := transaction.TxParams{
 		From:     common.HexToAddress(buyer.Account().Addr),
@@ -206,12 +213,13 @@ func PrepareToBuy(publishId string) {
 		Value:    big.NewInt(0),
 		Pending:  false,
 	}
-	err := chain.PrepareToBuy(&txParam, publishId, false)
+	err := chain.AdvancePurchase(&txParam, publishId, false)
 	if err != nil {
 		fmt.Println("failed to prepareToBuy, error:", err)
 	}
 }
 
+// Buy
 func Buy(txId *big.Int) {
 	txParam := transaction.TxParams{
 		From:     common.HexToAddress(buyer.Account().Addr),
@@ -220,7 +228,7 @@ func Buy(txId *big.Int) {
 		Pending:  false,
 	}
 
-	err := chain.BuyData(&txParam, txId)
+	err := chain.ConfirmPurchase(&txParam, txId)
 	if err != nil {
 		fmt.Println("failed to buyData, error:", err)
 	}

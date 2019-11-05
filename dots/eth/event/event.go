@@ -8,6 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
+// ModifyContractParam
 type Event struct {
 	BlockNumber uint64
 	TxHash      common.Hash
@@ -16,11 +17,13 @@ type Event struct {
 	Data        JSONObj
 }
 
+// Progress
 type Progress struct {
 	From uint64
 	To   uint64
 }
 
+// String
 func (evt Event) String() string {
 	return fmt.Sprintf(
 		`block: %v,tx: %s,address: %s,event: %s,data: %s`,

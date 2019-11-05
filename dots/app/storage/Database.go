@@ -1,5 +1,6 @@
 package storage
 
+// Database
 type Database interface {
 	// connect and init
 	Init() error
@@ -9,7 +10,7 @@ type Database interface {
 	Insert(v interface{}) (int64, error)
 	Read(out interface{}, order, query string, sql ...interface{}) (int64, error)
 	Update(out interface{}, m map[string]interface{}, query string, sql ...interface{}) (int64, error)
-	Delete(type_ interface{}, query string, sql ...interface{}) (int64, error)
+	Delete(typ interface{}, query string, sql ...interface{}) (int64, error)
 
 	// Customized CRUD
 
@@ -17,5 +18,5 @@ type Database interface {
 	ReadPage() error
 
 	// Update one item with hooks
-	UpdateWithoutHooks(type_ interface{}, m map[string]interface{}, query string, sql ...interface{}) (int64, error)
+	UpdateWithoutHooks(typ interface{}, m map[string]interface{}, query string, sql ...interface{}) (int64, error)
 }

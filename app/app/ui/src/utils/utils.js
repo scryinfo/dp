@@ -2,7 +2,8 @@ import {connect} from "./connect";
 
 let utils = {
     stateEnum: ["Begin", "Created", "Voted", "Buying", "ReadyForDownload", "Closed"],
-    state: [ // tx state -> func state, means func button can or can't click
+
+    state: [
         [false, false, false,  true, false, false], // 0 seller: re-encrypt
         [false,  true,  true,  true, false, false], // 1 buyer: cancel
         [false,  true,  true, false, false, false], // 2 buyer: confirmPurchase
@@ -22,6 +23,31 @@ let utils = {
         connect.addCallbackFunc("onVerifierDisable", presetFunc.onVerifierDisable);
         connect.addCallbackFunc("onArbitrationBegin", presetFunc.onArbitrationBegin);
         connect.addCallbackFunc("onArbitrationResult", presetFunc.onArbitrationResult);
+    },
+
+    reacquireData: function (mode) {
+        switch (mode) {
+            case "dl":
+                initFunc.initDL();
+                break;
+            case "txs":
+                initFunc.initTxS();
+                break;
+            case "txb":
+                initFunc.initTxB();
+                break;
+            case "txv":
+                initFunc.initTxV();
+                break;
+            case "txa":
+                initFunc.initTxA();
+                break;
+            case "all":
+                initFunc.initAll();
+                break;
+            default:
+                console.log("Invalid mode! (in data init)");
+        }
     },
 
     setStateString: function (str) {
@@ -204,27 +230,21 @@ let presetFunc = {
             case 1:
                 _this.$store.state.transactionsell.forEach(function (item, index, arr) {
                     if (item.TransactionId === payload.TransactionId) {
-                        // delete item[index]
-                        arr[index] = arr[0];
-                        arr.shift();
+                        item.State = utils.stateEnum[parseInt(payload.State)]
                     }
                 });
                 break;
             case 2:
                 _this.$store.state.transactionbuy.forEach(function (item, index, arr) {
                     if (item.TransactionId === payload.TransactionId) {
-                        // delete item[index]
-                        arr[index] = arr[0];
-                        arr.shift();
+                        item.State = utils.stateEnum[parseInt(payload.State)]
                     }
                 });
                 break;
             case 3:
                 _this.$store.state.transactionverifier.forEach(function (item, index, arr) {
                     if (item.TransactionId === payload.TransactionId) {
-                        // delete item[index]
-                        arr[index] = arr[0];
-                        arr.shift();
+                        item.State = utils.stateEnum[parseInt(payload.State)]
                     }
                 });
                 break;
@@ -314,6 +334,148 @@ let presetFunc = {
                 });
                 break;
         }
+    }
+};
+
+let initFunc = {
+    initDL: function () {
+        connect.send({Name: "getDataList", Payload: ""}, function (payload, _this) {
+            _this.$store.state.datalist = [];
+            for (let i = 0; i < payload.length; i++) {
+                _this.$store.state.datalist.push({
+                    Title: payload[i].Title,
+                    Price: payload[i].Price,
+                    Keys: payload[i].Keys,
+                    Description: payload[i].Description,
+                    Seller: payload[i].Seller,
+                    SupportVerify: payload[i].SupportVerify,
+                    PublishId: payload[i].PublishId,
+                    SVDisplay: utils.setSupportVerify(payload[i].SupportVerify)
+                })
+            }
+        }, function (payload, _this) {
+            console.log("获取数据列表失败：", payload);
+            _this.$alert(payload, "获取数据列表失败！", {
+                confirmButtonText: "关闭",
+                showClose: false,
+                type: "error"
+            });
+        });
+    },
+
+    initTxS: function () {
+        connect.send({Name: "getTxSell", Payload: ""}, function (payload, _this) {
+            _this.$store.state.transactionsell = [];
+            for (let i = 0; i < payload.length; i++) {
+                _this.$store.state.transactionsell.push({
+                    PublishId: payload[i].PublishId,
+                    TransactionId: payload[i].TransactionId,
+                    State: utils.stateEnum[parseInt(payload[i].State)],
+                    Title: payload[i].Title,
+                    Price: payload[i].Price,
+                    Keys: payload[i].Keys,
+                    Description: payload[i].Description,
+                    ArbitrateResult: false,
+                    SVDisplay: utils.setSupportVerify(payload[i].SupportVerify),
+                    NVDisplay: utils.setNeedVerify(payload[i].StartVerify)
+                })
+            }
+        }, function (payload, _this) {
+            console.log("获取当前用户为卖方的交易列表失败：", payload);
+            _this.$alert(payload, "获取当前用户为卖方的交易列表失败！", {
+                confirmButtonText: "关闭",
+                showClose: false,
+                type: "error"
+            });
+        });
+    },
+
+    initTxB: function () {
+        connect.send({Name: "getTxBuy", Payload: ""}, function (payload, _this) {
+            _this.$store.state.transactionbuy = [];
+            for (let i = 0; i < payload.length; i++) {
+                _this.$store.state.transactionbuy.push({
+                    PublishId: payload[i].PublishId,
+                    TransactionId: payload[i].TransactionId,
+                    State: utils.stateEnum[parseInt(payload[i].State)],
+                    Title: payload[i].Title,
+                    Price: payload[i].Price,
+                    Keys: payload[i].Keys,
+                    Description: payload[i].Description,
+                    Verifier1Response: payload[i].Verifier1Response,
+                    Verifier2Response: payload[i].Verifier2Response,
+                    SupportVerify: payload[i].SupportVerify,
+                    ArbitrateResult: payload[i].Description,
+                    SVDisplay: utils.setSupportVerify(payload[i].SupportVerify),
+                    NVDisplay: utils.setNeedVerify(payload[i].StartVerify),
+                })
+            }
+        }, function (payload, _this) {
+            console.log("获取当前用户为买方的交易列表失败：", payload);
+            _this.$alert(payload, "获取当前用户为买方的交易列表失败！", {
+                confirmButtonText: "关闭",
+                showClose: false,
+                type: "error"
+            });
+        });
+    },
+
+    initTxV: function () {
+        connect.send({Name: "getTxVerify", Payload: ""}, function (payload, _this) {
+            _this.$store.state.transactionverifier = [];
+            if (payload.length > 0) {
+                for (let i = 0; i < payload.length; i++) {
+                    _this.$store.state.transactionverifier.push({
+                        PublishId: payload[i].PublishId,
+                        TransactionId: payload[i].TransactionId,
+                        Title: payload[i].Title,
+                        Price: payload[i].Price,
+                        Keys: payload[i].Keys,
+                        Description: payload[i].Description,
+                    })
+                }
+            }
+        }, function (payload, _this) {
+            console.log("获取当前用户为验证者的交易列表失败：", payload);
+            _this.$alert(payload, "获取当前用户为验证者的交易列表失败！", {
+                confirmButtonText: "关闭",
+                showClose: false,
+                type: "error"
+            });
+        });
+    },
+
+    initTxA: function () {
+        connect.send({Name: "getTxArbitrate", Payload: ""}, function (payload, _this) {
+            _this.$store.state.transactionarbitrator = [];
+            if (payload.length > 0) {
+                for (let i = 0; i < payload.length; i++) {
+                    _this.$store.state.transactionarbitrator.push({
+                        PublishId: payload[i].PublishId,
+                        TransactionId: payload[i].TransactionId,
+                        Title: payload[i].Title,
+                        Price: payload[i].Price,
+                        Keys: payload[i].Keys,
+                        Description: payload[i].Description,
+                    })
+                }
+            }
+        }, function (payload, _this) {
+            console.log("获取当前用户为仲裁者的交易列表失败：", payload);
+            _this.$alert(payload, "获取当前用户为仲裁者的交易列表失败！", {
+                confirmButtonText: "关闭",
+                showClose: false,
+                type: "error"
+            });
+        });
+    },
+
+    initAll: function () {
+        initFunc.initDL();
+        initFunc.initTxS();
+        initFunc.initTxB();
+        initFunc.initTxV();
+        initFunc.initTxA();
     }
 };
 

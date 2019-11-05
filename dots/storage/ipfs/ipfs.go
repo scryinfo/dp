@@ -10,15 +10,17 @@ import (
 	"strings"
 )
 
+// const
 const (
 	IpfsTypeId = "6763f97f-dfd2-40eb-8925-b8a031aab461"
-	IpfsLiveId = "6763f97f-dfd2-40eb-8925-b8a031aab461"
 )
 
+// Ipfs
 type Ipfs struct {
 	sh *shell.Shell
 }
 
+// Create
 func (c *Ipfs) Create(l dot.Line) error {
 
 	return nil
@@ -30,7 +32,7 @@ func newIpfsDot() (dot.Dot, error) {
 	return d, nil
 }
 
-//Data structure needed when generating newer component
+// IpfsTypeLive Data structure needed when generating newer component
 func IpfsTypeLive() *dot.TypeLives {
 	return &dot.TypeLives{
 		Meta: dot.Metadata{TypeId: IpfsTypeId,
@@ -40,6 +42,7 @@ func IpfsTypeLive() *dot.TypeLives {
 	}
 }
 
+// Initialize
 func (c *Ipfs) Initialize(storageSrvAddr string) error {
 	c.sh = shell.NewShell(storageSrvAddr)
 	if c.sh == nil {
@@ -49,6 +52,7 @@ func (c *Ipfs) Initialize(storageSrvAddr string) error {
 	return nil
 }
 
+// Save
 func (c *Ipfs) Save(value []byte) (string, error) {
 	if c.sh == nil {
 		return "", errors.New("Ipfs api shell is nil")
@@ -57,6 +61,7 @@ func (c *Ipfs) Save(value []byte) (string, error) {
 	return c.sh.Add(strings.NewReader(string(value)))
 }
 
+// Get
 func (c *Ipfs) Get(key string, outDir string) error {
 	if c.sh == nil {
 		return errors.New("Get from ipfs failed, ipfs api shell is nil. ")

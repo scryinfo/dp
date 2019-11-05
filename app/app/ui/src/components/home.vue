@@ -94,6 +94,7 @@ export default {
 
         connect.send({Name:"currentUserDataUpdate", Payload: {address: this.$route.params.acc}}, function (payload, _this) {
             console.log("用户信息更新成功！", payload);
+            utils.reacquireData("all");
             _home.$store.state.nickname = payload;
         }, function (payload, _this) {
             console.log("用户信息更新失败：", payload);

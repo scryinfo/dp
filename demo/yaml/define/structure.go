@@ -3,6 +3,7 @@
 
 package define
 
+// Conf
 type Conf struct {
 	Person    `yaml:"Person"`
 	Contact   `yaml:"Contact"`
@@ -11,12 +12,13 @@ type Conf struct {
 	InlineAdd `yaml:"InlineAdd,inline"`
 }
 
+// InlineAdd
 type InlineAdd struct {
 	Height int `yaml:"Height_cm"`
 	Heavy  int `yaml:"Heavy_kg"`
 }
 
-//simple configuration item.
+// Inline simple configuration item.
 type Inline struct {
 	NativePlace     string   `yaml:"Native_place"`
 	PliticalOutlook string   `yaml:"Political_outlook"`
@@ -26,19 +28,21 @@ type Inline struct {
 	AwardsReceived  string   `yaml:"Awards_received"`
 }
 
-//complex configuration item which has lower level tags.
+// Person complex configuration item which has lower level tags.
 type Person struct {
 	Name `yaml:"Name"`
 	Sex  string `yaml:"Sex"`
 	Age  int    `yaml:"Age"`
 	IDCN int64  `yaml:"ID_card_number"`
 }
+// Name
 type Name struct {
 	CName string `yaml:"Chinese_name"`
 	EName string `yaml:"English_name"`
 	//NameUB string `yaml:"Name_used_before"`
 }
 
+// Contact
 type Contact struct {
 	Tel   int64    `yaml:"Telephone"`
 	Phone int32    `yaml:"Phone"`
@@ -47,12 +51,14 @@ type Contact struct {
 	EMail []string `yaml:"E-mail"`
 }
 
+// Education
 type Education struct {
 	Primary School `yaml:"Primary"`
 	Junior  School `yaml:"Junior"`
 	Senior  School `yaml:"Senior"`
 	Collage School `yaml:"Collage"`
 }
+// School
 type School struct {
 	SName string `yaml:"School_name"`
 	SDate string `yaml:"Start_date"`

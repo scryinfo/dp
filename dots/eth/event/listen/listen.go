@@ -13,9 +13,11 @@ import (
 )
 
 const (
+	// ListenerTypeId
 	ListenerTypeId = "9ff2cb44-e73a-4a53-add4-3166954983d7"
 )
 
+// Listener listen event
 type Listener struct {
 	builder *Builder
 }
@@ -28,7 +30,7 @@ func newListenerDot(conf interface{}) (dot.Dot, error) {
 	return d, err
 }
 
-//Data structure needed when generating newer component
+// ListenerTypeLive add a dot component to dot.line with 'line.PreAdd()'
 func ListenerTypeLive() *dot.TypeLives {
 	return &dot.TypeLives{
 		Meta: dot.Metadata{TypeId: ListenerTypeId,
@@ -38,11 +40,13 @@ func ListenerTypeLive() *dot.TypeLives {
 	}
 }
 
+// Create
 func (c *Listener) Create(l dot.Line) error {
 	c.builder = NewScanBuilder()
 	return nil
 }
 
+// ListenEvent listen event
 func (c *Listener) ListenEvent(
 	conn *ethclient.Client,
 	contracts []event.ContractInfo,
@@ -86,6 +90,7 @@ func (c *Listener) ListenEvent(
 	return true
 }
 
+// SetFromBlock
 func (c *Listener) SetFromBlock(from uint64) {
 	if c.builder != nil {
 		c.builder.SetFrom(from)

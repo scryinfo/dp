@@ -64,28 +64,7 @@ export default {
         },
 
         initTxA: function () {
-            connect.send({Name: "getTxArbitrate", Payload: ""}, function (payload, _this) {
-                _this.$store.state.transactionarbitrator = [];
-                if (payload.length > 0) {
-                    for (let i = 0; i < payload.length; i++) {
-                        _this.$store.state.transactionarbitrator.push({
-                            PublishId: payload[i].PublishId,
-                            TransactionId: payload[i].TransactionId,
-                            Title: payload[i].Title,
-                            Price: payload[i].Price,
-                            Keys: payload[i].Keys,
-                            Description: payload[i].Description,
-                        })
-                    }
-                }
-            }, function (payload, _this) {
-                console.log("获取当前用户为仲裁者的交易列表失败：", payload);
-                _this.$alert(payload, "获取当前用户为仲裁者的交易列表失败！", {
-                    confirmButtonText: "关闭",
-                    showClose: false,
-                    type: "error"
-                });
-            });
+            utils.reacquireData("txa");
         },
 
         decrypt: function (pwd) {
@@ -158,8 +137,6 @@ export default {
                 type: "error"
             });
         });
-
-        this.initTxA();
     }
 }
 </script>

@@ -12,17 +12,21 @@ import (
 )
 
 const (
+	// SubsTypeId
 	SubsTypeId = "5535a065-0d90-46f4-9776-26630676c4c5"
 )
 
+// Subscribe
 type Subscribe struct {
 	eventRepo *event.Repository
 }
 
+// Create
 func (c *Subscribe) Create(l dot.Line) error {
 	return nil
 }
 
+// SetRepo
 func (c *Subscribe) SetRepo(r *event.Repository) {
 	c.eventRepo = r
 }
@@ -44,6 +48,7 @@ func SubsTypeLive() *dot.TypeLives {
 	}
 }
 
+// Subscribe
 func (c *Subscribe) Subscribe(
 	clientAddr common.Address,
 	eventName string,
@@ -65,6 +70,7 @@ func (c *Subscribe) Subscribe(
 	return nil
 }
 
+// UnSubscribe
 func (c *Subscribe) UnSubscribe(
 	clientAddr common.Address,
 	eventName string,
@@ -74,13 +80,13 @@ func (c *Subscribe) UnSubscribe(
 	}
 
 	var subscribeInfoMap sync.Map
-	if rv, ok := c.eventRepo.MapEventCallback.Load(eventName); !ok {
-		return errors.New("couldn't find corresponding client to unsubscribe:" + eventName)
-	} else {
+	if rv, ok := c.eventRepo.MapEventCallback.Load(eventName); ok {
 		subscribeInfoMap = rv.(sync.Map)
-		if rv, ok = subscribeInfoMap.Load(clientAddr); !ok {
+		if _, ok = subscribeInfoMap.Load(clientAddr); !ok {
 			return errors.New("couldn't find corresponding event to unsubscribe:" + clientAddr.String())
 		}
+	} else {
+		return errors.New("couldn't find corresponding client to unsubscribe:" + eventName)
 	}
 
 	subscribeInfoMap.Delete(clientAddr)

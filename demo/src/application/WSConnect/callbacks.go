@@ -1,7 +1,7 @@
 // Scry Info.  All rights reserved.
 // license that can be found in the license file.
 
-package WSConnect
+package wsconnect
 
 import (
 	"encoding/json"
@@ -18,6 +18,7 @@ import (
 	"strconv"
 )
 
+// const
 const (
 	IPFSOutDir      = "D:/desktop"
 	EventSendFailed = " event send failed. "

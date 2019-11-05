@@ -31,12 +31,13 @@ type chainWrapperImp struct {
 // check if 'chainWrapperImp' implements 'ChainWrapper' interface.
 var _ ChainWrapper = (*chainWrapperImp)(nil)
 
+// NewChainWrapper
 func NewChainWrapper(protocolcontractinterfaceAddress common.Address,
 	tokencontractinterfaceAddress common.Address,
 	clientConn *ethclient.Client,
 	appId string,
 ) (ChainWrapper, error) {
-	var err error = nil
+	var err error
 	c := &chainWrapperImp{}
 
 	c.protocol, err = contractinterface.NewScryProtocol(protocolcontractinterfaceAddress, clientConn)
@@ -78,7 +79,7 @@ func (c *chainWrapperImp) Publish(txParams *tx.TxParams, price *big.Int, metaDat
 	publishId := util.GenerateUUID()
 
 	pdIDs := make([][32]byte, proofNum)
-	var err error = nil
+	var err error
 	for i := int32(0); i < proofNum; i++ {
 		pdIDs[i], err = ipfsHashToBytes32(proofDataIDs[i])
 		if err != nil {
@@ -117,6 +118,7 @@ func ipfsHashToBytes32(src string) ([32]byte, error) {
 	return hashArray2, nil
 }
 
+// Bytes32ToIpfsHash
 func Bytes32ToIpfsHash(value [32]byte) (string, error) {
 	byteArray := [34]byte{18, 32}
 	copy(byteArray[2:], value[:])
@@ -165,7 +167,7 @@ func (c *chainWrapperImp) ReEncrypt(
 	txParams *tx.TxParams,
 	txId *big.Int,
 	encodedData []byte,
-) error {
+) (err error) {
 	buyer, err := c.protocol.GetBuyer(c.Tx.BuildCallOpts(txParams), txId)
 	if err != nil {
 		dot.Logger().Errorln("chainWrapperImp::ReEncryptMetaDataId", zap.Error(err))
@@ -186,6 +188,10 @@ func (c *chainWrapperImp) ReEncrypt(
 
 	//re-encrypt with arbitrators public key
 	arbitrators, err := c.protocol.GetArbitrators(c.Tx.BuildCallOpts(txParams), txId)
+	if err != nil {
+		dot.Logger().Errorln("chainWrapperImp::ReEncryptMetaDataId", zap.Error(err))
+		return err
+	}
 	var edaList []byte
 	for _, ab := range arbitrators {
 		if ab == common.HexToAddress("0x0") {

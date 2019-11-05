@@ -12,9 +12,10 @@ import (
 	"sync"
 )
 
-var accountManager *AccountManager = nil
+var accountManager *AccountManager
 var once sync.Once
 
+// GetAMInstance
 func GetAMInstance() *AccountManager {
 	once.Do(func() {
 		accountManager = &AccountManager{}
@@ -23,15 +24,18 @@ func GetAMInstance() *AccountManager {
 	return accountManager
 }
 
+// Account
 type Account struct {
 	Address string
 }
 
+// AccountManager
 type AccountManager struct {
 	client   scryinfo.KeyServiceClient
 	accounts []*Account
 }
 
+// Initialize
 func (am *AccountManager) Initialize(asNodeAddr string) error {
 	cn, err := grpc.Dial(asNodeAddr, grpc.WithInsecure())
 	if err != nil {
@@ -47,6 +51,7 @@ func (am *AccountManager) Initialize(asNodeAddr string) error {
 	return nil
 }
 
+// CreateAccount
 func (am *AccountManager) CreateAccount(password string) (*Account, error) {
 
 	defer func() {
@@ -77,6 +82,7 @@ func (am *AccountManager) CreateAccount(password string) (*Account, error) {
 	return newAccount, nil
 }
 
+// AuthAccount
 func (am AccountManager) AuthAccount(address string, password string) (bool, error) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -103,10 +109,12 @@ func (am AccountManager) AuthAccount(address string, password string) (bool, err
 	return rv, nil
 }
 
+// GetAccounts
 func (am AccountManager) GetAccounts() []*Account {
 	return am.accounts
 }
 
+// AccountValid
 func (am AccountManager) AccountValid(address string) bool {
 	for _, v := range am.accounts {
 		if v.Address == address {
@@ -117,6 +125,7 @@ func (am AccountManager) AccountValid(address string) bool {
 	return false
 }
 
+// Encrypt
 func (am AccountManager) Encrypt(
 	plainText []byte,
 	address string) ([]byte, error) {
@@ -146,6 +155,7 @@ func (am AccountManager) Encrypt(
 	return out.Data, nil
 }
 
+// Decrypt
 func (am AccountManager) Decrypt(
 	cipherText []byte,
 	address string,
@@ -181,6 +191,7 @@ func (am AccountManager) Decrypt(
 	return out.Data, nil
 }
 
+// ReEncrypt
 func (am AccountManager) ReEncrypt(
 	cipherText []byte,
 	address1 string,
@@ -225,6 +236,7 @@ func (am AccountManager) ReEncrypt(
 	return out.Data, nil
 }
 
+// SignTransaction
 func (am AccountManager) SignTransaction(message []byte, address string, password string) ([]byte, error) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -257,6 +269,7 @@ func (am AccountManager) SignTransaction(message []byte, address string, passwor
 	return out.Data, nil
 }
 
+// ImportAccount
 func (am AccountManager) ImportAccount(
 	keyJson []byte,
 	oldPassword string,

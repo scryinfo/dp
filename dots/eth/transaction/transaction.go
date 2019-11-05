@@ -16,21 +16,25 @@ import (
 	"math/big"
 )
 
+// const
 const (
 	TxTypeId        = "a3e1a88e-f84e-4285-b5ff-54a16fdcd44c"
 	DefaultGasLimit = 3000000
 )
 
+// Transaction
 type Transaction struct {
 	Config  configTransaction
 	Account *auth.Account `dot:"ca1c6ce4-182b-430a-9813-caeccf83f8ab"`
 }
 
+// configTransaction
 type configTransaction struct {
 	DefaultGasPrice *big.Int `json:"gasPrice"`
 	DefaultGasLimit uint64   `json:"gasLimit"`
 }
 
+// TxParams
 type TxParams struct {
 	From     common.Address
 	Password string
@@ -60,7 +64,7 @@ func newTxDot(conf interface{}) (dot.Dot, error) {
 	return d, nil
 }
 
-//Data structure needed when generating newer component
+// TxTypeLive Data structure needed when generating newer component
 func TxTypeLive() []*dot.TypeLives {
 	return []*dot.TypeLives{
 		&dot.TypeLives{
@@ -73,10 +77,12 @@ func TxTypeLive() []*dot.TypeLives {
 	}
 }
 
+// Create
 func (c *Transaction) Create(l dot.Line) error {
 	return nil
 }
 
+// BuildTransactOpts
 func (c *Transaction) BuildTransactOpts(txParams *TxParams) *bind.TransactOpts {
 	gp := txParams.GasPrice
 	if gp == nil {
@@ -108,6 +114,7 @@ func (c *Transaction) BuildTransactOpts(txParams *TxParams) *bind.TransactOpts {
 	return opts
 }
 
+// SignTransaction
 func (c *Transaction) SignTransaction(
 	signer types.Signer,
 	address common.Address,
@@ -127,6 +134,7 @@ func (c *Transaction) SignTransaction(
 	return transaction.WithSignature(signer, sign)
 }
 
+// BuildCallOpts
 func (c *Transaction) BuildCallOpts(txParams *TxParams) *bind.CallOpts {
 	opts := &bind.CallOpts{
 		Pending:     txParams.Pending,
@@ -138,6 +146,7 @@ func (c *Transaction) BuildCallOpts(txParams *TxParams) *bind.CallOpts {
 	return opts
 }
 
+// Transact
 func (c *Transaction) Transact(
 	opts *bind.TransactOpts,
 	to common.Address,

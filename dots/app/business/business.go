@@ -8,19 +8,18 @@ import (
 	"go.uber.org/zap"
 )
 
+// Business
 type Business struct {
 	Pre *preset.Preset `dot:""`
 }
 
+// const
 const (
 	BusTypeId = "64a3ff50-50de-447c-b0b9-401fff8c4fa4"
 	BusLiveId = "64a3ff50-50de-447c-b0b9-401fff8c4fa4"
 )
 
-func (b *Business) Create(l dot.Line) error {
-	return nil
-}
-
+// Start
 func (b *Business) Start(ignore bool) error {
 	if err := b.Pre.CBs.WS.PresetMsgHandleFuncs(b.Pre.PresetMsgNames, b.Pre.PresetMsgHandlers); err != nil {
 		return err
@@ -42,6 +41,7 @@ func newBusDot(_ interface{}) (dot.Dot, error) {
 	return d, err
 }
 
+// BusTypeLive
 func BusTypeLive() []*dot.TypeLives {
 	t := []*dot.TypeLives{
 		{

@@ -9,9 +9,11 @@ import (
 )
 
 const (
+	// SettingLocation
 	SettingLocation = "D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/dp/demo/src/application/sdkinterface/settings/definition.yaml"
 )
 
+// LoadSettings
 func LoadSettings() (*scryinfo, error) {
 	rv, err := cf.GetYAMLStructure(SettingLocation, &scryinfo{})
 	if err != nil {

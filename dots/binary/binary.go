@@ -21,6 +21,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// const
 const (
 	BinTypeId                 = "92fed326-2f2c-40c5-8664-107473238390"
 	BinLiveId                 = "92fed326-2f2c-40c5-8664-107473238390"
@@ -33,6 +34,7 @@ const (
 	maxChannelEventNum        = 10000
 )
 
+// Binary
 type Binary struct {
 	chainWrapper scry.ChainWrapper
 	config       BinaryConfig
@@ -48,6 +50,7 @@ type Binary struct {
 	Grpc         grpc.BinaryGrpcServer `dot:"96a6e2b5-f0b6-48dc-b0ff-2d9f2c5c9f1d"`
 }
 
+// BinaryConfig
 type BinaryConfig struct {
 	AppId                string `json:"appId"`
 	EthSrvAddr           string `json:"ethServiceAddr"`
@@ -78,7 +81,7 @@ func newBinaryDot(conf interface{}) (dot.Dot, error) {
 	return d, err
 }
 
-//Data structure needed when generating newer component
+// BinTypeLiveWithoutGrpc Data structure needed when generating newer component
 func BinTypeLiveWithoutGrpc() []*dot.TypeLives {
 	t := []*dot.TypeLives{
 		&dot.TypeLives{
@@ -98,7 +101,7 @@ func BinTypeLiveWithoutGrpc() []*dot.TypeLives {
 	return t
 }
 
-//Data structure needed when generating newer component
+// BinTypeLiveWithGrpc Data structure needed when generating newer component
 func BinTypeLiveWithGrpc() []*dot.TypeLives {
 	t := []*dot.TypeLives{
 		&dot.TypeLives{
@@ -120,6 +123,7 @@ func BinTypeLiveWithGrpc() []*dot.TypeLives {
 	return t
 }
 
+// Create
 func (c *Binary) Create(l dot.Line) error {
 	c.contracts = c.getContracts(c.config.ProtocolContractAddr, c.config.TokenContractAddr)
 	c.subsRepo = event.NewRepository()
@@ -129,10 +133,12 @@ func (c *Binary) Create(l dot.Line) error {
 	return nil
 }
 
+// Config
 func (c *Binary) Config() BinaryConfig {
 	return c.config
 }
 
+// Start
 func (c *Binary) Start(ignore bool) error {
 	c.Subscriber.SetRepo(c.subsRepo)
 
@@ -168,14 +174,17 @@ func (c *Binary) Start(ignore bool) error {
 	return nil
 }
 
+// Stop
 func (c *Binary) Stop(ignore bool) error {
 	return nil
 }
 
+// Destroy
 func (c *Binary) Destroy(ignore bool) error {
 	return nil
 }
 
+// ChainWrapper
 func (c *Binary) ChainWrapper() scry.ChainWrapper {
 	return c.chainWrapper
 }
@@ -207,6 +216,7 @@ func (c *Binary) getContracts(
 	return contracts
 }
 
+// StartEngine
 func (c *Binary) StartEngine() (*ethclient.Client, error) {
 	logger := dot.Logger()
 
@@ -234,6 +244,7 @@ func (c *Binary) StartEngine() (*ethclient.Client, error) {
 	return connector.conn, nil
 }
 
+// Connector
 type Connector struct {
 	ctx  context.Context
 	conn *ethclient.Client

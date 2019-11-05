@@ -13,14 +13,17 @@ import (
 )
 
 const (
+	// AccountTypeId
 	AccountTypeId = "ca1c6ce4-182b-430a-9813-caeccf83f8ab"
 )
 
+// Account
 type Account struct {
 	cn     *grpc.ClientConn
 	client authStub.KeyServiceClient
 }
 
+// UserAccount
 type UserAccount struct {
 	Addr string
 }
@@ -31,7 +34,7 @@ func newAccountDot(_ interface{}) (dot.Dot, error) {
 	return d, nil
 }
 
-//Data structure needed when generating newer component
+// AccountTypeLive Data structure needed when generating newer component
 func AccountTypeLive() *dot.TypeLives {
 	return &dot.TypeLives{
 		Meta: dot.Metadata{TypeId: AccountTypeId, NewDoter: func(conf interface{}) (dot.Dot, error) {
@@ -41,11 +44,13 @@ func AccountTypeLive() *dot.TypeLives {
 	}
 }
 
+// Create
 func (c *Account) Create(l dot.Line) error {
 
 	return nil
 }
 
+// Destroy
 func (c *Account) Destroy(ignore bool) error {
 	dot.Logger().Debugln("closing grpc connection...")
 	err := c.cn.Close()
@@ -59,6 +64,7 @@ func (c *Account) Destroy(ignore bool) error {
 	return nil
 }
 
+// Initialize
 func (c *Account) Initialize(authServiceAddr string) error {
 	var err error
 	c.cn, err = grpc.Dial(authServiceAddr, grpc.WithInsecure())
@@ -76,6 +82,7 @@ func (c *Account) Initialize(authServiceAddr string) error {
 	return nil
 }
 
+// CreateUserAccount
 func (c *Account) CreateUserAccount(password string) (*UserAccount, error) {
 	defer func() {
 		if er := recover(); er != nil {
@@ -110,6 +117,7 @@ func (c *Account) CreateUserAccount(password string) (*UserAccount, error) {
 	return newAccount, nil
 }
 
+// AuthUserAccount
 func (c *Account) AuthUserAccount(address string, password string) (bool, error) {
 	defer func() {
 		if er := recover(); er != nil {
@@ -141,6 +149,7 @@ func (c *Account) AuthUserAccount(address string, password string) (bool, error)
 	return true, nil
 }
 
+// Encrypt
 func (c *Account) Encrypt(
 	plainText []byte,
 	address string,
@@ -173,6 +182,7 @@ func (c *Account) Encrypt(
 	return out.Data, nil
 }
 
+// Decrypt
 func (c *Account) Decrypt(
 	cipherText []byte,
 	address string,
@@ -211,6 +221,7 @@ func (c *Account) Decrypt(
 	return out.Data, nil
 }
 
+// ReEncrypt
 func (c *Account) ReEncrypt(
 	cipherText []byte,
 	address1 string,
@@ -258,6 +269,7 @@ func (c *Account) ReEncrypt(
 	return out.Data, nil
 }
 
+// SignTransaction
 func (c *Account) SignTransaction(message []byte, address string, password string) ([]byte, error) {
 	defer func() {
 		if er := recover(); er != nil {
@@ -291,6 +303,7 @@ func (c *Account) SignTransaction(message []byte, address string, password strin
 	return out.Data, nil
 }
 
+// ImportUserAccount
 func (c *Account) ImportUserAccount(
 	keyJson []byte,
 	oldPassword string,

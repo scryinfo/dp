@@ -5,7 +5,7 @@ package server
 
 import "encoding/json"
 
-// define what a type of connection should implement.
+// Server define what a type of connection should implement.
 type Server interface {
 	ListenAndServe() error
 
@@ -16,16 +16,20 @@ type Server interface {
 	PresetMsgHandleFuncs(name []string, presetFunc []PresetFunc) error
 }
 
+// MessageIn
 type MessageIn struct {
 	Name    string          `json:"Name"`
 	Payload json.RawMessage `json:"Payload"`
 }
 
+// MessageOut
 type MessageOut struct {
 	Name    string      `json:"Name"`
 	Payload interface{} `json:"Payload,omitempty"`
 }
 
+// PresetFunc
 type PresetFunc = func(*MessageIn) (interface{}, error)
 
+// EventSendFailed
 const EventSendFailed = " event send failed. "

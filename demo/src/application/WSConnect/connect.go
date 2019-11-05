@@ -1,7 +1,7 @@
 // Scry Info.  All rights reserved.
 // license that can be found in the license file.
 
-package WSConnect
+package wsconnect
 
 import (
 	"encoding/json"
@@ -14,10 +14,12 @@ import (
 	"os/exec"
 )
 
+// WSServer
 type WSServer struct {
 	Port string
 }
 
+// ResourcesDir
 const ResourcesDir = "D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/dp/demo/src/application/resources/app"
 
 var (
@@ -26,6 +28,7 @@ var (
 	err        error
 )
 
+// WebsocketConnect
 func WebsocketConnect(port string) error {
 	ws := WSServer{
 		Port: port,

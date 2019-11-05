@@ -14,8 +14,7 @@ import (
 
 func main() {
 	l, err := line.BuildAndStart(func(l dot.Line) error {
-		l.PreAdd(business.BusTypeLive()...)
-		return nil
+		return l.PreAdd(business.BusTypeLive()...)
 	})
 	if err != nil {
 		dot.Logger().Errorln("Line init failed. ", zap.NamedError("error", err))

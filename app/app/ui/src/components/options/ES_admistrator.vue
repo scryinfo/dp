@@ -7,6 +7,8 @@
     <section class="administrator">
         <el-col :span="24" class="section-item">
             <el-button size="mini" type="primary" @click="welcome">Welcome</el-button></el-col>
+        <el-col :span="24" class="section-item">
+            <el-button size="mini" type="primary" @click="logoutSimulate">Logout Simulate</el-button></el-col>
         <div>
             <el-col :span="5" class="section-item">
                 <el-select size="mini" v-model="modifyItem" placeholder="Choose param" clearable allow-create filterable>
@@ -25,6 +27,7 @@
 
 <script>
 import {connect} from "../../utils/connect.js";
+import home from "../home.vue";
 export default {
     name: "ES_administrator.vue",
     data () {
@@ -46,6 +49,10 @@ export default {
                 message: '谢谢你使用我的程序!&nbsp;<strong>:)</strong>',
                 position: "top-left"
             });
+        },
+
+        logoutSimulate: function () {
+            home.methods.logout();
         },
 
         modifyParam: function () {

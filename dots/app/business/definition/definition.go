@@ -3,6 +3,7 @@
 
 package definition
 
+// Preset
 type Preset struct {
 	PublishId     string `json:"PublishId"`
 	TransactionId string `json:"TransactionId"`
@@ -22,21 +23,25 @@ type Preset struct {
 	Contract ModifyContractParam `json:"modifyContractParam"`
 }
 
+// Ids
 type Ids struct {
 	MetaDataId   string   `json:"metaDataId"`
 	ProofDataIds []string `json:"proofDataIds"`
 	DetailsId    string   `json:"detailsId"`
 }
 
+// Confirm
 type Confirm struct {
 	Truth bool `json:"confirmResult"`
 }
 
+// Verify
 type Verify struct {
 	Suggestion bool   `json:"suggestion"`
 	Comment    string `json:"comment"`
 }
 
+// Grade
 type Grade struct {
 	Verifier1Revert bool    `json:"verifier1Revert"`
 	Verifier1Grade  float64 `json:"verifier1Grade"`
@@ -44,10 +49,12 @@ type Grade struct {
 	Verifier2Grade  float64 `json:"verifier2Grade"`
 }
 
+// Arbitrate
 type Arbitrate struct {
 	ArbitrateResult bool `json:"arbitrateResult,omitempty"`
 }
 
+// ModifyContractParam
 type ModifyContractParam struct {
 	ParamName  string `json:"paramName"`
 	ParamValue string `json:"paramValue"`

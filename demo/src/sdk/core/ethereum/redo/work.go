@@ -12,8 +12,10 @@ import (
 	"time"
 )
 
+// Job
 type Job func(*RedoCtx)
 
+// RedoCtx
 type RedoCtx struct {
 	delayBeforeNextLoop time.Duration
 	stopRedo            bool
@@ -26,35 +28,39 @@ func newCtx(duration time.Duration) *RedoCtx {
 	}
 }
 
-func (ctx *RedoCtx) SetDelayBeforeNext(new_duration time.Duration) {
-	ctx.delayBeforeNextLoop = new_duration
+// SetDelayBeforeNext
+func (ctx *RedoCtx) SetDelayBeforeNext(newDuration time.Duration) {
+	ctx.delayBeforeNextLoop = newDuration
 }
 
+// StartNextRightNow
 func (ctx *RedoCtx) StartNextRightNow() {
 	ctx.SetDelayBeforeNext(time.Duration(0))
 }
 
+// StopRedo
 func (ctx *RedoCtx) StopRedo() {
 	ctx.stopRedo = true
 }
 
+// WrapFunc
 func WrapFunc(work func()) Job {
 	return func(ctx *RedoCtx) {
 		work()
 	}
 }
 
-// perform job without gracefull exit
-func Perform(once Job, duration time.Duration) *Recipet {
+// Perform perform job without gracefully exit
+func Perform(once Job, duration time.Duration) *Receipt {
 	return performWork(once, duration, false)
 }
 
-// perform job with gracefull exit
-func PerformSafe(once Job, duration time.Duration) *Recipet {
+// PerformSafe perform job with gracefully exit
+func PerformSafe(once Job, duration time.Duration) *Receipt {
 	return performWork(once, duration, true)
 }
 
-func performWork(once Job, duration time.Duration, catchSignal bool) *Recipet {
+func performWork(once Job, duration time.Duration, catchSignal bool) *Receipt {
 	onceFunc := func(ctx *RedoCtx) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -67,11 +73,11 @@ func performWork(once Job, duration time.Duration, catchSignal bool) *Recipet {
 	}
 	recipet := newRecipet()
 	recipet.catchSignal = catchSignal
-	go func(m *Recipet) {
+	go func(m *Receipt) {
 		if catchSignal {
 			batchCatchSignals(recipet.sigchan)
 		}
-		pls_exit := m.requestStopChan()
+		plsExit := m.requestStopChan()
 		for {
 			ctx := newCtx(duration)
 			onceFunc(ctx)
@@ -80,7 +86,7 @@ func performWork(once Job, duration time.Duration, catchSignal bool) *Recipet {
 			}
 
 			select {
-			case <-pls_exit:
+			case <-plsExit:
 				m.closeChannels()
 				return
 			case <-recipet.sigchan:

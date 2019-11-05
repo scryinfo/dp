@@ -29,28 +29,32 @@ var (
 	reflectBigInt  = reflect.TypeOf(new(big.Int))
 )
 
+// Progress
 type Progress struct {
 	From uint64
 	To   uint64
 }
 
+// Builder
 type Builder struct {
 	es       *eventScanner
 	interval time.Duration
 }
 
+// NewScanBuilder make a default *Builder
 func NewScanBuilder() *Builder {
 	return &Builder{
 		es: &eventScanner{Contracts: make(contractMap)},
 	}
 }
 
+// SetClient
 func (b *Builder) SetClient(conn *ethclient.Client) *Builder {
 	b.es.conn = conn
 	return b
 }
 
-// set addr to address(0) e.g.common.Address{} to filter any contracts with same abi
+// SetContract set addr to address(0) e.g.common.Address{} to filter any contracts with same abi
 func (b *Builder) SetContract(
 	addr common.Address,
 	abiStr string,
@@ -64,36 +68,43 @@ func (b *Builder) SetContract(
 	return b
 }
 
+// SetGracefulExit
 func (b *Builder) SetGracefulExit(yes bool) *Builder {
 	b.es.GracefulExit = yes
 	return b
 }
 
+// SetBlockMargin
 func (b *Builder) SetBlockMargin(margin uint64) *Builder {
 	b.es.marginBlock = margin
 	return b
 }
 
+// SetFrom
 func (b *Builder) SetFrom(f uint64) *Builder {
 	b.es.From = f
 	return b
 }
 
+// SetStep
 func (b *Builder) SetStep(f uint64) *Builder {
 	b.es.StepLength = f
 	return b
 }
 
+// SetTo
 func (b *Builder) SetTo(f uint64) *Builder {
 	b.es.To = f
 	return b
 }
 
+// SetProgressChan
 func (b *Builder) SetProgressChan(pc chan<- Progress) *Builder {
 	b.es.ProgressChan = pc
 	return b
 }
 
+// SetDataChan
 func (b *Builder) SetDataChan(
 	dataCh chan<- event.Event,
 	errChan chan<- error,
@@ -102,11 +113,13 @@ func (b *Builder) SetDataChan(
 	return b
 }
 
+// SetInterval
 func (b *Builder) SetInterval(interval time.Duration) *Builder {
 	b.interval = interval
 	return b
 }
 
+// BuildAndRun
 func (b *Builder) BuildAndRun() (*Receipt, error) {
 	if err := b.Build(); err != nil {
 		return nil, err
@@ -120,6 +133,7 @@ func (b *Builder) BuildAndRun() (*Receipt, error) {
 	return recipet, nil
 }
 
+// Build
 func (b *Builder) Build() error {
 	if b.es.DataChan == nil {
 		dot.Logger().Errorln("data channel should not be empty")
@@ -446,19 +460,7 @@ func parseTopics(out event.JSONObj, fields abi.Arguments, topics []common.Hash) 
 			} else {
 				out.Set(name, false)
 			}
-		case reflect.Int8:
-			num := new(big.Int).SetBytes(topics[0][:])
-			out.Set(name, num.Int64())
-
-		case reflect.Int16:
-			num := new(big.Int).SetBytes(topics[0][:])
-			out.Set(name, num.Int64())
-
-		case reflect.Int32:
-			num := new(big.Int).SetBytes(topics[0][:])
-			out.Set(name, num.Int64())
-
-		case reflect.Int64:
+		case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			num := new(big.Int).SetBytes(topics[0][:])
 			out.Set(name, num.Int64())
 
@@ -576,33 +578,33 @@ func (es *eventScanner) scan(ctx *RedoCtx) {
 	if es.From == 0 {
 		es.From = newestBn
 	}
-	var to_bn uint64
+	var toBn uint64
 	if es.To > 0 && es.To < newestBn {
-		to_bn = es.To
+		toBn = es.To
 	} else {
-		to_bn = newestBn
+		toBn = newestBn
 	}
 	if es.From > es.To && es.To > 0 {
 		ctx.StopRedo()
 		return
 	}
-	if to_bn < es.From {
+	if toBn < es.From {
 		return
 	}
-	if es.From+es.StepLength < to_bn {
-		to_bn = es.From + es.StepLength
+	if es.From+es.StepLength < toBn {
+		toBn = es.From + es.StepLength
 	}
 
 	fq := ethereum.FilterQuery{
 		FromBlock: new(big.Int).SetUint64(es.From),
-		ToBlock:   new(big.Int).SetUint64(to_bn),
+		ToBlock:   new(big.Int).SetUint64(toBn),
 		Addresses: []common.Address{},
 		Topics:    [][]common.Hash{},
 	}
 	fq.Addresses = es.Contracts.Contracts()
 	logs, err := es.conn.FilterLogs(context.Background(), fq)
 	if err != nil {
-		es.sendErr(fmt.Errorf("filter log(%v,%v) err:%v, will retry later", es.From, to_bn, err))
+		es.sendErr(fmt.Errorf("filter log(%v,%v) err:%v, will retry later", es.From, toBn, err))
 		return
 	}
 	for _, lg := range logs {
@@ -628,12 +630,12 @@ func (es *eventScanner) scan(ctx *RedoCtx) {
 		})
 	}
 	if es.ProgressChan != nil {
-		es.ProgressChan <- Progress{From: es.From, To: to_bn}
+		es.ProgressChan <- Progress{From: es.From, To: toBn}
 	}
-	if to_bn < newestBn {
+	if toBn < newestBn {
 		ctx.StartNextRightNow()
 	}
-	es.From = to_bn + 1
+	es.From = toBn + 1
 }
 
 func unpackMatchedLog(out event.JSONObj, log types.Log, meta *contractMeta) (string, error) {
