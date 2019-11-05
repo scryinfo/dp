@@ -67,7 +67,7 @@ func newTxDot(conf interface{}) (dot.Dot, error) {
 // TxTypeLive Data structure needed when generating newer component
 func TxTypeLive() []*dot.TypeLives {
 	return []*dot.TypeLives{
-		&dot.TypeLives{
+		{
 			Meta: dot.Metadata{TypeId: TxTypeId,
 				NewDoter: func(conf interface{}) (dot dot.Dot, err error) {
 					return newTxDot(conf)

@@ -35,6 +35,7 @@ type Person struct {
 	Age  int    `yaml:"Age"`
 	IDCN int64  `yaml:"ID_card_number"`
 }
+
 // Name
 type Name struct {
 	CName string `yaml:"Chinese_name"`
@@ -58,6 +59,7 @@ type Education struct {
 	Senior  School `yaml:"Senior"`
 	Collage School `yaml:"Collage"`
 }
+
 // School
 type School struct {
 	SName string `yaml:"School_name"`

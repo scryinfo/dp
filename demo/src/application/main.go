@@ -18,7 +18,7 @@ const logPath = "D:/EnglishRoad/workspace/Go/src/github.com/scryinfo/dp/demo/src
 var (
 	scryinfo *settings.scryinfo
 	err      error
-	port           = flag.String("port", "9822", "")
+	port     = flag.String("port", "9822", "")
 )
 
 func init() {

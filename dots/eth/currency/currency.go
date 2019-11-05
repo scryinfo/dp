@@ -24,7 +24,7 @@ type Currency struct {
 }
 
 //construct dot
-func newCurrDot(conf interface{}) (dot.Dot, error) {
+func newCurrDot(_ interface{}) (dot.Dot, error) {
 	d := &Currency{}
 	return d, nil
 }
@@ -33,7 +33,7 @@ func newCurrDot(conf interface{}) (dot.Dot, error) {
 func CurrTypeLive() []*dot.TypeLives {
 
 	t := []*dot.TypeLives{
-		&dot.TypeLives{
+		{
 			Meta: dot.Metadata{TypeId: CurrTypeId,
 				NewDoter: func(conf interface{}) (dot dot.Dot, err error) {
 					return newCurrDot(conf)

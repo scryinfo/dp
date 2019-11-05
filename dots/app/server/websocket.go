@@ -10,7 +10,7 @@ import (
 	"os/exec"
 )
 
-// WSServer
+// WSServer with optional leading article
 type WSServer struct {
 	connParams *websocket.Conn
 	funcMap    map[string]PresetFunc
@@ -22,7 +22,7 @@ type serverConfig struct {
 	UIResourcesDir string `json:"uiResourcesDir"`
 }
 
-// WebSocketTypeId
+// WebSocketTypeId websocket type id
 const WebSocketTypeId = "40ef6679-5cfc-4436-a1f6-7f39870bc5ef"
 
 var _ Server = (*WSServer)(nil)
@@ -47,7 +47,7 @@ func newWebSocketDot(conf interface{}) (dot.Dot, error) {
 	return d, err
 }
 
-// WebSocketTypeLive
+// WebSocketTypeLive add a dot component to dot.line with 'line.PreAdd()'
 func WebSocketTypeLive() *dot.TypeLives {
 	return &dot.TypeLives{
 		Meta: dot.Metadata{
@@ -59,14 +59,14 @@ func WebSocketTypeLive() *dot.TypeLives {
 	}
 }
 
-// Create
+// Create dot.Create
 func (ws *WSServer) Create(l dot.Line) error {
 	ws.funcMap = make(map[string]PresetFunc)
 
 	return nil
 }
 
-// ListenAndServe
+// ListenAndServe start a http server and listen given port
 func (ws *WSServer) ListenAndServe() error {
 	return errors.Wrap(ws.start(), "web serve start failed. ")
 }
@@ -152,7 +152,7 @@ func (ws *WSServer) handleMessages(conn *websocket.Conn) {
 	}
 }
 
-// SendMessage
+// SendMessage send message to client
 func (ws *WSServer) SendMessage(name string, payload interface{}) error {
 	if bs, ok := payload.([]byte); ok {
 		payload = string(bs) // []byte will be base58 encode first, in json marshal
@@ -173,7 +173,7 @@ func (ws *WSServer) SendMessage(name string, payload interface{}) error {
 	return websocket.Message.Send(ws.connParams, string(b)) // avoid base58 encode
 }
 
-// PresetMsgHandleFuncs
+// PresetMsgHandleFuncs preset system functions' handler
 func (ws *WSServer) PresetMsgHandleFuncs(name []string, presetFunc []PresetFunc) error {
 	if len(name) != len(presetFunc) {
 		return errors.New("Quantities of name and function are not equal. ")

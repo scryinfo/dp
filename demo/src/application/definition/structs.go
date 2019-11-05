@@ -38,6 +38,7 @@ type PublishData struct {
 	Password      string  `json:"password"`
 	IDs           IDs     `json:"IDs"`
 }
+
 // IDs
 type IDs struct {
 	MetaDataID   string   `json:"metaDataID"`
@@ -65,6 +66,7 @@ type BuyData struct {
 	StartVerify  bool         `json:"startVerify"`
 	SelectedData SelectedData `json:"pID"`
 }
+
 // SelectedData
 type SelectedData struct {
 	PublishID string `json:"PublishID"`
@@ -105,6 +107,7 @@ type PurchaseData struct {
 	Password   string       `json:"password"`
 	SelectedTx SelectedTxPD `json:"tID"`
 }
+
 // SelectedTxPD
 type SelectedTxPD struct {
 	TransactionID string `json:"TransactionID"`
@@ -126,6 +129,7 @@ type ReEncryptData struct {
 	Password   string        `json:"password"`
 	SelectedTx SelectedTxRED `json:"tID"`
 }
+
 // SelectedTxRED
 type SelectedTxRED struct {
 	TransactionID           string `json:"TransactionID"`
@@ -148,6 +152,7 @@ type DecryptData struct {
 	Password   string       `json:"password"`
 	SelectedTx SelectedTxDD `json:"tID"`
 }
+
 // SelectedTxDD
 type SelectedTxDD struct {
 	MetaDataIDEncrypt []byte `json:"MetaDataIDEncrypt"`
@@ -161,6 +166,7 @@ type ConfirmData struct {
 	SelectedTx SelectedTxCD `json:"tID"`
 	Truth      bool         `json:"confirmData"`
 }
+
 // SelectedTxCD
 type SelectedTxCD struct {
 	TransactionID string `json:"TransactionID"`
@@ -178,6 +184,7 @@ type OnClose struct {
 type RegisterVerifierData struct {
 	Password string `json:"password"`
 }
+
 // OnRegisterAsVerifier
 type OnRegisterAsVerifier struct {
 	Block uint64
@@ -189,6 +196,7 @@ type VerifyData struct {
 	TransactionID string `json:"tID"`
 	Verify        Verify `json:"verify"`
 }
+
 // Verify
 type Verify struct {
 	Suggestion bool   `json:"suggestion"`
@@ -210,10 +218,12 @@ type CreditData struct {
 	SelectedTx SelectedTxCrD `json:"tID"`
 	Credit     Credit        `json:"credit"`
 }
+
 // SelectedTxCrD
 type SelectedTxCrD struct {
 	TransactionID string `json:"TransactionID"`
 }
+
 // Credit
 type Credit struct {
 	Verifier1Revert bool    `json:"verifier1Revert"`
