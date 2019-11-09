@@ -165,12 +165,12 @@ func (b *Builder) Build() error {
 		if cm.abiStr == "" {
 			return errors.New("need ABI")
 		}
-		bc, abi, err := bindContract(cm.abiStr, cm.contract, b.es.conn)
+		bc, contractAbi, err := bindContract(cm.abiStr, cm.contract, b.es.conn)
 		if err != nil {
 			return err
 		}
 		cm.bc = bc
-		cm.abi = abi
+		cm.abi = contractAbi
 		b.es.Contracts[key] = cm
 	}
 	return nil
@@ -218,8 +218,8 @@ func (cm contractMeta) Unpack(v event.JSONObj, name string, output []byte) (err 
 			return errors.New("abi: improperly formatted output")
 		}
 		return cm.UnpackArgs(v, output, method.Outputs)
-	} else if event, ok := cm.abi.Events[name]; ok {
-		return cm.UnpackArgs(v, output, event.Inputs)
+	} else if abiEvent, ok := cm.abi.Events[name]; ok {
+		return cm.UnpackArgs(v, output, abiEvent.Inputs)
 	}
 	return errors.New("abi: could not locate named method or event")
 }
@@ -464,21 +464,8 @@ func parseTopics(out event.JSONObj, fields abi.Arguments, topics []common.Hash) 
 			num := new(big.Int).SetBytes(topics[0][:])
 			out.Set(name, num.Int64())
 
-		case reflect.Uint8:
-			num := new(big.Int).SetBytes(topics[0][:])
-			out.Set(name, uint8(num.Int64()))
-
-		case reflect.Uint16:
-			num := new(big.Int).SetBytes(topics[0][:])
-			out.Set(name, uint16(num.Int64()))
-
-		case reflect.Uint32:
-			num := new(big.Int).SetBytes(topics[0][:])
-			out.Set(name, uint32(num.Int64()))
-
-		case reflect.Uint64:
-			num := new(big.Int).SetBytes(topics[0][:])
-			out.Set(name, num.Uint64())
+		case reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			uintHandler(out, name, new(big.Int).SetBytes(topics[0][:]), arg.Type.Kind)
 
 		default:
 			// Ran out of plain primitive types, try custom types
@@ -509,6 +496,21 @@ func parseTopics(out event.JSONObj, fields abi.Arguments, topics []common.Hash) 
 		topics = topics[1:]
 	}
 	return nil
+}
+
+func uintHandler(out event.JSONObj, name string, num *big.Int, typ reflect.Kind) {
+	switch typ {
+	case reflect.Uint8:
+		out.Set(name, uint8(num.Int64()))
+	case reflect.Uint16:
+		out.Set(name, uint16(num.Int64()))
+	case reflect.Uint32:
+		out.Set(name, uint32(num.Int64()))
+	case reflect.Uint64:
+		out.Set(name, num.Uint64())
+	}
+
+	return
 }
 
 type contractMap map[string]contractMeta

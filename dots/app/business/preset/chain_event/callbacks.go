@@ -1,24 +1,24 @@
 package cec
 
 import (
-	"encoding/json"
-	"github.com/btcsuite/btcutil/base58"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/pkg/errors"
-	"github.com/scryinfo/dot/dot"
-	"github.com/scryinfo/dp/dots/app/server"
-	SQLite "github.com/scryinfo/dp/dots/app/storage"
-	"github.com/scryinfo/dp/dots/app/storage/definition"
-	scry2 "github.com/scryinfo/dp/dots/binary/scry"
-	"github.com/scryinfo/dp/dots/eth/event"
-	ipfs "github.com/scryinfo/dp/dots/storage/ipfs"
-	"go.uber.org/zap"
-	"io/ioutil"
-	"math/big"
-	"os"
-	"strconv"
-	"strings"
-	"time"
+    "encoding/json"
+    "github.com/btcsuite/btcutil/base58"
+    "github.com/ethereum/go-ethereum/common"
+    "github.com/pkg/errors"
+    "github.com/scryinfo/dot/dot"
+    "github.com/scryinfo/dp/dots/app/server"
+    "github.com/scryinfo/dp/dots/app/storage"
+    "github.com/scryinfo/dp/dots/app/storage/definition"
+    scry2 "github.com/scryinfo/dp/dots/binary/scry"
+    "github.com/scryinfo/dp/dots/eth/event"
+    ipfs "github.com/scryinfo/dp/dots/storage/ipfs"
+    "go.uber.org/zap"
+    "io/ioutil"
+    "math/big"
+    "os"
+    "strconv"
+    "strings"
+    "time"
 )
 
 // Callbacks encapsulate event handler, current user and some components
@@ -30,7 +30,7 @@ type Callbacks struct {
 	config       cbsConfig
 	WS           *server.WSServer `dot:""`
 	Storage      *ipfs.Ipfs       `dot:""`
-	DB           *SQLite.SQLite   `dot:""`
+	DB           *storage.SQLite  `dot:""`
 }
 
 type cbsConfig struct {
@@ -43,7 +43,7 @@ const (
 )
 
 // Create dot.Create
-func (c *Callbacks) Create(l dot.Line) error {
+func (c *Callbacks) Create(_ dot.Line) error {
 	c.FlagChan = make(chan bool, 10)
 
 	c.EventNames = []string{
@@ -117,7 +117,7 @@ func CBsTypeLive() []*dot.TypeLives {
 		},
 		server.WebSocketTypeLive(),
 		ipfs.IpfsTypeLive(),
-		SQLite.SQLiteTypeLive(),
+        storage.SQLiteTypeLive(),
 	}
 }
 
@@ -253,19 +253,19 @@ func (c *Callbacks) onVerifiersChosen(event event.Event) bool {
 	return true
 }
 
-func (c *Callbacks) updateVerifierArray(txId string, blockNumber uint64, mode string) (err error) {
+func (c *Callbacks) updateVerifierArray(txId string, blockNumber uint64, mode string) error {
 	var acc definition.Account
 
 	if num, err := c.DB.Read(&acc, "", "address = ?", c.CurUser.Account().Addr); num != 1 || err != nil {
 		dot.Logger().Errorln("id not in slice", zap.Int64("affect rows number", num), zap.NamedError("error", err))
-		return
+		return nil
 	}
 
 	if bs, err := UpdateSlice(acc.Verify, txId, mode); err == nil {
 		acc.Verify = bs
 	} else {
 		dot.Logger().Errorln("append verify failed. ", zap.NamedError("error", err))
-		return
+		return nil
 	}
 
 	if num, err := c.DB.Update(&acc, map[string]interface{}{
@@ -273,10 +273,10 @@ func (c *Callbacks) updateVerifierArray(txId string, blockNumber uint64, mode st
 		"from_block": blockNumber,
 	}, "address = ?", c.CurUser.Account().Addr); num != 1 || err != nil {
 		dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
-		return
+		return nil
 	}
 
-	return
+	return nil
 }
 
 func (c *Callbacks) onAdvancePurchase(event event.Event) bool {

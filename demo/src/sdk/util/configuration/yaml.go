@@ -27,10 +27,7 @@ func GetYAMLStructure(fileAddr string, v interface{}) (interface{}, error) {
 	return conf, nil
 }
 
-/* SaveChanges save changes
-   This function will delete items in .yaml file which not in structure.go,
-   so make sure items in structure.go is not less than in .yaml file.
-*/
+// SaveChanges save changes
 func SaveChanges(fileAddr string, conf interface{}) error {
 	err := writeFile(fileAddr, conf, os.O_TRUNC) //O_TRUNC param will rewrite the file
 	if err != nil {

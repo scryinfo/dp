@@ -475,21 +475,8 @@ func parseTopics(out JSONObj, fields abi.Arguments, topics []common.Hash) error 
 			num := new(big.Int).SetBytes(topics[0][:])
 			out.Set(name, num.Int64())
 
-		case reflect.Uint8:
-			num := new(big.Int).SetBytes(topics[0][:])
-			out.Set(name, uint8(num.Int64()))
-
-		case reflect.Uint16:
-			num := new(big.Int).SetBytes(topics[0][:])
-			out.Set(name, uint16(num.Int64()))
-
-		case reflect.Uint32:
-			num := new(big.Int).SetBytes(topics[0][:])
-			out.Set(name, uint32(num.Int64()))
-
-		case reflect.Uint64:
-			num := new(big.Int).SetBytes(topics[0][:])
-			out.Set(name, num.Uint64())
+		case reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			uintHandler(out, name, new(big.Int).SetBytes(topics[0][:]), arg.Type.Kind)
 
 		default:
 			// Ran out of plain primitive types, try custom types
@@ -520,6 +507,21 @@ func parseTopics(out JSONObj, fields abi.Arguments, topics []common.Hash) error 
 		topics = topics[1:]
 	}
 	return nil
+}
+
+func uintHandler(out JSONObj, name string, num *big.Int, typ reflect.Kind) {
+	switch typ {
+	case reflect.Uint8:
+		out.Set(name, uint8(num.Int64()))
+	case reflect.Uint16:
+		out.Set(name, uint16(num.Int64()))
+	case reflect.Uint32:
+		out.Set(name, uint32(num.Int64()))
+	case reflect.Uint64:
+		out.Set(name, num.Uint64())
+	}
+
+	return
 }
 
 type contractMap map[string]contractMeta

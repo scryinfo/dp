@@ -20,7 +20,7 @@ var (
 	err error
 )
 
-// use: go build example.go, and run 'example.exe';
+// use: go build, then run 'example.exe';
 //      or config debug items, mainly 'out dir' and 'exec file name'
 func main() {
 	// init
@@ -30,12 +30,12 @@ func main() {
 		})
 
 		if err != nil {
-			dot.Logger().Debugln("Line init failed. ", zap.NamedError("", err))
+			dot.Logger().Debugln("Line init failed. ", zap.NamedError("error", err))
 			return
 		}
 
 		var d dot.Dot
-		d, err = l.ToInjecter().GetByLiveId(dot.LiveId(storage.SQLiteTypeId))
+		d, err = l.ToInjecter().GetByLiveId(dot.LiveId(storage.DatabaseTypeId))
 		if err != nil {
 			dot.Logger().Errorln("load SQLite component failed.")
 		}
@@ -86,6 +86,8 @@ func start() {
 
 	// read all to check delete result
 	readAllToCheck()
+
+	return
 }
 
 func deleteAll() {
