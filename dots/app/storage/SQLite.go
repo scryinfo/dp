@@ -26,8 +26,8 @@ type sqlConfig struct {
 
 // const
 const (
-	SQLiteTypeId = "cd947210-6790-4e9f-b73f-63aeba484beb"
-	DB           = "sqlite3"
+	DatabaseTypeId = "cd947210-6790-4e9f-b73f-63aeba484beb"
+	DB             = "sqlite3"
 )
 
 // check if 'SQLite' struct implements 'Database' interface
@@ -76,7 +76,7 @@ func newSQLiteDot(conf interface{}) (dot.Dot, error) {
 func SQLiteTypeLive() *dot.TypeLives {
 	return &dot.TypeLives{
 		Meta: dot.Metadata{
-			TypeId: SQLiteTypeId,
+			TypeId: DatabaseTypeId,
 			NewDoter: func(conf interface{}) (dot.Dot, error) {
 				return newSQLiteDot(conf)
 			},

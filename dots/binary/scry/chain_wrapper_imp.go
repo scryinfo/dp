@@ -32,21 +32,21 @@ type chainWrapperImp struct {
 var _ ChainWrapper = (*chainWrapperImp)(nil)
 
 // NewChainWrapper create a new chain wrapper
-func NewChainWrapper(protocolcontractinterfaceAddress common.Address,
-	tokencontractinterfaceAddress common.Address,
+func NewChainWrapper(protocolContractInterfaceAddress common.Address,
+	tokenContractInterfaceAddress common.Address,
 	clientConn *ethclient.Client,
 	appId string,
 ) (ChainWrapper, error) {
 	var err error
 	c := &chainWrapperImp{}
 
-	c.protocol, err = contractinterface.NewScryProtocol(protocolcontractinterfaceAddress, clientConn)
+	c.protocol, err = contractinterface.NewScryProtocol(protocolContractInterfaceAddress, clientConn)
 	if err != nil {
 		dot.Logger().Errorln("", zap.NamedError("failed to initialize protocol contractinterface interface wrapper.", err))
 		return nil, err
 	}
 
-	c.token, err = contractinterface.NewScryToken(tokencontractinterfaceAddress, clientConn)
+	c.token, err = contractinterface.NewScryToken(tokenContractInterfaceAddress, clientConn)
 	if err != nil {
 		dot.Logger().Errorln("", zap.NamedError("failed to initialize token contractinterface interface wrapper.", err))
 		return nil, err
@@ -56,7 +56,7 @@ func NewChainWrapper(protocolcontractinterfaceAddress common.Address,
 	c.appId = appId
 
 	//load components
-	dot.GetDefaultLine().ToInjecter().Inject(&c)
+	err = dot.GetDefaultLine().ToInjecter().Inject(&c)
 
 	return c, err
 }

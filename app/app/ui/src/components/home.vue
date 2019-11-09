@@ -92,7 +92,7 @@ export default {
         let _home = this;
         _home.$store.state.account = this.$route.params.acc;
 
-        connect.send({Name:"currentUserDataUpdate", Payload: {address: this.$route.params.acc}}, function (payload, _this) {
+        connect.send({Name:"currentUserDataUpdate", Payload: {}}, function (payload, _this) {
             console.log("用户信息更新成功！", payload);
             utils.reacquireData("all");
             _home.$store.state.nickname = payload;

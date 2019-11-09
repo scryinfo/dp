@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	// SubsTypeId
+	// SubsTypeId subscribe type id
 	SubsTypeId = "5535a065-0d90-46f4-9776-26630676c4c5"
 )
 

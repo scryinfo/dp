@@ -231,14 +231,9 @@ func (p *Preset) CreateNewAccount(mi *server.MessageIn) (payload interface{}, er
 }
 
 // CurrentUserDataUpdate update data for current user, while send current user some eth and tokens for test
-func (p *Preset) CurrentUserDataUpdate(mi *server.MessageIn) (payload interface{}, err error) {
+func (p *Preset) CurrentUserDataUpdate(_ *server.MessageIn) (payload interface{}, err error) {
 	if p.CBs.CurUser == nil {
 		err = errors.New("Current user is nil. ")
-		return
-	}
-
-	var bs PreDef.Preset
-	if err = json.Unmarshal(mi.Payload, &bs); err != nil {
 		return
 	}
 
@@ -253,7 +248,7 @@ func (p *Preset) CurrentUserDataUpdate(mi *server.MessageIn) (payload interface{
 	// set from block
 	{
 		var num int64
-		if num, err = p.CBs.DB.Read(&acc, "", "address = ?", bs.Address); num != 1 || err != nil {
+		if num, err = p.CBs.DB.Read(&acc, "", "address = ?", p.CBs.CurUser.Account().Addr); num != 1 || err != nil {
 			err = errors.Wrap(err, "db read failed")
 			return
 		}
@@ -790,11 +785,6 @@ func (p *Preset) IsVerifier(_ *server.MessageIn) (payload interface{}, err error
 
 // GetAccountsList get accounts
 func (p *Preset) GetAccountsList(_ *server.MessageIn) (payload interface{}, err error) {
-	if p.CBs.CurUser == nil {
-		err = errors.New("Current user is nil. ")
-		return
-	}
-
 	var (
 		accs []DBDef.Account
 		num  int64

@@ -48,7 +48,7 @@ func ListenEvent(conn *ethclient.Client, contracts []ContractInfo, fromBlock uin
 	recp, err := builder.SetClient(conn).
 		SetFrom(fromBlock).
 		SetTo(0).
-        SetGracefullyExit(true).
+		SetGracefullyExit(true).
 		SetDataChan(dataChannel, errorChannel).
 		SetInterval(interval).
 		BuildAndRun()

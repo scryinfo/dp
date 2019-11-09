@@ -51,7 +51,7 @@ func NewScryClient(address string, chainWrapper ChainWrapper) Client {
 func getAccountComponent() (*auth.Account, error) {
 	logger := dot.Logger()
 
-	d, err := dot.GetDefaultLine().ToInjecter().GetByLiveId(dot.LiveId(auth.AccountTypeId))
+	d, err := dot.GetDefaultLine().ToInjecter().GetByLiveId(auth.AccountTypeId)
 	if err != nil {
 		logger.Errorln("loading Binary component failed")
 		return nil, errors.New("loading Binary component failed")

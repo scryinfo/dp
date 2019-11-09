@@ -688,7 +688,7 @@ func initLog() error {
 	return nil
 }
 
-// StartScan
+// StartScan start scan
 func StartScan(fromBlock uint64) {
 	core.StartScan(fromBlock)
 }

@@ -29,8 +29,8 @@ func newCtx(duration time.Duration) *RedoCtx {
 }
 
 // SetDelayBeforeNext set delay before next
-func (ctx *RedoCtx) SetDelayBeforeNext(new_duration time.Duration) {
-	ctx.delayBeforeNextLoop = new_duration
+func (ctx *RedoCtx) SetDelayBeforeNext(newDuration time.Duration) {
+	ctx.delayBeforeNextLoop = newDuration
 }
 
 // StartNextRightNow set delay before next = 0
