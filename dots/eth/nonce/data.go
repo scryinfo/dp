@@ -41,9 +41,7 @@ var (
 	queryNonceSQL = func(address string, nonce uint64) string { return fmt.Sprintf("SELECT nonce FROM nonces WHERE address = '%v' AND nonce = %v", address, nonce) }
 	queryAllNoncesCountSQL = func(address string) string { return fmt.Sprintf("SELECT count(*) FROM nonces WHERE address = '%v'", address) }
 	queryTheOnlyUpdatedNonceSQL = func(address string) string { return fmt.Sprintf("SELECT nonce FROM nonces WHERE address = '%v' AND updated = TRUE", address) }
-	//queryRecycledNoncesSQL = func(address string) string { return fmt.Sprintf("SELECT nonce FROM nonces WHERE address = '%v' AND updated = FALSE", address) }
 	queryMinRecycledNonceSQL = func(address string) string { return fmt.Sprintf("SELECT nonce FROM nonces WHERE nonce = (SELECT min(nonce) FROM nonces WHERE address = '%v' AND updated = FALSE)", address)}
-	//queryMinRecycledNonceSQL = func(address string) string { return "SELECT min(nonce) FROM " + " (" + queryRecycledNoncesSQL(address) + ")" }
 	deleteAndReturnMinRecycledNonceSQL = func(address string) string { return fmt.Sprintf("DELETE FROM nonces WHERE address = '%v' AND nonce =  + (", address) + queryMinRecycledNonceSQL(address) + ")" + " RETURNING nonce" }
 	deleteRecycledNoncesSQL = func(address string) string { return fmt.Sprintf("DELETE FROM nonces WHERE address = '%v' AND updated = FALSE", address) }
 	deleteAllNoncesSQL = func(address string) string { return fmt.Sprintf("DELETE FROM nonces WHERE address = '%v'", address) }
