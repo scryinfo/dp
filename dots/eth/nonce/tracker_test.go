@@ -4,319 +4,944 @@
 package nonce
 
 import (
+	"context"
+	"database/sql"
+	"errors"
+	"fmt"
 	"math/rand"
-	"strconv"
 	"sync"
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/scryinfo/dot/dot"
+	"github.com/scryinfo/dot/dots/db/gorms"
+	"github.com/scryinfo/dp/dots/eth/client"
+	"github.com/scryinfo/dp/dots/eth/nonce/mocks"
+
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
 )
 
-// Tests that rely on the real environments of mainet and PostgreSQL.
-func Test_Tracker_on_ETH_mainnet_and_PostgreSQL(t *testing.T) {
-	// Test main successful scenarios
-	t.Run("main_successful_scenarios", func(t *testing.T) {
-		// Inputs
-		inDriverName := "postgres"
-		inDataSourceName := "host=localhost port=5432 user=postgres password=QrfV2_Pg sslmode=disable dbname=ljg_cqu"
-		inNodeURL := "https://mainnet.infura.io/v3/d0a6c76d448d4f16baeb8143050a1f2f"
-		address := "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"
-
-		// Run tests
-		assert := assert.New(t)
-		// Get a tracker, connect to the database and the Ethereum network
-		tracker := GetTracker(inDriverName, inDataSourceName, inNodeURL)
-		t.Logf("GetTracker: dial %v and open %v is a success\n", inNodeURL, inDriverName)
-		// Create an account into the database
-		err := tracker.CreateAccount(address)
-		if assert.NoErrorf(err, "create account %v shouldn't failed.", address) {
-			t.Logf("CreateAccount: %v successfully.\n", address)
-			// Retrieve nonce to an address
-			nonce1, err := tracker.RetrieveNonceAt(address)
-			if assert.NoErrorf(err, "retrieve nonce from account %v shouldn't failed.", address) {
-				t.Logf("RetrieveNonceAt: nonce1 %v\n", nonce1)
-				// Repeat retrieving nonce to an address
-				nonce2, err := tracker.RetrieveNonceAt(address)
-				if assert.NoErrorf(err, "retrieve nonce from account %v shouldn't failed.", address) {
-					t.Logf("RetrieveNonceAt: nonce2 %v\n", nonce2)
-					if assert.Equalf(nonce1+1, nonce2, "nonce1 = %v, but nonce2 = %v, nonce1-nonc2 != 1", nonce1, nonce2) {
-						t.Logf("nonce1+1 %v == nonce2 %v\n", nonce1+1, nonce2)
-					}
-				}
-				// Restore nonce to an address
-				err = tracker.RestoreNonce(address, nonce2)
-				if assert.NoErrorf(err, "restore nonce2 %v to address %v shouldn't fail", nonce2, address) {
-					t.Logf("RestoreNonce: nonce2 %v\n", nonce2)
-					// Again retrieving nonce to the same address
-					nonce2_restored, err := tracker.RetrieveNonceAt(address)
-					if assert.NoErrorf(err, "retrieve nonce from account %v shouldn't failed.", address) {
-						t.Logf("RetrieveNonceAt: nonce2_restored %v\n", nonce2_restored)
-						if assert.Equalf(nonce2, nonce2_restored, "nonce2 = %v, but nonce2_restored = %v, nonce2 != nonce2_restored", nonce2, nonce2_restored) {
-							t.Logf("nonce2 %v == nonce2_restored %v\n", nonce2, nonce2_restored)
-						}
-					}
-					// Rest nonce at an address
-					err = tracker.ResetNonceAt(address)
-					if assert.NoErrorf(err, "reset nonce to address %v shouldn't fail", address) {
-						t.Logf("ResetNonceAt: address %s successfully. \n", address)
-						// Delete an account
-						err := tracker.DeleteAccount(address)
-						if assert.NoErrorf(err, "delete account %v shouldn't fail", address) {
-							t.Logf("DeleteAccount: %v deleted.\n", address)
-							// Retrieve nonce from a non-existing account
-							nonce_0, err := tracker.RetrieveNonceAt(address)
-							if assert.EqualErrorf(err, ErrNonceNotExist.Error(), "There should be no nonce at address absence") {
-								t.Logf("RetrieveNonceAt: nonce_0 = %v at address %v absence.\n", nonce_0, address)
-								if assert.Equalf(uint64(0), nonce_0, "Expected zero nonce 0, but got actual nonce %v\n", nonce_0) {
-									t.Logf("retrieve nonce of 0 from un-existing account %v\n", address)
-								}
-							}
-						}
-					}
-				}
-			}
-			err = tracker.Close()
-			if assert.NoErrorf(err, "There shouldn't return an error when close a track.") {
-				t.Log("Close: Tracker got closed.")
-			}
-		}
-	})
-
-	// Test GetTracker on input errors scenarios
-	t.Run("GetTracker_on_input_errors_scenarios", func(t *testing.T) {
-		// Test scenarios
-		scenarios := []struct{
-			desc string
-			inDriverName, inDataSourceName, inETHNodeURL string
-		} {
-			{
-				desc: "unknow driver",
-				inDriverName: "unknow_driver",},
-			{
-				desc: "db not exists",
-				inDriverName: "postgres",
-				inDataSourceName: "host=localhost port=5432 user=postgres password=QrfV2_Pg sslmode=disable dbname=not_exists",},
-			{
-				desc: "invalid ETH node URL",
-				inDriverName: "postgres",
-				inDataSourceName: "host=localhost port=5432 user=postgres password=QrfV2_Pg sslmode=disable dbname=ljg_cqu",
-				inETHNodeURL: "https://invalid",},
-		}
-
-		// Run tests
-		assert := assert.New(t)
-		for _, scenario := range scenarios {
-			assert.Panicsf(func() {
-				GetTracker(scenario.inDriverName, scenario.inDataSourceName, scenario.inETHNodeURL)
-			}, "GetTracker: should panic!")
-		}
-	})
-
-	// Test CreateAccount, DeleteAccount and Close on input errors scenarios
-	t.Run("CreateAccount_and_DeleteAccount_on_input_errors_scenarios", func(t *testing.T) {
-		// prerequisites
-		driverName := "postgres"
-		dataSourceName := "host=localhost port=5432 user=postgres password=QrfV2_Pg sslmode=disable dbname=ljg_cqu"
-		ethNodeURL := "https://mainnet.infura.io/v3/d0a6c76d448d4f16baeb8143050a1f2f"
-		address := "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"
-		tracker := GetTracker(driverName, dataSourceName, ethNodeURL)
-		tracker.CreateAccount(address) // Create an account as existing beforehand.
-
-		// Run tests
-		assert := assert.New(t)
-		defer func() {
-			assert.NoError(tracker.Close(), "Close: should return no error.") // Release underlying resources
-		}()
-
-		defer func(address string) {
-			err := tracker.DeleteAccount(address) // Clear up test trash
-			assert.NoErrorf(err,"DeleteAccount: should return no error on an existing account %v\n", address)
-			err = tracker.DeleteAccount("non_existing_address")
-			assert.NoErrorf(err,"DeleteAccount: should return no error on an absent account %v\n", address)
-		}(address)
-
-		// Test scenarios for CreateAccount
-		scenarios := []struct{
-			desc string
-			inAddress string
-			expectErr bool
-		}{
-			{
-				desc: "invalid Ethereum address",
-				inAddress: "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643_",
-				expectErr: true,},
-			{
-				desc: "account does already exist",
-				inAddress: "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
-				expectErr: true,},
-		}
-
-		// Run tests for CreateAccount
-		for _, scenario := range scenarios {
-			err := tracker.CreateAccount(scenario.inAddress)
-			assert.Equalf(scenario.expectErr, err != nil, "expectEr: %v, but gotErr: %v\n", scenario.expectErr, err)
-		}
-	})
-
-	// Test RetrieveNonceAt, RestoreNonce, ResetNonceAt on input errors scenarios
-	t.Run("RetrieveNonceAt_RestoreNonce_ResetNonceAt_on_input_errors_scenarios", func(t *testing.T) {
-		// prerequisites
-		driverName := "postgres"
-		dataSourceName := "host=localhost port=5432 user=postgres password=QrfV2_Pg sslmode=disable dbname=ljg_cqu"
-		ethNodeURL := "https://mainnet.infura.io/v3/d0a6c76d448d4f16baeb8143050a1f2f"
-		tracker := GetTracker(driverName, dataSourceName, ethNodeURL)
-		defer tracker.Close()
-
-		assert := assert.New(t)
-
-		// Test ErrNonceNottExist on RetrieveNonceAt
-		address := "account_not_exists"
-		_, err := tracker.RetrieveNonceAt(address)
-		assert.Errorf(err, ErrNonceNotExist.Error(), "no nonce data should be retrieved from account %v\n", address)
-
-		// Test ErrAccountNotExist on RestoreNonce and ResetNoneAt
-		err = tracker.RestoreNonce(address, 10)
-		assert.Errorf(err, ErrAccountNotExist.Error(), "no nonce data should be retrieved from account %v\n", address)
-
-		err = tracker.ResetNonceAt(address)
-		assert.Errorf(err, ErrAccountNotExist.Error(), "no nonce data should be retrieved from account %v\n", address)
-
-		// Test ErrInvalidRecycledNonce on RestoreNonce
-		address = "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"
-		err = tracker.CreateAccount(address)
-		if assert.NoErrorf(err, "CreateAccount: should return no error at address %v\n", address) {
-			t.Logf("CreateAccount %v\n", address)
-			defer func() {
-				err = tracker.DeleteAccount(address)
-				assert.NoErrorf(err, "DeleteAccount: should return no error at address %v\n", address)
-			}()
-
-			nonce, err := tracker.RetrieveNonceAt(address)
-			if assert.NoErrorf(err, "RetrieveNonceAt: should return no error at address %v\n", address) {
-				t.Logf("RetrieveNonceAt: address %v, returned nonce %v\n", address, nonce)
-				invalidRecycledNonce := nonce + 2
-				err = tracker.RestoreNonce(address, invalidRecycledNonce)
-				if assert.Errorf(err, ErrInvalidRecycledNonce.Error(), "RestoreNonce(%v, %v) should returns an error.\n", address, invalidRecycledNonce) {
-					t.Logf("RestoreNonce(%v, %v) returns error '%v' as expected.\n", address, invalidRecycledNonce, ErrInvalidRecycledNonce)
-				}
-				alreadyExistRecycledNonce := nonce + 1
-				err = tracker.RestoreNonce(address, alreadyExistRecycledNonce)
-				if assert.Errorf(err, ErrNonceAlreadyExist.Error(), "RestoreNonce(%v, %v) should returns an error.\n", address, alreadyExistRecycledNonce) {
-					t.Logf("RestoreNonce(%v, %v) returns error '%v' as expected.\n", address, alreadyExistRecycledNonce, ErrNonceAlreadyExist)
-				}
-			}
-		}
-	})
+type TrackerTestSuite struct {
+	suite.Suite
+	gorutines int
 }
 
-// Test the Tracker for safety of concurrent use by multiple goroutines, relying on the real environments of mainet and PostgreSQL
-func Test_Tracker_for_concurrent_safety_on_ETH_mainnet_and_PostgreSQL(t *testing.T) {
-		// prerequisites
-		driverName := "postgres"
-		dataSourceName := "host=localhost port=5432 user=postgres password=QrfV2_Pg sslmode=disable dbname=ljg_cqu"
-		ethNodeURL := "https://mainnet.infura.io/v3/d0a6c76d448d4f16baeb8143050a1f2f"
-		address := "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"
-		tracker := GetTracker(driverName, dataSourceName, ethNodeURL)
-		tracker.CreateAccount(address)
+func (suite *TrackerTestSuite) SetupTest() {
+	rand.Seed(time.Now().UnixNano())
+	goroutinesCount := rand.Intn(100)
+	suite.gorutines = goroutinesCount
+}
 
-		assert := assert.New(t)
-		var wg = &sync.WaitGroup{}
+func (suite *TrackerTestSuite) TestCreate() {
+	// testing scenarios
+	scenarios := []struct {
+		desc                              string
+		expError                          error
+		configMockLineAndInjecter         func(mockLine *mocks.Line, mockInjecter *mocks.Injecter)
+		patchCreateStorerWithDBAndMockSql func(db *sql.DB, mockSql sqlmock.Sqlmock)
+	}{
+		{
+			desc: "happy path",
+			configMockLineAndInjecter: func(mockLine *mocks.Line, mockInjecter *mocks.Injecter) {
+				mockInjecter.On("GetByLiveId", dot.LiveId(client.ClientTypeId)).Return(&client.Client{}, nil)
+				mockInjecter.On("GetByLiveId", dot.LiveId(gorms.TypeId)).Return(&gorms.Gorms{}, nil)
+				mockLine.On("ToInjecter").Return(mockInjecter)
+			},
+			patchCreateStorerWithDBAndMockSql: func(db *sql.DB, mockSql sqlmock.Sqlmock) {
+				createTableNoncesIFNotExistsSQLRegex := fmt.Sprintf("\\Q%v\\E", createTableNoncesIFNotExistsSQL())
+				mockSql.ExpectExec(createTableNoncesIFNotExistsSQLRegex).WillReturnResult(sqlmock.NewResult(1, 0))
 
-		// Test concurrent creating the same account for 10 times
-		for i := 0; i < 10; i++ {
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				err := tracker.CreateAccount(address)
-				if assert.Errorf(err, ErrAccountAlreadyExist.Error(), "CreateAccount(%v) should return error '%v'\n", err) {
-					t.Logf("CreateAccount(%v) failed expectedly for error '%v'\n", address, err)
-				}
-			}()
-		}
-
-		// Test concurrent retrieving and restoring nonce for 20 times.
-		var totalNonces int = 20
-		var failedNonces, succeededNonces  = []uint64{}, []uint64{}
-
-		for i := 0; i < totalNonces; i++ {
-			goID := "goroutine-" + strconv.Itoa(i)
-			wg.Add(1)
-			go func(goID string) {
-				defer wg.Done()
-
-				// Retrieve a nonce
-				nonce, err := tracker.RetrieveNonceAt(address)
-				if assert.NoErrorf(err, "RetrieveNonceAt(%v) shouldn't returns error '%v'.", address, err) {
-					t.Logf("%v RetrieveNonceAt(%v): %v\n", goID, address, nonce)
-					// Imitate the process of a transaction
-					n := rand.Intn(1000)
-					dur := time.Millisecond * time.Duration(n)
-					time.Sleep(dur)
-					t.Logf("%v takes %v microseconds trying to Tx %v", goID, dur, nonce)
-					if n % 2 == 0 {
-						t.Logf("%v Tx %v.", goID, nonce)
-						succeededNonces = append(succeededNonces, nonce)
-					} else {
-						err := tracker.RestoreNonce(address, nonce)
-						if assert.NoErrorf(err, "RestoreNonce(%v, %v) shouldn't returns error '%v'.", address, nonce, err) {
-							t.Logf("%v RestoreNonce(%v, %v).", goID, address, nonce)
-							failedNonces = append(failedNonces, nonce)
-						}
+				createStorer = func(t *TrackerImp) error {
+					if err := db.Ping(); err != nil {
+						return err
 					}
+					storer, err := getStorer(db)
+					if err != nil {
+						return err
+					}
+					t.storer = storer
+					return nil
 				}
-			}(goID)
+			},
+		},
+		{
+			desc:     "Dot issue: Dot not found",
+			expError: errors.New("ErrDotNotFound"),
+			configMockLineAndInjecter: func(mockLine *mocks.Line, mockInjecter *mocks.Injecter) {
+				mockInjecter.On("GetByLiveId", dot.LiveId(client.ClientTypeId)).Return(&client.Client{}, nil)
+				mockInjecter.On("GetByLiveId", dot.LiveId(gorms.TypeId)).Return((*gorms.Gorms)(nil), errors.New("ErrDotNotFound"))
+				mockLine.On("ToInjecter").Return(mockInjecter)
+			},
+		},
+		{
+			desc:     "Dot issue: internal error",
+			expError: errors.New("ErrDotInternalError"),
+			configMockLineAndInjecter: func(mockLine *mocks.Line, mockInjecter *mocks.Injecter) {
+				mockInjecter.On("GetByLiveId", dot.LiveId(client.ClientTypeId)).Return(&client.Client{}, nil)
+				mockInjecter.On("GetByLiveId", dot.LiveId(gorms.TypeId)).Return((*gorms.Gorms)(nil), errors.New("ErrDotInternalError"))
+				mockLine.On("ToInjecter").Return(mockInjecter)
+			},
+		},
+		{
+			desc:     "DB issue: fail connecting DB",
+			expError: errors.New("ErrConnectDB"),
+			configMockLineAndInjecter: func(mockLine *mocks.Line, mockInjecter *mocks.Injecter) {
+				mockInjecter.On("GetByLiveId", dot.LiveId(client.ClientTypeId)).Return(&client.Client{}, nil)
+				mockInjecter.On("GetByLiveId", dot.LiveId(gorms.TypeId)).Return(&gorms.Gorms{}, nil)
+				mockLine.On("ToInjecter").Return(mockInjecter)
+			},
+			patchCreateStorerWithDBAndMockSql: func(db *sql.DB, mockSql sqlmock.Sqlmock) {
+				createTableNoncesIFNotExistsSQLRegex := fmt.Sprintf("\\Q%v\\E", createTableNoncesIFNotExistsSQL())
+				mockSql.ExpectExec(createTableNoncesIFNotExistsSQLRegex).WillReturnError(errors.New("ErrConnectDB"))
+
+				createStorer = func(t *TrackerImp) error {
+					if err := db.Ping(); err != nil {
+						return err
+					}
+					storer, err := getStorer(db)
+					if err != nil {
+						return err
+					}
+					t.storer = storer
+					return nil
+				}
+			},
+		},
+		{
+			desc:     "DB issue: fail inserting sql",
+			expError: errors.New("ErrInsertSQL"),
+			configMockLineAndInjecter: func(mockLine *mocks.Line, mockInjecter *mocks.Injecter) {
+				mockInjecter.On("GetByLiveId", dot.LiveId(client.ClientTypeId)).Return(&client.Client{}, nil)
+				mockInjecter.On("GetByLiveId", dot.LiveId(gorms.TypeId)).Return(&gorms.Gorms{}, nil)
+				mockLine.On("ToInjecter").Return(mockInjecter)
+			},
+			patchCreateStorerWithDBAndMockSql: func(db *sql.DB, mockSql sqlmock.Sqlmock) {
+				createTableNoncesIFNotExistsSQLRegex := fmt.Sprintf("\\Q%v\\E", createTableNoncesIFNotExistsSQL())
+				mockSql.ExpectExec(createTableNoncesIFNotExistsSQLRegex).WillReturnError(errors.New("ErrInsertSQL"))
+
+				createStorer = func(t *TrackerImp) error {
+					if err := db.Ping(); err != nil {
+						return err
+					}
+					storer, err := getStorer(db)
+					if err != nil {
+						return err
+					}
+					t.storer = storer
+					return nil
+				}
+			},
+		},
+		{
+			desc:     "DB issue: DB internal error",
+			expError: errors.New("ErrDBInternalError"),
+			configMockLineAndInjecter: func(mockLine *mocks.Line, mockInjecter *mocks.Injecter) {
+				mockInjecter.On("GetByLiveId", dot.LiveId(client.ClientTypeId)).Return(&client.Client{}, nil)
+				mockInjecter.On("GetByLiveId", dot.LiveId(gorms.TypeId)).Return(&gorms.Gorms{}, nil)
+				mockLine.On("ToInjecter").Return(mockInjecter)
+			},
+			patchCreateStorerWithDBAndMockSql: func(db *sql.DB, mockSql sqlmock.Sqlmock) {
+				createTableNoncesIFNotExistsSQLRegex := fmt.Sprintf("\\Q%v\\E", createTableNoncesIFNotExistsSQL())
+				mockSql.ExpectExec(createTableNoncesIFNotExistsSQLRegex).WillReturnError(errors.New("ErrDBInternalError"))
+
+				createStorer = func(t *TrackerImp) error {
+					if err := db.Ping(); err != nil {
+						return err
+					}
+					storer, err := getStorer(db)
+					if err != nil {
+						return err
+					}
+					t.storer = storer
+					return nil
+				}
+			},
+		},
+	}
+
+	// perform tests
+	for _, scenario := range scenarios {
+		// create tracker
+		tracker := &TrackerImp{mu: &sync.Mutex{}}
+
+		// mock Line and Injecter
+		mockLine := &mocks.Line{}
+		mockInjecter := &mocks.Injecter{}
+		scenario.configMockLineAndInjecter(mockLine, mockInjecter)
+
+		// monkey patch createStorer with DB and mockSql
+		db, mockSql, err := sqlmock.New()
+		if scenario.patchCreateStorerWithDBAndMockSql != nil {
+			suite.Require().NoError(err)
+			defer db.Close()
+			defer func(origin func(t *TrackerImp) error) {
+				createStorer = origin
+			}(createStorer)
+			scenario.patchCreateStorerWithDBAndMockSql(db, mockSql)
 		}
 
-		wg.Wait()
-		t.Logf("total nonces: %v %v\n", totalNonces, len(succeededNonces))
-		t.Logf("%v succeed nonces: %v\n", len(succeededNonces),  succeededNonces)
-		t.Logf("%v failed nonces: %v\n", len(failedNonces),  failedNonces)
-		for i := 0; i < len(failedNonces); i++ {
-			failedNonce, _ := tracker.RetrieveNonceAt(address)
-			t.Logf("retrieved failed nonce: %v\n", failedNonce)
-		}
-		for i := 0; i < 5; i++ {
-			nextNonce, _ := tracker.RetrieveNonceAt(address)
-			t.Logf("retrieved next nonce: %v\n", nextNonce)
+		// execute code
+		resErr := tracker.Create(mockLine)
+
+		// testify results
+		if scenario.expError != nil {
+			suite.Require().Error(resErr)
+			suite.EqualError(scenario.expError, resErr.Error())
 		}
 
-		// Test concurrent reset nonce to an account for 10 times
-		for i := 0; i < 10; i++ {
-			wg.Add(1)
+		// make sure all expectations were met
+		mockLine.AssertExpectations(suite.T())
+		mockInjecter.AssertExpectations(suite.T())
+		suite.NoError(mockSql.ExpectationsWereMet())
+	}
+}
+
+func (suite *TrackerTestSuite) TestCreateAccount() {
+	// testing scenarios
+	scenarios := []struct {
+		desc             string
+		address          string
+		expError         error
+		configMockClient func(mockClient *mocks.EthClient)
+		configMockSql    func(mockSql sqlmock.Sqlmock)
+	}{
+		{
+			desc:    "happy path",
+			address: "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			configMockClient: func(mockclient *mocks.EthClient) {
+				mockclient.On("PendingNonceAt", context.Background(), common.HexToAddress("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643")).Return(uint64(100), nil)
+			},
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryAllNoncesCountSQLRegex := fmt.Sprintf("\\Q%v\\E", queryAllNoncesCountSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(queryAllNoncesCountSQLRegex).WillReturnRows(sqlmock.NewRows([]string{"nonce_count"}).AddRow("0"))
+					insertNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", insertNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643", 100, true))
+					mockSql.ExpectExec(insertNonceSQLRegex).WillReturnResult(sqlmock.NewResult(1, 1))
+				}
+			},
+		},
+		{
+			desc:     "input error: invalid input address",
+			address:  "0xinvalidaddress",
+			expError: ErrInvalidAddress,
+		},
+		{
+			desc:     "ethClient issue: fail connecting Ethereum",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			expError: errors.New("ErrConnectETHNetwork"),
+			configMockClient: func(mockclient *mocks.EthClient) {
+				mockclient.On("PendingNonceAt", mock.Anything, mock.Anything).Return(uint64(0), errors.New("ErrConnectETHNetwork"))
+			},
+		},
+		{
+			desc:     "ethClient issue: Ethereum internal error",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			expError: errors.New("ErrETHNetworkInternalError"),
+			configMockClient: func(mockclient *mocks.EthClient) {
+				mockclient.On("PendingNonceAt", mock.Anything, mock.Anything).Return(uint64(0), errors.New("ErrETHNetworkInternalError"))
+			},
+		},
+		{
+			desc:     "DB issue: fail connecting DB",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			expError: errors.New("ErrConnectDB"),
+			configMockClient: func(mockclient *mocks.EthClient) {
+				mockclient.On("PendingNonceAt", mock.Anything, mock.Anything).Return(uint64(0), nil)
+			},
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryAllNoncesCountSQLRegex := fmt.Sprintf("\\Q%v\\E", queryAllNoncesCountSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(queryAllNoncesCountSQLRegex).WillReturnError(errors.New("ErrConnectDB"))
+				}
+			},
+		},
+		{
+			desc:     "DB issue: fail inserting sql",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			expError: errors.New("ErrInsertSQL"),
+			configMockClient: func(mockclient *mocks.EthClient) {
+				mockclient.On("PendingNonceAt", mock.Anything, mock.Anything).Return(uint64(0), nil)
+			},
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryAllNoncesCountSQLRegex := fmt.Sprintf("\\Q%v\\E", queryAllNoncesCountSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(queryAllNoncesCountSQLRegex).WillReturnError(errors.New("ErrInsertSQL"))
+				}
+			},
+		},
+		{
+			desc:     "DB issue: DB internal error",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			expError: errors.New("ErrDBInternalError"),
+			configMockClient: func(mockclient *mocks.EthClient) {
+				mockclient.On("PendingNonceAt", mock.Anything, mock.Anything).Return(uint64(0), nil)
+			},
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryAllNoncesCountSQLRegex := fmt.Sprintf("\\Q%v\\E", queryAllNoncesCountSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(queryAllNoncesCountSQLRegex).WillReturnError(errors.New("ErrDBInternalError"))
+				}
+			},
+		},
+		{
+			desc:     "data conflict: account already exists",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			expError: ErrAccountAlreadyExist,
+			configMockClient: func(mockclient *mocks.EthClient) {
+				mockclient.On("PendingNonceAt", mock.Anything, mock.Anything).Return(uint64(0), nil)
+			},
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryAllNoncesCountSQLRegex := fmt.Sprintf("\\Q%v\\E", queryAllNoncesCountSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(queryAllNoncesCountSQLRegex).WillReturnRows(sqlmock.NewRows([]string{"nonce_count"}).AddRow("1"))
+				}
+			},
+		},
+	}
+
+	// perform tests
+	for _, scenario := range scenarios {
+		// create tracker
+		tracker := &TrackerImp{mu: &sync.Mutex{}}
+
+		// mock client
+		mockClient := &mocks.EthClient{}
+		tracker.ethClient = mockClient
+		if scenario.configMockClient != nil {
+			scenario.configMockClient(mockClient)
+		}
+
+		// mock sql
+		db, mockSql, err := sqlmock.New()
+		suite.Require().NoError(err)
+
+		tracker.storer = &storer{dao: &dao{db}}
+		defer db.Close()
+
+		if scenario.configMockSql != nil {
+			mockSql.MatchExpectationsInOrder(false)
+			scenario.configMockSql(mockSql)
+		}
+
+		var wg sync.WaitGroup
+		wg.Add(suite.gorutines)
+		for i := 0; i < suite.gorutines; i++ {
 			go func() {
 				defer wg.Done()
-				err := tracker.ResetNonceAt(address)
-				if assert.NoErrorf(err,"ResetNonceAt(%v) shouldn't return error '%v'\n", err) {
-					t.Logf("ResetNonceAt(%v) runs as expected\n", address)
+
+				// execute code
+				resErr := tracker.CreateAccount(scenario.address)
+
+				// testify results
+				if scenario.expError != nil {
+					suite.EqualError(scenario.expError, resErr.Error())
 				}
 			}()
 		}
 		wg.Wait()
 
-		// Test concurrent deleting an account for 10 times
-		for i := 0; i < 10; i++ {
-			wg.Add(1)
+		// make sure all expectations were met
+		mockClient.AssertExpectations(suite.T())
+		suite.NoError(mockSql.ExpectationsWereMet())
+	}
+}
+
+func (suite *TrackerTestSuite) TestDeleteAccount() {
+	// testing scenarios
+	scenarios := []struct {
+		desc             string
+		address          string
+		expError         error
+		configMockClient func(mockClient *mocks.EthClient)
+		configMockSql    func(mockSql sqlmock.Sqlmock)
+	}{
+		{
+			desc:    "happy path",
+			address: "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					deleteAllNoncesSQLRegex := fmt.Sprintf("\\Q%v\\E", deleteAllNoncesSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectExec(deleteAllNoncesSQLRegex).WillReturnResult(sqlmock.NewResult(1, 1))
+				}
+			},
+		},
+		{
+			desc:     "DB issue: fail connecting DB",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			expError: errors.New("ErrConnectDB"),
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					deleteAllNoncesSQLRegex := fmt.Sprintf("\\Q%v\\E", deleteAllNoncesSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectExec(deleteAllNoncesSQLRegex).WillReturnError(errors.New("ErrConnectDB"))
+				}
+			},
+		},
+		{
+			desc:     "DB issue: fail inserting sql",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			expError: errors.New("ErrInsertSQL"),
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					deleteAllNoncesSQLRegex := fmt.Sprintf("\\Q%v\\E", deleteAllNoncesSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectExec(deleteAllNoncesSQLRegex).WillReturnError(errors.New("ErrInsertSQL"))
+				}
+			},
+		},
+		{
+			desc:     "DB issue: DB internal error",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			expError: errors.New("ErrDBInternalError"),
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					deleteAllNoncesSQLRegex := fmt.Sprintf("\\Q%v\\E", deleteAllNoncesSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectExec(deleteAllNoncesSQLRegex).WillReturnError(errors.New("ErrDBInternalError"))
+				}
+			},
+		},
+		{
+			desc:     "data absent: account not exists",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			expError: nil,
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					deleteAllNoncesSQLRegex := fmt.Sprintf("\\Q%v\\E", deleteAllNoncesSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectExec(deleteAllNoncesSQLRegex).WillReturnResult(sqlmock.NewResult(0, 0))
+				}
+			},
+		},
+	}
+
+	// perform tests
+	for _, scenario := range scenarios {
+		// create tracker
+		tracker := &TrackerImp{mu: &sync.Mutex{}}
+
+		// mock client
+		mockClient := &mocks.EthClient{}
+		tracker.ethClient = mockClient
+		if scenario.configMockClient != nil {
+			scenario.configMockClient(mockClient)
+		}
+
+		// mock sql
+		db, mockSql, err := sqlmock.New()
+		suite.Require().NoError(err)
+
+		tracker.storer = &storer{dao: &dao{db}}
+		defer db.Close()
+		if scenario.configMockSql != nil {
+			mockSql.MatchExpectationsInOrder(false)
+			scenario.configMockSql(mockSql)
+		}
+
+		var wg sync.WaitGroup
+		wg.Add(suite.gorutines)
+		for i := 0; i < suite.gorutines; i++ {
 			go func() {
 				defer wg.Done()
-				err := tracker.DeleteAccount(address)
-				if assert.NoErrorf(err,"DeleteAccount(%v) shouldn't return error '%v'\n", err) {
-					t.Logf("DeleteAccount(%v) runs as expected\n", address)
+
+				// execute code
+				resErr := tracker.DeleteAccount(scenario.address)
+
+				// testify results
+				if scenario.expError != nil {
+					suite.EqualError(scenario.expError, resErr.Error())
 				}
 			}()
 		}
 		wg.Wait()
 
-		// Test concurrent close the Tracker for 10 times
-		for i := 0; i < 10; i++ {
-			wg.Add(1)
+		// make sure all expectations were met
+		mockClient.AssertExpectations(suite.T())
+		suite.NoError(mockSql.ExpectationsWereMet())
+	}
+}
+
+func (suite *TrackerTestSuite) TestRetrieveNonceAt() {
+	// testing scenarios
+	scenarios := []struct {
+		desc             string
+		address          string
+		expNonce         uint64
+		expError         error
+		configMockClient func(mockClient *mocks.EthClient)
+		configMockSql    func(mockSql sqlmock.Sqlmock)
+	}{
+		{
+			desc:     "happy path: only the one updated nonce in storage",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			expNonce: 100,
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryAllNoncesCountSQLRegex := fmt.Sprintf("\\Q%v\\E", queryAllNoncesCountSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(queryAllNoncesCountSQLRegex).WillReturnRows(sqlmock.NewRows([]string{"nonce_count"}).AddRow("1"))
+					returnAndIncreaseUpdatedNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", returnAndIncreaseUpdatedNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(returnAndIncreaseUpdatedNonceSQLRegex).WillReturnRows(sqlmock.NewRows([]string{"nonce"}).AddRow("100"))
+
+				}
+			},
+		},
+		{
+			desc:     "happy path: with recycled nonce(s) in storage",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			expNonce: 99,
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryAllNoncesCountSQLRegex := fmt.Sprintf("\\Q%v\\E", queryAllNoncesCountSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(queryAllNoncesCountSQLRegex).WillReturnRows(sqlmock.NewRows([]string{"nonce_count"}).AddRow("2"))
+					deleteAndReturnMinRecycledNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", deleteAndReturnMinRecycledNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(deleteAndReturnMinRecycledNonceSQLRegex).WillReturnRows(sqlmock.NewRows([]string{"nonce"}).AddRow("99"))
+				}
+			},
+		},
+		{
+			desc:     "DB issue: fail connecting DB",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			expError: errors.New("ErrConnectDB"),
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryAllNoncesCountSQLRegex := fmt.Sprintf("\\Q%v\\E", queryAllNoncesCountSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(queryAllNoncesCountSQLRegex).WillReturnError(errors.New("ErrConnectDB"))
+				}
+			},
+		},
+		{
+			desc:     "DB issue: fail inserting sql",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			expError: errors.New("ErrInsertSQL"),
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryAllNoncesCountSQLRegex := fmt.Sprintf("\\Q%v\\E", queryAllNoncesCountSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(queryAllNoncesCountSQLRegex).WillReturnError(errors.New("ErrInsertSQL"))
+				}
+			},
+		},
+		{
+			desc:     "DB issue: DB internal error",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			expError: errors.New("ErrDBInternalError"),
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryAllNoncesCountSQLRegex := fmt.Sprintf("\\Q%v\\E", queryAllNoncesCountSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(queryAllNoncesCountSQLRegex).WillReturnError(errors.New("ErrDBInternalError"))
+				}
+			},
+		},
+		{
+			desc:     "data absent: account not exists",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			expError: ErrNonceNotExist,
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryAllNoncesCountSQLRegex := fmt.Sprintf("\\Q%v\\E", queryAllNoncesCountSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(queryAllNoncesCountSQLRegex).WillReturnRows(sqlmock.NewRows([]string{"nonce_count"}).AddRow("0"))
+				}
+			},
+		},
+	}
+
+	// perform tests
+	for _, scenario := range scenarios {
+		// create tracker
+		tracker := &TrackerImp{mu: &sync.Mutex{}}
+
+		// mock client
+		mockClient := &mocks.EthClient{}
+		tracker.ethClient = mockClient
+		if scenario.configMockClient != nil {
+			scenario.configMockClient(mockClient)
+		}
+
+		// mock sql
+		db, mockSql, err := sqlmock.New()
+		suite.Require().NoError(err)
+
+		tracker.storer = &storer{dao: &dao{db}}
+		defer db.Close()
+		if scenario.configMockSql != nil {
+			mockSql.MatchExpectationsInOrder(false)
+			scenario.configMockSql(mockSql)
+		}
+
+		var wg sync.WaitGroup
+		wg.Add(suite.gorutines)
+		for i := 0; i < suite.gorutines; i++ {
 			go func() {
 				defer wg.Done()
-				err := tracker.Close()
-				if assert.NoErrorf(err,"Close shouldn't return error '%v'\n", err) {
-					t.Log("Close runs as expected\n")
+
+				// execute code
+				resNonce, resErr := tracker.RetrieveNonceAt(scenario.address)
+
+				// testify results
+				if scenario.expError != nil {
+					suite.EqualError(scenario.expError, resErr.Error())
+				}
+				suite.Equal(scenario.expNonce, resNonce)
+			}()
+		}
+		wg.Wait()
+
+		// make sure all expectations were met
+		mockClient.AssertExpectations(suite.T())
+		suite.NoError(mockSql.ExpectationsWereMet())
+	}
+}
+
+func (suite *TrackerTestSuite) TestRestoreNonce() {
+	// testing scenarios
+	scenarios := []struct {
+		desc             string
+		address          string
+		nonce            uint64
+		expError         error
+		configMockClient func(mockClient *mocks.EthClient)
+		configMockSql    func(mockSql sqlmock.Sqlmock)
+	}{
+		{
+			desc:    "happy path",
+			address: "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			nonce:   99,
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", queryNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643", 99))
+					mockSql.ExpectQuery(queryNonceSQLRegex).WillReturnError(sql.ErrNoRows)
+					queryTheOnlyUpdatedNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", queryTheOnlyUpdatedNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(queryTheOnlyUpdatedNonceSQLRegex).WillReturnRows(sqlmock.NewRows([]string{"nonce"}).AddRow("100"))
+					insertNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", insertNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643", 99, false))
+					mockSql.ExpectExec(insertNonceSQLRegex).WillReturnResult(sqlmock.NewResult(1, 1))
+				}
+			},
+		},
+		{
+			desc:     "input error: account not exists",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			nonce:    99,
+			expError: ErrAccountNotExist,
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", queryNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643", 99))
+					mockSql.ExpectQuery(queryNonceSQLRegex).WillReturnError(sql.ErrNoRows)
+					queryTheOnlyUpdatedNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", queryTheOnlyUpdatedNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(queryTheOnlyUpdatedNonceSQLRegex).WillReturnError(sql.ErrNoRows)
+				}
+			},
+		},
+		{
+			desc:     "input error: invalid recycled nonce",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			nonce:    101,
+			expError: ErrInvalidRecycledNonce,
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", queryNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643", 101))
+					mockSql.ExpectQuery(queryNonceSQLRegex).WillReturnError(sql.ErrNoRows)
+					queryTheOnlyUpdatedNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", queryTheOnlyUpdatedNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(queryTheOnlyUpdatedNonceSQLRegex).WillReturnRows(sqlmock.NewRows([]string{"nonce"}).AddRow("100"))
+				}
+			},
+		},
+		{
+			desc:     "DB issue: fail connecting DB",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			nonce:    99,
+			expError: errors.New("ErrConnectDB"),
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", queryNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643", 99))
+					mockSql.ExpectQuery(queryNonceSQLRegex).WillReturnError(sql.ErrNoRows)
+					queryTheOnlyUpdatedNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", queryTheOnlyUpdatedNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(queryTheOnlyUpdatedNonceSQLRegex).WillReturnRows(sqlmock.NewRows([]string{"nonce"}).AddRow("100"))
+					insertNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", insertNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643", 99, false))
+					mockSql.ExpectExec(insertNonceSQLRegex).WillReturnError(errors.New("ErrConnectDB"))
+				}
+			},
+		},
+		{
+			desc:     "DB issue: fail inserting sql",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			nonce:    99,
+			expError: errors.New("ErrInsertSQL"),
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", queryNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643", 99))
+					mockSql.ExpectQuery(queryNonceSQLRegex).WillReturnError(sql.ErrNoRows)
+					queryTheOnlyUpdatedNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", queryTheOnlyUpdatedNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(queryTheOnlyUpdatedNonceSQLRegex).WillReturnRows(sqlmock.NewRows([]string{"nonce"}).AddRow("100"))
+					insertNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", insertNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643", 99, false))
+					mockSql.ExpectExec(insertNonceSQLRegex).WillReturnError(errors.New("ErrInsertSQL"))
+				}
+			},
+		},
+		{
+			desc:     "DB issue: DB internal error",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			nonce:    99,
+			expError: errors.New("ErrDBInternalError"),
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", queryNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643", 99))
+					mockSql.ExpectQuery(queryNonceSQLRegex).WillReturnError(sql.ErrNoRows)
+					queryTheOnlyUpdatedNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", queryTheOnlyUpdatedNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(queryTheOnlyUpdatedNonceSQLRegex).WillReturnRows(sqlmock.NewRows([]string{"nonce"}).AddRow("100"))
+					insertNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", insertNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643", 99, false))
+					mockSql.ExpectExec(insertNonceSQLRegex).WillReturnError(errors.New("ErrDBInternalError"))
+				}
+			},
+		},
+		{
+			desc:     "data conflict: nonce already exists",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			nonce:    100,
+			expError: ErrNonceAlreadyExist,
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", queryNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643", 100))
+					mockSql.ExpectQuery(queryNonceSQLRegex).WillReturnRows(sqlmock.NewRows([]string{"nonce"}).AddRow("100"))
+				}
+			},
+		},
+	}
+
+	// perform tests
+	for _, scenario := range scenarios {
+		// create tracker
+		tracker := &TrackerImp{mu: &sync.Mutex{}}
+
+		// mock client
+		mockClient := &mocks.EthClient{}
+		tracker.ethClient = mockClient
+		if scenario.configMockClient != nil {
+			scenario.configMockClient(mockClient)
+		}
+
+		// mock sql
+		db, mockSql, err := sqlmock.New()
+		suite.Require().NoError(err)
+
+		tracker.storer = &storer{dao: &dao{db}}
+		defer db.Close()
+		if scenario.configMockSql != nil {
+			mockSql.MatchExpectationsInOrder(false)
+			scenario.configMockSql(mockSql)
+		}
+
+		var wg sync.WaitGroup
+		wg.Add(suite.gorutines)
+		for i := 0; i < suite.gorutines; i++ {
+			go func() {
+				defer wg.Done()
+
+				// execute code
+				resErr := tracker.RestoreNonce(scenario.address, scenario.nonce)
+
+				// testify results
+				if scenario.expError != nil {
+					suite.EqualError(scenario.expError, resErr.Error())
 				}
 			}()
 		}
 		wg.Wait()
+
+		// make sure all expectations were met
+		mockClient.AssertExpectations(suite.T())
+		suite.NoError(mockSql.ExpectationsWereMet())
+	}
+}
+
+func (suite *TrackerTestSuite) TestResetNonceAt() {
+	// testing scenarios
+	scenarios := []struct {
+		desc             string
+		address          string
+		expError         error
+		configMockClient func(mockClient *mocks.EthClient)
+		configMockSql    func(mockSql sqlmock.Sqlmock)
+	}{
+		{
+			desc:    "happy path",
+			address: "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			configMockClient: func(mockclient *mocks.EthClient) {
+				mockclient.On("PendingNonceAt", context.Background(), common.HexToAddress("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643")).Return(uint64(100), nil)
+			},
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryTheOnlyUpdatedNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", queryTheOnlyUpdatedNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(queryTheOnlyUpdatedNonceSQLRegex).WillReturnRows(sqlmock.NewRows([]string{"nonce"}).AddRow("100"))
+
+					mockSql.ExpectBegin()
+					updateTheOnlyUpdatedNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", updateTheOnlyUpdatedNonceSQL(100, "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectExec(updateTheOnlyUpdatedNonceSQLRegex).WillReturnResult(sqlmock.NewResult(1, 1))
+					deleteRecycledNoncesSQLRegex := fmt.Sprintf("\\Q%v\\E", deleteRecycledNoncesSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectExec(deleteRecycledNoncesSQLRegex).WillReturnResult(sqlmock.NewResult(1, 1))
+					mockSql.ExpectCommit()
+				}
+			},
+		},
+		{
+			desc:     "input error: account not exists",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			expError: ErrAccountNotExist,
+			configMockClient: func(mockclient *mocks.EthClient) {
+				mockclient.On("PendingNonceAt", context.Background(), common.HexToAddress("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643")).Return(uint64(100), nil)
+			},
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryTheOnlyUpdatedNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", queryTheOnlyUpdatedNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(queryTheOnlyUpdatedNonceSQLRegex).WillReturnError(sql.ErrNoRows)
+				}
+			},
+		},
+		{
+			desc:     "ethClient issue: fail connecting Ethereum",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			expError: errors.New("ErrConnectETHNetwork"),
+			configMockClient: func(mockclient *mocks.EthClient) {
+				mockclient.On("PendingNonceAt", mock.Anything, mock.Anything).Return(uint64(0), errors.New("ErrConnectETHNetwork"))
+			},
+		},
+		{
+			desc:     "ethClient issue: Ethereum internal error",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			expError: errors.New("ErrETHNetworkInternalError"),
+			configMockClient: func(mockclient *mocks.EthClient) {
+				mockclient.On("PendingNonceAt", mock.Anything, mock.Anything).Return(uint64(0), errors.New("ErrETHNetworkInternalError"))
+			},
+		},
+		{
+			desc:     "DB issue: fail connecting DB when rollback",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			expError: errors.New("ErrConnectDB"),
+			configMockClient: func(mockclient *mocks.EthClient) {
+				mockclient.On("PendingNonceAt", context.Background(), common.HexToAddress("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643")).Return(uint64(100), nil)
+			},
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryTheOnlyUpdatedNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", queryTheOnlyUpdatedNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(queryTheOnlyUpdatedNonceSQLRegex).WillReturnRows(sqlmock.NewRows([]string{"nonce"}).AddRow("200"))
+
+					mockSql.ExpectBegin()
+					updateTheOnlyUpdatedNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", updateTheOnlyUpdatedNonceSQL(100, "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectExec(updateTheOnlyUpdatedNonceSQLRegex).WillReturnResult(sqlmock.NewResult(1, 1))
+					deleteRecycledNoncesSQLRegex := fmt.Sprintf("\\Q%v\\E", deleteRecycledNoncesSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectExec(deleteRecycledNoncesSQLRegex).WillReturnError(errors.New("ErrConnectDB"))
+					mockSql.ExpectRollback().WillReturnError(errors.New("ErrConnectDB"))
+				}
+			},
+		},
+		{
+			desc:     "DB issue: fail connecting DB when commit",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			expError: errors.New("ErrConnectDB"),
+			configMockClient: func(mockclient *mocks.EthClient) {
+				mockclient.On("PendingNonceAt", context.Background(), common.HexToAddress("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643")).Return(uint64(100), nil)
+			},
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryTheOnlyUpdatedNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", queryTheOnlyUpdatedNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(queryTheOnlyUpdatedNonceSQLRegex).WillReturnRows(sqlmock.NewRows([]string{"nonce"}).AddRow("200"))
+
+					mockSql.ExpectBegin()
+					updateTheOnlyUpdatedNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", updateTheOnlyUpdatedNonceSQL(100, "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectExec(updateTheOnlyUpdatedNonceSQLRegex).WillReturnResult(sqlmock.NewResult(1, 1))
+					deleteRecycledNoncesSQLRegex := fmt.Sprintf("\\Q%v\\E", deleteRecycledNoncesSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectExec(deleteRecycledNoncesSQLRegex).WillReturnResult(sqlmock.NewResult(1, 1))
+					mockSql.ExpectCommit().WillReturnError(errors.New("ErrConnectDB"))
+				}
+			},
+		},
+		{
+			desc:     "DB issue: fail inserting sql",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			expError: errors.New("ErrInsertSQL"),
+			configMockClient: func(mockclient *mocks.EthClient) {
+				mockclient.On("PendingNonceAt", context.Background(), common.HexToAddress("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643")).Return(uint64(100), nil)
+			},
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryTheOnlyUpdatedNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", queryTheOnlyUpdatedNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(queryTheOnlyUpdatedNonceSQLRegex).WillReturnRows(sqlmock.NewRows([]string{"nonce"}).AddRow("200"))
+
+					mockSql.ExpectBegin()
+					updateTheOnlyUpdatedNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", updateTheOnlyUpdatedNonceSQL(100, "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectExec(updateTheOnlyUpdatedNonceSQLRegex).WillReturnResult(sqlmock.NewResult(1, 1))
+					deleteRecycledNoncesSQLRegex := fmt.Sprintf("\\Q%v\\E", deleteRecycledNoncesSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectExec(deleteRecycledNoncesSQLRegex).WillReturnError(errors.New("ErrInsertSQL"))
+					mockSql.ExpectRollback().WillReturnError(errors.New("ErrInsertSQL"))
+				}
+			},
+		},
+		{
+			desc:     "DB issue: DB internal error",
+			address:  "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643",
+			expError: errors.New("ErrDBInternalError"),
+			configMockClient: func(mockclient *mocks.EthClient) {
+				mockclient.On("PendingNonceAt", context.Background(), common.HexToAddress("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643")).Return(uint64(100), nil)
+			},
+			configMockSql: func(mockSql sqlmock.Sqlmock) {
+				for i := 0; i < suite.gorutines; i++ {
+					queryTheOnlyUpdatedNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", queryTheOnlyUpdatedNonceSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectQuery(queryTheOnlyUpdatedNonceSQLRegex).WillReturnRows(sqlmock.NewRows([]string{"nonce"}).AddRow("200"))
+
+					mockSql.ExpectBegin()
+					updateTheOnlyUpdatedNonceSQLRegex := fmt.Sprintf("\\Q%v\\E", updateTheOnlyUpdatedNonceSQL(100, "0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectExec(updateTheOnlyUpdatedNonceSQLRegex).WillReturnResult(sqlmock.NewResult(1, 1))
+					deleteRecycledNoncesSQLRegex := fmt.Sprintf("\\Q%v\\E", deleteRecycledNoncesSQL("0x99ad45666e02a89eaf06780d6cbd7ac9bb43f643"))
+					mockSql.ExpectExec(deleteRecycledNoncesSQLRegex).WillReturnResult(sqlmock.NewResult(1, 1))
+					mockSql.ExpectCommit().WillReturnError(errors.New("ErrDBInternalError"))
+				}
+			},
+		},
+	}
+
+	// perform tests
+	for _, scenario := range scenarios {
+		// create tracker
+		tracker := &TrackerImp{mu: &sync.Mutex{}}
+
+		// mock client
+		mockClient := &mocks.EthClient{}
+		tracker.ethClient = mockClient
+		if scenario.configMockClient != nil {
+			scenario.configMockClient(mockClient)
+		}
+
+		// mock sql
+		db, mockSql, err := sqlmock.New()
+		suite.Require().NoError(err)
+
+		tracker.storer = &storer{dao: &dao{db}}
+		defer db.Close()
+		if scenario.configMockSql != nil {
+			mockSql.MatchExpectationsInOrder(false)
+			scenario.configMockSql(mockSql)
+		}
+
+		var wg sync.WaitGroup
+		wg.Add(suite.gorutines)
+		for i := 0; i < suite.gorutines; i++ {
+			go func() {
+				defer wg.Done()
+
+				// execute code
+				resErr := tracker.ResetNonceAt(scenario.address)
+
+				// testify results
+				if scenario.expError != nil {
+					suite.EqualError(scenario.expError, resErr.Error())
+				}
+			}()
+		}
+		wg.Wait()
+
+		// make sure all expectations were met
+		mockClient.AssertExpectations(suite.T())
+		suite.NoError(mockSql.ExpectationsWereMet())
+	}
+}
+
+func TestTrackerTestSuite(t *testing.T) {
+	suite.Run(t, new(TrackerTestSuite))
 }
