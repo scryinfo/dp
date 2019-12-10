@@ -1,24 +1,24 @@
 package cec
 
 import (
-    "encoding/json"
-    "github.com/btcsuite/btcutil/base58"
-    "github.com/ethereum/go-ethereum/common"
-    "github.com/pkg/errors"
-    "github.com/scryinfo/dot/dot"
-    "github.com/scryinfo/dp/dots/app/server"
-    "github.com/scryinfo/dp/dots/app/storage"
-    "github.com/scryinfo/dp/dots/app/storage/definition"
-    scry2 "github.com/scryinfo/dp/dots/binary/scry"
-    "github.com/scryinfo/dp/dots/eth/event"
-    ipfs "github.com/scryinfo/dp/dots/storage/ipfs"
-    "go.uber.org/zap"
-    "io/ioutil"
-    "math/big"
-    "os"
-    "strconv"
-    "strings"
-    "time"
+	"encoding/json"
+	"github.com/btcsuite/btcutil/base58"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/pkg/errors"
+	"github.com/scryinfo/dot/dot"
+	"github.com/scryinfo/dp/dots/app/server"
+	"github.com/scryinfo/dp/dots/app/storage"
+	"github.com/scryinfo/dp/dots/app/storage/definition"
+	scry2 "github.com/scryinfo/dp/dots/binary/scry"
+	"github.com/scryinfo/dp/dots/eth/event"
+	ipfs "github.com/scryinfo/dp/dots/storage/ipfs"
+	"go.uber.org/zap"
+	"io/ioutil"
+	"math/big"
+	"os"
+	"strconv"
+	"strings"
+	"time"
 )
 
 // Callbacks encapsulate event handler, current user and some components
@@ -117,7 +117,7 @@ func CBsTypeLive() []*dot.TypeLives {
 		},
 		server.WebSocketTypeLive(),
 		ipfs.IpfsTypeLive(),
-        storage.SQLiteTypeLive(),
+		storage.SQLiteTypeLive(),
 	}
 }
 

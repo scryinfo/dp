@@ -1,3 +1,6 @@
+[![GoDoc](https://godoc.org/github.com/scryinfo/dp?status.svg)](https://godoc.org/github.com/scryinfo/dp)
+[![Go Report Card](https://goreportcard.com/badge/github.com/scryinfo/dp)](https://goreportcard.com/report/github.com/scryinfo/dp)
+
 [中文](./README-cn.md)  
 [EN](./README.md)  
 [한국어](./README-ko.md)  
@@ -8,8 +11,7 @@
 # Windows
 ##  编译
 ###  编译环境
-> 下列环境需要自行安装，未列出不需要自行安装的环境(如webpack、truffle)与可选的环境(如python)。    
-括号内为经过测试的推荐版本。
+> 请自行安装下列环境（括号内为经过测试的推荐版本）：
 - go (1.12.5)
 - node.js (10.15.3)
 - gcc (mingw-w64 v8.1.0)
@@ -60,22 +62,25 @@
 脚本会将部分结果输出到上级目录的migrate.log文件，在文件末尾可以找到*ScryToken*、*ScryProtocol*两个"0x"开头的42个字符的地址。
 ### 修改app配置文件：
 按照下表所示，修改位于dp/app/app/main目录下的**main.json**配置文件：  
-| key | value |  
-|:------- |:------- |  
+
+| key | value |
+|:------- |:------- |
 protocolContractAddr | 修改为日志文件中找到的ScryProtocol地址
 tokenContractAddr | 修改为日志文件中找到的ScryToken地址
-uiResourcesDir | 修改dp项目路径为你的电脑上的路径
+uiResourcesDir | 修改为你的电脑上的dp项目路径
 metaDataOutDir | 修改为你期望的原始数据文件下载路径
 proofsOutDir | 修改为你期望的证明文件下载路径  
-修改上面的配置即可保证主要流程正确执行，下附其他配置信息简要描述：  
+
+修改上面的配置即可保证主要流程正常执行，下附其他配置信息简要描述：  
+
 | key | value |  
 |:------- |:------- |  
-appId | 同一条链上，不同appId的消息是不互通的
+appId | 同一条链上，不同id的app,消息是不互通的
 ethServiceAddr | 链地址
 keyServiceAddr | 用户服务地址
 storageServiceAddr | ipfs地址
 wsPort | app前后端之间的websocket连接使用的端口
-accsInfoBackupFile | 用户信息文件存储位置，备份和导入时使用
+dbName | 数据库名
 
 ### 体验
 完成上述所有步骤后，即可通过dp/app/app/main/main.exe入口文件进行体验。

@@ -15,6 +15,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// const
 const (
 	TrackerTypeId = "15fa392f-042e-43f4-9df0-934bdb0fcf78"
 )
