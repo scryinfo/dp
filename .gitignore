@@ -47,7 +47,8 @@ Thumbs.db
 ####################
 nohup.out
 /services/binary_s/main/main.exe
-/go.sum
+go.sum
+*.out
 /app/test/main/main
 node_modules/
 /services/auth_s/account_server

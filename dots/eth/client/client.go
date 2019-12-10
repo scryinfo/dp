@@ -11,6 +11,7 @@ import (
 	"github.com/scryinfo/dot/dot"
 )
 
+// const
 const (
 	ClientTypeId = "bee6ae8e-e8a0-4693-ac65-416f618023d5"
 )
