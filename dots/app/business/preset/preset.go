@@ -32,7 +32,6 @@ type Preset struct {
 
 type presetConfig struct {
 	MetaDataOutDir string `json:"metaDataOutDir"`
-	AccsBackupFile string `json:"accsInfoBackupFile"`
 }
 
 const (
@@ -256,29 +255,35 @@ func (p *Preset) CurrentUserDataUpdate(_ *server.MessageIn) (payload interface{}
 	}
 
 	// when an user login success, he will get 10,000,000 eth and tokens for test.
-	{
-		if err = p.CBs.CurUser.TransferEthFrom(common.HexToAddress(p.Deployer.Address),
-			p.Deployer.Password,
-			big.NewInt(10000000),
-			p.Bin.ChainWrapper().Conn(),
-		); err != nil {
-			err = errors.Wrap(err, "Transfer eth from Deployer failed. ")
-			return
-		}
-
-		txParam := transaction.TxParams{
-			From:     common.HexToAddress(p.Deployer.Address),
-			Password: p.Deployer.Password,
-			Value:    big.NewInt(0),
-			Pending:  false,
-		}
-		if err = p.Bin.ChainWrapper().TransferTokens(&txParam, common.HexToAddress(p.CBs.CurUser.Account().Addr), big.NewInt(10000000)); err != nil {
-			err = errors.Wrap(err, "Transfer token from Deployer failed. ")
-			return
-		}
+	if err = p.testTransferEthAndTokens(); err != nil {
+		return
 	}
 
 	payload = acc.Nickname
+
+	return
+}
+
+func (p *Preset) testTransferEthAndTokens() (err error) {
+	if err = p.CBs.CurUser.TransferEthFrom(common.HexToAddress(p.Deployer.Address),
+		p.Deployer.Password,
+		big.NewInt(10000000),
+		p.Bin.ChainWrapper().Conn(),
+	); err != nil {
+		err = errors.Wrap(err, "Transfer eth from Deployer failed. ")
+		return
+	}
+
+	txParam := transaction.TxParams{
+		From:     common.HexToAddress(p.Deployer.Address),
+		Password: p.Deployer.Password,
+		Value:    big.NewInt(0),
+		Pending:  false,
+	}
+	if err = p.Bin.ChainWrapper().TransferTokens(&txParam, common.HexToAddress(p.CBs.CurUser.Account().Addr), big.NewInt(10000000)); err != nil {
+		err = errors.Wrap(err, "Transfer token from Deployer failed. ")
+		return
+	}
 
 	return
 }
