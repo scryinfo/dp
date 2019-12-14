@@ -267,21 +267,18 @@ let presetFunc = {
             message: "收到新的验证者回复，交易ID：" + payload.TransactionId,
             position: "top-left"
         });
-        switch (parseInt(payload.Identify)) {
-            case 2:
-                _this.$store.state.transactionbuy.forEach(function (item) {
-                    if (item.TransactionId === payload.TransactionId) {
-                        item.State = utils.stateEnum[parseInt(payload.State)]
+        if (parseInt(payload.Identify) === 2) {
+            _this.$store.state.transactionbuy.forEach(function (item) {
+                if (item.TransactionId === payload.TransactionId) {
+                    item.State = utils.stateEnum[parseInt(payload.State)]
+                    if (payload.Verifier1Response !== "") {
+                        item.Verifier1Response = payload.Verifier1Response
                     }
-                });
-                break;
-            case 3:
-                _this.$store.state.transactionverifier.forEach(function (item) {
-                    if (item.TransactionId === payload.TransactionId) {
-                        item.State = utils.stateEnum[parseInt(payload.State)]
+                    if (payload.Verifier2Response !== "") {
+                        item.Verifier2Response = payload.Verifier2Response
                     }
-                });
-                break;
+                }
+            });
         }
     },
 

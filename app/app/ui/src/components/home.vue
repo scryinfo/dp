@@ -6,7 +6,7 @@
             <el-col :span="24" class="top">
                 <el-col :span="18">Dapp</el-col>
                 <el-col :span="6">
-                    <el-dropdown class="top-dropdown" show-timeout=200 trigger="hover">
+                    <el-dropdown class="top-dropdown" show-timeout=200 trigger="click">
                         <span>{{ this.$store.state.nickname }}</span>
                         <el-dropdown-menu slot="dropdown">
                             <el-dropdown-item @click.native="getBalance">余额查询</el-dropdown-item>

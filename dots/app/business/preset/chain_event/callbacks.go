@@ -374,14 +374,19 @@ func (c *Callbacks) onConfirmPurchase(event event.Event) bool {
 	switch strings.ToLower(c.CurUser.Account().Addr) {
 	case strings.ToLower(tx.Seller):
 		tx.Identify = 1
+		if !c.updateFromBlock(event.BlockNumber) {
+			return false
+		}
 	case strings.ToLower(tx.Buyer):
 		tx.Identify = 2
+		if !c.updateFromBlock(event.BlockNumber) {
+			return false
+		}
 	default:
 		tx.Identify = 3
-	}
-
-	if err := c.updateVerifierArray(tx.TransactionId, event.BlockNumber, "delete"); err != nil {
-		dot.Logger().Errorln("", zap.NamedError("delete verifier array", err))
+		if err := c.updateVerifierArray(tx.TransactionId, event.BlockNumber, "delete"); err != nil {
+			dot.Logger().Errorln("", zap.NamedError("delete verifier array", err))
+		}
 	}
 
 	if err := c.WS.SendMessage("onConfirmPurchase", tx); err != nil {
@@ -471,9 +476,11 @@ func (c *Callbacks) onVoteResult(event event.Event) bool {
 
 	switch int(event.Data.Get("index").(uint8)) {
 	case 0:
-		tx.Identify = 2
-	case 1:
 		tx.Identify = 3
+		tx.TransactionId = event.Data.Get("transactionId").(*big.Int).String()
+		tx.State = int(event.Data.Get("state").(uint8))
+	case 1:
+		tx.Identify = 2
 		if num, err := c.DB.Update(&tx, map[string]interface{}{
 			"verifier1_response": setJudge(event.Data.Get("judge").(bool)) + ". " + event.Data.Get("comments").(string),
 			"state":              int(event.Data.Get("state").(uint8)),
@@ -482,7 +489,7 @@ func (c *Callbacks) onVoteResult(event event.Event) bool {
 			return false
 		}
 	case 2:
-		tx.Identify = 3
+		tx.Identify = 2
 		if num, err := c.DB.Update(&tx, map[string]interface{}{
 			"verifier2_response": setJudge(event.Data.Get("judge").(bool)) + ". " + event.Data.Get("comments").(string),
 			"state":              int(event.Data.Get("state").(uint8)),
