@@ -27,9 +27,8 @@ func (c *Subscribe) SetRepo(r *event.Repository) {
 }
 
 //construct dot
-func newSubsDot(conf interface{}) (dot.Dot, error) {
+func newSubsDot() (dot.Dot, error) {
 	d := &Subscribe{}
-
 	return d, nil
 }
 
@@ -37,8 +36,8 @@ func newSubsDot(conf interface{}) (dot.Dot, error) {
 func SubsTypeLive() *dot.TypeLives {
 	return &dot.TypeLives{
 		Meta: dot.Metadata{TypeId: SubsTypeId,
-			NewDoter: func(conf interface{}) (dot dot.Dot, err error) {
-				return newSubsDot(conf)
+			NewDoter: func(_ []byte) (dot dot.Dot, err error) {
+				return newSubsDot()
 			}},
 	}
 }

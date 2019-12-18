@@ -24,19 +24,18 @@ type Currency struct {
 }
 
 //construct dot
-func newCurrDot(_ interface{}) (dot.Dot, error) {
+func newCurrDot() (dot.Dot, error) {
 	d := &Currency{}
 	return d, nil
 }
 
 // CurrTypeLive Data structure needed when generating newer component
 func CurrTypeLive() []*dot.TypeLives {
-
 	t := []*dot.TypeLives{
 		{
 			Meta: dot.Metadata{TypeId: CurrTypeId,
-				NewDoter: func(conf interface{}) (dot dot.Dot, err error) {
-					return newCurrDot(conf)
+				NewDoter: func(_ []byte) (dot dot.Dot, err error) {
+					return newCurrDot()
 				}},
 		},
 	}

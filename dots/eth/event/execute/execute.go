@@ -30,17 +30,15 @@ type Executor struct {
 
 //construct dot
 func newExecutorDot() (dot.Dot, error) {
-	var err error
 	d := &Executor{}
-
-	return d, err
+	return d, nil
 }
 
 // ExecutorTypeLive Data structure needed when generating newer component
 func ExecutorTypeLive() *dot.TypeLives {
 	return &dot.TypeLives{
 		Meta: dot.Metadata{TypeId: ExecTypeId,
-			NewDoter: func(conf interface{}) (dot dot.Dot, err error) {
+			NewDoter: func(_ []byte) (dot dot.Dot, err error) {
 				return newExecutorDot()
 			}},
 	}

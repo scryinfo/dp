@@ -52,17 +52,11 @@ func (s *SQLite) Create(l dot.Line) error {
 }
 
 //construct dot
-func newSQLiteDot(conf interface{}) (dot.Dot, error) {
+func newSQLiteDot(conf []byte) (dot.Dot, error) {
 	var err error
-	var bs []byte
-	if bt, ok := conf.([]byte); ok {
-		bs = bt
-	} else {
-		return nil, dot.SError.Parameter
-	}
 
 	dConf := &sqlConfig{}
-	err = dot.UnMarshalConfig(bs, dConf)
+	err = dot.UnMarshalConfig(conf, dConf)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +71,7 @@ func SQLiteTypeLive() *dot.TypeLives {
 	return &dot.TypeLives{
 		Meta: dot.Metadata{
 			TypeId: DatabaseTypeId,
-			NewDoter: func(conf interface{}) (dot.Dot, error) {
+			NewDoter: func(conf []byte) (dot.Dot, error) {
 				return newSQLiteDot(conf)
 			},
 		},

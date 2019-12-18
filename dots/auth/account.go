@@ -29,7 +29,7 @@ type UserAccount struct {
 }
 
 //construct dot
-func newAccountDot(_ interface{}) (dot.Dot, error) {
+func newAccountDot() (dot.Dot, error) {
 	d := &Account{}
 	return d, nil
 }
@@ -37,8 +37,8 @@ func newAccountDot(_ interface{}) (dot.Dot, error) {
 // AccountTypeLive Data structure needed when generating newer component
 func AccountTypeLive() *dot.TypeLives {
 	return &dot.TypeLives{
-		Meta: dot.Metadata{TypeId: AccountTypeId, NewDoter: func(conf interface{}) (dot.Dot, error) {
-			return newAccountDot(conf)
+		Meta: dot.Metadata{TypeId: AccountTypeId, NewDoter: func(_ []byte) (dot.Dot, error) {
+			return newAccountDot()
 		},
 		},
 	}

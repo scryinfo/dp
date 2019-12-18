@@ -30,7 +30,7 @@ func newIpfsDot() (dot.Dot, error) {
 func IpfsTypeLive() *dot.TypeLives {
 	return &dot.TypeLives{
 		Meta: dot.Metadata{TypeId: IpfsTypeId,
-			NewDoter: func(conf interface{}) (dot dot.Dot, err error) {
+			NewDoter: func(_ []byte) (dot dot.Dot, err error) {
 				return newIpfsDot()
 			}},
 	}
