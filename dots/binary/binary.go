@@ -61,17 +61,11 @@ type BinaryConfig struct {
 }
 
 //construct dot
-func newBinaryDot(conf interface{}) (dot.Dot, error) {
+func newBinaryDot(conf []byte) (dot.Dot, error) {
 	var err error
-	var bs []byte
-	if bt, ok := conf.([]byte); ok {
-		bs = bt
-	} else {
-		return nil, dot.SError.Parameter
-	}
 
 	dConf := &BinaryConfig{}
-	err = dot.UnMarshalConfig(bs, dConf)
+	err = dot.UnMarshalConfig(conf, dConf)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +79,7 @@ func newBinaryDot(conf interface{}) (dot.Dot, error) {
 func BinTypeLiveWithoutGrpc() []*dot.TypeLives {
 	t := []*dot.TypeLives{
 		{
-			Meta: dot.Metadata{TypeId: BinTypeId, NewDoter: func(conf interface{}) (dot.Dot, error) {
+			Meta: dot.Metadata{TypeId: BinTypeId, NewDoter: func(conf []byte) (dot.Dot, error) {
 				return newBinaryDot(conf)
 			}},
 		},
@@ -105,7 +99,7 @@ func BinTypeLiveWithoutGrpc() []*dot.TypeLives {
 func BinTypeLiveWithGrpc() []*dot.TypeLives {
 	t := []*dot.TypeLives{
 		{
-			Meta: dot.Metadata{TypeId: BinTypeId, NewDoter: func(conf interface{}) (dot.Dot, error) {
+			Meta: dot.Metadata{TypeId: BinTypeId, NewDoter: func(conf []byte) (dot.Dot, error) {
 				return newBinaryDot(conf)
 			}},
 		},

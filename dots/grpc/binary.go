@@ -42,17 +42,11 @@ type binaryGrpcServerConfig struct {
 
 var _ BinaryGrpcServer = (*BinaryGrpcServerImp)(nil)
 
-func newBinaryGrpcServerDot(conf interface{}) (dot.Dot, error) {
+func newBinaryGrpcServerDot(conf []byte) (dot.Dot, error) {
 	var err error
-	var bs []byte
-	if bt, ok := conf.([]byte); ok {
-		bs = bt
-	} else {
-		return nil, dot.SError.Parameter
-	}
 
 	dConf := &binaryGrpcServerConfig{}
-	err = dot.UnMarshalConfig(bs, dConf)
+	err = dot.UnMarshalConfig(conf, dConf)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +61,7 @@ func BinaryGrpcServerImpTypeLive() []*dot.TypeLives {
 	t := []*dot.TypeLives{
 		{
 			Meta: dot.Metadata{TypeId: BinaryGrpcServerTypeId,
-				NewDoter: func(conf interface{}) (dot dot.Dot, err error) {
+				NewDoter: func(conf []byte) (dot dot.Dot, err error) {
 					return newBinaryGrpcServerDot(conf)
 				},
 			},

@@ -44,17 +44,11 @@ type TxParams struct {
 }
 
 //construct dot
-func newTxDot(conf interface{}) (dot.Dot, error) {
+func newTxDot(conf []byte) (dot.Dot, error) {
 	var err error
-	var bs []byte
-	if bt, ok := conf.([]byte); ok {
-		bs = bt
-	} else {
-		return nil, dot.SError.Parameter
-	}
 
 	dConf := &configTransaction{}
-	err = dot.UnMarshalConfig(bs, dConf)
+	err = dot.UnMarshalConfig(conf, dConf)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +62,7 @@ func TxTypeLive() []*dot.TypeLives {
 	return []*dot.TypeLives{
 		{
 			Meta: dot.Metadata{TypeId: TxTypeId,
-				NewDoter: func(conf interface{}) (dot dot.Dot, err error) {
+				NewDoter: func(conf []byte) (dot dot.Dot, err error) {
 					return newTxDot(conf)
 				}},
 		},

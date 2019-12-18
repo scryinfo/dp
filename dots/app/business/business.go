@@ -34,11 +34,9 @@ func (b *Business) Start(ignore bool) error {
 }
 
 //construct dot
-func newBusDot(_ interface{}) (dot.Dot, error) {
-	var err error
+func newBusDot() (dot.Dot, error) {
 	d := &Business{}
-
-	return d, err
+	return d, nil
 }
 
 // BusTypeLive add a dot component to dot.line with 'line.PreAdd()'
@@ -47,8 +45,8 @@ func BusTypeLive() []*dot.TypeLives {
 		{
 			Meta: dot.Metadata{
 				TypeId: BusTypeId,
-				NewDoter: func(conf interface{}) (dot.Dot, error) {
-					return newBusDot(conf)
+				NewDoter: func(_ []byte) (dot.Dot, error) {
+					return newBusDot()
 				},
 			},
 			Lives: []dot.Live{{

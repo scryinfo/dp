@@ -84,17 +84,11 @@ func (c *Callbacks) Create(_ dot.Line) error {
 }
 
 //construct dot
-func newCBsDot(conf interface{}) (dot.Dot, error) {
+func newCBsDot(conf []byte) (dot.Dot, error) {
 	var err error
-	var bs []byte
-	if bt, ok := conf.([]byte); ok {
-		bs = bt
-	} else {
-		return nil, dot.SError.Parameter
-	}
 
 	dConf := &cbsConfig{}
-	err = dot.UnMarshalConfig(bs, dConf)
+	err = dot.UnMarshalConfig(conf, dConf)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +104,7 @@ func CBsTypeLive() []*dot.TypeLives {
 		{
 			Meta: dot.Metadata{
 				TypeId: CBsTypeId,
-				NewDoter: func(conf interface{}) (dot.Dot, error) {
+				NewDoter: func(conf []byte) (dot.Dot, error) {
 					return newCBsDot(conf)
 				},
 			},

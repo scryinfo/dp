@@ -27,17 +27,11 @@ const WebSocketTypeId = "40ef6679-5cfc-4436-a1f6-7f39870bc5ef"
 
 var _ Server = (*WSServer)(nil)
 
-func newWebSocketDot(conf interface{}) (dot.Dot, error) {
+func newWebSocketDot(conf []byte) (dot.Dot, error) {
 	var err error
-	var bs []byte
-	if bt, ok := conf.([]byte); ok {
-		bs = bt
-	} else {
-		return nil, dot.SError.Parameter
-	}
 
 	dConf := &serverConfig{}
-	err = dot.UnMarshalConfig(bs, dConf)
+	err = dot.UnMarshalConfig(conf, dConf)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +46,7 @@ func WebSocketTypeLive() *dot.TypeLives {
 	return &dot.TypeLives{
 		Meta: dot.Metadata{
 			TypeId: WebSocketTypeId,
-			NewDoter: func(conf interface{}) (dot.Dot, error) {
+			NewDoter: func(conf []byte) (dot.Dot, error) {
 				return newWebSocketDot(conf)
 			},
 		},

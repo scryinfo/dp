@@ -127,17 +127,11 @@ func (p *Preset) Create(l dot.Line) error {
 	return nil
 }
 
-func newPresetDot(conf interface{}) (dot.Dot, error) {
+func newPresetDot(conf []byte) (dot.Dot, error) {
 	var err error
-	var bs []byte
-	if bt, ok := conf.([]byte); ok {
-		bs = bt
-	} else {
-		return nil, dot.SError.Parameter
-	}
 
 	dConf := &presetConfig{}
-	err = dot.UnMarshalConfig(bs, dConf)
+	err = dot.UnMarshalConfig(conf, dConf)
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +147,7 @@ func PreTypeLive() []*dot.TypeLives {
 		{
 			Meta: dot.Metadata{
 				TypeId: PreTypeId,
-				NewDoter: func(conf interface{}) (dot.Dot, error) {
+				NewDoter: func(conf []byte) (dot.Dot, error) {
 					return newPresetDot(conf)
 				},
 			},
@@ -424,7 +418,6 @@ func (p *Preset) ReEncrypt(mi *server.MessageIn) (payload interface{}, err error
 		return
 	}
 
-	txParam := p.makeTxParams(re.Password)
 	tId, ok := new(big.Int).SetString(re.TransactionId, 10)
 	if !ok {
 		err = errors.New("Set to *big.Int failed. ")
@@ -441,7 +434,7 @@ func (p *Preset) ReEncrypt(mi *server.MessageIn) (payload interface{}, err error
 		}
 	}
 
-	if err = p.Bin.ChainWrapper().ReEncrypt(txParam, tId, []byte(tx.MetaDataIdEncWithSeller)); err != nil {
+	if err = p.Bin.ChainWrapper().ReEncrypt(p.makeTxParams(re.Password), tId, []byte(tx.MetaDataIdEncWithSeller)); err != nil {
 		err = errors.Wrap(err, "Re-encrypt failed. ")
 		return
 	}
@@ -501,15 +494,15 @@ func (p *Preset) Decrypt(mi *server.MessageIn) (payload interface{}, err error) 
 		}
 	}
 
-	if payload, err = p.getMetaDataFileName(tx, decrypt.Password); err != nil {
+	if payload, err = p.getMetaDataFileName(&tx, decrypt.Password); err != nil {
 		return
 	}
 
 	return
 }
 
-func (p *Preset) getMetaDataFileName(tx DBDef.Transaction, pwd string) (fileName string, err error) {
-	var fileId string
+func (p *Preset) getMetaDataFileName(tx *DBDef.Transaction, pwd string) (fullName string, err error) {
+	var fileName string
 	{
 		var metaDataIdByte []byte
 		{
@@ -528,11 +521,11 @@ func (p *Preset) getMetaDataFileName(tx DBDef.Transaction, pwd string) (fileName
 			return "", errors.Wrap(err, "Get meta data from IPFS failed. ")
 		}
 
-		fileId = outDir + "/" + string(metaDataIdByte)
+		fileName = outDir + "/" + string(metaDataIdByte)
 	}
 
-	fileName = fileId + tx.MetaDataExtension
-	if err = os.Rename(fileId, fileName); err != nil {
+	fullName = fileName + tx.MetaDataExtension
+	if err = os.Rename(fileName, fullName); err != nil {
 		return "", errors.Wrap(err, "Add extension to meta data failed. ")
 	}
 
@@ -692,7 +685,7 @@ func (p *Preset) Arbitrate(mi *server.MessageIn) (payload interface{}, err error
 		return
 	}
 
-	payload = tId
+	payload = ad.TransactionId
 
 	return
 }

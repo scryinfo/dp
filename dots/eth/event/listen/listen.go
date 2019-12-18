@@ -23,19 +23,17 @@ type Listener struct {
 }
 
 //construct dot
-func newListenerDot(conf interface{}) (dot.Dot, error) {
-	var err error
+func newListenerDot() (dot.Dot, error) {
 	d := &Listener{}
-
-	return d, err
+	return d, nil
 }
 
 // ListenerTypeLive add a dot component to dot.line with 'line.PreAdd()'
 func ListenerTypeLive() *dot.TypeLives {
 	return &dot.TypeLives{
 		Meta: dot.Metadata{TypeId: ListenerTypeId,
-			NewDoter: func(conf interface{}) (dot dot.Dot, err error) {
-				return newListenerDot(conf)
+			NewDoter: func(_ []byte) (dot dot.Dot, err error) {
+				return newListenerDot()
 			}},
 	}
 }
