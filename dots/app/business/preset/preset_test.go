@@ -8,7 +8,6 @@ import (
 	"github.com/scryinfo/dot/dot"
 	PreDef "github.com/scryinfo/dp/dots/app/business/definition"
 	cec "github.com/scryinfo/dp/dots/app/business/preset/chain_event"
-	mock_dot "github.com/scryinfo/dp/dots/app/business/preset/mock"
 	"github.com/scryinfo/dp/dots/app/server"
 	"github.com/scryinfo/dp/dots/app/storage"
 	DBDef "github.com/scryinfo/dp/dots/app/storage/definition"
@@ -31,10 +30,7 @@ func TestPreset_Create(t *testing.T) {
 		Convey("standard input, expect success", func() {
 			preIns := &Preset{}
 
-			controller := gomock.NewController(t)
-			mockLineObj := mock_dot.NewMockLine(controller)
-
-			output := preIns.Create(mockLineObj)
+			output := preIns.Create(nil)
 			So(output, ShouldBeNil)
 		})
 	})
@@ -877,6 +873,7 @@ func TestPreset_Decrypt(t *testing.T) {
 			Patch((*storage.SQLite).Read, func(*storage.SQLite, interface{}, string, string, ...interface{}) (int64, error) {
 				return 1, nil
 			})
+			defer UnpatchAll()
 			Patch((*Preset).getMetaDataFileName, func(*Preset, *DBDef.Transaction, string) (string, error) {
 				return "simulate meta data file absolute path", nil
 			})
@@ -910,6 +907,7 @@ func TestPreset_Decrypt(t *testing.T) {
 			Patch((*storage.SQLite).Read, func(*storage.SQLite, interface{}, string, string, ...interface{}) (int64, error) {
 				return 0, nil
 			})
+			defer UnpatchAll()
 			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
 			output, err := preIns.Decrypt(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 125}})
 			So(output, ShouldBeNil)
@@ -922,6 +920,7 @@ func TestPreset_Decrypt(t *testing.T) {
 			Patch((*storage.SQLite).Read, func(*storage.SQLite, interface{}, string, string, ...interface{}) (int64, error) {
 				return 1, nil
 			})
+			defer UnpatchAll()
 			Patch((*Preset).getMetaDataFileName, func(*Preset, *DBDef.Transaction, string) (string, error) {
 				return "", errors.New("an error")
 			})
@@ -965,8 +964,8 @@ func TestPreset_getMetaDataFileName(t *testing.T) {
 				MetaDataIdEncWithArbitrator: "simulate ipfs id with arbitrator",
 				MetaDataExtension:           ".txt",
 			}, "123456")
-			So(output, ShouldEqual, "")
-			So(err, ShouldBeError, errors.New("an error"))
+			So(output, ShouldEqual, "D:/dp/download/metadata.txt")
+			So(err, ShouldBeNil)
 		})
 
 		Convey("account decrypt failed", func() {
@@ -1539,6 +1538,533 @@ func TestPreset_GetEthBalance(t *testing.T) {
 			output, err := preIns.GetEthBalance(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.Wrap(errors.New("an error"), "Get eth balance failed. "))
+		})
+	})
+}
+
+func TestPreset_GetTokenBalance(t *testing.T) {
+	Convey("test Preset.GetTokenBalance", t, func() {
+		Convey("standard input, expect success", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			mockChainWrapperObj := mock_scry.NewMockChainWrapper(controller)
+			Patch((*binary.Binary).ChainWrapper, func(*binary.Binary) scry.ChainWrapper {
+				return mockChainWrapperObj
+			})
+			defer UnpatchAll()
+			mockChainWrapperObj.EXPECT().GetTokenBalance(gomock.Any(), gomock.Any()).Return(big.NewInt(100), nil)
+			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"}).Times(2)
+
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}, Bin: &binary.Binary{}}
+
+			output, err := preIns.GetTokenBalance(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 125}})
+			So(output, ShouldBeLessThanOrEqualTo, "100|"+time.Now().String())
+			So(err, ShouldBeNil)
+		})
+
+		Convey("current user is nil", func() {
+			preIns := &Preset{CBs: &cec.Callbacks{}}
+			output, err := preIns.GetTokenBalance(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.New("Current user is nil. "))
+		})
+
+		Convey("json unmarshal failed", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
+			output, err := preIns.GetTokenBalance(&server.MessageIn{Payload: []byte{34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34}})
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.New("invalid character ':' after top-level value"))
+		})
+
+		Convey("get token balance failed", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			mockChainWrapperObj := mock_scry.NewMockChainWrapper(controller)
+			Patch((*binary.Binary).ChainWrapper, func(*binary.Binary) scry.ChainWrapper {
+				return mockChainWrapperObj
+			})
+			defer UnpatchAll()
+			mockChainWrapperObj.EXPECT().GetTokenBalance(gomock.Any(), gomock.Any()).Return(big.NewInt(100), errors.New("an error"))
+			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"}).Times(2)
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}, Bin: &binary.Binary{}}
+			output, err := preIns.GetTokenBalance(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 125}})
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.Wrap(errors.New("an error"), "Get token balance failed. "))
+		})
+	})
+}
+
+func TestPreset_IsVerifier(t *testing.T) {
+	Convey("test Preset.IsVerifier", t, func() {
+		Convey("standard input, expect success", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			Patch((*storage.SQLite).Read, func(*storage.SQLite, interface{}, string, string, ...interface{}) (int64, error) {
+				return 1, nil
+			})
+			defer UnpatchAll()
+			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
+
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+
+			output, err := preIns.IsVerifier(nil)
+			So(output, ShouldBeFalse)
+			So(err, ShouldBeNil)
+		})
+
+		Convey("current user is nil", func() {
+			preIns := &Preset{CBs: &cec.Callbacks{}}
+			output, err := preIns.IsVerifier(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.New("Current user is nil. "))
+		})
+
+		Convey("db read failed", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			Patch((*storage.SQLite).Read, func(*storage.SQLite, interface{}, string, string, ...interface{}) (int64, error) {
+				return 0, nil
+			})
+			defer UnpatchAll()
+			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			output, err := preIns.IsVerifier(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeNil)
+		})
+	})
+}
+
+func TestPreset_GetAccountsList(t *testing.T) {
+	Convey("test Preset.GetAccountsList", t, func() {
+		Convey("standard input, expect success", func() {
+			Patch((*storage.SQLite).Read, func(*storage.SQLite, interface{}, string, string, ...interface{}) (int64, error) {
+				return 1, nil
+			})
+			defer UnpatchAll()
+
+			preIns := &Preset{CBs: &cec.Callbacks{DB: &storage.SQLite{}}}
+
+			output, err := preIns.GetAccountsList(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeNil)
+		})
+
+		Convey("db read failed", func() {
+			Patch((*storage.SQLite).Read, func(*storage.SQLite, interface{}, string, string, ...interface{}) (int64, error) {
+				return 1, errors.New("an error")
+			})
+			defer UnpatchAll()
+			preIns := &Preset{CBs: &cec.Callbacks{DB: &storage.SQLite{}}}
+			output, err := preIns.GetAccountsList(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.New("an error"))
+		})
+	})
+}
+
+func TestPreset_GetDataList(t *testing.T) {
+	Convey("test Preset.GetDataList", t, func() {
+		Convey("standard input, expect success", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			Patch((*storage.SQLite).Read, func(*storage.SQLite, interface{}, string, string, ...interface{}) (int64, error) {
+				return 1, nil
+			})
+			defer UnpatchAll()
+
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+
+			output, err := preIns.GetDataList(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeNil)
+		})
+
+		Convey("current user is nil", func() {
+			preIns := &Preset{CBs: &cec.Callbacks{}}
+			output, err := preIns.GetDataList(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.New("Current user is nil. "))
+		})
+
+		Convey("db read failed", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			Patch((*storage.SQLite).Read, func(*storage.SQLite, interface{}, string, string, ...interface{}) (int64, error) {
+				return 1, errors.New("an error")
+			})
+			defer UnpatchAll()
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			output, err := preIns.GetDataList(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.New("an error"))
+		})
+	})
+}
+
+func TestPreset_GetTxSell(t *testing.T) {
+	Convey("test Preset.GetTxSell", t, func() {
+		Convey("standard input, expect success", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			Patch((*storage.SQLite).Read, func(*storage.SQLite, interface{}, string, string, ...interface{}) (int64, error) {
+				return 1, nil
+			})
+			defer UnpatchAll()
+			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
+
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+
+			output, err := preIns.GetTxSell(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeNil)
+		})
+
+		Convey("current user is nil", func() {
+			preIns := &Preset{CBs: &cec.Callbacks{}}
+			output, err := preIns.GetTxSell(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.New("Current user is nil. "))
+		})
+
+		Convey("db read failed", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			Patch((*storage.SQLite).Read, func(*storage.SQLite, interface{}, string, string, ...interface{}) (int64, error) {
+				return 1, errors.New("an error")
+			})
+			defer UnpatchAll()
+			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			output, err := preIns.GetTxSell(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.New("an error"))
+		})
+	})
+}
+
+func TestPreset_GetTxBuy(t *testing.T) {
+	Convey("test Preset.GetTxBuy", t, func() {
+		Convey("standard input, expect success", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			Patch((*storage.SQLite).Read, func(*storage.SQLite, interface{}, string, string, ...interface{}) (int64, error) {
+				return 1, nil
+			})
+			defer UnpatchAll()
+			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
+
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+
+			output, err := preIns.GetTxBuy(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeNil)
+		})
+
+		Convey("current user is nil", func() {
+			preIns := &Preset{CBs: &cec.Callbacks{}}
+			output, err := preIns.GetTxBuy(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.New("Current user is nil. "))
+		})
+
+		Convey("db read failed", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			Patch((*storage.SQLite).Read, func(*storage.SQLite, interface{}, string, string, ...interface{}) (int64, error) {
+				return 1, errors.New("an error")
+			})
+			defer UnpatchAll()
+			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			output, err := preIns.GetTxBuy(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.New("an error"))
+		})
+	})
+}
+
+func TestPreset_GetTxVerify(t *testing.T) {
+	Convey("test Preset.GetTxVerify", t, func() {
+		Convey("standard input, expect success", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
+			Patch((*storage.SQLite).Read, func(_ *storage.SQLite, out interface{}, _, _ string, _ ...interface{}) (int64, error) {
+				if outAssert, ok := out.(*DBDef.Account); ok {
+					*outAssert = DBDef.Account{Verify: []byte{91,34,48,34,93}}
+				}
+				return 1, nil
+			})
+			defer UnpatchAll()
+
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+
+			output, err := preIns.GetTxVerify(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeNil)
+		})
+
+		Convey("json unmarshal failed", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
+			Patch((*storage.SQLite).Read, func(_ *storage.SQLite, out interface{}, _, _ string, _ ...interface{}) (int64, error) {
+				if outAssert, ok := out.(*DBDef.Account); ok {
+					*outAssert = DBDef.Account{Verify: []byte{48, ':'}}
+				}
+				return 1, nil
+			})
+			defer UnpatchAll()
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			output, err := preIns.GetTxVerify(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.New("invalid character ':' after top-level value"))
+		})
+
+		Convey("db read second time failed", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
+			Patch((*storage.SQLite).Read, func(_ *storage.SQLite, out interface{}, _, _ string, _ ...interface{}) (int64, error) {
+				if outAssert, ok := out.(*DBDef.Account); ok {
+					*outAssert = DBDef.Account{Verify: []byte{91,34,48,34,93}}
+				} else {
+					return 1, errors.New("an error")
+				}
+				return 1, nil
+			})
+			defer UnpatchAll()
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			output, err := preIns.GetTxVerify(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.New("an error"))
+		})
+
+		Convey("current user is nil", func() {
+			preIns := &Preset{CBs: &cec.Callbacks{}}
+			output, err := preIns.GetTxVerify(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.New("Current user is nil. "))
+		})
+
+		Convey("db read failed", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
+			Patch((*storage.SQLite).Read, func(*storage.SQLite, interface{}, string, string, ...interface{}) (int64, error) {
+				return 1, errors.New("an error")
+			})
+			defer UnpatchAll()
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			output, err := preIns.GetTxVerify(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.New("an error"))
+		})
+
+		Convey("acc.verify is nil", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
+			Patch((*storage.SQLite).Read, func(*storage.SQLite, interface{}, string, string, ...interface{}) (int64, error) {
+				return 1, nil
+			})
+			defer UnpatchAll()
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			output, err := preIns.GetTxVerify(nil)
+			So(output, ShouldEqual, "")
+			So(err, ShouldBeNil)
+		})
+	})
+}
+
+func TestPreset_GetTxArbitrate(t *testing.T) {
+	Convey("test Preset.GetTxArbitrate", t, func() {
+		Convey("standard input, expect success", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
+			Patch((*storage.SQLite).Read, func(_ *storage.SQLite, out interface{}, _, _ string, _ ...interface{}) (int64, error) {
+				if outAssert, ok := out.(*DBDef.Account); ok {
+					*outAssert = DBDef.Account{Arbitrate: []byte{91,34,48,34,93}}
+				}
+				return 1, nil
+			})
+			defer UnpatchAll()
+
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+
+			output, err := preIns.GetTxArbitrate(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeNil)
+		})
+
+		Convey("json unmarshal failed", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
+			Patch((*storage.SQLite).Read, func(_ *storage.SQLite, out interface{}, _, _ string, _ ...interface{}) (int64, error) {
+				if outAssert, ok := out.(*DBDef.Account); ok {
+					*outAssert = DBDef.Account{Arbitrate: []byte{48, ':'}}
+				}
+				return 1, nil
+			})
+			defer UnpatchAll()
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			output, err := preIns.GetTxArbitrate(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.New("invalid character ':' after top-level value"))
+		})
+
+		Convey("db read second time failed", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
+			Patch((*storage.SQLite).Read, func(_ *storage.SQLite, out interface{}, _, _ string, _ ...interface{}) (int64, error) {
+				if outAssert, ok := out.(*DBDef.Account); ok {
+					*outAssert = DBDef.Account{Arbitrate: []byte{91,34,48,34,93}}
+				} else {
+					return 1, errors.New("an error")
+				}
+				return 1, nil
+			})
+			defer UnpatchAll()
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			output, err := preIns.GetTxArbitrate(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.New("an error"))
+		})
+
+		Convey("current user is nil", func() {
+			preIns := &Preset{CBs: &cec.Callbacks{}}
+			output, err := preIns.GetTxArbitrate(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.New("Current user is nil. "))
+		})
+
+		Convey("db read failed", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
+			Patch((*storage.SQLite).Read, func(*storage.SQLite, interface{}, string, string, ...interface{}) (int64, error) {
+				return 1, errors.New("an error")
+			})
+			defer UnpatchAll()
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			output, err := preIns.GetTxArbitrate(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.New("an error"))
+		})
+
+		Convey("acc.arbitrate is nil", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
+			Patch((*storage.SQLite).Read, func(*storage.SQLite, interface{}, string, string, ...interface{}) (int64, error) {
+				return 1, nil
+			})
+			defer UnpatchAll()
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			output, err := preIns.GetTxArbitrate(nil)
+			So(output, ShouldEqual, "")
+			So(err, ShouldBeNil)
+		})
+	})
+}
+
+func TestPreset_ModifyNickname(t *testing.T) {
+	Convey("test Preset.ModifyNickname", t, func() {
+		Convey("standard input, expect success", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
+			Patch((*storage.SQLite).Update, func(*storage.SQLite, interface{}, map[string]interface{}, string, ...interface{}) (int64, error) {
+				return 1, nil
+			})
+
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+
+			output, err := preIns.ModifyNickname(&server.MessageIn{Payload: []byte{123, 34, 78, 105, 99, 107, 110, 97, 109, 101, 34, 58, 32, 34, 110, 105, 99, 107, 32, 110, 97, 109, 101, 34, 125}})
+			So(output, ShouldBeTrue)
+			So(err, ShouldBeNil)
+		})
+
+		Convey("current user is nil", func() {
+			preIns := &Preset{CBs: &cec.Callbacks{}}
+			output, err := preIns.ModifyNickname(nil)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.New("Current user is nil. "))
+		})
+
+		Convey("json unmarshal failed", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
+			output, err := preIns.ModifyNickname(&server.MessageIn{Payload: []byte{34, 78, 105, 99, 107, 110, 97, 109, 101, 34, 58, 32, 34, 110, 105, 99, 107, 32, 110, 97, 109, 101, 34}})
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.New("invalid character ':' after top-level value"))
+		})
+
+		Convey("db update failed", func() {
+			controller := gomock.NewController(t)
+			mockClientObj := mock_scry.NewMockClient(controller)
+			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
+			Patch((*storage.SQLite).Update, func(*storage.SQLite, interface{}, map[string]interface{}, string, ...interface{}) (int64, error) {
+				return 1, errors.New("an error")
+			})
+			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			output, err := preIns.ModifyNickname(&server.MessageIn{Payload: []byte{123, 34, 78, 105, 99, 107, 110, 97, 109, 101, 34, 58, 32, 34, 110, 105, 99, 107, 32, 110, 97, 109, 101, 34, 125}})
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.Wrap(errors.New("an error"), "Modify nickname failed. "))
+		})
+	})
+}
+
+func TestPreset_ModifyContractParam(t *testing.T) {
+	Convey("test Preset.ModifyContractParam", t, func() {
+		Convey("standard input, expect success", func() {
+			controller := gomock.NewController(t)
+			mockChainWrapperObj := mock_scry.NewMockChainWrapper(controller)
+			Patch((*binary.Binary).ChainWrapper, func(*binary.Binary) scry.ChainWrapper {
+				return mockChainWrapperObj
+			})
+			defer UnpatchAll()
+			mockChainWrapperObj.EXPECT().ModifyContractParam(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+
+			preIns := &Preset{
+				Bin:      &binary.Binary{},
+				Deployer: &PreDef.Preset{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
+			}
+
+			output, err := preIns.ModifyContractParam(&server.MessageIn{Payload: []byte{123, 34, 109, 111, 100, 105, 102, 121, 67, 111, 110, 116, 114, 97, 99, 116, 80, 97, 114, 97, 109, 34, 58, 123, 34, 112, 97, 114, 97, 109, 78, 97, 109, 101, 34, 58, 34, 49, 34, 44, 34, 112, 97, 114, 97, 109, 86, 97, 108, 117, 101, 34, 58, 34, 49, 48, 48, 34, 125, 125}})
+			So(output, ShouldBeTrue)
+			So(err, ShouldBeNil)
+		})
+
+		Convey("json unmarshal failed", func() {
+			preIns := &Preset{}
+			output, err := preIns.ModifyContractParam(&server.MessageIn{Payload: []byte{34, 109, 111, 100, 105, 102, 121, 67, 111, 110, 116, 114, 97, 99, 116, 80, 97, 114, 97, 109, 34, 58, 123, 34, 112, 97, 114, 97, 109, 78, 97, 109, 101, 34, 58, 34, 49, 34, 44, 34, 112, 97, 114, 97, 109, 86, 97, 108, 117, 101, 34, 58, 34, 49, 48, 48, 34, 125}})
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.New("invalid character ':' after top-level value"))
+		})
+
+		Convey("modify contract params failed", func() {
+			controller := gomock.NewController(t)
+			mockChainWrapperObj := mock_scry.NewMockChainWrapper(controller)
+			Patch((*binary.Binary).ChainWrapper, func(*binary.Binary) scry.ChainWrapper {
+				return mockChainWrapperObj
+			})
+			defer UnpatchAll()
+			mockChainWrapperObj.EXPECT().ModifyContractParam(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("an error"))
+			preIns := &Preset{
+				Bin:      &binary.Binary{},
+				Deployer: &PreDef.Preset{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
+			}
+			output, err := preIns.ModifyContractParam(&server.MessageIn{Payload: []byte{123, 34, 109, 111, 100, 105, 102, 121, 67, 111, 110, 116, 114, 97, 99, 116, 80, 97, 114, 97, 109, 34, 58, 123, 34, 112, 97, 114, 97, 109, 78, 97, 109, 101, 34, 58, 34, 49, 34, 44, 34, 112, 97, 114, 97, 109, 86, 97, 108, 117, 101, 34, 58, 34, 49, 48, 48, 34, 125, 125}})
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, errors.Wrap(errors.New("an error"), "modify contract param failed"))
 		})
 	})
 }

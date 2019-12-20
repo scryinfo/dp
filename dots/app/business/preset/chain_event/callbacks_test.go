@@ -1,10 +1,77 @@
 package cec
 
 import (
+	. "bou.ke/monkey"
 	"github.com/pkg/errors"
+	"github.com/scryinfo/dot/dot"
+	"github.com/scryinfo/dp/dots/app/server"
+	"github.com/scryinfo/dp/dots/app/storage"
+	ipfs "github.com/scryinfo/dp/dots/storage/ipfs"
+	. "github.com/smartystreets/goconvey/convey"
 	"testing"
 )
-import . "github.com/smartystreets/goconvey/convey"
+
+func TestCallbacks_Create(t *testing.T) {
+	Convey("test Callbacks.Create", t, func() {
+		cbIns := &Callbacks{}
+
+		output := cbIns.Create(nil)
+		So(output, ShouldBeNil)
+	})
+}
+
+func TestNewCBsDot(t *testing.T) {
+	Convey("test Callbacks config", t, func() {
+		Convey("standard input, expect success", func() {
+			confBs := []byte{123,34,112,114,111,111,102,115,79,117,116,68,105,114,34,58,32,34,67,58,47,85,115,101,114,115,47,87,105,108,108,47,68,101,115,107,116,111,112,34,125}
+
+			output, err := newCBsDot(confBs)
+			So(err, ShouldBeNil)
+
+			outputAssert, ok := output.(*Callbacks)
+			So(ok, ShouldBeTrue)
+			So(outputAssert.config.ProofsOutDir, ShouldEqual, "C:/Users/Will/Desktop")
+		})
+
+		Convey("unmarshal failed", func() {
+			var confBs []byte
+			output, err := newCBsDot(confBs)
+			So(output, ShouldBeNil)
+			So(err, ShouldBeError, dot.NewError("dot_error_parameter", "the parameter error "))
+		})
+	})
+}
+
+func TestCBsTypeLive(t *testing.T) {
+	Convey("test Preset TypeLive", t, func() {
+		Convey("standard input, expect success", func() {
+			dotIns := &dot.TypeLives{
+				Meta: dot.Metadata{
+					TypeId: CBsTypeId,
+					NewDoter: func(conf []byte) (dot.Dot, error) {
+						return newCBsDot(conf)
+					},
+				},
+			}
+
+			Patch(server.WebSocketTypeLive, func() *dot.TypeLives {
+				return dotIns
+			})
+			defer UnpatchAll()
+			Patch(ipfs.IpfsTypeLive, func() *dot.TypeLives {
+				return dotIns
+			})
+			Patch(storage.SQLiteTypeLive, func() *dot.TypeLives {
+				return dotIns
+			})
+
+			output := CBsTypeLive()
+			So(output[1], ShouldEqual, dotIns)
+			So(output[2], ShouldEqual, dotIns)
+			So(output[3], ShouldEqual, dotIns)
+		})
+	})
+}
 
 func TestUpdateSlice(t *testing.T) {
 	Convey("test UpdateSlice", t, func() {

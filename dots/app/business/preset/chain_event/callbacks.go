@@ -123,6 +123,7 @@ func (c *Callbacks) onPublish(event event.Event) bool {
 		dl.PublishId = event.Data.Get("publishId").(string)
 		dl.SupportVerify = event.Data.Get("supportVerify").(bool)
 
+		// get details file from ipfs and parse it
 		if err := c.getPubDataDetails(&dl, event.Data.Get("despDataId").(string)); err != nil {
 			dot.Logger().Errorln("", zap.NamedError("onPublish: get publish data details failed. ", err))
 		}
