@@ -28,7 +28,7 @@ func NewScryClient(publicKey string) *ScryClient {
 
 // CreateScryClient create a new scry client
 func CreateScryClient(password string) (*ScryClient, error) {
-	account, err := ser.CreateAccount(password)
+	account, err := accounts.GetAMInstance().CreateAccount(password)
 	if err != nil {
 		rlog.Error("failed to create account_, error:", err)
 		return nil, err
