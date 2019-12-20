@@ -12,7 +12,7 @@ import (
 func main() {
 	logger := dot.Logger()
 	l, err := line.BuildAndStart(func(l dot.Line) error {
-		l.PreAdd(binary.BinTypeLive()...)
+		l.PreAdd(binary.BinTypeLiveWithGrpc()...)
 		return nil
 	})
 

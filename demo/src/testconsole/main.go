@@ -11,7 +11,7 @@ import (
 	"github.com/scryinfo/dp/demo/src/sdk/core/ethereum/events"
 	"github.com/scryinfo/dp/demo/src/sdk/scryclient"
 	cif "github.com/scryinfo/dp/demo/src/sdk/scryclient/chaininterfacewrapper"
-	"github.com/scryinfo/dp/dots/service"
+	"github.com/scryinfo/dp/demo/src/sdk/util/accounts"
 	"math/big"
 	"time"
 )
@@ -66,12 +66,12 @@ func main() {
 func testAccounts() {
 	fmt.Println("Start testing accounts...")
 
-	ac, err := service.GetAMIns().CreateAccount("12345")
+	ac, err := accounts.GetAMInstance().CreateAccount("12345")
 	if err != nil {
 		fmt.Println("failed to create interface, error:", err)
 	}
 
-	rv, err := service.GetAMIns().AuthAccount(ac.Address, "12345")
+	rv, err := accounts.GetAMInstance().AuthAccount(ac.Address, "12345")
 	if err != nil {
 		fmt.Println("failed to authenticate interface, error:", err)
 	}
