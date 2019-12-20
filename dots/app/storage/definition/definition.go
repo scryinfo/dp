@@ -59,11 +59,11 @@ type Transaction struct {
 
 // Event events
 type Event struct {
-	Id           int    `gorm:"primary_key"`
-	NotifyTo     []byte // []string, json serialize
-	EventName    int    // enum(iota)
-	EventKeyword string
-	EventPayload string
+	Id          int    `gorm:"primary_key"`
+	NotifyTo    []byte // []string, json serialize
+	EventName   string
+	EventBody   []byte // json string, json serialize
+	EventStatus int // 0: unread, 1: already read
 
 	CreatedTime int64 `json:"-"`
 }
