@@ -100,7 +100,7 @@ func (s *SQLite) Init() error {
 	return nil
 }
 
-// Basic CRUD, support one item and a slice of items
+// Basic CRUD, support one item or a slice of items
 
 // Insert add record(s) to db
 func (s *SQLite) Insert(v interface{}) (int64, error) {

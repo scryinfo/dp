@@ -58,7 +58,7 @@ export default {
         modifyParam: function () {
             connect.send({Name: "modifyContractParam", Payload: {modifyContractParam: {paramName: this.modifyItem, paramValue: this.newParamValue}}},
                 function (payload, _this) {
-                    console.log("modify param success: ", payload); // payload is nothing now :( think if it need some param from go?
+                    console.log("modify param success: ", payload);
                 }, function (payload, _this) {
                     console.log("modify param failed! ", payload);
                 });
