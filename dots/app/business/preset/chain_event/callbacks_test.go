@@ -4,7 +4,7 @@ import (
 	. "bou.ke/monkey"
 	"github.com/pkg/errors"
 	"github.com/scryinfo/dot/dot"
-	"github.com/scryinfo/dp/dots/app/server"
+    "github.com/scryinfo/dp/dots/app/server"
 	"github.com/scryinfo/dp/dots/app/storage"
 	ipfs "github.com/scryinfo/dp/dots/storage/ipfs"
 	. "github.com/smartystreets/goconvey/convey"
@@ -103,4 +103,12 @@ func TestUpdateSlice(t *testing.T) {
 			So(err, ShouldBeNil)
 		})
 	})
+}
+
+func TestOnPublish(t *testing.T) {
+    Convey("test onPublish", t, func() {
+        Convey("standard input, ecpect success", func() {
+            cbIns := &Callbacks{DB: &storage.SQLite{},WS: &server.WSServer{}}
+        })
+    })
 }
