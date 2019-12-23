@@ -47,7 +47,7 @@
           "liveId": "40ef6679-5cfc-4436-a1f6-7f39870bc5ef",
           "json": {
             "wsPort": "9822",
-            "uiResourcesDir": "D:/GoPath/src/github.com/scryinfo/dp/app/app/ui/resources/app"
+            "uiResourcesDir": "D:/GOCODE/src/github.com/scryinfo/dp-ts/app/app/ui/resources/app"
           }
         }
       ]
@@ -72,8 +72,7 @@
         {
           "liveId": "13d73d73-da19-4d39-9dca-3018fbf0ec30",
           "json": {
-            "metaDataOutDir": "C:/Users/Will/Desktop",
-            "accsInfoBackupFile": "C:/Users/Will/Desktop/accounts.json"
+            "metaDataOutDir": "C:/Users/Will/Desktop"
           }
         }
       ]
@@ -87,7 +86,21 @@
         {
           "liveId": "36b2b9b7-1559-4d57-a388-f8224072a5d1",
           "json": {
-            "proofsOutDir": "C:/Users/Will/Desktop"
+            "proofsOutDir": "D:/DP"
+          }
+        }
+      ]
+    },
+    {
+      "metaData": {
+        "name": "app database",
+        "typeId": "cd947210-6790-4e9f-b73f-63aeba484beb"
+      },
+      "lives": [
+        {
+          "liveId": "cd947210-6790-4e9f-b73f-63aeba484beb",
+          "json": {
+            "dbName": "app.db"
           }
         }
       ]

@@ -1,64 +1,76 @@
-// Scry Info.  All rights reserved.
-// license that can be found in the license file.
-
-let path = require('path');
-let config = require('../config');
-let ExtractTextPlugin = require('extract-text-webpack-plugin');
+'use strict'
+const path = require('path')
+const config = require('../config')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')//ExtractTextPlugin
+const packageConfig = require('../package.json')
 
 exports.assetsPath = function (_path) {
-  let assetsSubDirectory = process.env.NODE_ENV === 'production'
+  const assetsSubDirectory = process.env.NODE_ENV === 'production'
     ? config.build.assetsSubDirectory
-    : config.dev.assetsSubDirectory;
-  return path.posix.join(assetsSubDirectory, _path);
-};
+    : config.dev.assetsSubDirectory
+  return path.posix.join(assetsSubDirectory, _path)
+}
 
 exports.cssLoaders = function (options) {
-  options = options || {};
+  options = options || {}
 
-  let cssLoader = {
+  const cssLoader = {
     loader: 'css-loader',
     options: {
-      minimize: process.env.NODE_ENV === 'production',
       sourceMap: options.sourceMap
     }
-  };
+  }
 
+  const postcssLoader = {
+    loader: 'postcss-loader',
+    options: {
+      sourceMap: options.sourceMap
+    }
+  }
+
+  // generate loader string to be used with extract text plugin
   function generateLoaders (loader, loaderOptions) {
-    let loaders = [cssLoader];
+    const loaders = options.usePostCSS ? [cssLoader, postcssLoader] : [cssLoader]
     if (loader) {
       loaders.push({
         loader: loader + '-loader',
         options: Object.assign({}, loaderOptions, {
           sourceMap: options.sourceMap
         })
-      });
+      })
     }
 
+    // Extract CSS when that option is specified
+    // (which is the case during production build)
     if (options.extract) {
-      return ExtractTextPlugin.extract({
-        use: loaders,
-        fallback: 'vue-style-loader',
-        publicPath: '../../'
-      });
+      // return ExtractTextPlugin.extract({
+      //   use: loaders,
+      //   fallback: 'vue-style-loader'
+      // })
+      return [MiniCssExtractPlugin.loader].concat(loaders)
     } else {
-      return ['vue-style-loader'].concat(loaders);
+      return ['vue-style-loader'].concat(loaders)
     }
   }
 
+  // https://vue-loader.vuejs.org/en/configurations/extract-css.html
   return {
-    css: generateLoaders()
+    css: generateLoaders(),
   }
-};
+}
 
+// Generate loaders for standalone style files (outside of .vue)
 exports.styleLoaders = function (options) {
-  let output = [];
-  let loaders = exports.cssLoaders(options);
-  for (let extension in loaders) {
-    let loader = loaders[extension];
+  const output = []
+  const loaders = exports.cssLoaders(options)
+
+  for (const extension in loaders) {
+    const loader = loaders[extension]
     output.push({
       test: new RegExp('\\.' + extension + '$'),
       use: loader
-    });
+    })
   }
-  return output;
-};
+
+  return output
+}

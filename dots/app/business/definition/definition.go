@@ -3,207 +3,59 @@
 
 package definition
 
-type AccInfo struct {
-    Account  string `json:"account"`
-    Password string `json:"password"`
+// Preset pre-define structure for deserialize msg from client
+type Preset struct {
+	PublishId     string `json:"PublishId"`
+	TransactionId string `json:"TransactionId"`
+
+	Address       string `json:"address"`
+	Password      string `json:"password"`
+	Price         string `json:"price"`
+	SupportVerify bool   `json:"supportVerify"`
+	StartVerify   bool   `json:"startVerify"`
+
+	Ids       Ids       `json:"Ids"`
+	Confirm   Confirm   `json:"confirm"`
+	Verify    Verify    `json:"verify"`
+	Grade     Grade     `json:"grade"`
+	Arbitrate Arbitrate `json:"arbitrate"`
+
+	Contract ModifyContractParam `json:"modifyContractParam"`
 }
 
-type SDKInitData struct {
-    FromBlock float64 `json:"fromBlock"`
+// Ids specific structure for publish func
+type Ids struct {
+	MetaDataId   string   `json:"metaDataId"`
+	ProofDataIds []string `json:"proofDataIds"`
+	DetailsId    string   `json:"detailsId"`
 }
 
-type PublishData struct {
-    Price         float64 `json:"price"`
-    SupportVerify bool    `json:"supportVerify"`
-    Password      string  `json:"password"`
-    IDs           IDs     `json:"IDs"`
-}
-type IDs struct {
-    MetaDataID   string   `json:"metaDataID"`
-    ProofDataIDs []string `json:"proofDataIDs"`
-    DetailsID    string   `json:"detailsID"`
+// Confirm specific structure for confirm func
+type Confirm struct {
+	Truth bool `json:"confirmResult"`
 }
 
-type OnPublish struct {
-    Title               string   `json:"Title"`
-    Keys                string   `json:"Keys"`
-    Description         string   `json:"Description"`
-    MetaDataExtension   string   `json:"MetaDataExtension"`
-    ProofDataExtensions []string `json:"ProofDataExtensions"`
-    Seller              string   `json:"Seller"`
-    Price               string
-    PublishID           string
-    SupportVerify       bool
-    Block               uint64
-}
-
-type BuyData struct {
-    Password     string       `json:"password"`
-    StartVerify  bool         `json:"startVerify"`
-    SelectedData SelectedData `json:"pID"`
-}
-type SelectedData struct {
-    PublishID string  `json:"PublishID"`
-    Price     float64 `json:"Price"`
-}
-
-type OnApprove struct {
-    Block uint64
-}
-
-type OnVerifiersChosen struct {
-    TransactionID  string
-    PublishID      string
-    ProofFileNames []string
-    TxState        string
-    Block          uint64
-}
-
-type OnTransactionCreate struct {
-    TransactionID  string
-    PublishID      string
-    ProofFileNames []string
-    Buyer          string
-    StartVerify    bool
-    TxState        string
-    Block          uint64
-}
-
-type Prepared struct {
-    Extensions []string `json:"extensions"`
-}
-
-type PurchaseData struct {
-    Password   string       `json:"password"`
-    SelectedTx SelectedTxPD `json:"tID"`
-}
-type SelectedTxPD struct {
-    TransactionID string `json:"TransactionID"`
-}
-
-type OnPurchase struct {
-    TransactionID           string
-    PublishID               string
-    MetaDataIdEncWithSeller []byte
-    TxState                 string
-    UserIndex               string
-    Block                   uint64
-}
-
-type ReEncryptData struct {
-    Password   string        `json:"password"`
-    SelectedTx SelectedTxRED `json:"tID"`
-}
-type SelectedTxRED struct {
-    TransactionID           string `json:"TransactionID"`
-    Seller                  string `json:"Seller"`
-    MetaDataIDEncWithSeller []byte `json:"MetaDataIDEncWithSeller"`
-}
-
-type OnReadyForDownload struct {
-    TransactionID          string
-    MetaDataIdEncWithBuyer []byte
-    UserIndex              string
-    TxState                string
-    Block                  uint64
-}
-
-type DecryptData struct {
-    Password   string       `json:"password"`
-    SelectedTx SelectedTxDD `json:"tID"`
-}
-type SelectedTxDD struct {
-    MetaDataIDEncrypt []byte `json:"MetaDataIDEncrypt"`
-    MetaDataExtension string `json:"MetaDataExtension"`
-    User              string `json:"User"`
-}
-
-type ConfirmData struct {
-    Password   string       `json:"password"`
-    SelectedTx SelectedTxCD `json:"tID"`
-    Truth      bool         `json:"confirmData"`
-}
-type SelectedTxCD struct {
-    TransactionID string `json:"TransactionID"`
-}
-
-type OnClose struct {
-    TransactionID string
-    UserIndex     string
-    TxState       string
-    Block         uint64
-}
-
-type RegisterVerifierData struct {
-    Password string `json:"password"`
-}
-type OnRegisterAsVerifier struct {
-    Block uint64
-}
-
-type VerifyData struct {
-    Password      string `json:"password"`
-    TransactionID string `json:"tID"`
-    Verify        Verify `json:"verify"`
-}
+// Verify specific structure for vote func
 type Verify struct {
-    Suggestion bool   `json:"suggestion"`
-    Comment    string `json:"comment"`
+	Suggestion bool   `json:"suggestion"`
+	Comment    string `json:"comment"`
 }
 
-type OnVote struct {
-    TransactionID    string
-    VerifierResponse string
-    VerifierIndex    string
-    TxState          string
-    Block            uint64
+// Grade specific structure for grade func
+type Grade struct {
+	Verifier1Revert bool    `json:"verifier1Revert"`
+	Verifier1Grade  float64 `json:"verifier1Grade"`
+	Verifier2Revert bool    `json:"verifier2Revert"`
+	Verifier2Grade  float64 `json:"verifier2Grade"`
 }
 
-type CreditData struct {
-    Password   string        `json:"password"`
-    SelectedTx SelectedTxCrD `json:"tID"`
-    Credit     Credit        `json:"credit"`
-}
-type SelectedTxCrD struct {
-    TransactionID string `json:"TransactionID"`
-}
-type Credit struct {
-    Verifier1Revert bool    `json:"verifier1Revert"`
-    Verifier1Credit float64 `json:"verifier1Credit"`
-    Verifier2Revert bool    `json:"verifier2Revert"`
-    Verifier2Credit float64 `json:"verifier2Credit"`
+// Arbitrate specific structure for arbitrate func
+type Arbitrate struct {
+	ArbitrateResult bool `json:"arbitrateResult,omitempty"`
 }
 
-type ArbitrateData struct {
-    Password        string       `json:"password"`
-    SelectedTx      SelectedTxAD `json:"tID"`
-    ArbitrateResult bool         `json:"arbitrateResult"`
-}
-type SelectedTxAD struct {
-    TransactionId string `json:"TransactionID"`
-}
-
-type OnVerifierDisable struct {
-    Verifier string
-    Block uint64
-}
-
-type OnArbitrationBegin struct {
-    TransactionId               string
-    PublishId                   string
-    ProofFileNames              []string
-    MetaDataIdEncWithArbitrator []byte
-    Block                       uint64
-}
-
-type OnArbitrationResult struct {
-    TransactionId   string
-    ArbitrateResult string
-    User            string
-    Block           uint64
-}
-
-type Balance struct {
-    Balance   string
-    TimeStamp string
+// ModifyContractParam specific structure for MCP func
+type ModifyContractParam struct {
+	ParamName  string `json:"paramName"`
+	ParamValue string `json:"paramValue"`
 }

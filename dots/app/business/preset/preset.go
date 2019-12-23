@@ -1,652 +1,1039 @@
 package preset
 
 import (
-    "encoding/json"
-    "github.com/ethereum/go-ethereum/common"
-    "github.com/pkg/errors"
-    "github.com/scryinfo/dot/dot"
-    "github.com/scryinfo/dp/dots/app/business/definition"
-    "github.com/scryinfo/dp/dots/app/business/preset/chain_event"
-    "github.com/scryinfo/dp/dots/app/server"
-    "github.com/scryinfo/dp/dots/binary"
-    scry2 "github.com/scryinfo/dp/dots/binary/scry"
-    "github.com/scryinfo/dp/dots/eth/transaction"
-    "io/ioutil"
-    "math/big"
-    "os"
-    "time"
+	"encoding/json"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/pkg/errors"
+	"github.com/scryinfo/dot/dot"
+	PreDef "github.com/scryinfo/dp/dots/app/business/definition"
+	"github.com/scryinfo/dp/dots/app/business/preset/chain_event"
+	"github.com/scryinfo/dp/dots/app/server"
+	DBDef "github.com/scryinfo/dp/dots/app/storage/definition"
+	"github.com/scryinfo/dp/dots/binary"
+	scry2 "github.com/scryinfo/dp/dots/binary/scry"
+	"github.com/scryinfo/dp/dots/eth/transaction"
+	"go.uber.org/zap"
+	"math/big"
+	"os"
+	"strconv"
+	"strings"
+	"time"
 )
 
+// Preset handle system functions pre-defined
 type Preset struct {
-    PresetMsgNames    []string
-    PresetMsgHandlers []server.PresetFunc
-    CurUser           scry2.Client
-    Deployer          *definition.AccInfo
-    config            presetConfig
-    Bin               *binary.Binary `dot:""`
-    CBs               *cec.Callbacks `dot:""`
+	PresetMsgNames    []string
+	PresetMsgHandlers []server.PresetFunc
+	Deployer          *PreDef.Preset
+	config            presetConfig
+	Bin               *binary.Binary `dot:""`
+	CBs               *cec.Callbacks `dot:""`
 }
 
 type presetConfig struct {
-    MetaDataOutDir string `json:"metaDataOutDir"`
-    AccsBackupFile string `json:"accsInfoBackupFile"`
+	MetaDataOutDir string `json:"metaDataOutDir"`
 }
 
 const (
-    PreTypeId = "13d73d73-da19-4d39-9dca-3018fbf0ec30"
+	// PreTypeId preset type id
+	PreTypeId = "13d73d73-da19-4d39-9dca-3018fbf0ec30"
 
-    verifierNum            = 2
-    verifierBonus          = 300
-    registerAsVerifierCost = 10000
+	// todo: params get from db, modify request change db the same time.
+	verifierNum            = 2
+	verifierBonus          = 300
+	registerAsVerifierCost = 10000
 
-    arbitratorNum   = 1
-    arbitratorBonus = 500
+	arbitratorNum   = 1
+	arbitratorBonus = 500
 
-    sep = "|"
+	sep = "|"
 )
 
+// Create dot.Create
 func (p *Preset) Create(l dot.Line) error {
-    p.Deployer = &definition.AccInfo{
-        Account:  "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8",
-        Password: "111111",
-    }
+	p.Deployer = &PreDef.Preset{
+		Address:  "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8",
+		Password: "111111",
+	}
 
-    p.PresetMsgNames = []string{
-        "login.verify",
-        "create.new.account",
-        "block.set",
-        "logout",
-        "publish",
-        "buy",
-        "extensions",
-        "purchase",
-        "reEncrypt",
-        "cancel",
-        "decrypt",
-        "confirm",
-        "register",
-        "verify",
-        "credit",
-        "arbitrate",
-        "get.eth.balance",
-        "get.token.balance",
-        "acc.backup",
-        "acc.restore",
-    }
+	p.PresetMsgNames = []string{
+		"loginVerify",
+		"createNewAccount",
+		"currentUserDataUpdate",
+		"logout",
 
-    p.PresetMsgHandlers = []server.PresetFunc{
-        p.LoginVerify,
-        p.CreateNewAccount,
-        p.BlockSet,
-        p.Logout,
-        p.Publish,
-        p.Buy,
-        p.Extensions,
-        p.Purchase,
-        p.ReEncrypt,
-        p.Cancel,
-        p.Decrypt,
-        p.Confirm,
-        p.Register,
-        p.Verify,
-        p.Credit,
-        p.Arbitrate,
-        p.GetEthBalance,
-        p.GetTokenBalance,
-        p.Backup,
-        p.Restore,
-    }
-    return nil
+		"publish",
+		"advancePurchase",
+		"confirmPurchase",
+		"reEncrypt",
+		"cancelPurchase",
+		"decrypt",
+		"confirmData",
+		"register",
+		"vote",
+		"gradeToVerifier",
+		"arbitrate",
+
+		"getEthBalance",
+		"getTokenBalance",
+		"isVerifier",
+		"getAccountsList",
+		"getDataList",
+		"getTxSell",
+		"getTxBuy",
+		"getTxVerify",
+		"getTxArbitrate",
+
+		"modifyNickname",
+		"modifyContractParam",
+
+		"getEvtList",
+		"updateEvt",
+		"delEvt",
+
+		//p.GetEvtList,
+		//p.UpdateEvt,
+		//p.DelEvt,
+	}
+
+	p.PresetMsgHandlers = []server.PresetFunc{
+		p.LoginVerify,
+		p.CreateNewAccount,
+		p.CurrentUserDataUpdate,
+		p.Logout,
+
+		p.Publish,
+		p.AdvancePurchase,
+		p.ConfirmPurchase,
+		p.ReEncrypt,
+		p.CancelPurchase,
+		p.Decrypt,
+		p.ConfirmData,
+		p.Register,
+		p.Vote,
+		p.GradeToVerifier,
+		p.Arbitrate,
+
+		p.GetEthBalance,
+		p.GetTokenBalance,
+		p.IsVerifier,
+		p.GetAccountsList,
+		p.GetDataList,
+		p.GetTxSell,
+		p.GetTxBuy,
+		p.GetTxVerify,
+		p.GetTxArbitrate,
+
+		p.ModifyNickname,
+		p.ModifyContractParam,
+
+		p.GetEvtList,
+		p.UpdateEvt,
+		p.DelEvt,
+	}
+
+	if len(p.PresetMsgNames) != len(p.PresetMsgHandlers) {
+		return errors.New("Quantities of name and function are not matched. (preset) ")
+	}
+
+	return nil
 }
 
-func newPresetDot(conf interface{}) (dot.Dot, error) {
-    var err error
-    var bs []byte
-    if bt, ok := conf.([]byte); ok {
-        bs = bt
-    } else {
-        return nil, dot.SError.Parameter
-    }
+func newPresetDot(conf []byte) (dot.Dot, error) {
+	var err error
 
-    dConf := &presetConfig{}
-    err = dot.UnMarshalConfig(bs, dConf)
-    if err != nil {
-        return nil, err
-    }
+	dConf := &presetConfig{}
+	err = dot.UnMarshalConfig(conf, dConf)
+	if err != nil {
+		return nil, err
+	}
 
-    d := &Preset{config: *dConf}
+	d := &Preset{config: *dConf}
 
-    return d, err
+	return d, err
 }
 
+// PreTypeLive add a dot component to dot.line with 'line.PreAdd()'
 func PreTypeLive() []*dot.TypeLives {
-    t := []*dot.TypeLives{
-        {
-            Meta: dot.Metadata{
-                TypeId: PreTypeId,
-                NewDoter: func(conf interface{}) (dot.Dot, error) {
-                    return newPresetDot(conf)
-                },
-            },
-        },
-    }
-    
-    t = append(t, binary.BinTypeLiveWithoutGrpc()...)
-    t = append(t, cec.CBsTypeLive()...)
-    
-    return t
+	t := []*dot.TypeLives{
+		{
+			Meta: dot.Metadata{
+				TypeId: PreTypeId,
+				NewDoter: func(conf []byte) (dot.Dot, error) {
+					return newPresetDot(conf)
+				},
+			},
+		},
+	}
+
+	t = append(t, binary.BinTypeLiveWithoutGrpc()...)
+	t = append(t, cec.CBsTypeLive()...)
+
+	return t
 }
 
+// LoginVerify verify acc info
 func (p *Preset) LoginVerify(mi *server.MessageIn) (payload interface{}, err error) {
-   var ai definition.AccInfo
-   if err = json.Unmarshal(mi.Payload, &ai); err != nil {
-       return
-   }
+	var lv PreDef.Preset
+	if err = json.Unmarshal(mi.Payload, &lv); err != nil {
+		return
+	}
 
-   var client scry2.Client
-   if client = scry2.NewScryClient(ai.Account, p.Bin.ChainWrapper()); client == nil {
-       err = errors.New("Call NewScryClient failed. ")
-       return
-   }
+	var client scry2.Client
+	if client = scry2.NewScryClient(lv.Address, p.Bin.ChainWrapper()); client == nil {
+		err = errors.New("Call NewScryClient failed. ")
+		return
+	}
 
-   var login bool
-   if login, err = client.Authenticate(ai.Password); err != nil {
-       err = errors.Wrap(err, "Authenticate user information failed. ")
-       return
-   }
-   if login {
-       p.CurUser = client
-   } else {
-       err = errors.New("Login verify failed. ")
-       return
-   }
+	var login bool
+	if login, err = client.Authenticate(lv.Password); err != nil {
+		err = errors.Wrap(err, "Authenticate user information failed. ")
+		return
+	}
+	if login {
+		p.CBs.CurUser = client
+	} else {
+		err = errors.New("Login verify failed. ")
+		return
+	}
 
-   payload = true
+	payload = true
 
-   return
+	return
 }
 
+// CreateNewAccount create a new account
 func (p *Preset) CreateNewAccount(mi *server.MessageIn) (payload interface{}, err error) {
-   var pwd definition.AccInfo
-   if err = json.Unmarshal(mi.Payload, &pwd); err != nil {
-       return
-   }
+	var cna PreDef.Preset
+	if err = json.Unmarshal(mi.Payload, &cna); err != nil {
+		return
+	}
 
-   var client scry2.Client
-   if client, err = scry2.CreateScryClient(pwd.Password, p.Bin.ChainWrapper()); err != nil {
-       err = errors.Wrap(err, "Create new user failed. ")
-       return
-   }
+	var client scry2.Client
+	if client, err = scry2.CreateScryClient(cna.Password, p.Bin.ChainWrapper()); err != nil {
+		err = errors.Wrap(err, "Create new user failed. ")
+		return
+	}
 
-   p.CurUser = client
+	p.CBs.CurUser = client
 
-   payload = client.Account().Addr
+	payload = client.Account().Addr
 
-   return
+	var num int64
+	if num, err = p.CBs.DB.Insert(&DBDef.Account{
+		Address:    client.Account().Addr,
+		Nickname:   client.Account().Addr,
+		FromBlock:  1,
+		IsVerifier: false,
+		Verify:     nil,
+		Arbitrate:  nil,
+	}); num != 1 || err != nil {
+		err = errors.Wrap(err, "in create new account")
+		return
+	}
+
+	return
 }
 
-func (p *Preset) BlockSet(mi *server.MessageIn) (payload interface{}, err error) {
-   if p.CurUser == nil {
-       err = errors.New("Current user is nil. ")
-       return
-   }
+// CurrentUserDataUpdate update data for current user, while send current user some eth and tokens for test
+func (p *Preset) CurrentUserDataUpdate(_ *server.MessageIn) (payload interface{}, err error) {
+	if p.CBs.CurUser == nil {
+		err = errors.New("Current user is nil. ")
+		return
+	}
 
-   var sid definition.SDKInitData
-   if err = json.Unmarshal(mi.Payload, &sid); err != nil {
-       return
-   }
+	for i := range p.CBs.EventNames {
+		if err = p.CBs.CurUser.SubscribeEvent(p.CBs.EventNames[i], p.CBs.EventHandler[i]); err != nil {
+			err = errors.Wrap(err, "Subscribe event failed. ")
+			return
+		}
+	}
 
-   if len(p.CBs.EventNames) != len(p.CBs.EventHandler) {
-       err = errors.New("Quantities of name and function are not matched. ")
-       return
-   }
+	var acc DBDef.Account
+	// set from block
+	{
+		var num int64
+		if num, err = p.CBs.DB.Read(&acc, "", "address = ?", p.CBs.CurUser.Account().Addr); num != 1 || err != nil {
+			err = errors.Wrap(err, "db read failed")
+			return
+		}
+		p.Bin.Listener.SetFromBlock(uint64(acc.FromBlock))
+	}
 
-   for i := range p.CBs.EventNames {
-       if err = p.CurUser.SubscribeEvent(p.CBs.EventNames[i], p.CBs.EventHandler[i]); err != nil {
-           err = errors.Wrap(err, "Subscribe event failed. ")
-           return
-       }
-   }
+	// when an user login success, he will get 10,000,000 eth and tokens for test.
+	if err = p.testTransferEthAndTokens(); err != nil {
+		return
+	}
 
-   p.Bin.Listener.SetFromBlock(uint64(sid.FromBlock))
+	payload = acc.Nickname
 
-   // when an user login success, he will get 10,000,000 eth and tokens for test. in 'block.set' case.
-   if err = p.CurUser.TransferEthFrom(common.HexToAddress(p.Deployer.Account),
-       p.Deployer.Password,
-       big.NewInt(10000000),
-       p.Bin.ChainWrapper().Conn(),
-   ); err != nil {
-       err = errors.Wrap(err, "Transfer eth from Deployer failed. ")
-       return
-   }
-
-   txParam := transaction.TxParams{
-       From:     common.HexToAddress(p.Deployer.Account),
-       Password: p.Deployer.Password,
-       Value:    big.NewInt(0),
-       Pending:  false,
-   }
-   if err = p.Bin.ChainWrapper().TransferTokens(&txParam, common.HexToAddress(p.CurUser.Account().Addr), big.NewInt(10000000)); err != nil {
-       err = errors.Wrap(err, "Transfer token from Deployer failed. ")
-       return
-   }
-
-   payload = true
-
-   return
+	return
 }
 
+func (p *Preset) testTransferEthAndTokens() (err error) {
+	if err = p.CBs.CurUser.TransferEthFrom(common.HexToAddress(p.Deployer.Address),
+		p.Deployer.Password,
+		big.NewInt(10000000),
+		p.Bin.ChainWrapper().Conn(),
+	); err != nil {
+		err = errors.Wrap(err, "Transfer eth from Deployer failed. ")
+		return
+	}
+
+	txParam := transaction.TxParams{
+		From:     common.HexToAddress(p.Deployer.Address),
+		Password: p.Deployer.Password,
+		Value:    big.NewInt(0),
+		Pending:  false,
+	}
+	if err = p.Bin.ChainWrapper().TransferTokens(&txParam, common.HexToAddress(p.CBs.CurUser.Account().Addr), big.NewInt(10000000)); err != nil {
+		err = errors.Wrap(err, "Transfer token from Deployer failed. ")
+		return
+	}
+
+	return
+}
+
+// Logout logout
 func (p *Preset) Logout(_ *server.MessageIn) (payload interface{}, err error) {
-   if p.CurUser == nil {
-       err = errors.New("Current user is nil. ")
-       return
-   }
+	if p.CBs.CurUser == nil {
+		err = errors.New("Current user is nil. ")
+		return
+	}
 
-   for i := range p.CBs.EventNames {
-       if err = p.CurUser.UnSubscribeEvent(p.CBs.EventNames[i]); err != nil {
-           err = errors.Wrap(err, "Unsubscribe failed, event:  "+p.CBs.EventNames[i]+" . ")
-           return
-       }
-   }
+	for i := range p.CBs.EventNames {
+		if err = p.CBs.CurUser.UnSubscribeEvent(p.CBs.EventNames[i]); err != nil {
+			err = errors.Wrap(err, "Unsubscribe failed, event:  "+p.CBs.EventNames[i]+" . ")
+			return
+		}
+	}
 
-   p.CurUser = nil
+	p.CBs.CurUser = nil
 
-   payload = true
+	p.CBs.FlagChan = nil
 
-   return
+	payload = true
+
+	return
 }
 
+// Publish seller publish data
 func (p *Preset) Publish(mi *server.MessageIn) (payload interface{}, err error) {
-   if p.CurUser == nil {
-       err = errors.New("Current user is nil. ")
-       return
-   }
+	if p.CBs.CurUser == nil {
+		err = errors.New("Current user is nil. ")
+		return
+	}
 
-   var pd definition.PublishData
-   if err = json.Unmarshal(mi.Payload, &pd); err != nil {
-       return
-   }
+	var publish PreDef.Preset
+	if err = json.Unmarshal(mi.Payload, &publish); err != nil {
+		return
+	}
 
-   if payload, err = p.Bin.ChainWrapper().Publish(
-       p.makeTxParams(pd.Password),
-       big.NewInt(int64(pd.Price)),
-       []byte(pd.IDs.MetaDataID),
-       pd.IDs.ProofDataIDs,
-       int32(len(pd.IDs.ProofDataIDs)),
-       pd.IDs.DetailsID,
-       pd.SupportVerify,
-   ); err != nil {
-       return
-   }
+	price, err := strconv.Atoi(publish.Price)
+	if err != nil {
+		return
+	}
 
-   return
+	if payload, err = p.Bin.ChainWrapper().Publish(
+		p.makeTxParams(publish.Password),
+		big.NewInt(int64(price)),
+		[]byte(publish.Ids.MetaDataId),
+		publish.Ids.ProofDataIds,
+		int32(len(publish.Ids.ProofDataIds)),
+		publish.Ids.DetailsId,
+		publish.SupportVerify,
+	); err != nil {
+		return
+	}
+
+	return
 }
 
-func (p *Preset) Buy(mi *server.MessageIn) (payload interface{}, err error) {
-   if p.CurUser == nil {
-       err = errors.New("Current user is nil. ")
-       return
-   }
+// AdvancePurchase buyer approve contract transfer token from him and create a tx
+func (p *Preset) AdvancePurchase(mi *server.MessageIn) (payload interface{}, err error) {
+	if p.CBs.CurUser == nil {
+		err = errors.New("Current user is nil. ")
+		return
+	}
 
-   var bd definition.BuyData
-   if err = json.Unmarshal(mi.Payload, &bd); err != nil {
-       return
-   }
+	var ap PreDef.Preset
+	if err = json.Unmarshal(mi.Payload, &ap); err != nil {
+		return
+	}
 
-   fee := int64(bd.SelectedData.Price)
-   if bd.StartVerify {
-       fee += int64(verifierNum*verifierBonus) + int64(arbitratorNum*arbitratorBonus)
-   }
+	fee, ok := new(big.Int).SetString(ap.Price, 10)
+	if !ok {
+		err = errors.New("Set to *big.Int failed. ")
+		return
+	}
+	if ap.StartVerify {
+		fee = fee.Add(fee, big.NewInt(int64(verifierNum*verifierBonus)+int64(arbitratorNum*arbitratorBonus)))
+	}
 
-   if err = p.Bin.ChainWrapper().ApproveTransfer(p.makeTxParams(bd.Password),
-       common.HexToAddress(p.Bin.Config().ProtocolContractAddr),
-       big.NewInt(fee),
-   ); err != nil {
-       err = errors.Wrap(err, "Contract transfer token from buyer failed. ")
-       return
-   }
+	if err = p.Bin.ChainWrapper().ApproveTransfer(p.makeTxParams(ap.Password),
+		common.HexToAddress(p.Bin.Config().ProtocolContractAddr),
+		fee,
+	); err != nil {
+		err = errors.Wrap(err, "Contract transfer token from buyer failed. ")
+		return
+	}
 
-   if err = p.Bin.ChainWrapper().PrepareToBuy(p.makeTxParams(bd.Password), bd.SelectedData.PublishID, bd.StartVerify); err != nil {
-       err = errors.Wrap(err, "Transaction create failed. ")
-       return
-   }
+	<-p.CBs.FlagChan
 
-   payload = true
+	if err = p.Bin.ChainWrapper().AdvancePurchase(p.makeTxParams(ap.Password), ap.PublishId, ap.StartVerify); err != nil {
+		err = errors.Wrap(err, "Advance purchase failed. ")
+		return
+	}
 
-   return
+	payload = true
+
+	return
 }
 
-func (p *Preset) Extensions(mi *server.MessageIn) (payload interface{}, err error) {
-   var ppd definition.Prepared
-   if err = json.Unmarshal(mi.Payload, &p); err != nil {
-       return
-   }
-   p.CBs.ExtChan <- ppd.Extensions
-   payload = true
+// ConfirmPurchase buyer confirm to purchase specific data
+func (p *Preset) ConfirmPurchase(mi *server.MessageIn) (payload interface{}, err error) {
+	if p.CBs.CurUser == nil {
+		err = errors.New("Current user is nil. ")
+		return
+	}
 
-   return
+	var cp PreDef.Preset
+	if err = json.Unmarshal(mi.Payload, &cp); err != nil {
+		return
+	}
+
+	tId, ok := new(big.Int).SetString(cp.TransactionId, 10)
+	if !ok {
+		err = errors.New("Set to *big.Int failed. ")
+		return
+	}
+
+	if err = p.Bin.ChainWrapper().ConfirmPurchase(p.makeTxParams(cp.Password), tId); err != nil {
+		err = errors.Wrap(err, "Confirm purchase failed. ")
+		return
+	}
+
+	payload = true
+
+	return
 }
 
-func (p *Preset) Purchase(mi *server.MessageIn) (payload interface{}, err error) {
-   if p.CurUser == nil {
-       err = errors.New("Current user is nil. ")
-       return
-   }
-
-   var pd definition.PurchaseData
-   if err = json.Unmarshal(mi.Payload, &pd); err != nil {
-       return
-   }
-
-   tID, ok := new(big.Int).SetString(pd.SelectedTx.TransactionID, 10)
-   if !ok {
-       err = errors.New("Set to *big.Int failed. ")
-       return
-   }
-
-   if err = p.Bin.ChainWrapper().BuyData(p.makeTxParams(pd.Password), tID); err != nil {
-       err = errors.Wrap(err, "Buy data failed. ")
-       return
-   }
-
-   payload = true
-
-   return
-}
-
+// ReEncrypt seller decrypt his data and re-encrypt it with buyer's public key
 func (p *Preset) ReEncrypt(mi *server.MessageIn) (payload interface{}, err error) {
-   if p.CurUser == nil {
-       err = errors.New("Current user is nil. ")
-       return
-   }
+	if p.CBs.CurUser == nil {
+		err = errors.New("Current user is nil. ")
+		return
+	}
 
-   var re definition.ReEncryptData
-   if err = json.Unmarshal(mi.Payload, &re); err != nil {
-       return
-   }
+	var re PreDef.Preset
+	if err = json.Unmarshal(mi.Payload, &re); err != nil {
+		return
+	}
 
-   txParam := p.makeTxParams(re.Password)
-   tID, ok := new(big.Int).SetString(re.SelectedTx.TransactionID, 10)
-   if !ok {
-       err = errors.New("Set to *big.Int failed. ")
-       return
-   }
+	tId, ok := new(big.Int).SetString(re.TransactionId, 10)
+	if !ok {
+		err = errors.New("Set to *big.Int failed. ")
+		return
+	}
 
-   if err = p.Bin.ChainWrapper().ReEncryptMetaDataId(txParam, tID, re.SelectedTx.MetaDataIDEncWithSeller); err != nil {
-       err = errors.Wrap(err, "Submit encrypted ID with buyer failed. ")
-       return
-   }
+	var tx DBDef.Transaction
+	// get meta data id enc with seller
+	{
+		var num int64
+		if num, err = p.CBs.DB.Read(&tx, "", "transaction_id = ?", re.TransactionId); num != 1 || err != nil {
+			dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
+			return
+		}
+	}
 
-   payload = true
+	if err = p.Bin.ChainWrapper().ReEncrypt(p.makeTxParams(re.Password), tId, []byte(tx.MetaDataIdEncWithSeller)); err != nil {
+		err = errors.Wrap(err, "Re-encrypt failed. ")
+		return
+	}
 
-   return
+	payload = true
+
+	return
 }
 
-func (p *Preset) Cancel(mi *server.MessageIn) (payload interface{}, err error) {
-   if p.CurUser == nil {
-       err = errors.New("Current user is nil. ")
-       return
-   }
+// CancelPurchase buyer cancel purchase
+func (p *Preset) CancelPurchase(mi *server.MessageIn) (payload interface{}, err error) {
+	if p.CBs.CurUser == nil {
+		err = errors.New("Current user is nil. ")
+		return
+	}
 
-   var pd definition.PurchaseData
-   if err = json.Unmarshal(mi.Payload, &pd); err != nil {
-       return
-   }
+	var cp PreDef.Preset
+	if err = json.Unmarshal(mi.Payload, &cp); err != nil {
+		return
+	}
 
-   tID, ok := new(big.Int).SetString(pd.SelectedTx.TransactionID, 10)
-   if !ok {
-       err = errors.New("Set to *big.Int failed. ")
-       return
-   }
+	tId, ok := new(big.Int).SetString(cp.TransactionId, 10)
+	if !ok {
+		err = errors.New("Set to *big.Int failed. ")
+		return
+	}
 
-   if err = p.Bin.ChainWrapper().CancelTransaction(p.makeTxParams(pd.Password), tID); err != nil {
-       err = errors.Wrap(err, "Cancel transaction failed. ")
-       return
-   }
+	if err = p.Bin.ChainWrapper().CancelPurchase(p.makeTxParams(cp.Password), tId); err != nil {
+		err = errors.Wrap(err, "Cancel purchase failed. ")
+		return
+	}
 
-   payload = true
+	payload = true
 
-   return
+	return
 }
 
+// Decrypt buyer or arbitrator decrypt meta data
 func (p *Preset) Decrypt(mi *server.MessageIn) (payload interface{}, err error) {
-   if p.CurUser == nil {
-       err = errors.New("Current user is nil. ")
-       return
-   }
+	if p.CBs.CurUser == nil {
+		err = errors.New("Current user is nil. ")
+		return
+	}
 
-   var dd definition.DecryptData
-   if err = json.Unmarshal(mi.Payload, &dd); err != nil {
-       return
-   }
+	var decrypt PreDef.Preset
+	if err = json.Unmarshal(mi.Payload, &decrypt); err != nil {
+		return
+	}
 
-   var oldFileName string
-   {
-       var metaDataIDByte []byte
-       if metaDataIDByte, err = p.Bin.Account.Decrypt(dd.SelectedTx.MetaDataIDEncrypt, dd.SelectedTx.User, dd.Password); err != nil {
-           return "", errors.Wrap(err, "Decrypt encrypted meta data ID failed. ")
-       }
-       outDir := p.config.MetaDataOutDir
-       if err = p.Bin.Storage.Get(string(metaDataIDByte), outDir); err != nil {
-           return "", errors.Wrap(err, "Get meta data from IPFS failed. ")
-       }
-       oldFileName = outDir + "/" + string(metaDataIDByte)
-   }
+	var tx DBDef.Transaction
+	// get meta data id enc with seller
+	{
+		var num int64
+		if num, err = p.CBs.DB.Read(&tx, "", "transaction_id = ?", decrypt.TransactionId); num != 1 || err != nil {
+			dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
+			return
+		}
+	}
 
-   newFileName := oldFileName + dd.SelectedTx.MetaDataExtension
-   if err = os.Rename(oldFileName, newFileName); err != nil {
-       return "", errors.Wrap(err, "Add extension to meta data failed. ")
-   }
+	if payload, err = p.getMetaDataFileName(&tx, decrypt.Password); err != nil {
+		return
+	}
 
-   payload = newFileName
-
-   return
+	return
 }
 
-func (p *Preset) Confirm(mi *server.MessageIn) (payload interface{}, err error) {
-   if p.CurUser == nil {
-       err = errors.New("Current user is nil. ")
-       return
-   }
+func (p *Preset) getMetaDataFileName(tx *DBDef.Transaction, pwd string) (fullName string, err error) {
+	var fileName string
+	{
+		var metaDataIdByte []byte
+		{
+			if p.CBs.CurUser.Account().Addr == tx.Buyer {
+				metaDataIdByte = []byte(tx.MetaDataIdEncWithBuyer)
+			} else {
+				metaDataIdByte = []byte(tx.MetaDataIdEncWithArbitrator)
+			}
+		}
+		if metaDataIdByte, err = p.Bin.Account.Decrypt(metaDataIdByte, p.CBs.CurUser.Account().Addr, pwd); err != nil {
+			return "", errors.Wrap(err, "Decrypt encrypted meta data Id failed. ")
+		}
 
-   var cd definition.ConfirmData
-   if err = json.Unmarshal(mi.Payload, &cd); err != nil {
-       return
-   }
+		outDir := p.config.MetaDataOutDir
+		if err = p.Bin.Storage.Get(string(metaDataIdByte), outDir); err != nil {
+			return "", errors.Wrap(err, "Get meta data from IPFS failed. ")
+		}
 
-   tID, ok := new(big.Int).SetString(cd.SelectedTx.TransactionID, 10)
-   if !ok {
-       err = errors.New("Set to *big.Int failed. ")
-       return
-   }
+		fileName = outDir + "/" + string(metaDataIdByte)
+	}
 
-   if err = p.Bin.ChainWrapper().ConfirmDataTruth(p.makeTxParams(cd.Password), tID, cd.Truth); err != nil {
-       err = errors.Wrap(err, "Confirm data truth failed. ")
-       return
-   }
+	fullName = fileName + tx.MetaDataExtension
+	if err = os.Rename(fileName, fullName); err != nil {
+		return "", errors.Wrap(err, "Add extension to meta data failed. ")
+	}
 
-   payload = true
-
-   return
+	return
 }
 
+// ConfirmData buyer give out his opinion on meta data
+func (p *Preset) ConfirmData(mi *server.MessageIn) (payload interface{}, err error) {
+	if p.CBs.CurUser == nil {
+		err = errors.New("Current user is nil. ")
+		return
+	}
+
+	var cd PreDef.Preset
+	if err = json.Unmarshal(mi.Payload, &cd); err != nil {
+		return
+	}
+
+	tId, ok := new(big.Int).SetString(cd.TransactionId, 10)
+	if !ok {
+		err = errors.New("Set to *big.Int failed. ")
+		return
+	}
+
+	if err = p.Bin.ChainWrapper().ConfirmData(p.makeTxParams(cd.Password), tId, cd.Confirm.Truth); err != nil {
+		err = errors.Wrap(err, "Confirm data failed. ")
+		return
+	}
+
+	payload = true
+
+	return
+}
+
+// Register as a verifier
 func (p *Preset) Register(mi *server.MessageIn) (payload interface{}, err error) {
-   if p.CurUser == nil {
-       err = errors.New("Current user is nil. ")
-       return
-   }
+	if p.CBs.CurUser == nil {
+		err = errors.New("Current user is nil. ")
+		return
+	}
 
-   var rvd definition.RegisterVerifierData
-   if err = json.Unmarshal(mi.Payload, &rvd); err != nil {
-       return
-   }
+	var register PreDef.Preset
+	if err = json.Unmarshal(mi.Payload, &register); err != nil {
+		return
+	}
 
-   if err = p.Bin.ChainWrapper().ApproveTransfer(p.makeTxParams(rvd.Password),
-       common.HexToAddress(p.Bin.Config().ProtocolContractAddr),
-       big.NewInt(registerAsVerifierCost),
-   ); err != nil {
-       err = errors.Wrap(err, "Contract transfer token from register failed. ")
-       return
-   }
+	if err = p.Bin.ChainWrapper().ApproveTransfer(p.makeTxParams(register.Password),
+		common.HexToAddress(p.Bin.Config().ProtocolContractAddr),
+		big.NewInt(registerAsVerifierCost),
+	); err != nil {
+		err = errors.Wrap(err, "Contract transfer token from register failed. ")
+		return
+	}
 
-   if err = p.Bin.ChainWrapper().RegisterAsVerifier(p.makeTxParams(rvd.Password)); err != nil {
-       err = errors.Wrap(err, "Register as verifier failed. ")
-       return
-   }
+	<-p.CBs.FlagChan
 
-   payload = true
+	if err = p.Bin.ChainWrapper().RegisterAsVerifier(p.makeTxParams(register.Password)); err != nil {
+		err = errors.Wrap(err, "Register as verifier failed. ")
+		return
+	}
 
-   return
+	payload = true
+
+	return
 }
 
-func (p *Preset) Verify(mi *server.MessageIn) (payload interface{}, err error) {
-   if p.CurUser == nil {
-       err = errors.New("Current user is nil. ")
-       return
-   }
+// Vote verifier give out his opinion on specific data
+func (p *Preset) Vote(mi *server.MessageIn) (payload interface{}, err error) {
+	if p.CBs.CurUser == nil {
+		err = errors.New("Current user is nil. ")
+		return
+	}
 
-   var vd definition.VerifyData
-   if err = json.Unmarshal(mi.Payload, &vd); err != nil {
-       return
-   }
+	var vote PreDef.Preset
+	if err = json.Unmarshal(mi.Payload, &vote); err != nil {
+		return
+	}
 
-   tID, ok := new(big.Int).SetString(vd.TransactionID, 10)
-   if !ok {
-       err = errors.New("Set to *big.Int failed. ")
-       return
-   }
+	tId, ok := new(big.Int).SetString(vote.TransactionId, 10)
+	if !ok {
+		err = errors.New("Set to *big.Int failed. ")
+		return
+	}
 
-   if err = p.Bin.ChainWrapper().Vote(p.makeTxParams(vd.Password), tID, vd.Verify.Suggestion, vd.Verify.Comment); err != nil {
-       err = errors.Wrap(err, "Vote failed. ")
-       return
-   }
+	if err = p.Bin.ChainWrapper().Vote(p.makeTxParams(vote.Password), tId, vote.Verify.Suggestion, vote.Verify.Comment); err != nil {
+		err = errors.Wrap(err, "Vote failed. ")
+		return
+	}
 
-   payload = true
+	payload = true
 
-   return
+	return
 }
 
-func (p *Preset) Credit(mi *server.MessageIn) (payload interface{}, err error) {
-   if p.CurUser == nil {
-       err = errors.New("Current user is nil. ")
-       return
-   }
+// GradeToVerifier buyer grade to verifier
+func (p *Preset) GradeToVerifier(mi *server.MessageIn) (payload interface{}, err error) {
+	if p.CBs.CurUser == nil {
+		err = errors.New("Current user is nil. ")
+		return
+	}
 
-   var cd definition.CreditData
-   if err = json.Unmarshal(mi.Payload, &cd); err != nil {
-       return
-   }
-   tID, ok := new(big.Int).SetString(cd.SelectedTx.TransactionID, 10)
-   if !ok {
-       err = errors.New("Set to *big.Int failed. ")
-       return
-   }
+	var gtv PreDef.Preset
+	if err = json.Unmarshal(mi.Payload, &gtv); err != nil {
+		return
+	}
+	tId, ok := new(big.Int).SetString(gtv.TransactionId, 10)
+	if !ok {
+		err = errors.New("Set to *big.Int failed. ")
+		return
+	}
 
-   txParam := p.makeTxParams(cd.Password)
+	txParam := p.makeTxParams(gtv.Password)
 
-   if cd.Credit.Verifier1Revert {
-       credit := uint8(cd.Credit.Verifier1Credit)
-       if err = p.Bin.ChainWrapper().CreditsToVerifier(txParam, tID, 0, credit); err != nil {
-           err = errors.Wrap(err, "Credit verifier1 failed. ")
-           return
-       }
-   }
-   if cd.Credit.Verifier2Revert {
-       credit := uint8(cd.Credit.Verifier2Credit)
-       if err = p.Bin.ChainWrapper().CreditsToVerifier(txParam, tID, 1, credit); err != nil {
-           err = errors.Wrap(err, "Credit verifier2 failed. ")
-           return
-       }
-   }
+	if gtv.Grade.Verifier1Revert {
+		credit := uint8(gtv.Grade.Verifier1Grade)
+		if err = p.Bin.ChainWrapper().GradeToVerifier(txParam, tId, 0, credit); err != nil {
+			err = errors.Wrap(err, "Grade verifier1 failed. ")
+			return
+		}
+	}
+	if gtv.Grade.Verifier2Revert {
+		credit := uint8(gtv.Grade.Verifier2Grade)
+		if err = p.Bin.ChainWrapper().GradeToVerifier(txParam, tId, 1, credit); err != nil {
+			err = errors.Wrap(err, "Grade verifier2 failed. ")
+			return
+		}
+	}
 
-   payload = true
+	payload = true
 
-   return
+	return
 }
 
+// Arbitrate arbitrator give out his opinion on specific meta data
 func (p *Preset) Arbitrate(mi *server.MessageIn) (payload interface{}, err error) {
-   if p.CurUser == nil {
-       err = errors.New("Current user is nil. ")
-       return
-   }
+	if p.CBs.CurUser == nil {
+		err = errors.New("Current user is nil. ")
+		return
+	}
 
-   var ad definition.ArbitrateData
-   if err = json.Unmarshal(mi.Payload, &ad); err != nil {
-       return
-   }
-   tID, ok := new(big.Int).SetString(ad.SelectedTx.TransactionId, 10)
-   if !ok {
-       err = errors.New("Set to *big.Int failed. ")
-       return
-   }
+	var ad PreDef.Preset
+	if err = json.Unmarshal(mi.Payload, &ad); err != nil {
+		return
+	}
+	tId, ok := new(big.Int).SetString(ad.TransactionId, 10)
+	if !ok {
+		err = errors.New("Set to *big.Int failed. ")
+		return
+	}
 
-   if err = p.Bin.ChainWrapper().Arbitrate(p.makeTxParams(ad.Password), tID, ad.ArbitrateResult); err != nil {
-       err = errors.Wrap(err, "Arbitrate failed. ")
-       return
-   }
+	if err = p.updateAccInfo(ad.TransactionId); err != nil {
+		return
+	}
 
-   payload = true
+	if err = p.Bin.ChainWrapper().Arbitrate(p.makeTxParams(ad.Password), tId, ad.Arbitrate.ArbitrateResult); err != nil {
+		err = errors.Wrap(err, "Arbitrate failed. ")
+		return
+	}
 
-   return
+	payload = ad.TransactionId
+
+	return
 }
 
-func (p *Preset) GetEthBalance(mi *server.MessageIn) (payload interface{}, err error) {
-   if p.CurUser == nil {
-       err = errors.New("Current user is nil. ")
-       return
-   }
+func (p *Preset) updateAccInfo(txId string) (err error) {
+	var (
+		acc DBDef.Account
+		num int64
+		bs  []byte
+	)
 
-   var pwd definition.AccInfo
-   if err = json.Unmarshal(mi.Payload, &pwd); err != nil {
-       return
-   }
+	if num, err = p.CBs.DB.Read(&acc, "", "address = ?", p.CBs.CurUser.Account().Addr); num != 1 || err != nil {
+		dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
+		return
+	}
 
-   var balance *big.Int
-   if balance, err = p.CurUser.GetEth(common.HexToAddress(p.CurUser.Account().Addr), p.Bin.ChainWrapper().Conn());err != nil {
-       err = errors.Wrap(err, "Get eth balance failed. ")
-       return
-   }
+	if bs, err = cec.UpdateSlice(acc.Arbitrate, txId, "delete"); err == nil {
+		acc.Arbitrate = bs
+	} else {
+		dot.Logger().Errorln("delete from arbitrate failed. ", zap.NamedError("error", err))
+		return
+	}
 
-   payload = balance.String() + sep + time.Now().String()
+	if num, err = p.CBs.DB.Update(&acc, map[string]interface{}{
+		"arbitrate": acc.Arbitrate,
+	}, "address = ?", p.CBs.CurUser.Account().Addr); num != 1 || err != nil {
+		dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
+		return
+	}
 
-   return
+	return
 }
 
+// GetEthBalance get eth balance
+func (p *Preset) GetEthBalance(_ *server.MessageIn) (payload interface{}, err error) {
+	if p.CBs.CurUser == nil {
+		err = errors.New("Current user is nil. ")
+		return
+	}
+
+	var balance *big.Int
+	if balance, err = p.CBs.CurUser.GetEth(common.HexToAddress(p.CBs.CurUser.Account().Addr), p.Bin.ChainWrapper().Conn()); err != nil {
+		err = errors.Wrap(err, "Get eth balance failed. ")
+		return
+	}
+
+	payload = balance.String() + sep + time.Now().String()
+
+	return
+}
+
+// GetTokenBalance get token balance
 func (p *Preset) GetTokenBalance(mi *server.MessageIn) (payload interface{}, err error) {
-   if p.CurUser == nil {
-       err = errors.New("Current user is nil. ")
-       return
-   }
+	if p.CBs.CurUser == nil {
+		err = errors.New("Current user is nil. ")
+		return
+	}
 
-   var pwd definition.AccInfo
-   if err = json.Unmarshal(mi.Payload, &pwd); err != nil {
-       return
-   }
+	var gtb PreDef.Preset
+	if err = json.Unmarshal(mi.Payload, &gtb); err != nil {
+		return
+	}
 
-   var balance *big.Int
-   if balance, err = p.Bin.ChainWrapper().GetTokenBalance(p.makeTxParams(pwd.Password), common.HexToAddress(p.CurUser.Account().Addr));err != nil {
-       err = errors.Wrap(err, "Get token balance failed. ")
-       return
-   }
+	var balance *big.Int
+	if balance, err = p.Bin.ChainWrapper().GetTokenBalance(p.makeTxParams(gtb.Password), common.HexToAddress(p.CBs.CurUser.Account().Addr)); err != nil {
+		err = errors.Wrap(err, "Get token balance failed. ")
+		return
+	}
 
-   payload = balance.String() + sep + time.Now().String()
+	payload = balance.String() + sep + time.Now().String()
 
-   return
+	return
 }
 
-func (p *Preset) Backup(mi *server.MessageIn) (interface{}, error) {
-   return true, ioutil.WriteFile(p.config.AccsBackupFile, mi.Payload, 0777)
+// IsVerifier return if current user is verifier
+func (p *Preset) IsVerifier(_ *server.MessageIn) (payload interface{}, err error) {
+	if p.CBs.CurUser == nil {
+		err = errors.New("Current user is nil. ")
+		return
+	}
+
+	var (
+		acc DBDef.Account
+		num int64
+	)
+	if num, err = p.CBs.DB.Read(&acc, "", "address = ?", p.CBs.CurUser.Account().Addr); num != 1 || err != nil {
+		dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
+		return
+	}
+
+	payload = acc.IsVerifier
+
+	return
 }
 
-func (p *Preset) Restore(_ *server.MessageIn) (interface{}, error) {
-   return ioutil.ReadFile(p.config.AccsBackupFile)
+// GetAccountsList get accounts
+func (p *Preset) GetAccountsList(_ *server.MessageIn) (payload interface{}, err error) {
+	var (
+		accs []DBDef.Account
+		num  int64
+	)
+	if num, err = p.CBs.DB.Read(&accs, "", ""); err != nil {
+		dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
+		return
+	}
+
+	payload = accs
+
+	return
+}
+
+// GetDataList get publish data list
+func (p *Preset) GetDataList(_ *server.MessageIn) (payload interface{}, err error) {
+	if p.CBs.CurUser == nil {
+		err = errors.New("Current user is nil. ")
+		return
+	}
+
+	var (
+		dls []DBDef.DataList
+		num int64
+	)
+	if num, err = p.CBs.DB.Read(&dls, "", ""); err != nil {
+		dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
+		return
+	}
+
+	payload = dls
+
+	return
+}
+
+// GetTxSell get txs which current user is seller
+func (p *Preset) GetTxSell(_ *server.MessageIn) (payload interface{}, err error) {
+	if p.CBs.CurUser == nil {
+		err = errors.New("Current user is nil. ")
+		return
+	}
+
+	var (
+		txs []DBDef.Transaction
+		num int64
+	)
+	if num, err = p.CBs.DB.Read(&txs, "", "seller = ?", strings.ToLower(p.CBs.CurUser.Account().Addr)); err != nil {
+		dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
+		return
+	}
+
+	payload = txs
+
+	return
+}
+
+// GetTxBuy get txs which current user is buyer
+func (p *Preset) GetTxBuy(_ *server.MessageIn) (payload interface{}, err error) {
+	if p.CBs.CurUser == nil {
+		err = errors.New("Current user is nil. ")
+		return
+	}
+
+	var (
+		txs []DBDef.Transaction
+		num int64
+	)
+	if num, err = p.CBs.DB.Read(&txs, "", "buyer = ?", strings.ToLower(p.CBs.CurUser.Account().Addr)); err != nil {
+		dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
+		return
+	}
+
+	payload = txs
+
+	return
+}
+
+// GetTxVerify get txs which current user is verifier
+func (p *Preset) GetTxVerify(_ *server.MessageIn) (payload interface{}, err error) {
+	if p.CBs.CurUser == nil {
+		err = errors.New("Current user is nil. ")
+		return
+	}
+
+	var (
+		txs []DBDef.Transaction
+		acc DBDef.Account
+		num int64
+		ss  = make([]string, 0)
+	)
+
+	if num, err = p.CBs.DB.Read(&acc, "", "address = ?", strings.ToLower(p.CBs.CurUser.Account().Addr)); num != 1 || err != nil {
+		dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
+		return
+	}
+
+	if acc.Verify == nil {
+		payload = ""
+		return
+	}
+	if err = json.Unmarshal(acc.Verify, &ss); err != nil {
+		return
+	}
+
+	if num, err = p.CBs.DB.Read(&txs, "", "transaction_id in (?)", ss); err != nil {
+		dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
+		return
+	}
+
+	payload = txs
+
+	return
+}
+
+// GetTxArbitrate get txs which current user is arbitrator
+func (p *Preset) GetTxArbitrate(_ *server.MessageIn) (payload interface{}, err error) {
+	if p.CBs.CurUser == nil {
+		err = errors.New("Current user is nil. ")
+		return
+	}
+
+	var (
+		txs []DBDef.Transaction
+		acc DBDef.Account
+		num int64
+		ss  = make([]string, 0)
+	)
+
+	if num, err = p.CBs.DB.Read(&acc, "", "address = ?", strings.ToLower(p.CBs.CurUser.Account().Addr)); num != 1 || err != nil {
+		dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
+		return
+	}
+
+	if acc.Arbitrate == nil {
+		payload = ""
+		return
+	}
+	if err = json.Unmarshal(acc.Arbitrate, &ss); err != nil {
+		return
+	}
+
+	if num, err = p.CBs.DB.Read(&txs, "", "transaction_id in (?)", ss); err != nil {
+		dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
+		return
+	}
+
+	payload = txs
+
+	return
+}
+
+// ModifyNickname modify nickname
+func (p *Preset) ModifyNickname(mi *server.MessageIn) (payload interface{}, err error) {
+	if p.CBs.CurUser == nil {
+		err = errors.New("Current user is nil. ")
+		return
+	}
+
+	var (
+		acc DBDef.Account
+		num int64
+	)
+	if err = json.Unmarshal(mi.Payload, &acc); err != nil {
+		return
+	}
+
+	if num, err = p.CBs.DB.Update(&acc, map[string]interface{}{"nickname": acc.Nickname}, "address = ?", p.CBs.CurUser.Account().Addr); num != 1 || err != nil {
+		err = errors.Wrap(err, "Modify nickname failed. ")
+		return
+	}
+
+	payload = true
+
+	return
+}
+
+// ModifyContractParam modify contract parameter
+func (p *Preset) ModifyContractParam(mi *server.MessageIn) (payload interface{}, err error) {
+	var mcp PreDef.Preset
+	if err = json.Unmarshal(mi.Payload, &mcp); err != nil {
+		return
+	}
+
+	if err = p.Bin.ChainWrapper().ModifyContractParam(&transaction.TxParams{
+		From:     common.HexToAddress(p.Deployer.Address),
+		Password: p.Deployer.Password,
+		Value:    big.NewInt(0),
+		Pending:  false,
+	}, mcp.Contract.ParamName, mcp.Contract.ParamValue); err != nil {
+		err = errors.New("Unknown contract param or param is not allowed to modify. ")
+		return
+	}
+
+	return
 }
 
 func (p *Preset) makeTxParams(password string) *transaction.TxParams {
-   return &transaction.TxParams{
-       From:     common.HexToAddress(p.CurUser.Account().Addr),
-       Password: password,
-       Value:    big.NewInt(0),
-       Pending:  false,
-   }
+	return &transaction.TxParams{
+		From:     common.HexToAddress(p.CBs.CurUser.Account().Addr),
+		Password: password,
+		Value:    big.NewInt(0),
+		Pending:  false,
+	}
+}
+
+// Get Event List
+func (p *Preset) GetEvtList(mi *server.MessageIn) (payload interface{}, err error) {
+	var cna DBDef.Event
+	if err = json.Unmarshal(mi.Payload, &cna); err != nil {
+		return
+	}
+
+	if p.CBs.CurUser == nil {
+		err = errors.New("Current user is nil. ")
+		return
+	}
+
+	var (
+		dls []DBDef.Event
+		num int64
+	)
+	if num, err = p.CBs.DB.Read(&dls, "created_time desc", (string(cna.EventBody))); err != nil {
+		dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
+		return
+	}
+
+	payload = dls
+
+	return
+}
+
+//Update Event
+func (p *Preset) UpdateEvt(in *server.MessageIn) (i interface{}, err error) {
+
+	return
+}
+
+//Del Event
+func (p *Preset) DelEvt(in *server.MessageIn) (i interface{}, err error) {
+
+	return
 }

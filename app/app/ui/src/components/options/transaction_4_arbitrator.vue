@@ -9,8 +9,8 @@
         </div>
         <div v-if="showControl">
             <el-col :span="21" class="section-item">
-                <s-f-t button-name="解密数据" @password="decrypt" :button-disabled="buttonDisabled(3)"></s-f-t>
-                <c-f-t button-name="仲裁数据" dialog-title="仲裁数据：" @password="Arbitrate" :button-disabled="buttonDisabled(3)">
+                <s-f-t button-name="解密数据" @password="decrypt"></s-f-t>
+                <c-f-t button-name="仲裁数据" dialog-title="仲裁数据：" @password="arbitrate">
                     <p>判断数据真实性：</p>
                     <p><el-switch v-model="arbitrateResult" active-text="真" inactive-text="假"></el-switch></p>
                 </c-f-t>
@@ -21,8 +21,8 @@
 
             <el-table :data="this.$store.state.transactionarbitrator.slice((curPage-1)*pageSize, curPage*pageSize)"
                       highlight-current-row border :height=height @current-change="currentChange">
-                <el-table-column prop="PublishID" label="数据ID" show-overflow-tooltip></el-table-column>
-                <el-table-column prop="TransactionID" label="交易ID" show-overflow-tooltip></el-table-column>
+                <el-table-column prop="PublishId" label="数据ID" show-overflow-tooltip></el-table-column>
+                <el-table-column prop="TransactionId" label="交易ID" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="Title" label="标题" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="Price" label="价格" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="Keys" label="标签" show-overflow-tooltip></el-table-column>
@@ -37,15 +37,13 @@
 
 <script>
 import {connect} from "../../utils/connect.js";
-import {acc_db, txArbitrator_db} from "../../utils/DBoptions.js";
-import {utils} from "../../utils/utils.js";
 import SFT from "../templates/simple_function_template.vue";
 import CFT from "../templates/complex_function_template.vue";
 export default {
     name: "transaction_4_arbitrator.vue",
     data () {
         return {
-            selectedTx: {},     // {txID: "", User: "", MetaDataIDEncrypt: ""}
+            selectedTx: "",     // txId: ""
             arbitrateResult: false,
             height: window.innerHeight - 170,
             showControl: false,
@@ -57,32 +55,23 @@ export default {
     },
     methods: {
         setCurPage: function (curPageReturn) { this.curPage = curPageReturn; },
+
         setPageSize: function (newPageSize) { this.pageSize = newPageSize; },
+
         currentChange: function (curRow) {
-            this.selectedTx = {
-                TransactionID: curRow.TransactionID,
-                User: this.$store.state.account,
-                MetaDataIDEncrypt: curRow.MetaDataIDEncWithArbitrator,
-                MetaDataExtension: curRow.MetaDataExtension
-            };
+            this.selectedTx = curRow.TransactionId;
             this.txState = curRow.State;
         },
-        buttonDisabled: function (funcNum) {
-            return utils.functionDisabled(funcNum, this.txState);
-        },
+
         initTxA: function () {
-            txArbitrator_db.init(this);
+            utils.reacquireData("txa");
         },
-        refresh: function () {
-            let _this = this;
-            acc_db.read(this.$store.state.account, function (accInstance) {
-                _this.showControl = accInstance.isVerifier;
-            })
-        },
+
         decrypt: function (pwd) {
-            connect.send({Name:"decrypt", Payload:{password: pwd, tID: this.selectedTx}}, function (payload, _this) {
+            connect.send({Name:"decrypt", Payload:{password: pwd, TransactionId: this.selectedTx}}, function (payload, _this) {
                 console.log("解密数据成功", payload);
                 _this.$alert(payload, "原始数据：", {
+                    customClass: "longText",
                     confirmButtonText: "关闭",
                     showClose: false,
                     type: "info"
@@ -96,9 +85,18 @@ export default {
                 });
             });
         },
-        Arbitrate: function (pwd) {
-            connect.send({Name: "arbitrate", Payload: {password: pwd, tID: this.selectedTx, arbitrateResult: this.arbitrateResult}}, function (payload, _this) {
+
+        arbitrate: function (pwd) {
+            connect.send({Name: "arbitrate", Payload: {password: pwd, TransactionId: this.selectedTx,
+                    arbitrate: {arbitrateResult: this.arbitrateResult}}}, function (payload, _this) {
                 console.log("仲裁成功", payload);
+                _this.$store.state.transactionarbitrator.forEach(function (item, index, arr) {
+                    if (item.TransactionId === payload) {
+                        // delete item[index]
+                        arr[index] = arr[0];
+                        arr.shift();
+                    }
+                });
             }, function (payload, _this) {
                 console.log("仲裁失败：", payload);
                 _this.$alert(payload, "仲裁失败！", {
@@ -115,22 +113,36 @@ export default {
     },
     computed: {
         listenTxARefresh() {
-            return this.$store.state.transactionarbitrator
+            return this.$store.state.transactionarbitrator;
         }
     },
     watch: {
         listenTxARefresh: function () {
-            this.curPage = 1
-            this.total = this.$store.state.transactionarbitrator.length
+            this.curPage = 1;
+            this.total = this.$store.state.transactionarbitrator.length;
         }
     },
     created () {
-        this.total = this.$store.state.transactionarbitrator.length
-        this.refresh()
+        this.total = this.$store.state.transactionarbitrator.length;
+        let _arbitrate = this;
+
+        connect.send({Name:"isVerifier", Payload:{}}, function (payload, _this) {
+            _arbitrate.showControl = payload;
+            console.log("当前用户验证者身份查询成功：", payload);
+        }, function (payload, _this) {
+            console.log("当前用户验证者身份查询失败!", payload);
+            _this.$alert(payload, "当前用户不是验证者！", {
+                confirmButtonText: "关闭",
+                showClose: false,
+                type: "error"
+            });
+        });
     }
 }
 </script>
 
-<style scoped>
-
+<style>
+.longText {
+    width: auto !important;
+}
 </style>

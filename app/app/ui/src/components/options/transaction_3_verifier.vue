@@ -4,12 +4,12 @@
     <section>
         <div v-if="!showControl">
             <el-col :span="24" class="section-item">
-                <s-f-t button-name="注册成为验证者" @password="Register"></s-f-t>
+                <s-f-t button-name="注册成为验证者" @password="register"></s-f-t>
             </el-col>
         </div>
         <div v-if="showControl">
             <el-col :span="21" class="section-item">
-                <c-f-t button-name="验证数据" dialog-title="验证数据：" @password="Vote" :button-disabled="buttonDisabled(2)">
+                <c-f-t button-name="验证数据" dialog-title="验证数据：" @password="vote">
                     <p>是否建议购买：</p>
                     <p><el-switch v-model="verify.suggestion" active-text="是" inactive-text="否"></el-switch></p>
                     <p><el-input v-model="verify.comment" placeholder="评论" clearable></el-input></p>
@@ -20,8 +20,8 @@
             </el-col>
             <el-table :data="this.$store.state.transactionverifier.slice((curPage-1)*pageSize, curPage*pageSize)"
                       highlight-current-row border :height=height @current-change="currentChange">
-                <el-table-column prop="PublishID" label="数据ID" show-overflow-tooltip></el-table-column>
-                <el-table-column prop="TransactionID" label="交易ID" show-overflow-tooltip></el-table-column>
+                <el-table-column prop="PublishId" label="数据ID" show-overflow-tooltip></el-table-column>
+                <el-table-column prop="TransactionId" label="交易ID" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="Title" label="标题" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="Price" label="价格" show-overflow-tooltip></el-table-column>
                 <el-table-column prop="Keys" label="标签" show-overflow-tooltip></el-table-column>
@@ -36,15 +36,13 @@
 
 <script>
 import {connect} from "../../utils/connect.js";
-import {acc_db, txVerifier_db} from "../../utils/DBoptions.js";
-import {utils} from "../../utils/utils.js";
 import SFT from "../templates/simple_function_template.vue";
 import CFT from "../templates/complex_function_template.vue";
 export default {
     name: "transaction_3_verifier.vue",
     data () {
         return {
-            selectedTx: "",     // txID: ""
+            selectedTx: "",     // tId: ""
             curPage: 1,
             pageSize: 6,
             total: 0,
@@ -59,24 +57,19 @@ export default {
     },
     methods: {
         setCurPage: function (curPageReturn) { this.curPage = curPageReturn; },
+
         setPageSize: function (newPageSize) { this.pageSize = newPageSize; },
+
         currentChange: function (curRow) {
-            this.selectedTx = curRow.TransactionID;
+            this.selectedTx = curRow.TransactionId;
             this.txState = curRow.State;
         },
-        buttonDisabled: function (funcNum) {
-            return utils.functionDisabled(funcNum, this.txState);
-        },
+
         initTxV: function () {
-            txVerifier_db.init(this);
+            utils.reacquireData("txv");
         },
-        refresh: function () {
-            let _this = this;
-            acc_db.read(this.$store.state.account, function (accInstance) {
-                _this.showControl = accInstance.isVerifier;
-            });
-        },
-        Register: function (pwd) {
+
+        register: function (pwd) {
             connect.send({Name:"register", Payload:{password: pwd}}, function (payload, _this) {
                 console.log("注册成为验证者成功", payload);
             }, function (payload, _this) {
@@ -88,8 +81,9 @@ export default {
                 });
             });
         },
-        Vote: function (pwd) {
-            connect.send({Name:"verify", Payload:{password: pwd, tID: this.selectedTx, verify: this.verify}},
+
+        vote: function (pwd) {
+            connect.send({Name:"vote", Payload:{password: pwd, TransactionId: this.selectedTx, verify: this.verify}},
                 function (payload, _this) {
                 _this.verify = {suggestion: false, comment: ""};
                 console.log("验证成功", payload);
@@ -120,7 +114,18 @@ export default {
     },
     created () {
         this.total = this.$store.state.transactionverifier.length;
-        this.refresh();
+        let _verify = this;
+        connect.send({Name:"isVerifier", Payload:{}}, function (payload, _this) {
+            _verify.showControl = payload;
+            console.log("当前用户验证者身份查询成功：", payload);
+        }, function (payload, _this) {
+            console.log("当前用户验证者身份查询失败!", payload);
+            _this.$alert(payload, "当前用户不是验证者！", {
+                confirmButtonText: "关闭",
+                showClose: false,
+                type: "error"
+            });
+        });
     }
 }
 </script>

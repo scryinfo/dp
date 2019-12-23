@@ -4,24 +4,24 @@
 package sdk
 
 import (
-    "fmt"
-    "github.com/ethereum/go-ethereum/common"
-    "github.com/pkg/errors"
-    "github.com/scryinfo/dp/demo/src/sdk/core"
-    ce "github.com/scryinfo/dp/demo/src/sdk/core/chainevents"
-    "github.com/scryinfo/dp/demo/src/sdk/scryclient/chaininterfacewrapper"
-    "github.com/scryinfo/dp/demo/src/sdk/settings"
-    rlog "github.com/sirupsen/logrus"
-    "os"
+	"fmt"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/pkg/errors"
+	"github.com/scryinfo/dp/demo/src/sdk/core"
+	ce "github.com/scryinfo/dp/demo/src/sdk/core/chainevents"
+	"github.com/scryinfo/dp/demo/src/sdk/scryclient/chaininterfacewrapper"
+	"github.com/scryinfo/dp/demo/src/sdk/settings"
+	rlog "github.com/sirupsen/logrus"
+	"os"
 )
 
 const (
-    startEngineFailed         = "failed to start engine"
-    initContractWrapperFailed = "failed to initialize contract interface"
-    loadPathFailed            = "failed to load log path"
-    initSdkFailed             = "failed to initialize sdk"
+	startEngineFailed         = "failed to start engine"
+	initContractWrapperFailed = "failed to initialize contract interface"
+	loadPathFailed            = "failed to load log path"
+	initSdkFailed             = "failed to initialize sdk"
 
-    protocolAbi = `[
+	protocolAbi = `[
     {
       "inputs": [
         {
@@ -595,100 +595,100 @@ const (
       "type": "function"
     }
   ]`
-    tokenAbi = `[{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"INITIAL_SUPPLY","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_subtractedValue","type":"uint256"}],"name":"decreaseApproval","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_addedValue","type":"uint256"}],"name":"increaseApproval","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_spender","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"name":"owner","type":"address"},{"indexed":true,"name":"spender","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"}]`
+	tokenAbi = `[{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"INITIAL_SUPPLY","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_subtractedValue","type":"uint256"}],"name":"decreaseApproval","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_addedValue","type":"uint256"}],"name":"increaseApproval","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_spender","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"name":"owner","type":"address"},{"indexed":true,"name":"spender","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"}]`
 )
 
-var (
-    err error = nil
-)
+var err error
 
+// Init init user service, contracts and SDK instance
 func Init(
-    ethNodeAddr string,
-    keyServiceAddr string,
-    protocolAddr string,
-    tokenAddr string,
-    ipfsNodeAddr string,
-    logPath string,
-    appId string,
+	ethNodeAddr string,
+	keyServiceAddr string,
+	protocolAddr string,
+	tokenAddr string,
+	ipfsNodeAddr string,
+	logPath string,
+	appId string,
 ) error {
-    settings.SetAppId(appId)
-    settings.SetLogPath(logPath)
+	settings.SetAppId(appId)
+	settings.SetLogPath(logPath)
 
-    err = initLog()
-    if err != nil {
-        fmt.Println(initSdkFailed, err)
-        return err
-    }
+	err = initLog()
+	if err != nil {
+		fmt.Println(initSdkFailed, err)
+		return err
+	}
 
-    contracts := getContracts(protocolAddr, tokenAddr)
-    conn, err := core.StartEngine(
-        ethNodeAddr,
-        keyServiceAddr,
-        contracts,
-        ipfsNodeAddr)
-    if err != nil {
-        rlog.Error(startEngineFailed, err)
-        return errors.New(startEngineFailed)
-    }
+	contracts := getContracts(protocolAddr, tokenAddr)
+	conn, err := core.StartEngine(
+		ethNodeAddr,
+		keyServiceAddr,
+		contracts,
+		ipfsNodeAddr)
+	if err != nil {
+		rlog.Error(startEngineFailed, err)
+		return errors.New(startEngineFailed)
+	}
 
-    err = chaininterfacewrapper.Initialize(
-        common.HexToAddress(contracts[0].Address),
-        common.HexToAddress(contracts[1].Address),
-        conn)
-    if err != nil {
-        rlog.Error(initContractWrapperFailed, err)
-        return errors.New(initContractWrapperFailed)
-    }
+	err = chaininterfacewrapper.Initialize(
+		common.HexToAddress(contracts[0].Address),
+		common.HexToAddress(contracts[1].Address),
+		conn)
+	if err != nil {
+		rlog.Error(initContractWrapperFailed, err)
+		return errors.New(initContractWrapperFailed)
+	}
 
-    return nil
+	return nil
 }
 
 func getContracts(
-    protocolAddr string,
-    tokenAddr string) []ce.ContractInfo {
-    protocolEvents := []string{
-        "DataPublish",
-        "TransactionCreate",
-        "RegisterVerifier",
-        "VerifiersChosen",
-        "Vote",
-        "Buy",
-        "ReadyForDownload",
-        "TransactionClose",
-        "VerifierDisable",
-    }
-    tokenEvents := []string{"Approval"}
+	protocolAddr string,
+	tokenAddr string) []ce.ContractInfo {
+	protocolEvents := []string{
+		"DataPublish",
+		"TransactionCreate",
+		"RegisterVerifier",
+		"VerifiersChosen",
+		"Vote",
+		"Buy",
+		"ReadyForDownload",
+		"TransactionClose",
+		"VerifierDisable",
+	}
+	tokenEvents := []string{"Approval"}
 
-    contracts := []ce.ContractInfo{
-        {
-            protocolAddr,
-            protocolAbi,
-            protocolEvents,
-        }, {
-            tokenAddr,
-            tokenAbi,
-            tokenEvents,
-        },
-    }
+	contracts := []ce.ContractInfo{
+		{
+			protocolAddr,
+			protocolAbi,
+			protocolEvents,
+		}, {
+			tokenAddr,
+			tokenAbi,
+			tokenEvents,
+		},
+	}
 
-    return contracts
+	return contracts
 }
 
 func initLog() error {
-    filePath := settings.GetLogPath()
-    f, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-    if err != nil {
-        fmt.Println(loadPathFailed, err)
-        return err
-    }
+	filePath := settings.GetLogPath()
+	f, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		fmt.Println(loadPathFailed, err)
+		return err
+	}
 
-    rlog.SetFormatter(&rlog.TextFormatter{})
-    rlog.SetOutput(f)
-    rlog.SetLevel(rlog.DebugLevel)
+	rlog.SetFormatter(&rlog.TextFormatter{})
+	rlog.SetOutput(f)
+	rlog.SetLevel(rlog.DebugLevel)
 
-    return nil
+	return nil
 }
 
+// StartScan start scan
 func StartScan(fromBlock uint64) {
-    core.StartScan(fromBlock)
+	core.StartScan(fromBlock)
 }

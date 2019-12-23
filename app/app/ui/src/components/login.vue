@@ -1,7 +1,7 @@
 <!-- Scry Info.  All rights reserved.-->
 <!-- license that can be found in the license file.-->
 <template>
-    <div>
+    <div v-if="isReload">
         <el-row>
             <el-col :span="24"><div class="top">Dapp</div></el-col>
         </el-row>
@@ -9,10 +9,8 @@
             <el-col :span="8">
                 <div class="left">
                     <div class="left-explain">选择账户：</div>
-                    <el-select class="left-account" v-model="account" placeholder="账户"
-                        clearable allow-create filterable>
-                        <el-option v-for="acc in this.$store.state.accounts" :key="acc.address"
-                                   :value="acc.address" :label="acc.address"></el-option>
+                    <el-select class="left-account" v-model="account" placeholder="账户" clearable allow-create filterable>
+                        <el-option v-for="acc in this.$store.state.accounts" :key="acc.address" :value="acc.address" :label="acc.address"></el-option>
                     </el-select>
                     <div class="left-button-margin">
                         <el-button class="left-button" @click="right('登录')">登录</el-button>
@@ -46,7 +44,6 @@
 </template>
 
 <script>
-import {db_options, acc_db} from "../utils/DBoptions.js";
 import {connect} from "../utils/connect.js";
 export default {
     name: "login.vue",
@@ -54,6 +51,7 @@ export default {
         return {
             account: "",
             password: "",
+            isReload: false,
             showControl1: false,
             showControl2: false,
             buttonControl: true,
@@ -69,18 +67,16 @@ export default {
             }
             this.describe = description + ":";
         },
+
         hide: function () {this.showControl1 = false; this.showControl2 = false; this.password = "";},
+
         submit_login: function () {
+            let acc = this.account;
+            this.account = "";
             let pwd = this.password;
             this.password = "";
-            let _login = this;
-            if (!(this.account.length === 42 && this.account.split("0x")[0] === "")) {
-                acc_db.readIndex(acc_db.db_index_name, this.account, function (accInstance) {
-                    _login.account = accInstance.nickname;
-                });
-            }
-            connect.send({Name: "login.verify", Payload: {account: this.account, password: pwd}}, function (payload, _this) {
-                _this.$router.push({ name: "home", params: {acc: _login.account}});
+            connect.send({Name: "loginVerify", Payload: {address: acc, password: pwd}}, function (payload, _this) {
+                _this.$router.push({ name: "home", params: {acc: acc}});
             }, function (payload, _this) {
                 console.log("登录验证失败：", payload);
                 _this.$alert(payload, "用户名或密码错误！", {
@@ -90,15 +86,12 @@ export default {
                 });
             });
         },
+
         submit_new: function () {
+            let pwd = this.password;
+            this.password = "";
             let _login = this;
-            connect.send({Name: "create.new.account", Payload: {password: this.password}}, function (payload, _this) {
-                acc_db.write({
-                    address: payload,
-                    nickname: payload,
-                    fromBlock: 1,
-                    isVerifier: false
-                });
+            connect.send({Name: "createNewAccount", Payload: {password: pwd}}, function (payload, _this) {
                 _login.account = payload;
                 _login.showControl1 = false;
                 _login.showControl2 = true;
@@ -111,15 +104,18 @@ export default {
                 });
             });
         },
+
         submit_keystore: function () {
             this.password = "";
             this.$router.push({ name: "home", params: {acc: this.account}});
         }
     },
     created() {
-        this.password = "";this.describe = "";this.account = "";
-        db_options.utilsDBInit(this);
-        connect.WSConnect(this);
+        window.sessionStorage.clear();
+        if (this.$store.state.account !== "") {
+            return window.location.reload();
+        }
+        this.isReload = true;
     }
 }
 </script>

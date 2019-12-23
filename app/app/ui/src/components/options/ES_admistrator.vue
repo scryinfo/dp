@@ -8,23 +8,37 @@
         <el-col :span="24" class="section-item">
             <el-button size="mini" type="primary" @click="welcome">Welcome</el-button></el-col>
         <el-col :span="24" class="section-item">
-            <el-button size="mini" type="primary" @click="resetChain">ResetChain</el-button></el-col>
-        <el-col :span="24" class="section-item">
-            <el-button size="mini" type="primary" @click="initDL">InitDL</el-button></el-col>
-        <el-col :span="24" class="section-item">
-            <el-button size="mini" type="primary" @click="initTx">InitTx</el-button></el-col>
-        <el-col :span="24" class="section-item">
-            <el-button size="mini" type="primary" @click="testTxDBsConnect">TestTxDBsConnect</el-button></el-col>
+            <el-button size="mini" type="primary" @click="logoutSimulate">Logout Simulate</el-button></el-col>
+        <div>
+            <el-col :span="5" class="section-item">
+                <el-select size="mini" v-model="modifyItem" placeholder="Choose param" clearable allow-create filterable>
+                    <el-option v-for="item in modifyList" :key="item.paramName" :value="item.paramName" :label="item.paramName"></el-option>
+                </el-select>
+            </el-col>
+            <el-col :span="9" class="section-item">
+                <el-input size="mini" v-model="newParamValue" placeholder="new param value" clearable></el-input>
+            </el-col>
+            <el-col :span="10" class="section-item">
+                <el-button size="mini" type="primary" @click="modifyParam">ModifyParam</el-button>
+            </el-col>
+        </div>
     </section>
 </template>
 
 <script>
-import {dl_db, acc_db, txBuyer_db, txSeller_db, txVerifier_db, txArbitrator_db, db_options} from "../../utils/DBoptions.js";
+import {connect} from "../../utils/connect.js";
+import home from "../home.vue";
 export default {
     name: "ES_administrator.vue",
     data () {
         return {
-
+            modifyItem: "",
+            newParamValue: "", // avoid param bigger than float64.MAX, json unmarshal in go will wrong.
+            modifyList: [
+                {
+                    paramName: "VerifierNum"
+                }
+            ]
         }
     },
     methods: {
@@ -35,50 +49,25 @@ export default {
                 message: '谢谢你使用我的程序!&nbsp;<strong>:)</strong>',
                 position: "top-left"
             });
-            acc_db.init(this);
         },
-        resetChain: async function () {
-            dl_db.reset();
-            acc_db.reset();
-            await this.resetTxDBs();
-            console.log("已重置app全部数据");
+
+        logoutSimulate: function () {
+            home.methods.logout();
         },
-        initDL: function () {
-            dl_db.init(this);
-            console.log("数据列表初始化完成");
-        },
-        initTx: function () {
-            txBuyer_db.init(this);
-            txSeller_db.init(this);
-            txVerifier_db.init(this);
-            txArbitrator_db.init(this);
-            console.log("交易列表初始化完成");
-        },
-        testTxDBsConnect: function () {
-            let result = "";
-            if (txBuyer_db.db_name === txSeller_db.db_name && txSeller_db.db_name === txVerifier_db.db_name) {
-                result = "数据库名： " + txBuyer_db.db_name;
-            } else {
-                result = "数据库名： " + txBuyer_db.db_name + " " + txSeller_db.db_name + " " + txVerifier_db.db_name;
-            }
-            console.log(result)
-        },
-        resetTxDBs: function () {
-            let c = acc_db.db.transaction(acc_db.db_store_name,"readwrite").objectStore(acc_db.db_store_name).openCursor();
-            c.onsuccess = function (evt) {
-                let cursor = evt.target.result;
-                if (cursor) {
-                    db_options.userDBInit(cursor.value.address);
-                    db_options.deleteDB(cursor.value.address);
-                    cursor.continue();
-                }
-            }
+
+        modifyParam: function () {
+            connect.send({Name: "modifyContractParam", Payload: {modifyContractParam: {paramName: this.modifyItem, paramValue: this.newParamValue}}},
+                function (payload, _this) {
+                    console.log("modify param success: ", payload); // payload is nothing now :( think if it need some param from go?
+                }, function (payload, _this) {
+                    console.log("modify param failed! ", payload);
+                });
         }
     }
 }
 </script>
 
-<style scoped>
+<style>
 .administrator {
     background-color: lightgrey;
 }

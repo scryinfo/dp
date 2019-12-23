@@ -4,444 +4,456 @@
 package main
 
 import (
-    "fmt"
-    "github.com/ethereum/go-ethereum/common"
-    "github.com/scryinfo/dp/demo/src/sdk"
-    "github.com/scryinfo/dp/demo/src/sdk/core/chainoperations"
-    "github.com/scryinfo/dp/demo/src/sdk/core/ethereum/events"
-    "github.com/scryinfo/dp/demo/src/sdk/scryclient"
-    cif "github.com/scryinfo/dp/demo/src/sdk/scryclient/chaininterfacewrapper"
-    "github.com/scryinfo/dp/dots/service"
-    "math/big"
-    "time"
+	"fmt"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/scryinfo/dp/demo/src/sdk"
+	"github.com/scryinfo/dp/demo/src/sdk/core/chainoperations"
+	"github.com/scryinfo/dp/demo/src/sdk/core/ethereum/events"
+	"github.com/scryinfo/dp/demo/src/sdk/scryclient"
+	cif "github.com/scryinfo/dp/demo/src/sdk/scryclient/chaininterfacewrapper"
+	"github.com/scryinfo/dp/dots/service"
+	"math/big"
+	"time"
 )
 
 var (
-    publishId                        = ""
-    txId                    *big.Int = big.NewInt(0)
-    metaDataIdEncWithSeller []byte
-    metaDataIdEncWithBuyer  []byte
-    protocolContractAddr                           = "0x3c4d26e916d79fc3fc925027a79612012462f691"
-    tokenContractAddr                              = "0x5c29f42d640ee25f080cdc648641e8e358459ddc"
-    clientPassword                                 = "888888"
-    suAddress                                      = "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8"
-    suPassword                                     = "111111"
-    seller                  *scryclient.ScryClient = nil
-    buyer                   *scryclient.ScryClient = nil
-    verifier1               *scryclient.ScryClient = nil
-    verifier2               *scryclient.ScryClient = nil
-    verifier3               *scryclient.ScryClient = nil
-    arbitrator              *scryclient.ScryClient = nil
-    sleepTime               time.Duration          = 20000000000
-    startVerify             bool                   = false
-    startTestFromBlock      bool                   = false
+	publishId                        = ""
+	txId                    *big.Int = big.NewInt(0)
+	metaDataIdEncWithSeller []byte
+	metaDataIdEncWithBuyer  []byte
+	protocolContractAddr    = "0x3c4d26e916d79fc3fc925027a79612012462f691"
+	tokenContractAddr       = "0x5c29f42d640ee25f080cdc648641e8e358459ddc"
+	clientPassword          = "888888"
+	suAddress               = "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8"
+	suPassword              = "111111"
+	seller                  *scryclient.ScryClient
+	buyer                   *scryclient.ScryClient
+	verifier1               *scryclient.ScryClient
+	verifier2               *scryclient.ScryClient
+	verifier3               *scryclient.ScryClient
+	arbitrator              *scryclient.ScryClient
+	sleepTime               time.Duration = 20000000000
+	startVerify             bool          = false
+	startTestFromBlock      bool          = false
 )
 
 func main() {
-    //note: asServiceAddr is the host of key management service which is outside
-    err := sdk.Init(
-        "http://127.0.0.1:8545/",
-        "192.168.1.14:48080",
-        protocolContractAddr,
-        tokenContractAddr,
-        "/ip4/127.0.0.1/tcp/5001",
-        "./log/sdk.log",
-        "testconsole")
-    if err != nil {
-        fmt.Println("failed to initialize sdk, error:", err)
-        return
-    }
+	//note: asServiceAddr is the host of key management service which is outside
+	err := sdk.Init(
+		"http://127.0.0.1:8545/",
+		"192.168.1.14:48080",
+		protocolContractAddr,
+		tokenContractAddr,
+		"/ip4/127.0.0.1/tcp/5001",
+		"./log/sdk.log",
+		"testconsole")
+	if err != nil {
+		fmt.Println("failed to initialize sdk, error:", err)
+		return
+	}
 
-    initClients()
+	initClients()
 
-    testAccounts()
+	testAccounts()
 
-    testTxWithoutVerify()
+	testTxWithoutVerify()
 
-    testTxWithVerify()
+	testTxWithVerify()
 
-    time.Sleep(100000000000000)
+	time.Sleep(100000000000000)
 }
 
 func testAccounts() {
-    fmt.Println("Start testing accounts...")
+	fmt.Println("Start testing accounts...")
 
-    ac, err := service.GetAMIns().CreateAccount("12345")
-    if err != nil {
-        fmt.Println("failed to create interface, error:", err)
-    }
+	ac, err := service.GetAMIns().CreateAccount("12345")
+	if err != nil {
+		fmt.Println("failed to create interface, error:", err)
+	}
 
-    rv, err := service.GetAMIns().AuthAccount(ac.Address, "12345")
-    if err != nil {
-        fmt.Println("failed to authenticate interface, error:", err)
-    }
+	rv, err := service.GetAMIns().AuthAccount(ac.Address, "12345")
+	if err != nil {
+		fmt.Println("failed to authenticate interface, error:", err)
+	}
 
-    if rv {
-        fmt.Println("account_ authentication passed")
-    } else {
-        fmt.Println("account_ authentication not passed")
-    }
+	if rv {
+		fmt.Println("account_ authentication passed")
+	} else {
+		fmt.Println("account_ authentication not passed")
+	}
 
 }
 
 func testTxWithoutVerify() {
-    fmt.Println("Start testing tx without verification...")
+	fmt.Println("Start testing tx without verification...")
 
-    startVerify = false
+	startVerify = false
 
-    SellerPublishData(false)
+	SellerPublishData(false)
 
 }
 
 func testTxWithVerify() {
-    fmt.Println("Start testing tx with verification...Note: please restart the test chain before running this case")
+	fmt.Println("Start testing tx with verification...Note: please restart the test chain before running this case")
 
-    startVerify = true
-    startTestFromBlock = false
+	startVerify = true
+	startTestFromBlock = false
 
-    subscribeAllEvents()
+	subscribeAllEvents()
 
-    VerifierApproveTransfer(verifier1)
+	VerifierApproveTransfer(verifier1)
 
-    time.Sleep(sleepTime)
+	time.Sleep(sleepTime)
 
-    VerifierApproveTransfer(verifier2)
+	VerifierApproveTransfer(verifier2)
 
-    time.Sleep(sleepTime)
+	time.Sleep(sleepTime)
 
-    VerifierApproveTransfer(verifier3)
+	VerifierApproveTransfer(verifier3)
 
-    time.Sleep(sleepTime)
+	time.Sleep(sleepTime)
 
-    RegisterAsVerifier(verifier1)
+	RegisterAsVerifier(verifier1)
 
-    time.Sleep(sleepTime)
+	time.Sleep(sleepTime)
 
-    RegisterAsVerifier(verifier2)
+	RegisterAsVerifier(verifier2)
 
-    time.Sleep(sleepTime)
+	time.Sleep(sleepTime)
 
-    RegisterAsVerifier(verifier3)
+	RegisterAsVerifier(verifier3)
 
-    time.Sleep(sleepTime)
+	time.Sleep(sleepTime)
 
-    SellerPublishData(true)
+	SellerPublishData(true)
 }
 
 func testFromBlock() {
-    startTestFromBlock = true
-    seller.SubscribeEvent("DataPublish", onPublish)
-    sdk.StartScan(1)
+	startTestFromBlock = true
+	seller.SubscribeEvent("DataPublish", onPublish)
+	sdk.StartScan(1)
 }
 
 func subscribeAllEvents() {
-    seller.SubscribeEvent("DataPublish", onPublish)
-    seller.SubscribeEvent("Buy", onPurchase)
+	seller.SubscribeEvent("DataPublish", onPublish)
+	seller.SubscribeEvent("Buy", onPurchase)
 
-    verifier1.SubscribeEvent("Approval", onApprovalVerifierTransfer)
-    verifier1.SubscribeEvent("RegisterVerifier", OnRegisterVerifier)
+	verifier1.SubscribeEvent("Approval", onApprovalVerifierTransfer)
+	verifier1.SubscribeEvent("RegisterVerifier", OnRegisterVerifier)
 
-    verifier2.SubscribeEvent("Approval", onApprovalVerifierTransfer)
-    verifier2.SubscribeEvent("RegisterVerifier", OnRegisterVerifier)
+	verifier2.SubscribeEvent("Approval", onApprovalVerifierTransfer)
+	verifier2.SubscribeEvent("RegisterVerifier", OnRegisterVerifier)
 
-    verifier3.SubscribeEvent("Approval", onApprovalVerifierTransfer)
-    verifier3.SubscribeEvent("RegisterVerifier", OnRegisterVerifier)
+	verifier3.SubscribeEvent("Approval", onApprovalVerifierTransfer)
+	verifier3.SubscribeEvent("RegisterVerifier", OnRegisterVerifier)
 
-    if startVerify {
-        verifier1.SubscribeEvent("TransactionCreate", onVerifier1Chosen)
-        verifier2.SubscribeEvent("TransactionCreate", onVerifier2Chosen)
-        verifier3.SubscribeEvent("TransactionCreate", onVerifier3Chosen)
-    }
+	if startVerify {
+		verifier1.SubscribeEvent("TransactionCreate", onVerifier1Chosen)
+		verifier2.SubscribeEvent("TransactionCreate", onVerifier2Chosen)
+		verifier3.SubscribeEvent("TransactionCreate", onVerifier3Chosen)
+	}
 
-    buyer.SubscribeEvent("Vote", onVote)
-    buyer.SubscribeEvent("Approval", onApprovalBuyerTransfer)
-    buyer.SubscribeEvent("TransactionCreate", onTransactionCreate)
-    buyer.SubscribeEvent("ReadyForDownload", onReadyForDownload)
-    buyer.SubscribeEvent("TransactionClose", onClose)
-    buyer.SubscribeEvent("VerifierDisable", onVerifierDisable)
+	buyer.SubscribeEvent("Vote", onVote)
+	buyer.SubscribeEvent("Approval", onApprovalBuyerTransfer)
+	buyer.SubscribeEvent("TransactionCreate", onTransactionCreate)
+	buyer.SubscribeEvent("ReadyForDownload", onReadyForDownload)
+	buyer.SubscribeEvent("TransactionClose", onClose)
+	buyer.SubscribeEvent("VerifierDisable", onVerifierDisable)
 }
 
 func unsubscribeAllEvents() {
-    seller.UnSubscribeEvent("DataPublish")
-    seller.UnSubscribeEvent("Buy")
+	seller.UnSubscribeEvent("DataPublish")
+	seller.UnSubscribeEvent("Buy")
 
-    verifier1.UnSubscribeEvent("Approval")
-    verifier1.UnSubscribeEvent("RegisterVerifier")
+	verifier1.UnSubscribeEvent("Approval")
+	verifier1.UnSubscribeEvent("RegisterVerifier")
 
-    verifier2.UnSubscribeEvent("Approval")
-    verifier2.UnSubscribeEvent("RegisterVerifier")
+	verifier2.UnSubscribeEvent("Approval")
+	verifier2.UnSubscribeEvent("RegisterVerifier")
 
-    verifier3.UnSubscribeEvent("Approval")
-    verifier3.UnSubscribeEvent("RegisterVerifier")
+	verifier3.UnSubscribeEvent("Approval")
+	verifier3.UnSubscribeEvent("RegisterVerifier")
 
-    if startVerify {
-        verifier1.UnSubscribeEvent("TransactionCreate")
-        verifier2.UnSubscribeEvent("TransactionCreate")
-        verifier3.UnSubscribeEvent("TransactionCreate")
-    }
+	if startVerify {
+		verifier1.UnSubscribeEvent("TransactionCreate")
+		verifier2.UnSubscribeEvent("TransactionCreate")
+		verifier3.UnSubscribeEvent("TransactionCreate")
+	}
 
-    buyer.UnSubscribeEvent("Vote")
-    buyer.UnSubscribeEvent("Approval")
-    buyer.UnSubscribeEvent("TransactionCreate")
-    buyer.UnSubscribeEvent("ReadyForDownload")
-    buyer.UnSubscribeEvent("TransactionClose")
-    buyer.UnSubscribeEvent("VerifierDisable")
+	buyer.UnSubscribeEvent("Vote")
+	buyer.UnSubscribeEvent("Approval")
+	buyer.UnSubscribeEvent("TransactionCreate")
+	buyer.UnSubscribeEvent("ReadyForDownload")
+	buyer.UnSubscribeEvent("TransactionClose")
+	buyer.UnSubscribeEvent("VerifierDisable")
 }
 
 func initClients() {
-    var err error
-    seller, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(10000000))
-    if err != nil {
-        fmt.Println("failed to init clients, error:", err)
-        panic(err)
-    }
+	var err error
+	seller, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(10000000))
+	if err != nil {
+		fmt.Println("failed to init clients, error:", err)
+		panic(err)
+	}
 
-    buyer, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(10000000))
-    if err != nil {
-        fmt.Println("failed to init clients, error:", err)
-        panic(err)
-    }
+	buyer, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(10000000))
+	if err != nil {
+		fmt.Println("failed to init clients, error:", err)
+		panic(err)
+	}
 
-    verifier1, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(10000000))
-    if err != nil {
-        fmt.Println("failed to init clients, error:", err)
-        panic(err)
-    }
+	verifier1, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(10000000))
+	if err != nil {
+		fmt.Println("failed to init clients, error:", err)
+		panic(err)
+	}
 
-    verifier2, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(10000000))
-    if err != nil {
-        fmt.Println("failed to init clients, error:", err)
-        panic(err)
-    }
+	verifier2, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(10000000))
+	if err != nil {
+		fmt.Println("failed to init clients, error:", err)
+		panic(err)
+	}
 
-    verifier3, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(10000000))
-    if err != nil {
-        fmt.Println("failed to init clients, error:", err)
-        panic(err)
-    }
+	verifier3, err = CreateClientWithToken(big.NewInt(10000000), big.NewInt(10000000))
+	if err != nil {
+		fmt.Println("failed to init clients, error:", err)
+		panic(err)
+	}
 
-    time.Sleep(sleepTime)
+	time.Sleep(sleepTime)
 }
 
+// CreateClientWithToken create client with token
 func CreateClientWithToken(token *big.Int, eth *big.Int) (*scryclient.ScryClient, error) {
-    client, err := scryclient.CreateScryClient(clientPassword)
-    if err != nil {
-        fmt.Println("failed to create user, error:", err)
-        return nil, err
-    }
+	client, err := scryclient.CreateScryClient(clientPassword)
+	if err != nil {
+		fmt.Println("failed to create user, error:", err)
+		return nil, err
+	}
 
-    _, err = cif.TransferEth(common.HexToAddress(suAddress),
-        suPassword,
-        common.HexToAddress(client.Account.Address),
-        eth)
-    if err != nil {
-        fmt.Println("failed to transfer token, error:", err)
-        return nil, err
-    }
+	_, err = cif.TransferEth(common.HexToAddress(suAddress),
+		suPassword,
+		common.HexToAddress(client.Account.Address),
+		eth)
+	if err != nil {
+		fmt.Println("failed to transfer token, error:", err)
+		return nil, err
+	}
 
-    txParam := chainoperations.TransactParams{common.HexToAddress(suAddress), suPassword, big.NewInt(0), false}
-    err = cif.TransferTokens(&txParam, common.HexToAddress(client.Account.Address), token)
-    if err != nil {
-        fmt.Println("failed to transfer token, error:", err)
-        return nil, err
-    }
+	txParam := chainoperations.TransactParams{common.HexToAddress(suAddress), suPassword, big.NewInt(0), false}
+	err = cif.TransferTokens(&txParam, common.HexToAddress(client.Account.Address), token)
+	if err != nil {
+		fmt.Println("failed to transfer token, error:", err)
+		return nil, err
+	}
 
-    return client, nil
+	return client, nil
 }
 
+// SellerPublishData publish
 func SellerPublishData(supportVerify bool) {
-    //publish data
-    metaData := []byte("QmcHXkMXwgvZP56tsUJNtcfedojHkqrDsgkC4fbsBM1zre")
-    proofData := []string{"QmNrTHX545s7hGfbEVrJuCiMqKVwUWJ4cPwXrAPv3GW5pm", "Qmb7csVP7wGco16XHVNqqRXUE7vQMjuA24QRypnZdkeQMD"}
-    despData := "QmQXqZdEwXnWgKpfJmUVaACuVar9R7vpBxtZgddQMTa2UN"
+	//publish data
+	metaData := []byte("QmcHXkMXwgvZP56tsUJNtcfedojHkqrDsgkC4fbsBM1zre")
+	proofData := []string{"QmNrTHX545s7hGfbEVrJuCiMqKVwUWJ4cPwXrAPv3GW5pm", "Qmb7csVP7wGco16XHVNqqRXUE7vQMjuA24QRypnZdkeQMD"}
+	despData := "QmQXqZdEwXnWgKpfJmUVaACuVar9R7vpBxtZgddQMTa2UN"
 
-    txParam := chainoperations.TransactParams{common.HexToAddress(seller.Account.Address), clientPassword, big.NewInt(0), false}
-    cif.Publish(&txParam, big.NewInt(1000), metaData, proofData, 2, despData, supportVerify)
+	txParam := chainoperations.TransactParams{common.HexToAddress(seller.Account.Address), clientPassword, big.NewInt(0), false}
+	cif.Publish(&txParam, big.NewInt(1000), metaData, proofData, 2, despData, supportVerify)
 }
 
+// VerifierApproveTransfer approve
 func VerifierApproveTransfer(verifier *scryclient.ScryClient) {
-    txParam := chainoperations.TransactParams{common.HexToAddress(verifier.Account.Address), clientPassword, big.NewInt(0), false}
-    err := cif.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(10000))
-    if err != nil {
-        fmt.Println("VerifierApproveTransfer", err)
-    }
+	txParam := chainoperations.TransactParams{common.HexToAddress(verifier.Account.Address), clientPassword, big.NewInt(0), false}
+	err := cif.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(10000))
+	if err != nil {
+		fmt.Println("VerifierApproveTransfer", err)
+	}
 }
 
+// RegisterAsVerifier register
 func RegisterAsVerifier(verifier *scryclient.ScryClient) {
-    txParam := chainoperations.TransactParams{common.HexToAddress(verifier.Account.Address), clientPassword, big.NewInt(0), false}
-    err := cif.RegisterAsVerifier(&txParam)
-    if err != nil {
-        fmt.Println("RegisterAsVerifier", err)
-    }
+	txParam := chainoperations.TransactParams{common.HexToAddress(verifier.Account.Address), clientPassword, big.NewInt(0), false}
+	err := cif.RegisterAsVerifier(&txParam)
+	if err != nil {
+		fmt.Println("RegisterAsVerifier", err)
+	}
 }
 
+// Vote vote
 func Vote(verifier *scryclient.ScryClient) {
-    txParam := chainoperations.TransactParams{common.HexToAddress(verifier.Account.Address), clientPassword, big.NewInt(0), false}
-    err := cif.Vote(&txParam, txId, true, "This could be real from "+verifier.Account.Address)
-    if err != nil {
-        fmt.Println("Vote:", err)
-    }
+	txParam := chainoperations.TransactParams{common.HexToAddress(verifier.Account.Address), clientPassword, big.NewInt(0), false}
+	err := cif.Vote(&txParam, txId, true, "This could be real from "+verifier.Account.Address)
+	if err != nil {
+		fmt.Println("Vote:", err)
+	}
 }
 
+// CreditsToVerifier credit
 func CreditsToVerifier(to common.Address) {
-    txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword, big.NewInt(0), false}
-    err := cif.CreditsToVerifier(&txParam, txId, 1, 5)
-    if err != nil {
-        fmt.Println("CreditsToVerifier:", err)
-    }
+	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword, big.NewInt(0), false}
+	err := cif.CreditsToVerifier(&txParam, txId, 1, 5)
+	if err != nil {
+		fmt.Println("CreditsToVerifier:", err)
+	}
 }
 
+// BuyerApproveTransfer approve
 func BuyerApproveTransfer() {
-    txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword, big.NewInt(0), false}
-    err := cif.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(1600))
-    if err != nil {
-        fmt.Println("BuyerApproveTransfer:", err)
-    }
+	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword, big.NewInt(0), false}
+	err := cif.ApproveTransfer(&txParam, common.HexToAddress(protocolContractAddr), big.NewInt(1600))
+	if err != nil {
+		fmt.Println("BuyerApproveTransfer:", err)
+	}
 }
 
+// PrepareToBuy prepare
 func PrepareToBuy(publishId string, startVerify bool) {
-    txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword,
-        big.NewInt(0), false}
-    err := cif.PrepareToBuy(&txParam, publishId, startVerify)
-    if err != nil {
-        fmt.Println("failed to prepareToBuy, error:", err)
-    }
+	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword,
+		big.NewInt(0), false}
+	err := cif.PrepareToBuy(&txParam, publishId, startVerify)
+	if err != nil {
+		fmt.Println("failed to prepareToBuy, error:", err)
+	}
 }
 
+// Buy buy
 func Buy(txId *big.Int) {
-    txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword, big.NewInt(0), false}
-    err := cif.BuyData(&txParam, txId)
-    if err != nil {
-        fmt.Println("failed to buyData, error:", err)
-    }
+	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address), clientPassword, big.NewInt(0), false}
+	err := cif.BuyData(&txParam, txId)
+	if err != nil {
+		fmt.Println("failed to buyData, error:", err)
+	}
 }
 
+// SubmitMetaDataIdEncWithBuyer submit
 func SubmitMetaDataIdEncWithBuyer(txId *big.Int) {
-    txParam := chainoperations.TransactParams{common.HexToAddress(seller.Account.Address), clientPassword, big.NewInt(0), false}
-    err := cif.SubmitMetaDataIdEncWithBuyer(&txParam, txId, metaDataIdEncWithBuyer)
-    if err != nil {
-        fmt.Println("failed to SubmitMetaDataIdEncWithBuyer, error:", err)
-    }
+	txParam := chainoperations.TransactParams{common.HexToAddress(seller.Account.Address), clientPassword, big.NewInt(0), false}
+	err := cif.SubmitMetaDataIdEncWithBuyer(&txParam, txId, metaDataIdEncWithBuyer)
+	if err != nil {
+		fmt.Println("failed to SubmitMetaDataIdEncWithBuyer, error:", err)
+	}
 }
 
+// ConfirmDataTruth confirm
 func ConfirmDataTruth(txId *big.Int) {
-    txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address),
-        clientPassword, big.NewInt(0), false}
-    err := cif.ConfirmDataTruth(&txParam, txId, true)
-    if err != nil {
-        fmt.Println("failed to ConfirmDataTruth, error:", err)
-    }
+	txParam := chainoperations.TransactParams{common.HexToAddress(buyer.Account.Address),
+		clientPassword, big.NewInt(0), false}
+	err := cif.ConfirmDataTruth(&txParam, txId, true)
+	if err != nil {
+		fmt.Println("failed to ConfirmDataTruth, error:", err)
+	}
 }
 
 func onPurchase(event events.Event) bool {
-    fmt.Println("onPurchase:", event)
-    metaDataIdEncWithSeller = event.Data.Get("metaDataIdEncSeller").([]byte)
-    fmt.Println("Node: EncID. ", metaDataIdEncWithSeller)
-    metaDataIdEncWithBuyer = make([]byte, len(metaDataIdEncWithSeller))
-    copy(metaDataIdEncWithBuyer, metaDataIdEncWithSeller)
+	fmt.Println("onPurchase:", event)
+	metaDataIdEncWithSeller = event.Data.Get("metaDataIdEncSeller").([]byte)
+	fmt.Println("Node: EncID. ", metaDataIdEncWithSeller)
+	metaDataIdEncWithBuyer = make([]byte, len(metaDataIdEncWithSeller))
+	copy(metaDataIdEncWithBuyer, metaDataIdEncWithSeller)
 
-    SubmitMetaDataIdEncWithBuyer(txId)
-    return true
+	SubmitMetaDataIdEncWithBuyer(txId)
+	return true
 }
 
 func onReadyForDownload(event events.Event) bool {
-    fmt.Println("onReadyForDownload:", event)
-    metaDataIdEncWithBuyer = event.Data.Get("metaDataIdEncBuyer").([]byte)
+	fmt.Println("onReadyForDownload:", event)
+	metaDataIdEncWithBuyer = event.Data.Get("metaDataIdEncBuyer").([]byte)
 
-    ConfirmDataTruth(txId)
+	ConfirmDataTruth(txId)
 
-    return true
+	return true
 }
 
 func onClose(event events.Event) bool {
-    fmt.Println("onClose:", event)
+	fmt.Println("onClose:", event)
 
-    fmt.Println("Testing Tx end")
+	fmt.Println("Testing Tx end")
 
-    unsubscribeAllEvents()
+	unsubscribeAllEvents()
 
-    fmt.Println("Start testing from block")
+	fmt.Println("Start testing from block")
 
-    testFromBlock()
+	testFromBlock()
 
-    return true
+	return true
 }
 
 func onApprovalBuyerTransfer(event events.Event) bool {
-    fmt.Println("onApprovalBuyerTransfer:", event)
+	fmt.Println("onApprovalBuyerTransfer:", event)
 
-    PrepareToBuy(publishId, startVerify)
-    return true
+	PrepareToBuy(publishId, startVerify)
+	return true
 }
 
 func onApprovalVerifierTransfer(event events.Event) bool {
-    fmt.Println("onApprovalVerifierTransfer:", event)
+	fmt.Println("onApprovalVerifierTransfer:", event)
 
-    return true
+	return true
 }
 
 func onTransactionCreate(event events.Event) bool {
-    fmt.Println("onTransactionCreated:", event)
-    txId = event.Data.Get("transactionId").(*big.Int)
-    if !startVerify {
-        Buy(txId)
-    }
+	fmt.Println("onTransactionCreated:", event)
+	txId = event.Data.Get("transactionId").(*big.Int)
+	if !startVerify {
+		Buy(txId)
+	}
 
-    return true
+	return true
 }
 
 func onVerifier1Chosen(event events.Event) bool {
-    fmt.Println("onVerifier1Chosen:", event)
+	fmt.Println("onVerifier1Chosen:", event)
 
-    txId = event.Data.Get("transactionId").(*big.Int)
-    Vote(verifier1)
-    return true
+	txId = event.Data.Get("transactionId").(*big.Int)
+	Vote(verifier1)
+	return true
 }
 
 func onVerifier2Chosen(event events.Event) bool {
-    fmt.Println("onVerifier2Chosen:", event)
+	fmt.Println("onVerifier2Chosen:", event)
 
-    txId = event.Data.Get("transactionId").(*big.Int)
-    Vote(verifier2)
-    return true
+	txId = event.Data.Get("transactionId").(*big.Int)
+	Vote(verifier2)
+	return true
 }
 
 func onVerifier3Chosen(event events.Event) bool {
-    fmt.Println("onVerifier3Chosen:", event)
+	fmt.Println("onVerifier3Chosen:", event)
 
-    txId = event.Data.Get("transactionId").(*big.Int)
-    Vote(verifier3)
-    return true
+	txId = event.Data.Get("transactionId").(*big.Int)
+	Vote(verifier3)
+	return true
 }
 
 func onPublish(event events.Event) bool {
-    fmt.Println("onpublish: ", event)
+	fmt.Println("onpublish: ", event)
 
-    publishId = event.Data.Get("publishId").(string)
+	publishId = event.Data.Get("publishId").(string)
 
-    if !startTestFromBlock {
-        BuyerApproveTransfer()
-    }
+	if !startTestFromBlock {
+		BuyerApproveTransfer()
+	}
 
-    return true
+	return true
 }
 
+// OnRegisterVerifier on register
 func OnRegisterVerifier(event events.Event) bool {
-    fmt.Println("OnRegisterVerifier: ", event)
+	fmt.Println("OnRegisterVerifier: ", event)
 
-    return true
+	return true
 }
 
 func onVote(event events.Event) bool {
-    fmt.Println("onVote: ", event)
+	fmt.Println("onVote: ", event)
 
-    Buy(txId)
+	Buy(txId)
 
-    return true
+	return true
 }
 
 func onVerifierDisable(event events.Event) bool {
-    fmt.Println("onVerifierDisable: ", event)
+	fmt.Println("onVerifierDisable: ", event)
 
-    return true
+	return true
 }

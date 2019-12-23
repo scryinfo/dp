@@ -4,9 +4,10 @@
 package uuid
 
 import (
-    "github.com/chilts/sid"
+	"github.com/chilts/sid"
 )
 
+// GenerateUUID generate uuid
 func GenerateUUID() string {
-    return sid.Id()
+	return sid.Id()
 }

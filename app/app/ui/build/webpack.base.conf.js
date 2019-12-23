@@ -1,12 +1,27 @@
-// Scry Info.  All rights reserved.
-// license that can be found in the license file.
+'use strict'
+const path = require('path')
+const utils = require('./utils')
+const config = require('../config')
+// const vueLoaderConfig = require('./vue-loader.conf')
+const {VueLoaderPlugin} = require('vue-loader')
 
-let path = require('path');
-let utils = require('./utils.js');
-let config = require('../config');
-let vueLoaderConfig = require('./vue-loader.conf.js');
+function resolve (dir) {
+  return path.join(__dirname, '..', dir)
+}
+
+const createLintingRule = () => ({
+  test: /\.(js|vue)$/,
+  loader: 'eslint-loader',
+  enforce: 'pre',
+  include: [resolve('src'), resolve('test')],
+  options: {
+    formatter: require('eslint-friendly-formatter'),
+    emitWarning: !config.dev.showEslintErrorsInOverlay
+  }
+})
 
 module.exports = {
+  context: path.resolve(__dirname, '../'),
   entry: {
     app: './src/main.js'
   },
@@ -21,23 +36,24 @@ module.exports = {
     extensions: ['.js', '.vue', '.json'],
     alias: {
       'vue$': 'vue/dist/vue.esm.js',
-      '@': path.join(__dirname, '../src')
+      '@': resolve('src'),
     }
   },
   module: {
     rules: [
+      // ...(config.dev.useEslint ? [createLintingRule()] : []),
       {
         test: /\.vue$/,
         loader: 'vue-loader',
-        options: vueLoaderConfig
+        // options: vueLoaderConfig
       },
       {
         test: /\.js$/,
         loader: 'babel-loader',
-        include: [path.join(__dirname, '../src')]
+        include: [resolve('src'), resolve('test'), resolve('node_modules/webpack-dev-server/client')]
       },
       {
-        test: /\.(png|jpe?g|gif)(\?.*)?$/,
+        test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
         loader: 'url-loader',
         options: {
           limit: 10000,
@@ -45,13 +61,37 @@ module.exports = {
         }
       },
       {
-        test: /\.(woff2?|ttf|otf)(\?.*)?$/,
+        test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
         loader: 'url-loader',
         options: {
           limit: 10000,
-          name: utils.assetsPath('fonts/[name].[hash:7].[ext]')
+          name: utils.assetsPath('media/[name].[hash:7].[ext]')
+        }
+      },
+      {
+        test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+        loader: 'url-loader',
+        options: {
+          limit: 10000,
+          name: utils.assetsPath('/fonts/[name].[hash:7].[ext]')
         }
       }
     ]
-  }
-};
+  },
+  node: {
+    // prevent webpack from injecting useless setImmediate polyfill because Vue
+    // source contains it (although only uses it if it's native).
+    setImmediate: false,
+    // prevent webpack from injecting mocks to Node native modules
+    // that does not make sense for the client
+    dgram: 'empty',
+    fs: 'empty',
+    net: 'empty',
+    tls: 'empty',
+    child_process: 'empty'
+  },
+  plugins:[
+    new VueLoaderPlugin()
+  ],
+  mode:process.env.NODE_ENV,
+}

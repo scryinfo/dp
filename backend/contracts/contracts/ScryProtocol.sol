@@ -11,16 +11,16 @@ contract ScryProtocol {
     address owner;
     ERC20   token;
 
-    event DataPublish(string seqNo, string publishId, uint256 price, string despDataId, bool supportVerify, address[] users);
-    event TransactionCreate(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool needVerify, uint8 state, address[] users);
-    event Buy(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, uint8 state, uint8 index, address[] users);
-    event TransactionClose(string seqNo, uint256 transactionId, uint8 state, uint8 index, address[] users);
+    event Publish(string seqNo, string publishId, uint256 price, string despDataId, bool supportVerify, address[] users);
+    event AdvancePurchase(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool needVerify, uint8 state, address[] users);
+    event ConfirmPurchase(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, uint8 state, address[] users);
+    event TransactionClose(string seqNo, uint256 transactionId, uint8 state, address[] users);
     event VerifiersChosen(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, uint8 state, address[] users);
-    event ReadyForDownload(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, uint8 state, uint8 index, address[] users);
+    event ReEncrypt(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, uint8 state, address[] users);
     event ArbitrationBegin(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bytes metaDataIdEncArbitrator, address[] users);
-    event ArbitrationResult(string seqNo, uint256 transactionId, bool judge, uint8 identify, address[] users);
+    event ArbitrationResult(string seqNo, uint256 transactionId, bool judge, address[] users);
     event RegisterVerifier(string seqNo, address[] users);
-    event Vote(string seqNo, uint256 transactionId, bool judge, string comments, uint8 state, uint8 index, address[] users);
+    event VoteResult(string seqNo, uint256 transactionId, bool judge, string comments, uint8 state, uint8 index, address[] users);
     event VerifierDisable(string seqNo, address verifier, address[] users);
 
     constructor (address _token) public {
@@ -35,28 +35,9 @@ contract ScryProtocol {
         dataSet.conf = common.Configuration(2, 10000, 300,   1, 0, 500,   0, 5, 2,   0, 32); // simple arbitrate params for test
     }
 
-    function registerAsVerifier(string seqNo) external {
-        verification.register(dataSet, seqNo, token);
-    }
-
-    function vote(string seqNo, uint txId, bool judge, string comments) external {
-        verification.vote(dataSet, seqNo, txId, judge, comments, token);
-    }
-
-    function creditsToVerifier(string seqNo, uint256 txId, uint8 verifierIndex, uint8 credit) external {
-        verification.creditsToVerifier(dataSet, seqNo, txId, verifierIndex, credit);
-    }
-
-    function arbitrate(string seqNo, uint txId, bool judge) external {
-        verification.arbitrate(dataSet, txId, judge, token);
-        if (verification.arbitrateFinished(dataSet, txId)) {
-            transaction.arbitrateResult(dataSet, seqNo, txId, token);
-        }
-    }
-
-    function publishDataInfo(string seqNo, string publishId, uint256 price, bytes metaDataIdEncSeller,
+    function publish(string seqNo, string publishId, uint256 price, bytes metaDataIdEncSeller,
         bytes32[] proofDataIds, string descDataId, bool supportVerify) public {
-        transaction.publishDataInfo(
+        transaction.publish(
             dataSet,
             seqNo,
             publishId,
@@ -68,7 +49,7 @@ contract ScryProtocol {
         );
     }
 
-    function createTransaction(string seqNo, string publishId, bool startVerify) external {
+    function advancePurchase(string seqNo, string publishId, bool startVerify) external {
         //get verifiers if verification needed
         address[] memory verifiersChosen;
         address[] memory arbitratorsChosen;
@@ -83,7 +64,7 @@ contract ScryProtocol {
         }
 
         //create tx
-        transaction.createTransaction(
+        transaction.advancePurchase(
             dataSet,
             verifiersChosen,
             arbitratorsChosen,
@@ -94,16 +75,16 @@ contract ScryProtocol {
         );
     }
 
-    function buyData(string seqNo, uint256 txId) external {
-        transaction.buy(
+    function confirmPurchase(string seqNo, uint256 txId) external {
+        transaction.confirmPurchase(
             dataSet,
             seqNo,
             txId
         );
     }
 
-    function cancelTransaction(string seqNo, uint256 txId) external {
-        transaction.cancelTransaction(
+    function cancelPurchase(string seqNo, uint256 txId) external {
+        transaction.cancelPurchase(
             dataSet,
             seqNo,
             txId,
@@ -111,8 +92,8 @@ contract ScryProtocol {
         );
     }
 
-    function reEncryptMetaDataIdBySeller(string seqNo, uint256 txId, bytes encryptedMetaDataId, bytes encryptedMetaDataIds) external {
-        transaction.reEncryptMetaDataIdBySeller(
+    function reEncrypt(string seqNo, uint256 txId, bytes encryptedMetaDataId, bytes encryptedMetaDataIds) external {
+        transaction.reEncrypt(
             dataSet,
             seqNo,
             txId,
@@ -121,8 +102,8 @@ contract ScryProtocol {
         );
     }
 
-    function confirmDataTruth(string seqNo, uint256 txId, bool truth) external {
-        transaction.confirmDataTruth(
+    function confirmData(string seqNo, uint256 txId, bool truth) external {
+        transaction.confirmData(
             dataSet,
             seqNo,
             txId,
@@ -131,11 +112,35 @@ contract ScryProtocol {
         );
     }
 
+    function registerAsVerifier(string seqNo) external {
+        verification.register(dataSet, seqNo, token);
+    }
+
+    function vote(string seqNo, uint txId, bool judge, string comments) external {
+        verification.vote(dataSet, seqNo, txId, judge, comments, token);
+    }
+
+    function gradeToVerifier(string seqNo, uint256 txId, uint8 verifierIndex, uint8 credit) external {
+        verification.gradeToVerifier(dataSet, seqNo, txId, verifierIndex, credit);
+    }
+
+    function arbitrate(string seqNo, uint txId, bool judge) external {
+        verification.arbitrate(dataSet, txId, judge, token);
+        if (verification.arbitrateFinished(dataSet, txId)) {
+            transaction.arbitrateResult(dataSet, seqNo, txId, token);
+        }
+    }
+
     function getBuyer(uint256 txId) external view returns (address) {
         return transaction.getBuyer(dataSet, txId);
     }
 
     function getArbitrators(uint256 txId) external view returns (address[]) {
         return transaction.getArbitrators(dataSet, txId);
+    }
+
+    function modifyVerifierNum(uint8 _value) external {
+        require(msg.sender == owner, "Invalid caller");
+        common.modifyVerifierNum(dataSet, _value);
     }
 }

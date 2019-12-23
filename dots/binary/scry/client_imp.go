@@ -4,118 +4,120 @@
 package scry
 
 import (
-    "errors"
-    "github.com/ethereum/go-ethereum/common"
-    "github.com/ethereum/go-ethereum/ethclient"
-    "github.com/scryinfo/dot/dot"
-    "github.com/scryinfo/dp/dots/auth"
-    curr "github.com/scryinfo/dp/dots/eth/currency"
-    "github.com/scryinfo/dp/dots/eth/event"
-    "github.com/scryinfo/dp/dots/eth/event/subscribe"
-    "go.uber.org/zap"
-    "math/big"
+	"errors"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/scryinfo/dot/dot"
+	"github.com/scryinfo/dp/dots/auth"
+	curr "github.com/scryinfo/dp/dots/eth/currency"
+	"github.com/scryinfo/dp/dots/eth/event"
+	"github.com/scryinfo/dp/dots/eth/event/subscribe"
+	"go.uber.org/zap"
+	"math/big"
 )
 
 type clientImp struct {
-    userAccount  *auth.UserAccount
-    chainWrapper ChainWrapper
-    Subscriber   *subscribe.Subscribe `dot:"5535a065-0d90-46f4-9776-26630676c4c5"`
-    Currency     *curr.Currency       `dot:"f76a1aac-ff18-479b-9d51-0166a858bec9"`
-    Acct         *auth.Account        `dot:"ca1c6ce4-182b-430a-9813-caeccf83f8ab"`
+	userAccount  *auth.UserAccount
+	chainWrapper ChainWrapper
+	Subscriber   *subscribe.Subscribe `dot:"5535a065-0d90-46f4-9776-26630676c4c5"`
+	Currency     *curr.Currency       `dot:"f76a1aac-ff18-479b-9d51-0166a858bec9"`
+	Acct         *auth.Account        `dot:"ca1c6ce4-182b-430a-9813-caeccf83f8ab"`
 }
 
 // check if 'clientImp' implements 'Client' interface.
 var _ Client = (*clientImp)(nil)
 
+// NewScryClient create a new ScryClient
 func NewScryClient(address string, chainWrapper ChainWrapper) Client {
-    if address == "" {
-        dot.Logger().Errorln("failed to create client: empty address")
-        return nil
-    }
+	if address == "" {
+		dot.Logger().Errorln("failed to create client: empty address")
+		return nil
+	}
 
-    c := &clientImp{
-        userAccount:  &auth.UserAccount{Addr: address},
-        chainWrapper: chainWrapper,
-    }
+	c := &clientImp{
+		userAccount:  &auth.UserAccount{Addr: address},
+		chainWrapper: chainWrapper,
+	}
 
-    err := dot.GetDefaultLine().ToInjecter().Inject(&c)
-    if err != nil {
-        dot.Logger().Errorln("failed to create client", zap.Error(err))
-        return nil
-    }
+	err := dot.GetDefaultLine().ToInjecter().Inject(&c)
+	if err != nil {
+		dot.Logger().Errorln("failed to create client", zap.Error(err))
+		return nil
+	}
 
-    return c
+	return c
 }
 
 func getAccountComponent() (*auth.Account, error) {
-    logger := dot.Logger()
+	logger := dot.Logger()
 
-    d, err := dot.GetDefaultLine().ToInjecter().GetByLiveId(dot.LiveId(auth.AccountTypeId))
-    if err != nil {
-        logger.Errorln("loading Binary component failed")
-        return nil, errors.New("loading Binary component failed")
-    }
+	d, err := dot.GetDefaultLine().ToInjecter().GetByLiveId(auth.AccountTypeId)
+	if err != nil {
+		logger.Errorln("loading Binary component failed")
+		return nil, errors.New("loading Binary component failed")
+	}
 
-    if a, ok := d.(*auth.Account); ok {
-        return a, nil
-    } else {
-        logger.Errorln("loading Binary component failed")
-        return nil, errors.New("loading Binary component failed")
-    }
+	a, ok := d.(*auth.Account)
+	if !ok {
+		logger.Errorln("loading Binary component failed")
+		return nil, errors.New("loading Binary component failed")
+	}
+
+	return a, nil
 }
 
+// CreateScryClient create a new Client with a new address
 func CreateScryClient(password string, chainWrapper ChainWrapper) (Client, error) {
-    a, err := getAccountComponent()
-    if err != nil {
-        return nil, err
-    }
+	a, err := getAccountComponent()
+	if err != nil {
+		return nil, err
+	}
 
-    ua, err := a.CreateUserAccount(password)
-    if err != nil {
-        dot.Logger().Errorln("", zap.NamedError("failed to create client, error:", err))
-        return nil, err
-    }
+	ua, err := a.CreateUserAccount(password)
+	if err != nil {
+		dot.Logger().Errorln("", zap.NamedError("failed to create client, error:", err))
+		return nil, err
+	}
 
-    c := &clientImp{
-        userAccount:  ua,
-        chainWrapper: chainWrapper,
-    }
+	c := &clientImp{
+		userAccount:  ua,
+		chainWrapper: chainWrapper,
+	}
 
-    err = dot.GetDefaultLine().ToInjecter().Inject(&c)
-    if err != nil {
-        dot.Logger().Errorln("", zap.NamedError("failed to create client, error:", err))
-        return nil, err
-    }
+	err = dot.GetDefaultLine().ToInjecter().Inject(&c)
+	if err != nil {
+		dot.Logger().Errorln("", zap.NamedError("failed to create client, error:", err))
+		return nil, err
+	}
 
-    return c, nil
+	return c, nil
 }
 
 func (c *clientImp) Account() *auth.UserAccount {
-    return c.userAccount
+	return c.userAccount
 }
 
 func (c *clientImp) SubscribeEvent(eventName string, callback event.Callback) error {
-    return c.Subscriber.Subscribe(common.HexToAddress(c.Account().Addr), eventName, callback)
+	return c.Subscriber.Subscribe(common.HexToAddress(c.Account().Addr), eventName, callback)
 }
 
 func (c *clientImp) UnSubscribeEvent(eventName string) error {
-    return c.Subscriber.UnSubscribe(common.HexToAddress(c.Account().Addr), eventName)
+	return c.Subscriber.UnSubscribe(common.HexToAddress(c.Account().Addr), eventName)
 }
 
 func (c *clientImp) Authenticate(password string) (bool, error) {
-    return c.Acct.AuthUserAccount(c.Account().Addr, password)
+	return c.Acct.AuthUserAccount(c.Account().Addr, password)
 }
 
 func (c *clientImp) TransferEthFrom(from common.Address, password string, value *big.Int, ec *ethclient.Client) error {
-    tx, err := c.Currency.TransferEth(from, password, common.HexToAddress(c.Account().Addr), value, ec)
-    if err == nil {
-        dot.Logger().Debugln("transferEthFrom: " + tx.Hash().String() + string(tx.Data()))
-    }
+	tx, err := c.Currency.TransferEth(from, password, common.HexToAddress(c.Account().Addr), value, ec)
+	if err == nil {
+		dot.Logger().Debugln("transferEthFrom: " + tx.Hash().String() + string(tx.Data()))
+	}
 
-    return err
+	return err
 }
 
 func (c *clientImp) GetEth(owner common.Address, ec *ethclient.Client) (*big.Int, error) {
-    return c.Currency.GetEthBalance(owner, ec)
+	return c.Currency.GetEthBalance(owner, ec)
 }
-

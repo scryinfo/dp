@@ -40,7 +40,7 @@ export default {
     methods: {
         getEthBalance: function (pwd) {
             let _balance = this;
-            connect.send({Name: "get.eth.balance", Payload: {password: pwd}}, function (payload, _this) {
+            connect.send({Name: "getEthBalance", Payload: {password: pwd}}, function (payload, _this) {
                 console.log("查询以太币余额成功：", payload.split("|")[0]);
                 _balance.$store.state.balance[0].Balance = payload.split("|")[0];
                 _balance.$store.state.balance[0].Time = payload.split("|")[1];
@@ -53,9 +53,10 @@ export default {
                 });
             });
         },
+
         getTokenBalance: function (pwd) {
             let _balance = this;
-            connect.send({Name: "get.token.balance", Payload: {password: pwd}}, function (payload, _this) {
+            connect.send({Name: "getTokenBalance", Payload: {password: pwd}}, function (payload, _this) {
                 console.log("查询token余额成功：", payload.split("|")[0]);
                 _balance.$store.state.balance[1].Balance = payload.split("|")[0];
                 _balance.$store.state.balance[1].Time = payload.split("|")[1];

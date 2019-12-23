@@ -18,6 +18,7 @@ module.exports = {
     bundleAnalyzerReport: false // control show analyzer report or not.
   },
   dev: {
+    host: 'localhost',
     env: require('./dev.env.js'),
     port: 9001,
     autoOpenBrowser: true,

@@ -4,16 +4,16 @@ import "./common.sol";
 import "../ScryToken.sol";
 
 library transaction {
-    event DataPublish(string seqNo, string publishId, uint256 price, string despDataId, bool supportVerify, address[] users);
-    event TransactionCreate(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool needVerify, uint8 state, address[] users);
-    event Buy(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, uint8 state, uint8 index, address[] users);
-    event TransactionClose(string seqNo, uint256 transactionId, uint8 state, uint8 index, address[] users);
+    event Publish(string seqNo, string publishId, uint256 price, string despDataId, bool supportVerify, address[] users);
+    event AdvancePurchase(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bool needVerify, uint8 state, address[] users);
+    event ConfirmPurchase(string seqNo, uint256 transactionId, string publishId, bytes metaDataIdEncSeller, uint8 state, address[] users);
+    event TransactionClose(string seqNo, uint256 transactionId, uint8 state, address[] users);
     event VerifiersChosen(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, uint8 state, address[] users);
-    event ReadyForDownload(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, uint8 state, uint8 index, address[] users);
+    event ReEncrypt(string seqNo, uint256 transactionId, bytes metaDataIdEncBuyer, uint8 state, address[] users);
     event ArbitrationBegin(string seqNo, uint256 transactionId, string publishId, bytes32[] proofIds, bytes metaDataIdEncArbitrator, address[] users);
-    event ArbitrationResult(string seqNo, uint256 transactionId, bool judge, uint8 identify, address[] users);
+    event ArbitrationResult(string seqNo, uint256 transactionId, bool judge, address[] users);
 
-    function publishDataInfo(
+    function publish(
         common.DataSet storage ds,
         string seqNo,
         string publishId,
@@ -40,7 +40,7 @@ library transaction {
             true
         );
 
-        emit DataPublish(seqNo, publishId, price, descDataId, supportVerify, users);
+        emit Publish(seqNo, publishId, price, descDataId, supportVerify, users);
     }
 
     function needVerification(
@@ -61,7 +61,7 @@ library transaction {
         return pubItem.supportVerify && startVerify;
     }
 
-    function createTransaction(
+    function advancePurchase(
         common.DataSet storage ds,
         address[] verifiers,
         address[] arbitrators,
@@ -114,29 +114,20 @@ library transaction {
     ) internal {
         uint256 txId = getTransactionId(ds);
         common.DataInfoPublished storage pubItem = ds.pubData.map[publishId];
-        bytes32[] storage proofIds = pubItem.proofDataIds;
 
-        address[] memory users = new address[](1);
-        for (uint8 i = 0; i < ds.conf.verifierNum; i++) {
-            users[0] = verifiers[i];
-            emit VerifiersChosen(seqNo, txId, publishId, proofIds, uint8(common.TransactionState.Created), users);
-        }
+        emit VerifiersChosen(seqNo, txId, publishId, pubItem.proofDataIds, uint8(common.TransactionState.Created), verifiers);
 
-        bool[] memory creditGiven = new bool[](ds.conf.verifierNum);
-
-        bytes memory metaDataIdEncryptedData = new bytes(ds.conf.encryptedIdLen);
-        bytes[] memory metaDataIdsEnc = new bytes[](ds.conf.arbitratorNum);
         ds.txData.map[txId] = common.TransactionItem(
             common.TransactionState.Created,
             msg.sender,
             pubItem.seller,
             verifiers,
-            creditGiven,
+            new bool[](ds.conf.verifierNum),
             arbitrators,
             publishId,
-            metaDataIdEncryptedData,
+            new bytes(ds.conf.encryptedIdLen),
             pubItem.metaDataIdEncSeller,
-            metaDataIdsEnc,
+            new bytes[](ds.conf.arbitratorNum),
             fee,
             ds.conf.verifierBonus,
             ds.conf.arbitratorBonus,
@@ -144,11 +135,11 @@ library transaction {
             true
         );
 
-        users[0] = msg.sender;
-        emit TransactionCreate(seqNo, txId, publishId, proofIds, true, uint8(common.TransactionState.Created), users);
-
+        address[] memory users = new address[](2);
         users[0] = pubItem.seller;
-        emit TransactionCreate(seqNo, txId, publishId, proofIds, true, uint8(common.TransactionState.Created), users);
+        users[1] = msg.sender;
+
+        emit AdvancePurchase(seqNo, txId, publishId, pubItem.proofDataIds, true, uint8(common.TransactionState.Created), users);
     }
 
     function createTxWithoutVerify(
@@ -162,7 +153,6 @@ library transaction {
         bytes32[] storage proofIds = pubItem.proofDataIds;
 
         address[] memory fills;
-        address[] memory users = new address[](1);
         bool[] memory creditGiven;
         bytes memory metaDataIdEncryptedData = new bytes(ds.conf.encryptedIdLen);
         bytes[] memory magic = new bytes[](ds.conf.arbitratorNum);
@@ -185,11 +175,11 @@ library transaction {
             true
         );
 
-        users[0] = msg.sender;
-        emit TransactionCreate(seqNo, txId, publishId, proofIds, false, uint8(common.TransactionState.Created), users);
-
+        address[] memory users = new address[](2);
         users[0] = pubItem.seller;
-        emit TransactionCreate(seqNo, txId, publishId, proofIds, false, uint8(common.TransactionState.Created), users);
+        users[1] = msg.sender;
+
+        emit AdvancePurchase(seqNo, txId, publishId, proofIds, false, uint8(common.TransactionState.Created), users);
     }
 
     function buyerDeposit(
@@ -219,7 +209,7 @@ library transaction {
     }
 
 
-    function buy(
+    function confirmPurchase(
         common.DataSet storage ds,
         string seqNo,
         uint256 txId
@@ -231,24 +221,21 @@ library transaction {
         common.DataInfoPublished storage data = ds.pubData.map[txItem.publishId];
         require(data.used, "Publish data does not exist");
 
-        //buyer can decide to buy even though no verifier response
+        //buyer can decide to buy even no verifier response
         require(txItem.state == common.TransactionState.Created || txItem.state == common.TransactionState.Voted, "Invalid transaction state");
         txItem.state = common.TransactionState.Buying;
 
-        address[] memory users = new address[](1);
+        address[] memory users = new address[](txItem.verifiers.length + 2);
         users[0] = txItem.seller;
-        emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, uint8(txItem.state), 0, users);
-
-        users[0] = msg.sender;
-        emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, uint8(txItem.state), 1, users);
-
+        users[1] = msg.sender;
         for (uint8 i = 0; i < txItem.verifiers.length; i++) {
-            users[0] = txItem.verifiers[i];
-            emit Buy(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, uint8(txItem.state), 2, users);
+            users[i + 2] = txItem.verifiers[i];
         }
+
+        emit ConfirmPurchase(seqNo, txId, txItem.publishId, txItem.metaDataIdEncSeller, uint8(txItem.state), users);
     }
 
-    function cancelTransaction(
+    function cancelPurchase(
         common.DataSet storage ds,
         string seqNo,
         uint256 txId,
@@ -273,17 +260,14 @@ library transaction {
     ) internal {
         txItem.state = common.TransactionState.Closed;
 
-        address[] memory users = new address[](1);
+        address[] memory users = new address[](txItem.verifiers.length + 2);
         users[0] = txItem.seller;
-        emit TransactionClose(seqNo, txId, uint8(txItem.state), 0, users);
-
-        users[0] = txItem.buyer;
-        emit TransactionClose(seqNo, txId, uint8(txItem.state), 1, users);
-
+        users[1] = txItem.buyer;
         for (uint8 i = 0; i < txItem.verifiers.length; i++) {
-            users[0] = txItem.verifiers[i];
-            emit TransactionClose(seqNo, txId, uint8(txItem.state), 2, users);
+            users[i + 2] = txItem.verifiers[i];
         }
+
+        emit TransactionClose(seqNo, txId, uint8(txItem.state), users);
     }
 
     function revertToBuyer(common.TransactionItem storage txItem, ERC20 token) internal {
@@ -298,7 +282,7 @@ library transaction {
         }
     }
 
-    function reEncryptMetaDataIdBySeller(
+    function reEncrypt(
         common.DataSet storage ds,
         string seqNo,
         uint256 txId,
@@ -316,12 +300,10 @@ library transaction {
 
         txItem.state = common.TransactionState.ReadyForDownload;
 
-        address[] memory users = new address[](1);
+        address[] memory users = new address[](2);
         users[0] = txItem.seller;
-        emit ReadyForDownload(seqNo, txId, txItem.meteDataIdEncBuyer, uint8(txItem.state), 0, users);
-
-        users[0] = txItem.buyer;
-        emit ReadyForDownload(seqNo, txId, txItem.meteDataIdEncBuyer, uint8(txItem.state), 1, users);
+        users[1] = txItem.buyer;
+        emit ReEncrypt(seqNo, txId, txItem.meteDataIdEncBuyer, uint8(txItem.state), users);
     }
 
     function deserializeAndSave(common.TransactionItem storage txItem, bytes encIds, uint8 num) internal {
@@ -341,7 +323,7 @@ library transaction {
         txItem.metaDataIdEncArbitrators = ids;
     }
 
-    function confirmDataTruth(
+    function confirmData(
         common.DataSet storage ds,
         string seqNo,
         uint256 txId,
@@ -369,9 +351,9 @@ library transaction {
                 revertToBuyer(txItem, token);
                 closeTransaction(txItem, seqNo, txId);
             } else {
-                address[] memory users = new address[](1);
+                address[] memory users = new address[](ds.conf.arbitratorNum);
                 for (uint8 i = 0; i < ds.conf.arbitratorNum; i++) {
-                    users[0] = txItem.arbitrators[i];
+                    users[i] = txItem.arbitrators[i];
                     emit ArbitrationBegin(seqNo, txId, txItem.publishId, data.proofDataIds, txItem.metaDataIdEncArbitrators[i], users);
                 }
             }
@@ -396,12 +378,11 @@ library transaction {
 
         revertToBuyer(txItem, token);
 
-        address[] memory users = new address[](1);
+        address[] memory users = new address[](2);
         users[0] = txItem.seller;
-        emit ArbitrationResult(seqNo, txId, result, 0, users);
+        users[1] = txItem.buyer;
 
-        users[0] = txItem.buyer;
-        emit ArbitrationResult(seqNo, txId, result, 1, users);
+        emit ArbitrationResult(seqNo, txId, result, users);
 
         closeTransaction(txItem, seqNo, txId);
     }
