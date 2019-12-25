@@ -2,21 +2,21 @@
 <!-- license that can be found in the license file.-->
 <template>
   <section>
-    <el-col :span="2" class="section-item-10">
-      <el-button size="mini" type="primary" @click="initEvtDL">标记为已读</el-button>
-    </el-col>
-    <el-col :span="2" class="section-item-10">
-      <el-button size="mini" type="primary" @click="initEvtDL">未读</el-button>
-    </el-col>
-    <el-col :span="3" class="section-item-10">
-      <c-f-t1  button-name="删除" dialog-title="是否确认删除？" @password="initEvtDL">
-        <div>
-          <p>是否确认删除：</p>
-          <el-switch active-text="是" inactive-text="否"></el-switch>
-        </div>
-      </c-f-t1>
-    </el-col>
-    <el-col :span="11" class="section-item-10">
+<!--    <el-col :span="2" class="section-item-10">-->
+<!--      <el-button size="mini" type="primary" @click="initEvtDL">标记为已读</el-button>-->
+<!--    </el-col>-->
+<!--    <el-col :span="2" class="section-item-10">-->
+<!--      <el-button size="mini" type="primary" @click="initEvtDL">未读</el-button>-->
+<!--    </el-col>-->
+<!--    <el-col :span="3" class="section-item-10">-->
+<!--      <c-f-t1  button-name="删除" dialog-title="是否确认删除？" @password="initEvtDL">-->
+<!--        <div>-->
+<!--          <p>是否确认删除：</p>-->
+<!--          <el-switch active-text="是" inactive-text="否"></el-switch>-->
+<!--        </div>-->
+<!--      </c-f-t1>-->
+<!--    </el-col>-->
+    <el-col :span="18" class="section-item-10">
       <el-input class="txtHeight"
                 placeholder="请输入内容"
                 v-model="input"
@@ -31,12 +31,10 @@
     </el-col>
     <el-table :data="this.$store.state.datalist.slice((curPage-1)*pageSize, curPage*pageSize)"
               highlight-current-row border :height=height @current-change="currentChange">
-      <el-table-column prop="Id" label="ID" show-overflow-tooltip></el-table-column>
-      <el-table-column prop="EventName" label="类型" show-overflow-tooltip></el-table-column>
-      <el-table-column prop="EventStatus" label="状态" show-overflow-tooltip></el-table-column>
-      <el-table-column prop="CreatedTime" label="时间" show-overflow-tooltip></el-table-column>
-      <el-table-column prop="EventBody" label="内容" show-overflow-tooltip></el-table-column>
-    </el-table>
+      <el-table-column min-width="5%" prop="ID" label="ID" show-overflow-tooltip></el-table-column>
+      <el-table-column min-width="7%" prop="EventName" label="类型" show-overflow-tooltip></el-table-column>
+      <el-table-column min-width="15%" prop="CreatedTime" label="时间" show-overflow-tooltip :formatter="formatterDate"></el-table-column>
+      <el-table-column min-width="73%" prop="EventBodys" label="内容" show-overflow-tooltip :formatter="formatterBodys"></el-table-column>    </el-table>
     <el-pagination class="pagination" @current-change="setCurPage" @size-change="setPageSize" :total="total"
                    layout="sizes, total, prev, pager, next, jumper" :page-sizes="[5, 6]" :page-size="pageSize"
     ></el-pagination>
@@ -44,9 +42,10 @@
 </template>
 
 <script>
-  import {connect} from "../../utils/connect";
+  import moment from 'moment'
   import CFT1 from "../templates/comfrim_function_template.vue"
   import {utils} from "../../utils/utils";
+
   export default {
     name: "message.vue",
     data () {
@@ -65,14 +64,29 @@
       setPageSize: function (newPageSize) {this.pageSize = newPageSize;},
       currentChange: function (curRow) {
         this.selectedData = {
-          PublishID: curRow.PublishID,
-          SupportVerify: curRow.SupportVerify,
-          Price: curRow.Price
         };
       },
       initEvtDL: function () {
-        utils.reacquireData("evtdl");
+        let str = this.input;
+        utils.reacquireData("evtdl",str);
       },
+      formatterDate:function (row,column) {
+        // 获取单元格数据
+        let data = row[column.property];
+        if (data === undefined) {
+          return '';
+        }
+        let dt = new Date(data*1000);
+        return moment(dt).format("YYYY-MM-DD HH:mm:ss")
+      },
+      formatterBodys:function (row,column) {
+        let data = row[column.property];
+        if (data === undefined){
+          return '';
+        }
+        let s = JSON.parse(data);
+        return JSON.stringify(s);
+      }
     },
     computed: {
       listenDLRefresh() {
@@ -93,6 +107,7 @@
       this.initEvtDL();
     }
   }
+
 </script>
 
 <style>

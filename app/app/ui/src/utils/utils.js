@@ -25,7 +25,7 @@ let utils = {
         connect.addCallbackFunc("onArbitrationResult", presetFunc.onArbitrationResult);
     },
 
-    reacquireData: function (mode) {
+    reacquireData: function (mode,str) {
         switch (mode) {
             case "dl":
                 initFunc.initDL();
@@ -47,7 +47,7 @@ let utils = {
                 break;
 
             case "evtdl":
-                  initFunc.initEvtDL();
+                  initFunc.initEvtDL(str);
                   break;
               default:
                   console.log("Invalid mode! (in data init)");
@@ -471,22 +471,21 @@ let initFunc = {
         });
     },
 
-    initEvtDL: function () {
-    connect.send({Name: "getEvtList", Payload: {eventBody: ""}}, function (payload, _this) {
+    initEvtDL: function (str) {
+    connect.send({Name: "getEvtList", Payload: {eventBodys: str}}, function (payload, _this) {
       _this.$store.state.datalist = [];
       console.log("getEvtList:",payload);
-      // for (let i = 0; i < payload.length; i++) {
-      //   _this.$store.state.datalist.push({
-      //     Title: payload[i].Title,
-      //     Price: payload[i].Price,
-      //     Keys: payload[i].Keys,
-      //     Description: payload[i].Description,
-      //     Seller: payload[i].Seller,
-      //     SupportVerify: payload[i].SupportVerify,
-      //     PublishId: payload[i].PublishId,
-      //     SVDisplay: utils.setSupportVerify(payload[i].SupportVerify)
-      //   })
-      // }
+      for (let i = 0; i < payload.length; i++) {
+        _this.$store.state.datalist.push({
+          ID:payload[i].Id,
+          NotifyTo: payload[i].NotifyTo,
+          EventName: payload[i].EventName,
+          Keys: payload[i].Keys,
+          EventBodys: payload[i].EventBodys,
+          EventStatus: payload[i].EventStatus,
+          CreatedTime: payload[i].CreatedTime,
+        })
+      }
     }, function (payload, _this) {
       console.log("获取数据列表失败：", payload);
       _this.$alert(payload, "获取数据列表失败！", {

@@ -50,7 +50,7 @@ const (
 )
 
 // Create dot.Create
-func (p *Preset) Create(l dot.Line) error {
+func (p *Preset) Create(_ dot.Line) error {
 	p.Deployer = &PreDef.Preset{
 		Address:  "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8",
 		Password: "111111",
@@ -880,25 +880,26 @@ func (p *Preset) GetTxVerify(_ *server.MessageIn) (payload interface{}, err erro
 	}
 
 	var (
-		txs []DBDef.Transaction
-		acc DBDef.Account
-		num int64
 		ss  = make([]string, 0)
+		num int64
 	)
+	{
+		var acc DBDef.Account
+		if num, err = p.CBs.DB.Read(&acc, "", "address = ?", strings.ToLower(p.CBs.CurUser.Account().Addr)); num != 1 || err != nil {
+			dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
+			return
+		}
 
-	if num, err = p.CBs.DB.Read(&acc, "", "address = ?", strings.ToLower(p.CBs.CurUser.Account().Addr)); num != 1 || err != nil {
-		dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
-		return
+		if acc.Verify == nil {
+			payload = ""
+			return
+		}
+		if err = json.Unmarshal(acc.Verify, &ss); err != nil {
+			return
+		}
 	}
 
-	if acc.Verify == nil {
-		payload = ""
-		return
-	}
-	if err = json.Unmarshal(acc.Verify, &ss); err != nil {
-		return
-	}
-
+	var txs []DBDef.Transaction
 	if num, err = p.CBs.DB.Read(&txs, "", "transaction_id in (?)", ss); err != nil {
 		dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
 		return
@@ -917,25 +918,27 @@ func (p *Preset) GetTxArbitrate(_ *server.MessageIn) (payload interface{}, err e
 	}
 
 	var (
-		txs []DBDef.Transaction
-		acc DBDef.Account
-		num int64
 		ss  = make([]string, 0)
+		num int64
 	)
 
-	if num, err = p.CBs.DB.Read(&acc, "", "address = ?", strings.ToLower(p.CBs.CurUser.Account().Addr)); num != 1 || err != nil {
-		dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
-		return
+	{
+		var acc DBDef.Account
+		if num, err = p.CBs.DB.Read(&acc, "", "address = ?", strings.ToLower(p.CBs.CurUser.Account().Addr)); num != 1 || err != nil {
+			dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
+			return
+		}
+
+		if acc.Arbitrate == nil {
+			payload = ""
+			return
+		}
+		if err = json.Unmarshal(acc.Arbitrate, &ss); err != nil {
+			return
+		}
 	}
 
-	if acc.Arbitrate == nil {
-		payload = ""
-		return
-	}
-	if err = json.Unmarshal(acc.Arbitrate, &ss); err != nil {
-		return
-	}
-
+	var txs []DBDef.Transaction
 	if num, err = p.CBs.DB.Read(&txs, "", "transaction_id in (?)", ss); err != nil {
 		dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
 		return
@@ -984,9 +987,11 @@ func (p *Preset) ModifyContractParam(mi *server.MessageIn) (payload interface{},
 		Value:    big.NewInt(0),
 		Pending:  false,
 	}, mcp.Contract.ParamName, mcp.Contract.ParamValue); err != nil {
-		err = errors.New("Unknown contract param or param is not allowed to modify. ")
+		err = errors.Wrap(err, "modify contract param failed")
 		return
 	}
+
+	payload = true
 
 	return
 }
@@ -1016,9 +1021,13 @@ func (p *Preset) GetEvtList(mi *server.MessageIn) (payload interface{}, err erro
 		dls []DBDef.Event
 		num int64
 	)
-	if num, err = p.CBs.DB.Read(&dls, "created_time desc", (string(cna.EventBody))); err != nil {
+	if num, err = p.CBs.DB.Read(&dls, "created_time desc", "event_body like ?", "%"+cna.EventBodys+"%"); err != nil {
 		dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
 		return
+	}
+
+	for i, v := range dls {
+		dls[i].EventBodys = string(v.EventBody)
 	}
 
 	payload = dls

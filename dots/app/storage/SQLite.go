@@ -133,6 +133,7 @@ func (s *SQLite) Insert(v interface{}) (int64, error) {
 // Read find records matched from db
 func (s *SQLite) Read(out interface{}, order, query string, sql ...interface{}) (int64, error) {
 	db, err := gorm.Open(DB, s.config.DBName)
+	db.LogMode(true)
 	if err != nil {
 		dot.Logger().Errorln("Database connect failed. ", zap.NamedError("in ReadWithOrder()", err))
 	}

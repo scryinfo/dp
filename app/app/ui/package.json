@@ -9,8 +9,10 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "core-js": "^2.6.11",
     "element-ui": "^2.13.0",
     "ipfs-http-client": "^40.0.1",
+    "moment": "^2.24.0",
     "vue": "^2.5.2",
     "vue-router": "^3.0.1",
     "vuex": "^3.1.2"

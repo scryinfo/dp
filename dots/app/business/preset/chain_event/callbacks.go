@@ -363,6 +363,7 @@ func (c *Callbacks) getAndRenameProofFiles(ipfsIds [][32]byte, extensions []stri
 
 	return
 }
+
 func ipfsBytes32ToHash(ipfsb [32]byte) string {
 	byte34 := make([]byte, 34)
 	// if ipfs change encrypt algorithm, byte 18 and 32 will change together.

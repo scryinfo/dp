@@ -65,8 +65,9 @@ const router = new VueRouter({
   routes
 });
 
+const routerPush = VueRouter.prototype.push;
 VueRouter.prototype.push = function push(location) {
-  return router.call(this, location).catch(error=> error)
+  return routerPush.call(this, location).catch(error=> error)
 };
 
 export default router;

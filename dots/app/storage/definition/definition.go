@@ -73,9 +73,9 @@ type Event struct {
 	NotifyTo    []byte // []string, json serialize
 	EventName   string
 	EventBody   []byte // json string, json serialize
-	EventStatus int    // 0: unread, 1: already read
-
-	CreatedTime int64 `json:"-"`
+	EventBodys  string
+	EventStatus int // 0: unread, 1: already read
+	CreatedTime int64
 }
 
 // AfterUpdate show use for hooks
