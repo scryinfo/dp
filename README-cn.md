@@ -26,9 +26,9 @@
 在dp/app/app/main目录下执行go build，成功执行后，会生成入口文件：**main.exe**。
 ##  运行
 ### 依赖
-- ipfs客户端 (0.4.20)
+- ipfs客户端 (0.4.14 / 0.4.20)
 - geth客户端 (1.8.27)
-- 浏览器 (chrome 74)
+- 浏览器 (chrome 79)
 ### 启动用户服务：
 运行dp/services/auth_s目录下的，用户服务的可执行文件：**account_server-windows-64.exe**，默认使用48080端口。
 ### 连接ipfs：
@@ -63,7 +63,7 @@
 执行dp/backend/contracts/tool目录下的**contract.ps1**脚本文件完成这一步骤。  
 脚本会将部分结果输出到上级目录的migrate.log文件，在文件末尾可以找到*ScryToken*、*ScryProtocol*两个"0x"开头的42个字符的地址。
 ### 修改app配置文件：
-按照下表所示，修改位于dp/app/app/main目录下的**main.json**配置文件：  
+按照相应格式，修改位于dp/app/app/main目录下的**main.json**配置文件：  
 
 | key | value |
 |:------- |:------- |
@@ -71,7 +71,7 @@ protocolContractAddr | 修改为日志文件中找到的ScryProtocol地址
 tokenContractAddr | 修改为日志文件中找到的ScryToken地址
 uiResourcesDir | 修改为你的电脑上的dp项目路径
 metaDataOutDir | 修改为你期望的原始数据文件下载路径
-proofsOutDir | 修改为你期望的证明文件下载路径  
+proofsOutDir | 修改为你期望的证明文件和临时文件的下载路径  
 
 修改上面的配置即可保证主要流程正常执行，下附其他配置信息简要描述：  
 
@@ -85,13 +85,12 @@ wsPort | app前后端之间的websocket连接使用的端口
 dbName | 数据库名
 
 ### 体验
-完成上述所有步骤后，即可通过dp/app/app/main/main.exe入口文件进行体验。
+完成上述所有步骤后，即可通过dp/app/app/main/main.exe入口文件进行体验，使用方式请参考document/app使用手册。
 ## 异常处理：
-- windows禁止ps1脚本执行：使用管理员权限打开命令行，执行**Set-ExecutionPolicy unrestricted**命令。
+- windows禁止ps1脚本执行：使用管理员权限，执行**Set-ExecutionPolicy unrestricted**命令。
 - npm install error，找不到python exec：安装python2或忽略该问题。
 - npm install error：node.js版本冲突，完全卸载node.js后重新安装即可解决该问题。
 - 用户服务启动失败，找不到vcruntime140.dll：[安装vcre](https://www.microsoft.com/zh-cn/download/details.aspx?id=48145)。
 - 智能合约部署失败，连接不到以太坊客户端：检查是否使用了自定义的端口搭建私链，修改contracts目录下的truffle.js配置文件network.geth.port与之一致。
-- 智能合约部署无显示：查看geth_init.ps1打开的powershell窗口是否仍在挖矿（不断有新的消息出现）。
 # [Code Style -- Go](https://github.com/scryinfo/scryg/blob/master/codestyle_go-cn.md)
 # [ScryInfo协议层SDK接口文档v0.0.5](https://github.com/scryinfo/dp/blob/master/document/ScryInfo%E5%8D%8F%E8%AE%AE%E5%B1%82SDK%E6%8E%A5%E5%8F%A3%E6%96%87%E6%A1%A3v0.0.5.md)

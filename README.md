@@ -1,3 +1,8 @@
+[![GoDoc](https://godoc.org/github.com/scryinfo/dp?status.svg)](https://godoc.org/github.com/scryinfo/dp)
+[![Go Report Card](https://goreportcard.com/badge/github.com/scryinfo/dp)](https://goreportcard.com/report/github.com/scryinfo/dp)
+[![Build Status](https://travis-ci.org/scryinfo/dp.svg?branch=master)](https://travis-ci.org/scryinfo/dp)
+[![codecov](https://codecov.io/gh/scryinfo/dp/branch/master/graph/badge.svg)](https://codecov.io/gh/scryinfo/dp)
+
 [中文](./README-cn.md)  
 [EN](./README.md)  
 [한국어](./README-ko.md)  

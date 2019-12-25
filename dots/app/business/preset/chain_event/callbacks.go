@@ -9,7 +9,6 @@ import (
 	"github.com/scryinfo/dp/dots/app/server"
 	"github.com/scryinfo/dp/dots/app/storage"
 	"github.com/scryinfo/dp/dots/app/storage/definition"
-	scry2 "github.com/scryinfo/dp/dots/binary/scry"
 	"github.com/scryinfo/dp/dots/eth/event"
 	ipfs "github.com/scryinfo/dp/dots/storage/ipfs"
 	"go.uber.org/zap"
@@ -23,14 +22,12 @@ import (
 
 // Callbacks encapsulate event handler, current user and some components
 type Callbacks struct {
-	CurUser      scry2.Client
 	EventNames   []string
 	EventHandler []event.Callback
 	FlagChan     chan bool // flag for scanned approval event.
 	config       cbsConfig
 	WS           *server.WSServer `dot:""`
 	Storage      *ipfs.Ipfs       `dot:""`
-	DB           *storage.SQLite  `dot:""`
 }
 
 type cbsConfig struct {
@@ -129,8 +126,8 @@ func (c *Callbacks) onPublish(event event.Event) bool {
 		}
 	}
 
-	if num, err := c.DB.Read(&definition.DataList{}, "", "publish_id = ?", dl.PublishId); num == 0 { // "error": "record not found"
-		if num, err := c.DB.Insert(&dl); num != 1 || err != nil {
+	if num, err := c.WS.DB.Read(&definition.DataList{}, "", "publish_id = ?", dl.PublishId); num == 0 { // "error": "record not found"
+		if num, err := c.WS.DB.Insert(&dl); num != 1 || err != nil {
 			dot.Logger().Errorln("db insert failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
 			return false
 		}
@@ -251,7 +248,7 @@ func (c *Callbacks) onVerifiersChosen(event event.Event) bool {
 func (c *Callbacks) updateVerifierArray(txId string, blockNumber uint64, mode string) error {
 	var acc definition.Account
 
-	if num, err := c.DB.Read(&acc, "", "address = ?", c.CurUser.Account().Addr); num != 1 || err != nil {
+	if num, err := c.WS.DB.Read(&acc, "", "address = ?", c.WS.CurUser.Account().Addr); num != 1 || err != nil {
 		dot.Logger().Errorln("id not in slice", zap.Int64("affect rows number", num), zap.NamedError("error", err))
 		return nil
 	}
@@ -263,10 +260,10 @@ func (c *Callbacks) updateVerifierArray(txId string, blockNumber uint64, mode st
 		return nil
 	}
 
-	if num, err := c.DB.Update(&acc, map[string]interface{}{
+	if num, err := c.WS.DB.Update(&acc, map[string]interface{}{
 		"verify":     acc.Verify,
 		"from_block": blockNumber,
-	}, "address = ?", c.CurUser.Account().Addr); num != 1 || err != nil {
+	}, "address = ?", c.WS.CurUser.Account().Addr); num != 1 || err != nil {
 		dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
 		return nil
 	}
@@ -294,10 +291,10 @@ func (c *Callbacks) onAdvancePurchase(event event.Event) bool {
 	}
 
 	tx.Identify = 1
-	if tx.Buyer == strings.ToLower(c.CurUser.Account().Addr) {
+	if tx.Buyer == strings.ToLower(c.WS.CurUser.Account().Addr) {
 		tx.Identify = 2
-		if num, err := c.DB.Read(&definition.Transaction{}, "", "transaction_id = ?", tx.TransactionId); num == 0 { // "error": "record not found"
-			if num, err := c.DB.Insert(&tx); num != 1 || err != nil {
+		if num, err := c.WS.DB.Read(&definition.Transaction{}, "", "transaction_id = ?", tx.TransactionId); num == 0 { // "error": "record not found"
+			if num, err := c.WS.DB.Insert(&tx); num != 1 || err != nil {
 				dot.Logger().Errorln("db insert failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
 				return false
 			}
@@ -358,7 +355,7 @@ func ipfsBytes32ToHash(ipfsb [32]byte) string {
 
 func (c *Callbacks) onConfirmPurchase(event event.Event) bool {
 	var tx definition.Transaction
-	if num, err := c.DB.Update(&tx, map[string]interface{}{
+	if num, err := c.WS.DB.Update(&tx, map[string]interface{}{
 		"meta_data_id_enc_with_seller": string(event.Data.Get("metaDataIdEncSeller").([]byte)),
 		"state":                        int(event.Data.Get("state").(uint8)),
 	}, "transaction_id = ?", event.Data.Get("transactionId").(*big.Int).String()); num != 1 || err != nil {
@@ -366,7 +363,7 @@ func (c *Callbacks) onConfirmPurchase(event event.Event) bool {
 		return false
 	}
 
-	switch strings.ToLower(c.CurUser.Account().Addr) {
+	switch strings.ToLower(c.WS.CurUser.Account().Addr) {
 	case strings.ToLower(tx.Seller):
 		tx.Identify = 1
 		if !c.updateFromBlock(event.BlockNumber) {
@@ -393,7 +390,7 @@ func (c *Callbacks) onConfirmPurchase(event event.Event) bool {
 
 func (c *Callbacks) onReEncrypt(event event.Event) bool {
 	var tx definition.Transaction
-	if num, err := c.DB.Update(&tx, map[string]interface{}{
+	if num, err := c.WS.DB.Update(&tx, map[string]interface{}{
 		"meta_data_id_enc_with_buyer": string(event.Data.Get("metaDataIdEncBuyer").([]byte)),
 		"state":                       int(event.Data.Get("state").(uint8)),
 	}, "transaction_id = ?", event.Data.Get("transactionId").(*big.Int).String()); num != 1 || err != nil {
@@ -401,7 +398,7 @@ func (c *Callbacks) onReEncrypt(event event.Event) bool {
 		return false
 	}
 
-	switch strings.ToLower(c.CurUser.Account().Addr) {
+	switch strings.ToLower(c.WS.CurUser.Account().Addr) {
 	case strings.ToLower(tx.Seller):
 		tx.Identify = 1
 	case strings.ToLower(tx.Buyer):
@@ -423,14 +420,14 @@ func (c *Callbacks) onReEncrypt(event event.Event) bool {
 
 func (c *Callbacks) onTransactionClose(event event.Event) bool {
 	var tx definition.Transaction
-	if num, err := c.DB.Update(&tx, map[string]interface{}{
+	if num, err := c.WS.DB.Update(&tx, map[string]interface{}{
 		"state": int(event.Data.Get("state").(uint8)),
 	}, "transaction_id = ?", event.Data.Get("transactionId").(*big.Int).String()); num != 1 || err != nil {
 		dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
 		return false
 	}
 
-	switch strings.ToLower(c.CurUser.Account().Addr) {
+	switch strings.ToLower(c.WS.CurUser.Account().Addr) {
 	case strings.ToLower(tx.Seller):
 		tx.Identify = 1
 	case strings.ToLower(tx.Buyer):
@@ -451,10 +448,10 @@ func (c *Callbacks) onTransactionClose(event event.Event) bool {
 }
 
 func (c *Callbacks) onRegisterAsVerifier(event event.Event) bool {
-	if num, err := c.DB.Update(&definition.Account{}, map[string]interface{}{
+	if num, err := c.WS.DB.Update(&definition.Account{}, map[string]interface{}{
 		"from_block":  int64(event.BlockNumber + 1),
 		"is_verifier": true,
-	}, "address = ?", c.CurUser.Account().Addr); num != 1 || err != nil {
+	}, "address = ?", c.WS.CurUser.Account().Addr); num != 1 || err != nil {
 		dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
 		return false
 	}
@@ -476,7 +473,7 @@ func (c *Callbacks) onVoteResult(event event.Event) bool {
 		tx.State = int(event.Data.Get("state").(uint8))
 	case 1:
 		tx.Identify = 2
-		if num, err := c.DB.Update(&tx, map[string]interface{}{
+		if num, err := c.WS.DB.Update(&tx, map[string]interface{}{
 			"verifier1_response": setJudge(event.Data.Get("judge").(bool)) + ". " + event.Data.Get("comments").(string),
 			"state":              int(event.Data.Get("state").(uint8)),
 		}, "transaction_id = ?", event.Data.Get("transactionId").(*big.Int).String()); num != 1 || err != nil {
@@ -485,7 +482,7 @@ func (c *Callbacks) onVoteResult(event event.Event) bool {
 		}
 	case 2:
 		tx.Identify = 2
-		if num, err := c.DB.Update(&tx, map[string]interface{}{
+		if num, err := c.WS.DB.Update(&tx, map[string]interface{}{
 			"verifier2_response": setJudge(event.Data.Get("judge").(bool)) + ". " + event.Data.Get("comments").(string),
 			"state":              int(event.Data.Get("state").(uint8)),
 		}, "transaction_id = ?", event.Data.Get("transactionId").(*big.Int).String()); num != 1 || err != nil {
@@ -531,7 +528,7 @@ func (c *Callbacks) onArbitrationBegin(event event.Event) bool {
 		dot.Logger().Errorln("", zap.NamedError("Node - onVC.callback: get and rename proof files failed. ", err))
 	}
 
-	if num, err := c.DB.Update(&tx, map[string]interface{}{
+	if num, err := c.WS.DB.Update(&tx, map[string]interface{}{
 		"meta_data_id_enc_with_arbitrator": string(event.Data.Get("metaDataIdEncArbitrator").([]byte)),
 	}, "transaction_id = ?", event.Data.Get("transactionId").(*big.Int).String()); num != 1 || err != nil {
 		dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
@@ -552,7 +549,7 @@ func (c *Callbacks) onArbitrationBegin(event event.Event) bool {
 func (c *Callbacks) updateArbitratorArray(txId string, blockNumber uint64, mode string) error {
 	var acc definition.Account
 
-	if num, err := c.DB.Read(&acc, "", "address = ?", c.CurUser.Account().Addr); num != 1 || err != nil {
+	if num, err := c.WS.DB.Read(&acc, "", "address = ?", c.WS.CurUser.Account().Addr); num != 1 || err != nil {
 		dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
 		return err
 	}
@@ -564,10 +561,10 @@ func (c *Callbacks) updateArbitratorArray(txId string, blockNumber uint64, mode 
 		return err
 	}
 
-	if num, err := c.DB.Update(&acc, map[string]interface{}{
+	if num, err := c.WS.DB.Update(&acc, map[string]interface{}{
 		"arbitrate":  acc.Arbitrate,
 		"from_block": blockNumber,
-	}, "address = ?", c.CurUser.Account().Addr); num != 1 || err != nil {
+	}, "address = ?", c.WS.CurUser.Account().Addr); num != 1 || err != nil {
 		dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
 		return err
 	}
@@ -578,14 +575,14 @@ func (c *Callbacks) updateArbitratorArray(txId string, blockNumber uint64, mode 
 func (c *Callbacks) onArbitrationResult(event event.Event) bool {
 	var tx definition.Transaction
 
-	if num, err := c.DB.Update(&tx, map[string]interface{}{
+	if num, err := c.WS.DB.Update(&tx, map[string]interface{}{
 		"arbitrate_result": event.Data.Get("judge").(bool),
 	}, "transaction_id = ?", event.Data.Get("transactionId").(*big.Int).String()); num != 1 || err != nil {
 		dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
 		return false
 	}
 
-	switch strings.ToLower(c.CurUser.Account().Addr) {
+	switch strings.ToLower(c.WS.CurUser.Account().Addr) {
 	case strings.ToLower(tx.Seller):
 		tx.Identify = 1
 	case strings.ToLower(tx.Buyer):
@@ -606,7 +603,7 @@ func (c *Callbacks) onArbitrationResult(event event.Event) bool {
 }
 
 func (c *Callbacks) updateFromBlock(blockNumber uint64) bool {
-	if num, err := c.DB.Update(&definition.Account{}, map[string]interface{}{"from_block": int64(blockNumber + 1)}, "address = ?", c.CurUser.Account().Addr); num != 1 || err != nil {
+	if num, err := c.WS.DB.Update(&definition.Account{}, map[string]interface{}{"from_block": int64(blockNumber + 1)}, "address = ?", c.WS.CurUser.Account().Addr); num != 1 || err != nil {
 		dot.Logger().Errorln("db update failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
 		return false
 	}
@@ -616,7 +613,7 @@ func (c *Callbacks) updateFromBlock(blockNumber uint64) bool {
 
 func (c *Callbacks) getProofFileExtensions(pubId string) (extensions []string) {
 	var dl definition.DataList
-	if num, err := c.DB.Read(&dl, "", "publish_id = ?", pubId); num != 1 || err != nil {
+	if num, err := c.WS.DB.Read(&dl, "", "publish_id = ?", pubId); num != 1 || err != nil {
 		dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
 		return
 	}
@@ -631,7 +628,7 @@ func (c *Callbacks) getProofFileExtensions(pubId string) (extensions []string) {
 
 func (c *Callbacks) makeTxWithDataDetails(tx *definition.Transaction, pubId string) bool {
 	var dl definition.DataList
-	if num, err := c.DB.Read(&dl, "", "publish_id = ?", pubId); num != 1 || err != nil {
+	if num, err := c.WS.DB.Read(&dl, "", "publish_id = ?", pubId); num != 1 || err != nil {
 		dot.Logger().Errorln("db read failed", zap.Int64("affect rows number", num), zap.NamedError("error", err))
 		return false
 	}

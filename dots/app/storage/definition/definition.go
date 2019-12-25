@@ -12,6 +12,7 @@ type Account struct {
 	IsVerifier bool
 	Verify     []byte // []string, json serialize
 	Arbitrate  []byte // []string, json serialize
+	Salt       string `json:"-"`
 }
 
 // DataList data_lists
@@ -63,7 +64,7 @@ type Event struct {
 	NotifyTo    []byte // []string, json serialize
 	EventName   string
 	EventBody   []byte // json string, json serialize
-	EventStatus int // 0: unread, 1: already read
+	EventStatus int    // 0: unread, 1: already read
 
 	CreatedTime int64 `json:"-"`
 }
