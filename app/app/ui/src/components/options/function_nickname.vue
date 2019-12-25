@@ -46,7 +46,7 @@ export default {
                 });
                 return;
             }
-            connect.send({Name:"modifyNickname",Payload:{Nickname: this.nickname}}, function (payload, _this) {
+            connect.send({Name:"modifyNickname",Payload:{modifyNickname:{nickname: this.nickname}}}, function (payload, _this) {
                 console.log("修改昵称成功：", payload);
                 _this.$store.state.nickname = _this.nickname;
             }, function (payload, _this) {
