@@ -14,7 +14,7 @@ type Database interface {
 
 	// Customized CRUD
 
-	// ReadPage, todo: wait js implement
+	// ReadPage, todo
 	ReadPage() error
 
 	// Update one item with hooks

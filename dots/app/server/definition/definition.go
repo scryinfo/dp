@@ -3,8 +3,25 @@
 
 package definition
 
-// Preset pre-define structure for deserialize msg from client
-type Preset struct {
+import "encoding/json"
+
+// MessageIn unified structure deserialize msg from client
+type MessageIn struct {
+	Name    string          `json:"Name"`
+	Payload json.RawMessage `json:"Payload"`
+}
+
+// MessageOut unified structure serialize msg send to client
+type MessageOut struct {
+	Name    string      `json:"Name"`
+	Payload interface{} `json:"Payload,omitempty"`
+}
+
+// PresetFunc preset system functions' handler
+type PresetFunc = func(*MessageInPayload) (interface{}, error)
+
+// MessageInPayload pre-define structure for deserialize msg from client
+type MessageInPayload struct {
 	PublishId     string `json:"PublishId"`
 	TransactionId string `json:"TransactionId"`
 
@@ -14,12 +31,15 @@ type Preset struct {
 	SupportVerify bool   `json:"supportVerify"`
 	StartVerify   bool   `json:"startVerify"`
 
+	Salt string
+
 	Ids       Ids       `json:"Ids"`
 	Confirm   Confirm   `json:"confirm"`
 	Verify    Verify    `json:"verify"`
 	Grade     Grade     `json:"grade"`
 	Arbitrate Arbitrate `json:"arbitrate"`
 
+	Nickname ModifyNickname      `json:"modifyNickname"`
 	Contract ModifyContractParam `json:"modifyContractParam"`
 }
 
@@ -43,15 +63,19 @@ type Verify struct {
 
 // Grade specific structure for grade func
 type Grade struct {
-	Verifier1Revert bool    `json:"verifier1Revert"`
-	Verifier1Grade  float64 `json:"verifier1Grade"`
-	Verifier2Revert bool    `json:"verifier2Revert"`
-	Verifier2Grade  float64 `json:"verifier2Grade"`
+	Verifier1Revert bool   `json:"verifier1Revert"`
+	Verifier1Grade  string `json:"verifier1Grade"`
+	Verifier2Revert bool   `json:"verifier2Revert"`
+	Verifier2Grade  string `json:"verifier2Grade"`
 }
 
 // Arbitrate specific structure for arbitrate func
 type Arbitrate struct {
 	ArbitrateResult bool `json:"arbitrateResult,omitempty"`
+}
+
+type ModifyNickname struct {
+	Nickname string `json:"nickname"`
 }
 
 // ModifyContractParam specific structure for MCP func

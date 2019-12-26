@@ -13,6 +13,8 @@ let connect = {
     msgMutex: true,
     msgParams: [],
 
+    crypto: require('crypto'),
+
     WSConnect: function (_this) {
         // url: 'http://127.0.0.1:9822/#/'
         let port = window.location.href.split(":")[2].split("/")[0];
@@ -87,6 +89,10 @@ let connect = {
         if (!!cbs) { connect.addCallbackFunc(obj.Name + ".callback", cbs); }
         if (!!cbf) { connect.addCallbackFunc(obj.Name + ".callback.error", cbf); }
 
+        if (!!obj.Payload && !!obj.Payload.password) { // password hash
+            obj.Payload.password = connect.calcHash(obj.Payload.password)
+        }
+
         console.log("before send: ", JSON.stringify(obj));
 
         connect.ws.send(JSON.stringify(obj));
@@ -98,6 +104,10 @@ let connect = {
 
     cleanFuncMap: function () {
         connect.map = {};
+    },
+
+    calcHash: function (text) {
+        return connect.crypto.createHash('sha256').update(text).digest('hex');
     }
 };
 

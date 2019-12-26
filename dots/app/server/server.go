@@ -3,7 +3,7 @@
 
 package server
 
-import "encoding/json"
+import "github.com/scryinfo/dp/dots/app/server/definition"
 
 // Server define what a type of connection should implement.
 type Server interface {
@@ -13,23 +13,8 @@ type Server interface {
 	SendMessage(name string, payload interface{}) error
 
 	// preset function to handle message.
-	PresetMsgHandleFuncs(name []string, presetFunc []PresetFunc) error
+	PresetMsgHandleFuncs(name []string, presetFunc []definition.PresetFunc) error
 }
-
-// MessageIn unified structure deserialize msg from client
-type MessageIn struct {
-	Name    string          `json:"Name"`
-	Payload json.RawMessage `json:"Payload"`
-}
-
-// MessageOut unified structure serialize msg send to client
-type MessageOut struct {
-	Name    string      `json:"Name"`
-	Payload interface{} `json:"Payload,omitempty"`
-}
-
-// PresetFunc preset system functions' handler
-type PresetFunc = func(*MessageIn) (interface{}, error)
 
 // EventSendFailed common error extend msg
 const EventSendFailed = " event send failed. "
