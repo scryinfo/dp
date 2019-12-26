@@ -144,7 +144,7 @@ func (ws *WSServer) handleMessages(conn *websocket.Conn) {
 		{
 			// handle
 			var message *definition.MessageInPayload
-			message, err = ws.calcPwdHash(mi.Payload)
+			message, err = ws.calcPwdHash(&mi)
 			if err != nil {
 				logger.Errorln("calculate password's hash failed. ", zap.NamedError("", err))
 				continue
@@ -202,44 +202,42 @@ func (ws *WSServer) PresetMsgHandleFuncs(name []string, presetFunc []definition.
 	return nil
 }
 
-func (ws *WSServer) calcPwdHash(bytes json.RawMessage) (result *definition.MessageInPayload, err error) {
-	if string(bytes) == "\"\"" { // payload is nil, no pwd item at all
+func (ws *WSServer) calcPwdHash(mi *definition.MessageIn) (result *definition.MessageInPayload, err error) {
+	if string(mi.Payload) == "\"\"" {
 		return
 	}
 
 	result = &definition.MessageInPayload{}
-	if err = json.Unmarshal(bytes, result); err != nil {
+	if err = json.Unmarshal(mi.Payload, result); err != nil {
 		return
 	}
-	dot.Logger().Debugln("show param :", zap.Any("result", result))
 
-	if result.Password != "" {
-		var userAddr string
-		if ws.CurUser == nil && result.Address == "" { // msg: create new account, only generate salt
-			result.Salt = ws.generateSalt(10)
-		} else if ws.CurUser == nil && result.Address != "" { // msg: login verify, match curUser with addr input
-			userAddr = result.Address
-		} else {
-			userAddr = ws.CurUser.Account().Addr
-		}
-
-		var salt string
-		if result.Salt != "" { // create
-			salt = result.Salt
-		} else {
-			if salt, err = ws.readSalt(userAddr); err != nil {
-				return
-			}
-		}
-
-		t := sha256.Sum256([]byte(result.Password + salt))
-		result.Password = hex.EncodeToString(t[:])
-
-		dot.Logger().Debugln("pwd hash   :", zap.String("pwd", result.Password),
-			zap.String("pwd meta", result.Password),
-			zap.String("salt", salt),
-		)
+	if result.Password == "" {
+		return
 	}
+
+	var userAddr string
+	if mi.Name == "createNewAccount" {
+		result.Salt = ws.generateSalt(10)
+	} else if mi.Name == "loginVerify" {
+		userAddr = result.Address
+	} else {
+		userAddr = ws.CurUser.Account().Addr
+	}
+
+	var salt string
+	if result.Salt != "" { // create
+		salt = result.Salt
+	} else {
+		if salt, err = ws.readSalt(userAddr); err != nil {
+			return
+		}
+	}
+
+	t := sha256.Sum256([]byte(result.Password + salt))
+	result.Password = hex.EncodeToString(t[:])
+
+	dot.Logger().Debugln("pwd hash   :", zap.String("pwd", result.Password))
 
 	return
 }

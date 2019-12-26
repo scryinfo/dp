@@ -288,7 +288,7 @@ func (p *Preset) Logout(_ *definition.MessageInPayload) (payload interface{}, er
 
 	p.CBs.WS.CurUser = nil
 
-	p.CBs.FlagChan = nil
+	p.CBs.FlagChan = make(chan bool, 10)
 
 	payload = true
 
@@ -580,15 +580,15 @@ func (p *Preset) GradeToVerifier(mi *definition.MessageInPayload) (payload inter
 
 	txParam := p.makeTxParams(mi.Password)
 
-	if mi.Grade.Verifier1Revert {
-		credit := uint8(mi.Grade.Verifier1Grade)
+	if mi.Grade.Verifier1Revert && len(mi.Grade.Verifier1Grade) == 1 {
+		credit := mi.Grade.Verifier1Grade[0]
 		if err = p.Bin.ChainWrapper().GradeToVerifier(txParam, tId, 0, credit); err != nil {
 			err = errors.Wrap(err, "Grade verifier1 failed. ")
 			return
 		}
 	}
-	if mi.Grade.Verifier2Revert {
-		credit := uint8(mi.Grade.Verifier2Grade)
+	if mi.Grade.Verifier2Revert && len(mi.Grade.Verifier2Grade) == 1 {
+		credit := mi.Grade.Verifier2Grade[0]
 		if err = p.Bin.ChainWrapper().GradeToVerifier(txParam, tId, 1, credit); err != nil {
 			err = errors.Wrap(err, "Grade verifier2 failed. ")
 			return

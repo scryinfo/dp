@@ -63,10 +63,10 @@ type Verify struct {
 
 // Grade specific structure for grade func
 type Grade struct {
-	Verifier1Revert bool    `json:"verifier1Revert"`
-	Verifier1Grade  float64 `json:"verifier1Grade"`
-	Verifier2Revert bool    `json:"verifier2Revert"`
-	Verifier2Grade  float64 `json:"verifier2Grade"`
+	Verifier1Revert bool   `json:"verifier1Revert"`
+	Verifier1Grade  string `json:"verifier1Grade"`
+	Verifier2Revert bool   `json:"verifier2Revert"`
+	Verifier2Grade  string `json:"verifier2Grade"`
 }
 
 // Arbitrate specific structure for arbitrate func
