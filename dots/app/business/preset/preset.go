@@ -37,7 +37,6 @@ const (
 	// PreTypeId preset type id
 	PreTypeId = "13d73d73-da19-4d39-9dca-3018fbf0ec30"
 
-	// todo: params get from db, modify request change db the same time.
 	verifierNum            = 2
 	verifierBonus          = 300
 	registerAsVerifierCost = 10000

@@ -85,7 +85,7 @@ wsPort | app前后端之间的websocket连接使用的端口
 dbName | 数据库名
 
 ### 体验
-完成上述所有步骤后，即可通过dp/app/app/main/main.exe入口文件进行体验，使用方式请参考document/app使用手册。
+完成上述所有步骤后，即可通过dp/app/app/main/main.exe入口文件进行体验。
 ## 异常处理：
 - windows禁止ps1脚本执行：使用管理员权限，执行**Set-ExecutionPolicy unrestricted**命令。
 - npm install error，找不到python exec：安装python2或忽略该问题。
