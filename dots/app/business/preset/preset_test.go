@@ -1304,9 +1304,9 @@ func TestPreset_GradeToVerifier(t *testing.T) {
 				TransactionId: "0",
 				Grade: definition.Grade{
 					Verifier1Revert: true,
-					Verifier1Grade:  5,
+					Verifier1Grade:  "5",
 					Verifier2Revert: true,
-					Verifier2Grade:  5,
+					Verifier2Grade:  "5",
 				},
 			})
 			So(output, ShouldBeTrue)
@@ -1329,9 +1329,9 @@ func TestPreset_GradeToVerifier(t *testing.T) {
 				TransactionId: "",
 				Grade: definition.Grade{
 					Verifier1Revert: true,
-					Verifier1Grade:  5,
+					Verifier1Grade:  "5",
 					Verifier2Revert: true,
-					Verifier2Grade:  5,
+					Verifier2Grade:  "5",
 				},
 			})
 			So(output, ShouldBeNil)
@@ -1354,9 +1354,9 @@ func TestPreset_GradeToVerifier(t *testing.T) {
 				TransactionId: "0",
 				Grade: definition.Grade{
 					Verifier1Revert: true,
-					Verifier1Grade:  5,
+					Verifier1Grade:  "5",
 					Verifier2Revert: true,
-					Verifier2Grade:  5,
+					Verifier2Grade:  "5",
 				},
 			})
 			So(output, ShouldBeNil)
@@ -1380,9 +1380,9 @@ func TestPreset_GradeToVerifier(t *testing.T) {
 				TransactionId: "0",
 				Grade: definition.Grade{
 					Verifier1Revert: true,
-					Verifier1Grade:  5,
+					Verifier1Grade:  "5",
 					Verifier2Revert: true,
-					Verifier2Grade:  5,
+					Verifier2Grade:  "5",
 				},
 			})
 			So(output, ShouldBeNil)
