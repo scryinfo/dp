@@ -169,7 +169,7 @@ func (s *SQLite) Delete(typ interface{}, query string, sql ...interface{}) (int6
 	return t.RowsAffected, t.Error
 }
 
-// ReadPage todo: wait client implement
+// ReadPage todo
 func (s *SQLite) ReadPage() error {
 	return nil
 }

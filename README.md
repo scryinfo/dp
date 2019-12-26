@@ -1,3 +1,6 @@
+> There are some differences between README.md and README-cn.md.  
+> Please reference README-cn.md first.
+
 [![GoDoc](https://godoc.org/github.com/scryinfo/dp?status.svg)](https://godoc.org/github.com/scryinfo/dp)
 [![Go Report Card](https://goreportcard.com/badge/github.com/scryinfo/dp)](https://goreportcard.com/report/github.com/scryinfo/dp)
 [![Build Status](https://travis-ci.org/scryinfo/dp.svg?branch=master)](https://travis-ci.org/scryinfo/dp)
@@ -21,21 +24,21 @@ Data provider inputs data and metadata through SDK (data includes static data an
 ### Package UI source files：
 > We assume that you have finished node.js download and installation  
 
-Run **webpackUI.ps1** script in dp/app/app/ui content to finish this process 
+Run **webpackUI.ps1** script in dp/app/app/ui/tool content to finish this process 
 You can control whether to display webpack result analysis through *bundleAnalyzerReport* in ui/config/index.js  
 ### Build app executable file：
 Run: ```go build``` in dp/app/app/main content，entrance file: **main.exe** will be generated if succeeded.
 ##  Run
 ### Prerequisites
-- ipfs client (0.4.20)
+- ipfs client (0.4.14 / 0.4.20)
 - geth client (1.8.27)
-- Browser (chrome 74)
+- Browser (chrome 79)
 ### Start user service:
-Run user service executable file in dp/dots/auth content，default port is 48080
+Run user service executable file in dp/services/auth_s content，default port is 48080
 ### ipfs connection：
 > We assume that you have finished ipfs download and installation
 - Adjust config file: find ```config``` file in your ipfs download path, add following 3 "Access..." for config item "API"：  
-```json
+```json  
 "API": {
   "HTTPHeaders": {
     "Server": [
@@ -58,11 +61,11 @@ Run user service executable file in dp/dots/auth content，default port is 48080
 ### Build one private chain:
 > We assume that you have finished geth download and installation
 
-Run **geth_init.ps1** script in dp/dots/binary/contracts/geth_init content to finish private chain building   
+Run **geth_init.ps1** script in dp/backend/contracts/geth_init content to finish private chain building   
 Run **geth_acc_mine.ps1** script in the same content to create user and start mining
 ### Deploy smart contract:
-Run **contract.ps1** script in dp/dots/binary/contracts content to finish this process 
-Script will input part of result to migrate.log in the same content, *ScryToken*、*ScryProtocol* two  42-character address with "0x" in the beginning can be found in the file end  
+Run **contract.ps1** script in dp/backend/contracts/tool content to finish this process 
+Script will input part of result to migrate.log in dp/backend/contracts content, *ScryToken*、*ScryProtocol* two  42-character address with "0x" in the beginning can be found in the file end  
 ### Adjust app config file：
 | key | value |
 |:------- |:------- |
