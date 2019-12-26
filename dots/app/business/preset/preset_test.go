@@ -6,9 +6,9 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/pkg/errors"
 	"github.com/scryinfo/dot/dot"
-	PreDef "github.com/scryinfo/dp/dots/app/business/definition"
 	cec "github.com/scryinfo/dp/dots/app/business/preset/chain_event"
 	"github.com/scryinfo/dp/dots/app/server"
+	"github.com/scryinfo/dp/dots/app/server/definition"
 	"github.com/scryinfo/dp/dots/app/storage"
 	DBDef "github.com/scryinfo/dp/dots/app/storage/definition"
 	"github.com/scryinfo/dp/dots/auth"
@@ -26,7 +26,7 @@ import (
 )
 
 func TestPreset_Create(t *testing.T) {
-	Convey("test Preset.Create (dot.Create)", t, func() {
+	Convey("test MessageInPayload.Create (dot.Create)", t, func() {
 		Convey("standard input, expect success", func() {
 			preIns := &Preset{}
 
@@ -37,7 +37,7 @@ func TestPreset_Create(t *testing.T) {
 }
 
 func TestNewPresetDot(t *testing.T) {
-	Convey("test Preset config", t, func() {
+	Convey("test MessageInPayload config", t, func() {
 		Convey("standard input, expect success", func() {
 			confBs := []byte{123, 34, 109, 101, 116, 97, 68, 97, 116, 97, 79, 117, 116, 68, 105, 114, 34, 58, 32, 34, 67, 58, 47, 85, 115, 101, 114, 115, 47, 87, 105, 108, 108, 47, 68, 101, 115, 107, 116, 111, 112, 34, 125}
 
@@ -59,7 +59,7 @@ func TestNewPresetDot(t *testing.T) {
 }
 
 func TestPreTypeLive(t *testing.T) {
-	Convey("test Preset TypeLive", t, func() {
+	Convey("test MessageInPayload TypeLive", t, func() {
 		Convey("standard input, expect success", func() {
 			dotIns := &dot.TypeLives{
 				Meta: dot.Metadata{
@@ -86,7 +86,7 @@ func TestPreTypeLive(t *testing.T) {
 }
 
 func TestPreset_LoginVerify(t *testing.T) {
-	Convey("test Preset.LoginVerify", t, func() {
+	Convey("test MessageInPayload.LoginVerify", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -96,23 +96,17 @@ func TestPreset_LoginVerify(t *testing.T) {
 			defer UnpatchAll()
 			mockClientObj.EXPECT().Authenticate("123456").Return(true, nil)
 
-			preIns := &Preset{CBs: &cec.Callbacks{}, Bin: &binary.Binary{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{}}, Bin: &binary.Binary{}}
 			Patch((*binary.Binary).ChainWrapper, func(*binary.Binary) scry.ChainWrapper {
 				return nil
 			})
 
-			output, err := preIns.LoginVerify(&server.MessageIn{
-				Payload: []byte{123, 34, 97, 100, 100, 114, 101, 115, 115, 34, 58, 34, 48, 120, 49, 50, 99, 55, 56, 50, 54, 55, 52, 55, 102, 57, 50, 48, 98, 99, 52, 98, 98, 56, 55, 48, 102, 102, 50, 52, 102, 98, 101, 97, 48, 101, 102, 57, 97, 98, 52, 57, 52, 56, 34, 44, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 125},
+			output, err := preIns.LoginVerify(&definition.MessageInPayload{
+				Address:  "0x12c7826747f920bc4bb870ff24fbea0ef9ab4948",
+				Password: "123456",
 			})
 			So(output, ShouldBeTrue)
 			So(err, ShouldBeNil)
-		})
-
-		Convey("json unmarshal failed", func() {
-			preIns := &Preset{}
-			output, err := preIns.LoginVerify(&server.MessageIn{Payload: []byte{123, 34, 97, 100, 100, 114, 101, 115, 115, 34, 58, 34, 48, 120, 49, 50, 99, 55, 56, 50, 54, 55, 52, 55, 102, 57, 50, 48, 98, 99, 52, 98, 98, 56, 55, 48, 102, 102, 50, 52, 102, 98, 101, 97, 48, 101, 102, 57, 97, 98, 52, 57, 52, 56, 34, 44, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 49, 50, 51, 52, 53, 54, 125}})
-			So(output, ShouldBeNil)
-			So(err, ShouldBeError, errors.New("json: cannot unmarshal number into Go struct field Preset.password of type string"))
 		})
 
 		Convey("client is nil", func() {
@@ -124,8 +118,9 @@ func TestPreset_LoginVerify(t *testing.T) {
 				return nil
 			})
 			preIns := &Preset{CBs: &cec.Callbacks{}, Bin: &binary.Binary{}}
-			output, err := preIns.LoginVerify(&server.MessageIn{
-				Payload: []byte{123, 34, 97, 100, 100, 114, 101, 115, 115, 34, 58, 34, 48, 120, 49, 50, 99, 55, 56, 50, 54, 55, 52, 55, 102, 57, 50, 48, 98, 99, 52, 98, 98, 56, 55, 48, 102, 102, 50, 52, 102, 98, 101, 97, 48, 101, 102, 57, 97, 98, 52, 57, 52, 56, 34, 44, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 125},
+			output, err := preIns.LoginVerify(&definition.MessageInPayload{
+				Address:  "0x12c7826747f920bc4bb870ff24fbea0ef9ab4948",
+				Password: "123456",
 			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Call NewScryClient failed. "))
@@ -143,8 +138,9 @@ func TestPreset_LoginVerify(t *testing.T) {
 				return nil
 			})
 			preIns := &Preset{CBs: &cec.Callbacks{}, Bin: &binary.Binary{}}
-			output, err := preIns.LoginVerify(&server.MessageIn{
-				Payload: []byte{123, 34, 97, 100, 100, 114, 101, 115, 115, 34, 58, 34, 48, 120, 49, 50, 99, 55, 56, 50, 54, 55, 52, 55, 102, 57, 50, 48, 98, 99, 52, 98, 98, 56, 55, 48, 102, 102, 50, 52, 102, 98, 101, 97, 48, 101, 102, 57, 97, 98, 52, 57, 52, 56, 34, 44, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 125},
+			output, err := preIns.LoginVerify(&definition.MessageInPayload{
+				Address:  "0x12c7826747f920bc4bb870ff24fbea0ef9ab4948",
+				Password: "123456",
 			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Authenticate user information failed. : an error"))
@@ -162,8 +158,9 @@ func TestPreset_LoginVerify(t *testing.T) {
 				return nil
 			})
 			preIns := &Preset{CBs: &cec.Callbacks{}, Bin: &binary.Binary{}}
-			output, err := preIns.LoginVerify(&server.MessageIn{
-				Payload: []byte{123, 34, 97, 100, 100, 114, 101, 115, 115, 34, 58, 34, 48, 120, 49, 50, 99, 55, 56, 50, 54, 55, 52, 55, 102, 57, 50, 48, 98, 99, 52, 98, 98, 56, 55, 48, 102, 102, 50, 52, 102, 98, 101, 97, 48, 101, 102, 57, 97, 98, 52, 57, 52, 56, 34, 44, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 125},
+			output, err := preIns.LoginVerify(&definition.MessageInPayload{
+				Address:  "0x12c7826747f920bc4bb870ff24fbea0ef9ab4948",
+				Password: "123456",
 			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Login verify failed. "))
@@ -172,7 +169,7 @@ func TestPreset_LoginVerify(t *testing.T) {
 }
 
 func TestPreset_CreateNewAccount(t *testing.T) {
-	Convey("test Preset.CreateNewAccount", t, func() {
+	Convey("test MessageInPayload.CreateNewAccount", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -188,18 +185,11 @@ func TestPreset_CreateNewAccount(t *testing.T) {
 				return 1, nil
 			})
 
-			preIns := &Preset{CBs: &cec.Callbacks{DB: &storage.SQLite{}}, Bin: &binary.Binary{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{DB: &storage.SQLite{}}}, Bin: &binary.Binary{}}
 
-			output, err := preIns.CreateNewAccount(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 125}})
+			output, err := preIns.CreateNewAccount(&definition.MessageInPayload{Password: "123456"})
 			So(output, ShouldEqual, "0x9693")
 			So(err, ShouldBeNil)
-		})
-
-		Convey("json unmarshal failed", func() {
-			preIns := &Preset{CBs: &cec.Callbacks{DB: &storage.SQLite{}}, Bin: &binary.Binary{}}
-			output, err := preIns.CreateNewAccount(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 49, 50, 51, 52, 53, 54, 125}})
-			So(output, ShouldBeNil)
-			So(err, ShouldBeError, errors.New("json: cannot unmarshal number into Go struct field Preset.password of type string"))
 		})
 
 		Convey("CreateScryClient failed", func() {
@@ -207,8 +197,8 @@ func TestPreset_CreateNewAccount(t *testing.T) {
 				return nil, errors.New("an error")
 			})
 			defer UnpatchAll()
-			preIns := &Preset{CBs: &cec.Callbacks{DB: &storage.SQLite{}}, Bin: &binary.Binary{}}
-			output, err := preIns.CreateNewAccount(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 125}})
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{DB: &storage.SQLite{}}}, Bin: &binary.Binary{}}
+			output, err := preIns.CreateNewAccount(&definition.MessageInPayload{Password: "123456"})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Create new user failed. : an error"))
 		})
@@ -227,8 +217,8 @@ func TestPreset_CreateNewAccount(t *testing.T) {
 			Patch((*storage.SQLite).Insert, func(*storage.SQLite, interface{}) (int64, error) {
 				return 0, nil
 			})
-			preIns := &Preset{CBs: &cec.Callbacks{DB: &storage.SQLite{}}, Bin: &binary.Binary{}}
-			output, err := preIns.CreateNewAccount(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 125}})
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{DB: &storage.SQLite{}}}, Bin: &binary.Binary{}}
+			output, err := preIns.CreateNewAccount(&definition.MessageInPayload{Password: "123456"})
 			So(output, ShouldEqual, "0x9693")
 			So(err, ShouldBeNil)
 		})
@@ -240,7 +230,7 @@ func onApprove(_ event.Event) bool {
 }
 
 func TestPreset_CurrentUserDataUpdate(t *testing.T) {
-	Convey("test Preset.CurrentUserDataUpdate", t, func() {
+	Convey("test MessageInPayload.CurrentUserDataUpdate", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -258,11 +248,11 @@ func TestPreset_CurrentUserDataUpdate(t *testing.T) {
 			})
 
 			preIns := &Preset{
-				Deployer: &PreDef.Preset{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
+				Deployer: &definition.MessageInPayload{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
 				CBs: &cec.Callbacks{
 					EventNames:   []string{"Approval"},
 					EventHandler: []event.Callback{onApprove},
-					CurUser:      mockClientObj,
+					WS:           &server.WSServer{CurUser: mockClientObj},
 				},
 				Bin: &binary.Binary{Listener: &listen.Listener{}},
 			}
@@ -273,7 +263,7 @@ func TestPreset_CurrentUserDataUpdate(t *testing.T) {
 		})
 
 		Convey("current user is nil", func() {
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: nil}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{}}}
 			output, err := preIns.CurrentUserDataUpdate(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Current user is nil. "))
@@ -287,7 +277,7 @@ func TestPreset_CurrentUserDataUpdate(t *testing.T) {
 				CBs: &cec.Callbacks{
 					EventNames:   []string{"Approval"},
 					EventHandler: []event.Callback{onApprove},
-					CurUser:      mockClientObj,
+					WS:           &server.WSServer{CurUser: mockClientObj},
 				},
 			}
 			output, err := preIns.CurrentUserDataUpdate(nil)
@@ -308,7 +298,7 @@ func TestPreset_CurrentUserDataUpdate(t *testing.T) {
 				CBs: &cec.Callbacks{
 					EventNames:   []string{"Approval"},
 					EventHandler: []event.Callback{onApprove},
-					CurUser:      mockClientObj,
+					WS:           &server.WSServer{CurUser: mockClientObj},
 				},
 			}
 			output, err := preIns.CurrentUserDataUpdate(nil)
@@ -332,11 +322,11 @@ func TestPreset_CurrentUserDataUpdate(t *testing.T) {
 				return errors.New("an error")
 			})
 			preIns := &Preset{
-				Deployer: &PreDef.Preset{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
+				Deployer: &definition.MessageInPayload{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
 				CBs: &cec.Callbacks{
 					EventNames:   []string{"Approval"},
 					EventHandler: []event.Callback{onApprove},
-					CurUser:      mockClientObj,
+					WS:           &server.WSServer{CurUser: mockClientObj},
 				},
 				Bin: &binary.Binary{Listener: &listen.Listener{}},
 			}
@@ -348,7 +338,7 @@ func TestPreset_CurrentUserDataUpdate(t *testing.T) {
 }
 
 func TestPreset_testTransferEthAndTokens(t *testing.T) {
-	Convey("test Preset.testTransferEthAndTokens", t, func() {
+	Convey("test MessageInPayload.testTransferEthAndTokens", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -363,8 +353,8 @@ func TestPreset_testTransferEthAndTokens(t *testing.T) {
 			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
 
 			preIns := &Preset{
-				Deployer: &PreDef.Preset{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
-				CBs:      &cec.Callbacks{CurUser: mockClientObj},
+				Deployer: &definition.MessageInPayload{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
+				CBs:      &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}},
 				Bin:      &binary.Binary{},
 			}
 
@@ -383,8 +373,8 @@ func TestPreset_testTransferEthAndTokens(t *testing.T) {
 			defer UnpatchAll()
 			mockChainWrapperObj.EXPECT().Conn().Return(&ethclient.Client{})
 			preIns := &Preset{
-				Deployer: &PreDef.Preset{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
-				CBs:      &cec.Callbacks{CurUser: mockClientObj},
+				Deployer: &definition.MessageInPayload{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
+				CBs:      &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}},
 			}
 			output := preIns.testTransferEthAndTokens()
 			So(output, ShouldBeError, errors.New("Transfer eth from Deployer failed. : an error"))
@@ -403,8 +393,8 @@ func TestPreset_testTransferEthAndTokens(t *testing.T) {
 			mockChainWrapperObj.EXPECT().TransferTokens(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("an error"))
 			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
 			preIns := &Preset{
-				Deployer: &PreDef.Preset{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
-				CBs:      &cec.Callbacks{CurUser: mockClientObj},
+				Deployer: &definition.MessageInPayload{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
+				CBs:      &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}},
 				Bin:      &binary.Binary{},
 			}
 			output := preIns.testTransferEthAndTokens()
@@ -414,13 +404,13 @@ func TestPreset_testTransferEthAndTokens(t *testing.T) {
 }
 
 func TestPreset_Logout(t *testing.T) {
-	Convey("test Preset.Logout", t, func() {
+	Convey("test MessageInPayload.Logout", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
 			mockClientObj.EXPECT().UnSubscribeEvent("Approval").Return(nil)
 
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, EventNames: []string{"Approval"}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}, EventNames: []string{"Approval"}}}
 
 			output, err := preIns.Logout(nil)
 			So(output, ShouldEqual, true) // interface{}.(bool) == bool
@@ -428,7 +418,7 @@ func TestPreset_Logout(t *testing.T) {
 		})
 
 		Convey("current user is nil", func() {
-			preIns := &Preset{CBs: &cec.Callbacks{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{}}}
 			output, err := preIns.Logout(nil)
 			var outputExpect interface{}
 			So(output, ShouldEqual, outputExpect)
@@ -439,7 +429,7 @@ func TestPreset_Logout(t *testing.T) {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
 			mockClientObj.EXPECT().UnSubscribeEvent("Approval").Return(errors.New("an error"))
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, EventNames: []string{"Approval"}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}, EventNames: []string{"Approval"}}}
 			output, err := preIns.Logout(nil)
 			var outputExpect interface{}
 			So(output, ShouldEqual, outputExpect) // interface{}.(bool) == bool
@@ -449,7 +439,7 @@ func TestPreset_Logout(t *testing.T) {
 }
 
 func TestPreset_Publish(t *testing.T) {
-	Convey("test Preset.Publish", t, func() {
+	Convey("test MessageInPayload.Publish", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -462,36 +452,45 @@ func TestPreset_Publish(t *testing.T) {
 			mockChainWrapperObj.EXPECT().Publish(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return("uuid", nil)
 
 			preIns := &Preset{
-				CBs: &cec.Callbacks{CurUser: mockClientObj},
+				CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}},
 				Bin: &binary.Binary{},
 			}
 
-			output, err := preIns.Publish(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 115, 117, 112, 112, 111, 114, 116, 86, 101, 114, 105, 102, 121, 34, 58, 116, 114, 117, 101, 44, 34, 112, 114, 105, 99, 101, 34, 58, 34, 49, 48, 49, 54, 34, 44, 34, 73, 100, 115, 34, 58, 123, 34, 109, 101, 116, 97, 68, 97, 116, 97, 73, 100, 34, 58, 34, 81, 109, 99, 72, 88, 107, 77, 88, 119, 103, 118, 90, 80, 53, 54, 116, 115, 85, 74, 78, 116, 99, 102, 101, 100, 111, 106, 72, 107, 113, 114, 68, 115, 103, 107, 67, 52, 102, 98, 115, 66, 77, 49, 122, 114, 101, 34, 44, 34, 112, 114, 111, 111, 102, 68, 97, 116, 97, 73, 100, 115, 34, 58, 91, 34, 81, 109, 81, 78, 110, 102, 113, 69, 53, 113, 67, 53, 56, 85, 118, 106, 75, 51, 66, 88, 68, 67, 80, 90, 76, 53, 86, 55, 78, 66, 89, 72, 84, 66, 109, 82, 117, 111, 66, 109, 90, 119, 102, 100, 101, 54, 34, 44, 34, 81, 109, 97, 90, 113, 89, 77, 81, 109, 119, 88, 88, 68, 113, 52, 111, 70, 113, 85, 100, 57, 106, 78, 100, 74, 50, 57, 83, 122, 117, 102, 53, 80, 119, 74, 52, 89, 109, 67, 50, 103, 83, 111, 121, 56, 66, 34, 93, 44, 34, 100, 101, 116, 97, 105, 108, 115, 73, 100, 34, 58, 34, 81, 109, 84, 120, 67, 98, 65, 72, 70, 111, 112, 90, 70, 76, 104, 51, 54, 77, 69, 78, 76, 103, 86, 116, 69, 53, 57, 109, 80, 78, 77, 82, 86, 87, 56, 82, 90, 98, 77, 89, 49, 104, 102, 105, 101, 75, 34, 125, 125}})
+			output, err := preIns.Publish(&definition.MessageInPayload{
+				Password:      "123456",
+				Price:         "1016",
+				SupportVerify: true,
+				Ids: definition.Ids{
+					MetaDataId:   "QmcHXkMXwgvZP56tsUJNtcfedojHkqrDsgkC4fbsBM1zre",
+					ProofDataIds: []string{"QmQNnfqE5qC58UvjK3BXDCPZL5V7NBYHTBmRuoBmZwfde6", "QmaZqYMQmwXXDq4oFqUd9jNdJ29Szuf5PwJ4YmC2gSoy8B"},
+					DetailsId:    "QmTxCbAHFopZFLh36MENLgVtE59mPNMRVW8RZbMY1hfieK",
+				},
+			})
 			So(output, ShouldEqual, "uuid")
 			So(err, ShouldBeNil)
 		})
 
 		Convey("current user is nil", func() {
-			preIns := &Preset{CBs: &cec.Callbacks{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{}}}
 			output, err := preIns.Publish(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Current user is nil. "))
 		})
 
-		Convey("json unmarshal failed", func() {
-			controller := gomock.NewController(t)
-			mockClientObj := mock_scry.NewMockClient(controller)
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
-			output, err := preIns.Publish(&server.MessageIn{Payload: []byte{34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 115, 117, 112, 112, 111, 114, 116, 86, 101, 114, 105, 102, 121, 34, 58, 116, 114, 117, 101, 44, 34, 112, 114, 105, 99, 101, 34, 58, 34, 49, 48, 49, 54, 34, 44, 34, 73, 100, 115, 34, 58, 123, 34, 109, 101, 116, 97, 68, 97, 116, 97, 73, 100, 34, 58, 34, 81, 109, 99, 72, 88, 107, 77, 88, 119, 103, 118, 90, 80, 53, 54, 116, 115, 85, 74, 78, 116, 99, 102, 101, 100, 111, 106, 72, 107, 113, 114, 68, 115, 103, 107, 67, 52, 102, 98, 115, 66, 77, 49, 122, 114, 101, 34, 44, 34, 112, 114, 111, 111, 102, 68, 97, 116, 97, 73, 100, 115, 34, 58, 91, 34, 81, 109, 81, 78, 110, 102, 113, 69, 53, 113, 67, 53, 56, 85, 118, 106, 75, 51, 66, 88, 68, 67, 80, 90, 76, 53, 86, 55, 78, 66, 89, 72, 84, 66, 109, 82, 117, 111, 66, 109, 90, 119, 102, 100, 101, 54, 34, 44, 34, 81, 109, 97, 90, 113, 89, 77, 81, 109, 119, 88, 88, 68, 113, 52, 111, 70, 113, 85, 100, 57, 106, 78, 100, 74, 50, 57, 83, 122, 117, 102, 53, 80, 119, 74, 52, 89, 109, 67, 50, 103, 83, 111, 121, 56, 66, 34, 93, 44, 34, 100, 101, 116, 97, 105, 108, 115, 73, 100, 34, 58, 34, 81, 109, 84, 120, 67, 98, 65, 72, 70, 111, 112, 90, 70, 76, 104, 51, 54, 77, 69, 78, 76, 103, 86, 116, 69, 53, 57, 109, 80, 78, 77, 82, 86, 87, 56, 82, 90, 98, 77, 89, 49, 104, 102, 105, 101, 75, 34, 125}})
-			So(output, ShouldBeNil)
-			So(err, ShouldBeError, errors.New("invalid character ':' after top-level value"))
-		})
-
 		Convey("atoi failed", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
-			output, err := preIns.Publish(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 115, 117, 112, 112, 111, 114, 116, 86, 101, 114, 105, 102, 121, 34, 58, 116, 114, 117, 101, 44, 34, 112, 114, 105, 99, 101, 34, 58, 34, 34, 44, 34, 73, 100, 115, 34, 58, 123, 34, 109, 101, 116, 97, 68, 97, 116, 97, 73, 100, 34, 58, 34, 81, 109, 99, 72, 88, 107, 77, 88, 119, 103, 118, 90, 80, 53, 54, 116, 115, 85, 74, 78, 116, 99, 102, 101, 100, 111, 106, 72, 107, 113, 114, 68, 115, 103, 107, 67, 52, 102, 98, 115, 66, 77, 49, 122, 114, 101, 34, 44, 34, 112, 114, 111, 111, 102, 68, 97, 116, 97, 73, 100, 115, 34, 58, 91, 34, 81, 109, 81, 78, 110, 102, 113, 69, 53, 113, 67, 53, 56, 85, 118, 106, 75, 51, 66, 88, 68, 67, 80, 90, 76, 53, 86, 55, 78, 66, 89, 72, 84, 66, 109, 82, 117, 111, 66, 109, 90, 119, 102, 100, 101, 54, 34, 44, 34, 81, 109, 97, 90, 113, 89, 77, 81, 109, 119, 88, 88, 68, 113, 52, 111, 70, 113, 85, 100, 57, 106, 78, 100, 74, 50, 57, 83, 122, 117, 102, 53, 80, 119, 74, 52, 89, 109, 67, 50, 103, 83, 111, 121, 56, 66, 34, 93, 44, 34, 100, 101, 116, 97, 105, 108, 115, 73, 100, 34, 58, 34, 81, 109, 84, 120, 67, 98, 65, 72, 70, 111, 112, 90, 70, 76, 104, 51, 54, 77, 69, 78, 76, 103, 86, 116, 69, 53, 57, 109, 80, 78, 77, 82, 86, 87, 56, 82, 90, 98, 77, 89, 49, 104, 102, 105, 101, 75, 34, 125, 125}})
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}}}
+			output, err := preIns.Publish(&definition.MessageInPayload{
+				Password:      "123456",
+				Price:         "",
+				SupportVerify: true,
+				Ids: definition.Ids{
+					MetaDataId:   "QmcHXkMXwgvZP56tsUJNtcfedojHkqrDsgkC4fbsBM1zre",
+					ProofDataIds: []string{"QmQNnfqE5qC58UvjK3BXDCPZL5V7NBYHTBmRuoBmZwfde6", "QmaZqYMQmwXXDq4oFqUd9jNdJ29Szuf5PwJ4YmC2gSoy8B"},
+					DetailsId:    "QmTxCbAHFopZFLh36MENLgVtE59mPNMRVW8RZbMY1hfieK",
+				},
+			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New(`strconv.Atoi: parsing "": invalid syntax`))
 		})
@@ -507,10 +506,19 @@ func TestPreset_Publish(t *testing.T) {
 			defer UnpatchAll()
 			mockChainWrapperObj.EXPECT().Publish(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return("uuid", errors.New("an error"))
 			preIns := &Preset{
-				CBs: &cec.Callbacks{CurUser: mockClientObj},
+				CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}},
 				Bin: &binary.Binary{},
 			}
-			output, err := preIns.Publish(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 115, 117, 112, 112, 111, 114, 116, 86, 101, 114, 105, 102, 121, 34, 58, 116, 114, 117, 101, 44, 34, 112, 114, 105, 99, 101, 34, 58, 34, 49, 48, 49, 54, 34, 44, 34, 73, 100, 115, 34, 58, 123, 34, 109, 101, 116, 97, 68, 97, 116, 97, 73, 100, 34, 58, 34, 81, 109, 99, 72, 88, 107, 77, 88, 119, 103, 118, 90, 80, 53, 54, 116, 115, 85, 74, 78, 116, 99, 102, 101, 100, 111, 106, 72, 107, 113, 114, 68, 115, 103, 107, 67, 52, 102, 98, 115, 66, 77, 49, 122, 114, 101, 34, 44, 34, 112, 114, 111, 111, 102, 68, 97, 116, 97, 73, 100, 115, 34, 58, 91, 34, 81, 109, 81, 78, 110, 102, 113, 69, 53, 113, 67, 53, 56, 85, 118, 106, 75, 51, 66, 88, 68, 67, 80, 90, 76, 53, 86, 55, 78, 66, 89, 72, 84, 66, 109, 82, 117, 111, 66, 109, 90, 119, 102, 100, 101, 54, 34, 44, 34, 81, 109, 97, 90, 113, 89, 77, 81, 109, 119, 88, 88, 68, 113, 52, 111, 70, 113, 85, 100, 57, 106, 78, 100, 74, 50, 57, 83, 122, 117, 102, 53, 80, 119, 74, 52, 89, 109, 67, 50, 103, 83, 111, 121, 56, 66, 34, 93, 44, 34, 100, 101, 116, 97, 105, 108, 115, 73, 100, 34, 58, 34, 81, 109, 84, 120, 67, 98, 65, 72, 70, 111, 112, 90, 70, 76, 104, 51, 54, 77, 69, 78, 76, 103, 86, 116, 69, 53, 57, 109, 80, 78, 77, 82, 86, 87, 56, 82, 90, 98, 77, 89, 49, 104, 102, 105, 101, 75, 34, 125, 125}})
+			output, err := preIns.Publish(&definition.MessageInPayload{
+				Password:      "123456",
+				Price:         "1016",
+				SupportVerify: true,
+				Ids: definition.Ids{
+					MetaDataId:   "QmcHXkMXwgvZP56tsUJNtcfedojHkqrDsgkC4fbsBM1zre",
+					ProofDataIds: []string{"QmQNnfqE5qC58UvjK3BXDCPZL5V7NBYHTBmRuoBmZwfde6", "QmaZqYMQmwXXDq4oFqUd9jNdJ29Szuf5PwJ4YmC2gSoy8B"},
+					DetailsId:    "QmTxCbAHFopZFLh36MENLgVtE59mPNMRVW8RZbMY1hfieK",
+				},
+			})
 			So(output, ShouldEqual, "uuid")
 			So(err, ShouldBeError, errors.New("an error"))
 		})
@@ -518,7 +526,7 @@ func TestPreset_Publish(t *testing.T) {
 }
 
 func TestPreset_AdvancePurchase(t *testing.T) {
-	Convey("test Preset.AdvancePurchase", t, func() {
+	Convey("test MessageInPayload.AdvancePurchase", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -538,42 +546,41 @@ func TestPreset_AdvancePurchase(t *testing.T) {
 			flagChan <- true
 			preIns := &Preset{
 				CBs: &cec.Callbacks{
-					CurUser:  mockClientObj,
+					WS:       &server.WSServer{CurUser: mockClientObj},
 					FlagChan: flagChan,
 				},
 				Bin: &binary.Binary{},
 			}
 
-			output, err := preIns.AdvancePurchase(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 115, 116, 97, 114, 116, 86, 101, 114, 105, 102, 121, 34, 58, 116, 114, 117, 101, 44, 34, 80, 117, 98, 108, 105, 115, 104, 73, 100, 34, 58, 34, 49, 53, 55, 53, 57, 52, 52, 52, 54, 49, 53, 52, 57, 48, 57, 56, 54, 48, 48, 45, 56, 50, 54, 49, 53, 53, 49, 51, 50, 52, 52, 53, 50, 57, 51, 55, 49, 55, 53, 34, 44, 34, 112, 114, 105, 99, 101, 34, 58, 34, 49, 48, 50, 48, 34, 125}})
+			output, err := preIns.AdvancePurchase(&definition.MessageInPayload{
+				Password:    "123456",
+				StartVerify: true,
+				PublishId:   "1575944461549098600-8261551324452937175",
+				Price:       "1020",
+			})
 			So(output, ShouldBeTrue)
 			So(err, ShouldBeNil)
 		})
 
 		Convey("current user is nil", func() {
-			preIns := &Preset{CBs: &cec.Callbacks{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{}}}
 			output, err := preIns.AdvancePurchase(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Current user is nil. "))
-		})
-
-		Convey("json unmarshal failed", func() {
-			controller := gomock.NewController(t)
-			mockClientObj := mock_scry.NewMockClient(controller)
-			preIns := &Preset{
-				CBs: &cec.Callbacks{CurUser: mockClientObj},
-			}
-			output, err := preIns.AdvancePurchase(&server.MessageIn{Payload: []byte{34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 115, 116, 97, 114, 116, 86, 101, 114, 105, 102, 121, 34, 58, 116, 114, 117, 101, 44, 34, 80, 117, 98, 108, 105, 115, 104, 73, 100, 34, 58, 34, 49, 53, 55, 53, 57, 52, 52, 52, 54, 49, 53, 52, 57, 48, 57, 56, 54, 48, 48, 45, 56, 50, 54, 49, 53, 53, 49, 51, 50, 52, 52, 53, 50, 57, 51, 55, 49, 55, 53, 34, 44, 34, 112, 114, 105, 99, 101, 34, 58, 34, 49, 48, 50, 48, 34}})
-			So(output, ShouldBeNil)
-			So(err, ShouldBeError, errors.New("invalid character ':' after top-level value"))
 		})
 
 		Convey("change string to *big.Int failed", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
 			preIns := &Preset{
-				CBs: &cec.Callbacks{CurUser: mockClientObj},
+				CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}},
 			}
-			output, err := preIns.AdvancePurchase(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 115, 116, 97, 114, 116, 86, 101, 114, 105, 102, 121, 34, 58, 116, 114, 117, 101, 44, 34, 80, 117, 98, 108, 105, 115, 104, 73, 100, 34, 58, 34, 49, 53, 55, 53, 57, 52, 52, 52, 54, 49, 53, 52, 57, 48, 57, 56, 54, 48, 48, 45, 56, 50, 54, 49, 53, 53, 49, 51, 50, 52, 52, 53, 50, 57, 51, 55, 49, 55, 53, 34, 44, 34, 112, 114, 105, 99, 101, 34, 58, 34, 34, 125}})
+			output, err := preIns.AdvancePurchase(&definition.MessageInPayload{
+				Password:    "123456",
+				StartVerify: true,
+				PublishId:   "1575944461549098600-8261551324452937175",
+				Price:       "",
+			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Set to *big.Int failed. "))
 		})
@@ -596,13 +603,18 @@ func TestPreset_AdvancePurchase(t *testing.T) {
 			flagChan <- true
 			preIns := &Preset{
 				CBs: &cec.Callbacks{
-					CurUser:  mockClientObj,
+					WS:       &server.WSServer{CurUser: mockClientObj},
 					FlagChan: flagChan,
 				},
 				Bin: &binary.Binary{},
 			}
 
-			output, err := preIns.AdvancePurchase(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 115, 116, 97, 114, 116, 86, 101, 114, 105, 102, 121, 34, 58, 116, 114, 117, 101, 44, 34, 80, 117, 98, 108, 105, 115, 104, 73, 100, 34, 58, 34, 49, 53, 55, 53, 57, 52, 52, 52, 54, 49, 53, 52, 57, 48, 57, 56, 54, 48, 48, 45, 56, 50, 54, 49, 53, 53, 49, 51, 50, 52, 52, 53, 50, 57, 51, 55, 49, 55, 53, 34, 44, 34, 112, 114, 105, 99, 101, 34, 58, 34, 49, 48, 50, 48, 34, 125}})
+			output, err := preIns.AdvancePurchase(&definition.MessageInPayload{
+				Password:    "123456",
+				StartVerify: true,
+				PublishId:   "1575944461549098600-8261551324452937175",
+				Price:       "1020",
+			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Contract transfer token from buyer failed. : an error"))
 		})
@@ -625,12 +637,17 @@ func TestPreset_AdvancePurchase(t *testing.T) {
 			flagChan <- true
 			preIns := &Preset{
 				CBs: &cec.Callbacks{
-					CurUser:  mockClientObj,
+					WS:       &server.WSServer{CurUser: mockClientObj},
 					FlagChan: flagChan,
 				},
 				Bin: &binary.Binary{},
 			}
-			output, err := preIns.AdvancePurchase(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 115, 116, 97, 114, 116, 86, 101, 114, 105, 102, 121, 34, 58, 116, 114, 117, 101, 44, 34, 80, 117, 98, 108, 105, 115, 104, 73, 100, 34, 58, 34, 49, 53, 55, 53, 57, 52, 52, 52, 54, 49, 53, 52, 57, 48, 57, 56, 54, 48, 48, 45, 56, 50, 54, 49, 53, 53, 49, 51, 50, 52, 52, 53, 50, 57, 51, 55, 49, 55, 53, 34, 44, 34, 112, 114, 105, 99, 101, 34, 58, 34, 49, 48, 50, 48, 34, 125}})
+			output, err := preIns.AdvancePurchase(&definition.MessageInPayload{
+				Password:    "123456",
+				StartVerify: true,
+				PublishId:   "1575944461549098600-8261551324452937175",
+				Price:       "1020",
+			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Advance purchase failed. : an error"))
 		})
@@ -638,7 +655,7 @@ func TestPreset_AdvancePurchase(t *testing.T) {
 }
 
 func TestPreset_ConfirmPurchase(t *testing.T) {
-	Convey("test Preset.TestPreset_ConfirmPurchase", t, func() {
+	Convey("test MessageInPayload.TestPreset_ConfirmPurchase", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -651,37 +668,34 @@ func TestPreset_ConfirmPurchase(t *testing.T) {
 			mockChainWrapperObj.EXPECT().ConfirmPurchase(gomock.Any(), gomock.Any()).Return(nil)
 
 			preIns := &Preset{
-				CBs:      &cec.Callbacks{CurUser: mockClientObj},
-				Deployer: &PreDef.Preset{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
+				CBs:      &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}},
+				Deployer: &definition.MessageInPayload{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
 			}
 
-			output, err := preIns.ConfirmPurchase(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 125}})
+			output, err := preIns.ConfirmPurchase(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "0",
+			})
 			So(output, ShouldBeTrue)
 			So(err, ShouldBeNil)
 		})
 
 		Convey("current user is nil", func() {
-			preIns := &Preset{CBs: &cec.Callbacks{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{}}}
 			output, err := preIns.ConfirmPurchase(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Current user is nil. "))
-		})
-
-		Convey("json unmarshal failed", func() {
-			controller := gomock.NewController(t)
-			mockClientObj := mock_scry.NewMockClient(controller)
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
-			output, err := preIns.ConfirmPurchase(&server.MessageIn{Payload: []byte{34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34}})
-			So(output, ShouldBeNil)
-			So(err, ShouldBeError, errors.New("invalid character ':' after top-level value"))
 		})
 
 		Convey("set string to *big.Int failed", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
 			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
-			output, err := preIns.ConfirmPurchase(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 34, 125}})
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}}}
+			output, err := preIns.ConfirmPurchase(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "",
+			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Set to *big.Int failed. "))
 		})
@@ -697,10 +711,13 @@ func TestPreset_ConfirmPurchase(t *testing.T) {
 			defer UnpatchAll()
 			mockChainWrapperObj.EXPECT().ConfirmPurchase(gomock.Any(), gomock.Any()).Return(errors.New("an error"))
 			preIns := &Preset{
-				CBs:      &cec.Callbacks{CurUser: mockClientObj},
-				Deployer: &PreDef.Preset{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
+				CBs:      &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}},
+				Deployer: &definition.MessageInPayload{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
 			}
-			output, err := preIns.ConfirmPurchase(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 125}})
+			output, err := preIns.ConfirmPurchase(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "0",
+			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.Wrap(errors.New("an error"), "Confirm purchase failed. "))
 		})
@@ -708,7 +725,7 @@ func TestPreset_ConfirmPurchase(t *testing.T) {
 }
 
 func TestPreset_ReEncrypt(t *testing.T) {
-	Convey("test Preset.ReEncrypt", t, func() {
+	Convey("test MessageInPayload.ReEncrypt", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -724,36 +741,33 @@ func TestPreset_ReEncrypt(t *testing.T) {
 			mockChainWrapperObj.EXPECT().ReEncrypt(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 
 			preIns := &Preset{
-				CBs:      &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}},
-				Deployer: &PreDef.Preset{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
+				CBs:      &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}},
+				Deployer: &definition.MessageInPayload{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
 			}
 
-			output, err := preIns.ReEncrypt(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 125}})
+			output, err := preIns.ReEncrypt(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "0",
+			})
 			So(output, ShouldBeTrue)
 			So(err, ShouldBeNil)
 		})
 
 		Convey("current user is nil", func() {
-			preIns := &Preset{CBs: &cec.Callbacks{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{}}}
 			output, err := preIns.ReEncrypt(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Current user is nil. "))
 		})
 
-		Convey("json unmarshal failed", func() {
-			controller := gomock.NewController(t)
-			mockClientObj := mock_scry.NewMockClient(controller)
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
-			output, err := preIns.ReEncrypt(&server.MessageIn{Payload: []byte{34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34}})
-			So(output, ShouldBeNil)
-			So(err, ShouldBeError, errors.New("invalid character ':' after top-level value"))
-		})
-
 		Convey("set string to *big.Int failed", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
-			output, err := preIns.ReEncrypt(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 34, 125}})
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}}}
+			output, err := preIns.ReEncrypt(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "",
+			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Set to *big.Int failed. "))
 		})
@@ -766,8 +780,11 @@ func TestPreset_ReEncrypt(t *testing.T) {
 				return 0, nil
 			})
 			defer UnpatchAll()
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
-			output, err := preIns.ReEncrypt(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 125}})
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
+			output, err := preIns.ReEncrypt(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "0",
+			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeNil)
 		})
@@ -786,10 +803,13 @@ func TestPreset_ReEncrypt(t *testing.T) {
 			})
 			mockChainWrapperObj.EXPECT().ReEncrypt(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("an error"))
 			preIns := &Preset{
-				CBs:      &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}},
-				Deployer: &PreDef.Preset{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
+				CBs:      &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}},
+				Deployer: &definition.MessageInPayload{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
 			}
-			output, err := preIns.ReEncrypt(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 125}})
+			output, err := preIns.ReEncrypt(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "0",
+			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.Wrap(errors.New("an error"), "Re-encrypt failed. "))
 		})
@@ -797,7 +817,7 @@ func TestPreset_ReEncrypt(t *testing.T) {
 }
 
 func TestPreset_CancelPurchase(t *testing.T) {
-	Convey("test Preset.CancelPurchase", t, func() {
+	Convey("test MessageInPayload.CancelPurchase", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -810,36 +830,33 @@ func TestPreset_CancelPurchase(t *testing.T) {
 			mockChainWrapperObj.EXPECT().CancelPurchase(gomock.Any(), gomock.Any()).Return(nil)
 
 			preIns := &Preset{
-				CBs:      &cec.Callbacks{CurUser: mockClientObj},
-				Deployer: &PreDef.Preset{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
+				CBs:      &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}},
+				Deployer: &definition.MessageInPayload{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
 			}
 
-			output, err := preIns.CancelPurchase(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 125}})
+			output, err := preIns.CancelPurchase(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "0",
+			})
 			So(output, ShouldBeTrue)
 			So(err, ShouldBeNil)
 		})
 
 		Convey("current user is nil", func() {
-			preIns := &Preset{CBs: &cec.Callbacks{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{}}}
 			output, err := preIns.CancelPurchase(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Current user is nil. "))
 		})
 
-		Convey("json unmarshal failed", func() {
-			controller := gomock.NewController(t)
-			mockClientObj := mock_scry.NewMockClient(controller)
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
-			output, err := preIns.CancelPurchase(&server.MessageIn{Payload: []byte{34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34}})
-			So(output, ShouldBeNil)
-			So(err, ShouldBeError, errors.New("invalid character ':' after top-level value"))
-		})
-
 		Convey("set string to *big.Int failed", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
-			output, err := preIns.CancelPurchase(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 34, 125}})
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}}}
+			output, err := preIns.CancelPurchase(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "",
+			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Set to *big.Int failed. "))
 		})
@@ -855,10 +872,13 @@ func TestPreset_CancelPurchase(t *testing.T) {
 			defer UnpatchAll()
 			mockChainWrapperObj.EXPECT().CancelPurchase(gomock.Any(), gomock.Any()).Return(errors.New("an error"))
 			preIns := &Preset{
-				CBs:      &cec.Callbacks{CurUser: mockClientObj},
-				Deployer: &PreDef.Preset{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
+				CBs:      &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}},
+				Deployer: &definition.MessageInPayload{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
 			}
-			output, err := preIns.CancelPurchase(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 125}})
+			output, err := preIns.CancelPurchase(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "0",
+			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Cancel purchase failed. : an error"))
 		})
@@ -866,7 +886,7 @@ func TestPreset_CancelPurchase(t *testing.T) {
 }
 
 func TestPreset_Decrypt(t *testing.T) {
-	Convey("test Preset.Decrypt", t, func() {
+	Convey("test MessageInPayload.Decrypt", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -878,27 +898,21 @@ func TestPreset_Decrypt(t *testing.T) {
 				return "simulate meta data file absolute path", nil
 			})
 
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 
-			output, err := preIns.Decrypt(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 125}})
+			output, err := preIns.Decrypt(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "0",
+			})
 			So(output, ShouldEqual, "simulate meta data file absolute path")
 			So(err, ShouldBeNil)
 		})
 
 		Convey("current user is nil", func() {
-			preIns := &Preset{CBs: &cec.Callbacks{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{}}}
 			output, err := preIns.Decrypt(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Current user is nil. "))
-		})
-
-		Convey("json unmarshal failed", func() {
-			controller := gomock.NewController(t)
-			mockClientObj := mock_scry.NewMockClient(controller)
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
-			output, err := preIns.Decrypt(&server.MessageIn{Payload: []byte{34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34}})
-			So(output, ShouldBeNil)
-			So(err, ShouldBeError, errors.New("invalid character ':' after top-level value"))
 		})
 
 		Convey("db read failed", func() {
@@ -908,8 +922,11 @@ func TestPreset_Decrypt(t *testing.T) {
 				return 0, nil
 			})
 			defer UnpatchAll()
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
-			output, err := preIns.Decrypt(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 125}})
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
+			output, err := preIns.Decrypt(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "0",
+			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeNil)
 		})
@@ -924,8 +941,11 @@ func TestPreset_Decrypt(t *testing.T) {
 			Patch((*Preset).getMetaDataFileName, func(*Preset, *DBDef.Transaction, string) (string, error) {
 				return "", errors.New("an error")
 			})
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
-			output, err := preIns.Decrypt(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 125}})
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
+			output, err := preIns.Decrypt(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "0",
+			})
 			So(output, ShouldEqual, "")
 			So(err, ShouldBeError, errors.New("an error"))
 		})
@@ -933,7 +953,7 @@ func TestPreset_Decrypt(t *testing.T) {
 }
 
 func TestPreset_getMetaDataFileName(t *testing.T) {
-	Convey("test Preset.getMetaDataFileName", t, func() {
+	Convey("test MessageInPayload.getMetaDataFileName", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -950,7 +970,7 @@ func TestPreset_getMetaDataFileName(t *testing.T) {
 			})
 
 			preIns := &Preset{
-				CBs: &cec.Callbacks{CurUser: mockClientObj},
+				CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}},
 				Bin: &binary.Binary{
 					Storage: &storage2.Ipfs{},
 					Account: &auth.Account{},
@@ -977,7 +997,7 @@ func TestPreset_getMetaDataFileName(t *testing.T) {
 			})
 			defer UnpatchAll()
 			preIns := &Preset{
-				CBs: &cec.Callbacks{CurUser: mockClientObj},
+				CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}},
 				Bin: &binary.Binary{Account: &auth.Account{}},
 			}
 			output, err := preIns.getMetaDataFileName(&DBDef.Transaction{
@@ -1002,7 +1022,7 @@ func TestPreset_getMetaDataFileName(t *testing.T) {
 				return errors.New("an error")
 			})
 			preIns := &Preset{
-				CBs:    &cec.Callbacks{CurUser: mockClientObj},
+				CBs:    &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}},
 				Bin:    &binary.Binary{Storage: &storage2.Ipfs{}, Account: &auth.Account{}},
 				config: presetConfig{MetaDataOutDir: "D:/dp/download"},
 			}
@@ -1031,7 +1051,7 @@ func TestPreset_getMetaDataFileName(t *testing.T) {
 				return errors.New("an error")
 			})
 			preIns := &Preset{
-				CBs:    &cec.Callbacks{CurUser: mockClientObj},
+				CBs:    &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}},
 				Bin:    &binary.Binary{Storage: &storage2.Ipfs{}, Account: &auth.Account{}},
 				config: presetConfig{MetaDataOutDir: "D:/dp/download"},
 			}
@@ -1048,7 +1068,7 @@ func TestPreset_getMetaDataFileName(t *testing.T) {
 }
 
 func TestPreset_ConfirmData(t *testing.T) {
-	Convey("test Preset.ConfirmData", t, func() {
+	Convey("test MessageInPayload.ConfirmData", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -1060,34 +1080,33 @@ func TestPreset_ConfirmData(t *testing.T) {
 			defer UnpatchAll()
 			mockChainWrapperObj.EXPECT().ConfirmData(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}, Bin: &binary.Binary{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}}, Bin: &binary.Binary{}}
 
-			output, err := preIns.ConfirmData(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 44, 34, 99, 111, 110, 102, 105, 114, 109, 34, 58, 123, 34, 99, 111, 110, 102, 105, 114, 109, 82, 101, 115, 117, 108, 116, 34, 58, 116, 114, 117, 101, 125, 125}})
+			output, err := preIns.ConfirmData(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "0",
+				Confirm:       definition.Confirm{Truth: true},
+			})
 			So(output, ShouldBeTrue)
 			So(err, ShouldBeNil)
 		})
 
 		Convey("current user is nil", func() {
-			preIns := &Preset{CBs: &cec.Callbacks{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{}}}
 			output, err := preIns.ConfirmData(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Current user is nil. "))
 		})
 
-		Convey("json unmarshal failed", func() {
-			controller := gomock.NewController(t)
-			mockClientObj := mock_scry.NewMockClient(controller)
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
-			output, err := preIns.ConfirmData(&server.MessageIn{Payload: []byte{34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 44, 34, 99, 111, 110, 102, 105, 114, 109, 34, 58, 123, 34, 99, 111, 110, 102, 105, 114, 109, 82, 101, 115, 117, 108, 116, 34, 58, 116, 114, 117, 101, 125}})
-			So(output, ShouldBeNil)
-			So(err, ShouldBeError, errors.New("invalid character ':' after top-level value"))
-		})
-
 		Convey("set string to *big.Int failed", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
-			output, err := preIns.ConfirmData(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 34, 44, 34, 99, 111, 110, 102, 105, 114, 109, 34, 58, 123, 34, 99, 111, 110, 102, 105, 114, 109, 82, 101, 115, 117, 108, 116, 34, 58, 116, 114, 117, 101, 125, 125}})
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}}}
+			output, err := preIns.ConfirmData(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "",
+				Confirm:       definition.Confirm{Truth: true},
+			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Set to *big.Int failed. "))
 		})
@@ -1102,8 +1121,12 @@ func TestPreset_ConfirmData(t *testing.T) {
 			})
 			defer UnpatchAll()
 			mockChainWrapperObj.EXPECT().ConfirmData(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("an error"))
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}, Bin: &binary.Binary{}}
-			output, err := preIns.ConfirmData(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 44, 34, 99, 111, 110, 102, 105, 114, 109, 34, 58, 123, 34, 99, 111, 110, 102, 105, 114, 109, 82, 101, 115, 117, 108, 116, 34, 58, 116, 114, 117, 101, 125, 125}})
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}}, Bin: &binary.Binary{}}
+			output, err := preIns.ConfirmData(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "0",
+				Confirm:       definition.Confirm{Truth: true},
+			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.Wrap(errors.New("an error"), "Confirm data failed. "))
 		})
@@ -1111,7 +1134,7 @@ func TestPreset_ConfirmData(t *testing.T) {
 }
 
 func TestPreset_Register(t *testing.T) {
-	Convey("test Preset.Register", t, func() {
+	Convey("test MessageInPayload.Register", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -1129,27 +1152,18 @@ func TestPreset_Register(t *testing.T) {
 
 			flagChan := make(chan bool, 10)
 			flagChan <- true
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, FlagChan: flagChan}, Bin: &binary.Binary{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}, FlagChan: flagChan}, Bin: &binary.Binary{}}
 
-			output, err := preIns.Register(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 125}})
+			output, err := preIns.Register(&definition.MessageInPayload{Password: "123456"})
 			So(output, ShouldBeTrue)
 			So(err, ShouldBeNil)
 		})
 
 		Convey("current user is nil", func() {
-			preIns := &Preset{CBs: &cec.Callbacks{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{}}}
 			output, err := preIns.Register(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Current user is nil. "))
-		})
-
-		Convey("json unmarshal failed", func() {
-			controller := gomock.NewController(t)
-			mockClientObj := mock_scry.NewMockClient(controller)
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
-			output, err := preIns.Register(&server.MessageIn{Payload: []byte{34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34}})
-			So(output, ShouldBeNil)
-			So(err, ShouldBeError, errors.New("invalid character ':' after top-level value"))
 		})
 
 		Convey("approve failed", func() {
@@ -1165,8 +1179,8 @@ func TestPreset_Register(t *testing.T) {
 			Patch((*binary.Binary).Config, func(*binary.Binary) binary.BinaryConfig {
 				return binary.BinaryConfig{ProtocolContractAddr: "simulate protocol contract address"}
 			})
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}, Bin: &binary.Binary{}}
-			output, err := preIns.Register(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 125}})
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}}, Bin: &binary.Binary{}}
+			output, err := preIns.Register(&definition.MessageInPayload{Password: "123456"})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.Wrap(errors.New("an error"), "Contract transfer token from register failed. "))
 		})
@@ -1187,8 +1201,8 @@ func TestPreset_Register(t *testing.T) {
 			mockChainWrapperObj.EXPECT().RegisterAsVerifier(gomock.Any()).Return(errors.New("an error"))
 			flagChan := make(chan bool, 10)
 			flagChan <- true
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, FlagChan: flagChan}, Bin: &binary.Binary{}}
-			output, err := preIns.Register(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 125}})
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}, FlagChan: flagChan}, Bin: &binary.Binary{}}
+			output, err := preIns.Register(&definition.MessageInPayload{Password: "123456"})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.Wrap(errors.New("an error"), "Register as verifier failed. "))
 		})
@@ -1196,7 +1210,7 @@ func TestPreset_Register(t *testing.T) {
 }
 
 func TestPreset_Vote(t *testing.T) {
-	Convey("test Preset.Vote", t, func() {
+	Convey("test MessageInPayload.Vote", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -1208,34 +1222,39 @@ func TestPreset_Vote(t *testing.T) {
 			mockChainWrapperObj.EXPECT().Vote(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
 
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}}}
 
-			output, err := preIns.Vote(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 44, 34, 118, 101, 114, 105, 102, 121, 34, 58, 123, 34, 115, 117, 103, 103, 101, 115, 116, 105, 111, 110, 34, 58, 116, 114, 117, 101, 44, 34, 99, 111, 109, 109, 101, 110, 116, 34, 58, 34, 99, 111, 109, 109, 105, 116, 34, 125, 125}})
+			output, err := preIns.Vote(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "0",
+				Verify: definition.Verify{
+					Suggestion: true,
+					Comment:    "commit",
+				},
+			})
 			So(output, ShouldBeTrue)
 			So(err, ShouldBeNil)
 		})
 
 		Convey("current user is nil", func() {
-			preIns := &Preset{CBs: &cec.Callbacks{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{}}}
 			output, err := preIns.Vote(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Current user is nil. "))
 		})
 
-		Convey("json unmarshal failed", func() {
-			controller := gomock.NewController(t)
-			mockClientObj := mock_scry.NewMockClient(controller)
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
-			output, err := preIns.Vote(&server.MessageIn{Payload: []byte{34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 44, 34, 118, 101, 114, 105, 102, 121, 34, 58, 123, 34, 115, 117, 103, 103, 101, 115, 116, 105, 111, 110, 34, 58, 116, 114, 117, 101, 44, 34, 99, 111, 109, 109, 101, 110, 116, 34, 58, 34, 99, 111, 109, 109, 105, 116, 34, 125}})
-			So(output, ShouldBeNil)
-			So(err, ShouldBeError, errors.New("invalid character ':' after top-level value"))
-		})
-
 		Convey("set string to *big.Int failed", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
-			output, err := preIns.Vote(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 34, 44, 34, 118, 101, 114, 105, 102, 121, 34, 58, 123, 34, 115, 117, 103, 103, 101, 115, 116, 105, 111, 110, 34, 58, 116, 114, 117, 101, 44, 34, 99, 111, 109, 109, 101, 110, 116, 34, 58, 34, 99, 111, 109, 109, 105, 116, 34, 125, 125}})
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}}}
+			output, err := preIns.Vote(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "",
+				Verify: definition.Verify{
+					Suggestion: true,
+					Comment:    "commit",
+				},
+			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Set to *big.Int failed. "))
 		})
@@ -1250,8 +1269,15 @@ func TestPreset_Vote(t *testing.T) {
 			defer UnpatchAll()
 			mockChainWrapperObj.EXPECT().Vote(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("an error"))
 			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
-			output, err := preIns.Vote(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 44, 34, 118, 101, 114, 105, 102, 121, 34, 58, 123, 34, 115, 117, 103, 103, 101, 115, 116, 105, 111, 110, 34, 58, 116, 114, 117, 101, 44, 34, 99, 111, 109, 109, 101, 110, 116, 34, 58, 34, 99, 111, 109, 109, 105, 116, 34, 125, 125}})
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}}}
+			output, err := preIns.Vote(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "0",
+				Verify: definition.Verify{
+					Suggestion: true,
+					Comment:    "commit",
+				},
+			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.Wrap(errors.New("an error"), "Vote failed. "))
 		})
@@ -1259,7 +1285,7 @@ func TestPreset_Vote(t *testing.T) {
 }
 
 func TestPreset_GradeToVerifier(t *testing.T) {
-	Convey("test Preset.GradeToVerifier", t, func() {
+	Convey("test MessageInPayload.GradeToVerifier", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -1271,34 +1297,43 @@ func TestPreset_GradeToVerifier(t *testing.T) {
 			defer UnpatchAll()
 			mockChainWrapperObj.EXPECT().GradeToVerifier(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil).Times(2)
 
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}, Bin: &binary.Binary{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}}, Bin: &binary.Binary{}}
 
-			output, err := preIns.GradeToVerifier(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 44, 34, 103, 114, 97, 100, 101, 34, 58, 123, 34, 118, 101, 114, 105, 102, 105, 101, 114, 49, 82, 101, 118, 101, 114, 116, 34, 58, 116, 114, 117, 101, 44, 34, 118, 101, 114, 105, 102, 105, 101, 114, 49, 71, 114, 97, 100, 101, 34, 58, 53, 44, 34, 118, 101, 114, 105, 102, 105, 101, 114, 50, 82, 101, 118, 101, 114, 116, 34, 58, 116, 114, 117, 101, 44, 34, 118, 101, 114, 105, 102, 105, 101, 114, 50, 71, 114, 97, 100, 101, 34, 58, 53, 125, 125}})
+			output, err := preIns.GradeToVerifier(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "0",
+				Grade: definition.Grade{
+					Verifier1Revert: true,
+					Verifier1Grade:  5,
+					Verifier2Revert: true,
+					Verifier2Grade:  5,
+				},
+			})
 			So(output, ShouldBeTrue)
 			So(err, ShouldBeNil)
 		})
 
 		Convey("current user is nil", func() {
-			preIns := &Preset{CBs: &cec.Callbacks{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{}}}
 			output, err := preIns.GradeToVerifier(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Current user is nil. "))
 		})
 
-		Convey("json unmarshal failed", func() {
-			controller := gomock.NewController(t)
-			mockClientObj := mock_scry.NewMockClient(controller)
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
-			output, err := preIns.GradeToVerifier(&server.MessageIn{Payload: []byte{34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 44, 34, 103, 114, 97, 100, 101, 34, 58, 123, 34, 118, 101, 114, 105, 102, 105, 101, 114, 49, 82, 101, 118, 101, 114, 116, 34, 58, 116, 114, 117, 101, 44, 34, 118, 101, 114, 105, 102, 105, 101, 114, 49, 71, 114, 97, 100, 101, 34, 58, 53, 44, 34, 118, 101, 114, 105, 102, 105, 101, 114, 50, 82, 101, 118, 101, 114, 116, 34, 58, 116, 114, 117, 101, 44, 34, 118, 101, 114, 105, 102, 105, 101, 114, 50, 71, 114, 97, 100, 101, 34, 58, 53, 125}})
-			So(output, ShouldBeNil)
-			So(err, ShouldBeError, errors.New("invalid character ':' after top-level value"))
-		})
-
 		Convey("set string to *big.Int failed", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
-			output, err := preIns.GradeToVerifier(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 34, 44, 34, 103, 114, 97, 100, 101, 34, 58, 123, 34, 118, 101, 114, 105, 102, 105, 101, 114, 49, 82, 101, 118, 101, 114, 116, 34, 58, 116, 114, 117, 101, 44, 34, 118, 101, 114, 105, 102, 105, 101, 114, 49, 71, 114, 97, 100, 101, 34, 58, 53, 44, 34, 118, 101, 114, 105, 102, 105, 101, 114, 50, 82, 101, 118, 101, 114, 116, 34, 58, 116, 114, 117, 101, 44, 34, 118, 101, 114, 105, 102, 105, 101, 114, 50, 71, 114, 97, 100, 101, 34, 58, 53, 125, 125}})
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}}}
+			output, err := preIns.GradeToVerifier(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "",
+				Grade: definition.Grade{
+					Verifier1Revert: true,
+					Verifier1Grade:  5,
+					Verifier2Revert: true,
+					Verifier2Grade:  5,
+				},
+			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Set to *big.Int failed. "))
 		})
@@ -1313,8 +1348,17 @@ func TestPreset_GradeToVerifier(t *testing.T) {
 			})
 			defer UnpatchAll()
 			mockChainWrapperObj.EXPECT().GradeToVerifier(gomock.Any(), gomock.Any(), uint8(0), gomock.Any()).Return(errors.New("an error"))
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}, Bin: &binary.Binary{}}
-			output, err := preIns.GradeToVerifier(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 44, 34, 103, 114, 97, 100, 101, 34, 58, 123, 34, 118, 101, 114, 105, 102, 105, 101, 114, 49, 82, 101, 118, 101, 114, 116, 34, 58, 116, 114, 117, 101, 44, 34, 118, 101, 114, 105, 102, 105, 101, 114, 49, 71, 114, 97, 100, 101, 34, 58, 53, 44, 34, 118, 101, 114, 105, 102, 105, 101, 114, 50, 82, 101, 118, 101, 114, 116, 34, 58, 116, 114, 117, 101, 44, 34, 118, 101, 114, 105, 102, 105, 101, 114, 50, 71, 114, 97, 100, 101, 34, 58, 53, 125, 125}})
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}}, Bin: &binary.Binary{}}
+			output, err := preIns.GradeToVerifier(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "0",
+				Grade: definition.Grade{
+					Verifier1Revert: true,
+					Verifier1Grade:  5,
+					Verifier2Revert: true,
+					Verifier2Grade:  5,
+				},
+			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.Wrap(errors.New("an error"), "Grade verifier1 failed. "))
 		})
@@ -1330,8 +1374,17 @@ func TestPreset_GradeToVerifier(t *testing.T) {
 			defer UnpatchAll()
 			mockChainWrapperObj.EXPECT().GradeToVerifier(gomock.Any(), gomock.Any(), uint8(0), gomock.Any()).Return(nil)
 			mockChainWrapperObj.EXPECT().GradeToVerifier(gomock.Any(), gomock.Any(), uint8(1), gomock.Any()).Return(errors.New("an error"))
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}, Bin: &binary.Binary{}}
-			output, err := preIns.GradeToVerifier(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 44, 34, 103, 114, 97, 100, 101, 34, 58, 123, 34, 118, 101, 114, 105, 102, 105, 101, 114, 49, 82, 101, 118, 101, 114, 116, 34, 58, 116, 114, 117, 101, 44, 34, 118, 101, 114, 105, 102, 105, 101, 114, 49, 71, 114, 97, 100, 101, 34, 58, 53, 44, 34, 118, 101, 114, 105, 102, 105, 101, 114, 50, 82, 101, 118, 101, 114, 116, 34, 58, 116, 114, 117, 101, 44, 34, 118, 101, 114, 105, 102, 105, 101, 114, 50, 71, 114, 97, 100, 101, 34, 58, 53, 125, 125}})
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}}, Bin: &binary.Binary{}}
+			output, err := preIns.GradeToVerifier(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "0",
+				Grade: definition.Grade{
+					Verifier1Revert: true,
+					Verifier1Grade:  5,
+					Verifier2Revert: true,
+					Verifier2Grade:  5,
+				},
+			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.Wrap(errors.New("an error"), "Grade verifier2 failed. "))
 		})
@@ -1339,7 +1392,7 @@ func TestPreset_GradeToVerifier(t *testing.T) {
 }
 
 func TestPreset_Arbitrate(t *testing.T) {
-	Convey("test Preset.Arbitrate", t, func() {
+	Convey("test MessageInPayload.Arbitrate", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -1354,34 +1407,33 @@ func TestPreset_Arbitrate(t *testing.T) {
 			mockChainWrapperObj.EXPECT().Arbitrate(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
 
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}, Bin: &binary.Binary{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}}, Bin: &binary.Binary{}}
 
-			output, err := preIns.Arbitrate(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 44, 34, 97, 114, 98, 105, 116, 114, 97, 116, 101, 34, 58, 123, 34, 97, 114, 98, 105, 116, 114, 97, 116, 101, 82, 101, 115, 117, 108, 116, 34, 58, 116, 114, 117, 101, 125, 125}})
+			output, err := preIns.Arbitrate(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "0",
+				Arbitrate:     definition.Arbitrate{ArbitrateResult: true},
+			})
 			So(output, ShouldEqual, "0")
 			So(err, ShouldBeNil)
 		})
 
 		Convey("current user is nil", func() {
-			preIns := &Preset{CBs: &cec.Callbacks{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{}}}
 			output, err := preIns.Arbitrate(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Current user is nil. "))
 		})
 
-		Convey("json unmarshal failed", func() {
-			controller := gomock.NewController(t)
-			mockClientObj := mock_scry.NewMockClient(controller)
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
-			output, err := preIns.Arbitrate(&server.MessageIn{Payload: []byte{34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 44, 34, 97, 114, 98, 105, 116, 114, 97, 116, 101, 34, 58, 123, 34, 97, 114, 98, 105, 116, 114, 97, 116, 101, 82, 101, 115, 117, 108, 116, 34, 58, 116, 114, 117, 101, 125}})
-			So(output, ShouldBeNil)
-			So(err, ShouldBeError, errors.New("invalid character ':' after top-level value"))
-		})
-
 		Convey("set string to *big.Int failed", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
-			output, err := preIns.Arbitrate(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 34, 44, 34, 97, 114, 98, 105, 116, 114, 97, 116, 101, 34, 58, 123, 34, 97, 114, 98, 105, 116, 114, 97, 116, 101, 82, 101, 115, 117, 108, 116, 34, 58, 116, 114, 117, 101, 125, 125}})
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}}}
+			output, err := preIns.Arbitrate(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "",
+				Arbitrate:     definition.Arbitrate{ArbitrateResult: true},
+			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Set to *big.Int failed. "))
 		})
@@ -1393,8 +1445,12 @@ func TestPreset_Arbitrate(t *testing.T) {
 				return errors.New("an error")
 			})
 			defer UnpatchAll()
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
-			output, err := preIns.Arbitrate(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 44, 34, 97, 114, 98, 105, 116, 114, 97, 116, 101, 34, 58, 123, 34, 97, 114, 98, 105, 116, 114, 97, 116, 101, 82, 101, 115, 117, 108, 116, 34, 58, 116, 114, 117, 101, 125, 125}})
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}}}
+			output, err := preIns.Arbitrate(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "0",
+				Arbitrate:     definition.Arbitrate{ArbitrateResult: true},
+			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("an error"))
 		})
@@ -1412,10 +1468,12 @@ func TestPreset_Arbitrate(t *testing.T) {
 			})
 			mockChainWrapperObj.EXPECT().Arbitrate(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("an error"))
 			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
-
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}, Bin: &binary.Binary{}}
-
-			output, err := preIns.Arbitrate(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 44, 34, 84, 114, 97, 110, 115, 97, 99, 116, 105, 111, 110, 73, 100, 34, 58, 34, 48, 34, 44, 34, 97, 114, 98, 105, 116, 114, 97, 116, 101, 34, 58, 123, 34, 97, 114, 98, 105, 116, 114, 97, 116, 101, 82, 101, 115, 117, 108, 116, 34, 58, 116, 114, 117, 101, 125, 125}})
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}}, Bin: &binary.Binary{}}
+			output, err := preIns.Arbitrate(&definition.MessageInPayload{
+				Password:      "123456",
+				TransactionId: "0",
+				Arbitrate:     definition.Arbitrate{ArbitrateResult: true},
+			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.Wrap(errors.New("an error"), "Arbitrate failed. "))
 		})
@@ -1423,7 +1481,7 @@ func TestPreset_Arbitrate(t *testing.T) {
 }
 
 func TestPreset_updateAccInfo(t *testing.T) {
-	Convey("test Preset.updateAccInfo", t, func() {
+	Convey("test MessageInPayload.updateAccInfo", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -1439,7 +1497,7 @@ func TestPreset_updateAccInfo(t *testing.T) {
 				return 1, nil
 			})
 
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 			err := preIns.updateAccInfo("0")
 			So(err, ShouldBeNil)
 		})
@@ -1452,7 +1510,7 @@ func TestPreset_updateAccInfo(t *testing.T) {
 				return 0, nil
 			})
 			defer UnpatchAll()
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 			err := preIns.updateAccInfo("0")
 			So(err, ShouldBeNil)
 		})
@@ -1468,7 +1526,7 @@ func TestPreset_updateAccInfo(t *testing.T) {
 			Patch(cec.UpdateSlice, func([]byte, string, string) ([]byte, error) {
 				return nil, errors.New("an error")
 			})
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 			err := preIns.updateAccInfo("0")
 			So(err, ShouldBeError, errors.New("an error"))
 		})
@@ -1488,7 +1546,7 @@ func TestPreset_updateAccInfo(t *testing.T) {
 				return 0, nil
 			})
 
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 			err := preIns.updateAccInfo("0")
 			So(err, ShouldBeNil)
 		})
@@ -1496,7 +1554,7 @@ func TestPreset_updateAccInfo(t *testing.T) {
 }
 
 func TestPreset_GetEthBalance(t *testing.T) {
-	Convey("test Preset.GetEthBalance", t, func() {
+	Convey("test MessageInPayload.GetEthBalance", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -1509,7 +1567,7 @@ func TestPreset_GetEthBalance(t *testing.T) {
 			defer UnpatchAll()
 			mockChainWrapperObj.EXPECT().Conn().Return(nil)
 
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}, Bin: &binary.Binary{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}}, Bin: &binary.Binary{}}
 
 			output, err := preIns.GetEthBalance(nil)
 			So(output, ShouldBeLessThanOrEqualTo, "100|"+time.Now().String())
@@ -1517,7 +1575,7 @@ func TestPreset_GetEthBalance(t *testing.T) {
 		})
 
 		Convey("current user is nil", func() {
-			preIns := &Preset{CBs: &cec.Callbacks{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{}}}
 			output, err := preIns.GetEthBalance(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Current user is nil. "))
@@ -1534,7 +1592,7 @@ func TestPreset_GetEthBalance(t *testing.T) {
 			})
 			defer UnpatchAll()
 			mockChainWrapperObj.EXPECT().Conn().Return(nil)
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}, Bin: &binary.Binary{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}}, Bin: &binary.Binary{}}
 			output, err := preIns.GetEthBalance(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.Wrap(errors.New("an error"), "Get eth balance failed. "))
@@ -1543,7 +1601,7 @@ func TestPreset_GetEthBalance(t *testing.T) {
 }
 
 func TestPreset_GetTokenBalance(t *testing.T) {
-	Convey("test Preset.GetTokenBalance", t, func() {
+	Convey("test MessageInPayload.GetTokenBalance", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -1555,27 +1613,18 @@ func TestPreset_GetTokenBalance(t *testing.T) {
 			mockChainWrapperObj.EXPECT().GetTokenBalance(gomock.Any(), gomock.Any()).Return(big.NewInt(100), nil)
 			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"}).Times(2)
 
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}, Bin: &binary.Binary{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}}, Bin: &binary.Binary{}}
 
-			output, err := preIns.GetTokenBalance(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 125}})
+			output, err := preIns.GetTokenBalance(&definition.MessageInPayload{Password: "123456"})
 			So(output, ShouldBeLessThanOrEqualTo, "100|"+time.Now().String())
 			So(err, ShouldBeNil)
 		})
 
 		Convey("current user is nil", func() {
-			preIns := &Preset{CBs: &cec.Callbacks{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{}}}
 			output, err := preIns.GetTokenBalance(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Current user is nil. "))
-		})
-
-		Convey("json unmarshal failed", func() {
-			controller := gomock.NewController(t)
-			mockClientObj := mock_scry.NewMockClient(controller)
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
-			output, err := preIns.GetTokenBalance(&server.MessageIn{Payload: []byte{34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34}})
-			So(output, ShouldBeNil)
-			So(err, ShouldBeError, errors.New("invalid character ':' after top-level value"))
 		})
 
 		Convey("get token balance failed", func() {
@@ -1588,8 +1637,8 @@ func TestPreset_GetTokenBalance(t *testing.T) {
 			defer UnpatchAll()
 			mockChainWrapperObj.EXPECT().GetTokenBalance(gomock.Any(), gomock.Any()).Return(big.NewInt(100), errors.New("an error"))
 			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"}).Times(2)
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}, Bin: &binary.Binary{}}
-			output, err := preIns.GetTokenBalance(&server.MessageIn{Payload: []byte{123, 34, 112, 97, 115, 115, 119, 111, 114, 100, 34, 58, 34, 49, 50, 51, 52, 53, 54, 34, 125}})
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj}}, Bin: &binary.Binary{}}
+			output, err := preIns.GetTokenBalance(&definition.MessageInPayload{Password: "123456"})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.Wrap(errors.New("an error"), "Get token balance failed. "))
 		})
@@ -1597,7 +1646,7 @@ func TestPreset_GetTokenBalance(t *testing.T) {
 }
 
 func TestPreset_IsVerifier(t *testing.T) {
-	Convey("test Preset.IsVerifier", t, func() {
+	Convey("test MessageInPayload.IsVerifier", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -1607,7 +1656,7 @@ func TestPreset_IsVerifier(t *testing.T) {
 			defer UnpatchAll()
 			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
 
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 
 			output, err := preIns.IsVerifier(nil)
 			So(output, ShouldBeFalse)
@@ -1615,7 +1664,7 @@ func TestPreset_IsVerifier(t *testing.T) {
 		})
 
 		Convey("current user is nil", func() {
-			preIns := &Preset{CBs: &cec.Callbacks{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{}}}
 			output, err := preIns.IsVerifier(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Current user is nil. "))
@@ -1629,7 +1678,7 @@ func TestPreset_IsVerifier(t *testing.T) {
 			})
 			defer UnpatchAll()
 			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 			output, err := preIns.IsVerifier(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeNil)
@@ -1638,14 +1687,14 @@ func TestPreset_IsVerifier(t *testing.T) {
 }
 
 func TestPreset_GetAccountsList(t *testing.T) {
-	Convey("test Preset.GetAccountsList", t, func() {
+	Convey("test MessageInPayload.GetAccountsList", t, func() {
 		Convey("standard input, expect success", func() {
 			Patch((*storage.SQLite).Read, func(*storage.SQLite, interface{}, string, string, ...interface{}) (int64, error) {
 				return 1, nil
 			})
 			defer UnpatchAll()
 
-			preIns := &Preset{CBs: &cec.Callbacks{DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{DB: &storage.SQLite{}}}}
 
 			output, err := preIns.GetAccountsList(nil)
 			So(output, ShouldBeNil)
@@ -1657,7 +1706,7 @@ func TestPreset_GetAccountsList(t *testing.T) {
 				return 1, errors.New("an error")
 			})
 			defer UnpatchAll()
-			preIns := &Preset{CBs: &cec.Callbacks{DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{DB: &storage.SQLite{}}}}
 			output, err := preIns.GetAccountsList(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("an error"))
@@ -1666,7 +1715,7 @@ func TestPreset_GetAccountsList(t *testing.T) {
 }
 
 func TestPreset_GetDataList(t *testing.T) {
-	Convey("test Preset.GetDataList", t, func() {
+	Convey("test MessageInPayload.GetDataList", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -1675,7 +1724,7 @@ func TestPreset_GetDataList(t *testing.T) {
 			})
 			defer UnpatchAll()
 
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 
 			output, err := preIns.GetDataList(nil)
 			So(output, ShouldBeNil)
@@ -1683,7 +1732,7 @@ func TestPreset_GetDataList(t *testing.T) {
 		})
 
 		Convey("current user is nil", func() {
-			preIns := &Preset{CBs: &cec.Callbacks{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{}}}
 			output, err := preIns.GetDataList(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Current user is nil. "))
@@ -1696,7 +1745,7 @@ func TestPreset_GetDataList(t *testing.T) {
 				return 1, errors.New("an error")
 			})
 			defer UnpatchAll()
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 			output, err := preIns.GetDataList(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("an error"))
@@ -1705,7 +1754,7 @@ func TestPreset_GetDataList(t *testing.T) {
 }
 
 func TestPreset_GetTxSell(t *testing.T) {
-	Convey("test Preset.GetTxSell", t, func() {
+	Convey("test MessageInPayload.GetTxSell", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -1715,7 +1764,7 @@ func TestPreset_GetTxSell(t *testing.T) {
 			defer UnpatchAll()
 			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
 
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 
 			output, err := preIns.GetTxSell(nil)
 			So(output, ShouldBeNil)
@@ -1723,7 +1772,7 @@ func TestPreset_GetTxSell(t *testing.T) {
 		})
 
 		Convey("current user is nil", func() {
-			preIns := &Preset{CBs: &cec.Callbacks{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{}}}
 			output, err := preIns.GetTxSell(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Current user is nil. "))
@@ -1737,7 +1786,7 @@ func TestPreset_GetTxSell(t *testing.T) {
 			})
 			defer UnpatchAll()
 			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 			output, err := preIns.GetTxSell(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("an error"))
@@ -1746,7 +1795,7 @@ func TestPreset_GetTxSell(t *testing.T) {
 }
 
 func TestPreset_GetTxBuy(t *testing.T) {
-	Convey("test Preset.GetTxBuy", t, func() {
+	Convey("test MessageInPayload.GetTxBuy", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -1756,7 +1805,7 @@ func TestPreset_GetTxBuy(t *testing.T) {
 			defer UnpatchAll()
 			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
 
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 
 			output, err := preIns.GetTxBuy(nil)
 			So(output, ShouldBeNil)
@@ -1764,7 +1813,7 @@ func TestPreset_GetTxBuy(t *testing.T) {
 		})
 
 		Convey("current user is nil", func() {
-			preIns := &Preset{CBs: &cec.Callbacks{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{}}}
 			output, err := preIns.GetTxBuy(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Current user is nil. "))
@@ -1778,7 +1827,7 @@ func TestPreset_GetTxBuy(t *testing.T) {
 			})
 			defer UnpatchAll()
 			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 			output, err := preIns.GetTxBuy(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("an error"))
@@ -1787,20 +1836,20 @@ func TestPreset_GetTxBuy(t *testing.T) {
 }
 
 func TestPreset_GetTxVerify(t *testing.T) {
-	Convey("test Preset.GetTxVerify", t, func() {
+	Convey("test MessageInPayload.GetTxVerify", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
 			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
 			Patch((*storage.SQLite).Read, func(_ *storage.SQLite, out interface{}, _, _ string, _ ...interface{}) (int64, error) {
 				if outAssert, ok := out.(*DBDef.Account); ok {
-					*outAssert = DBDef.Account{Verify: []byte{91,34,48,34,93}}
+					*outAssert = DBDef.Account{Verify: []byte{91, 34, 48, 34, 93}}
 				}
 				return 1, nil
 			})
 			defer UnpatchAll()
 
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 
 			output, err := preIns.GetTxVerify(nil)
 			So(output, ShouldBeNil)
@@ -1818,7 +1867,7 @@ func TestPreset_GetTxVerify(t *testing.T) {
 				return 1, nil
 			})
 			defer UnpatchAll()
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 			output, err := preIns.GetTxVerify(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("invalid character ':' after top-level value"))
@@ -1830,21 +1879,21 @@ func TestPreset_GetTxVerify(t *testing.T) {
 			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
 			Patch((*storage.SQLite).Read, func(_ *storage.SQLite, out interface{}, _, _ string, _ ...interface{}) (int64, error) {
 				if outAssert, ok := out.(*DBDef.Account); ok {
-					*outAssert = DBDef.Account{Verify: []byte{91,34,48,34,93}}
+					*outAssert = DBDef.Account{Verify: []byte{91, 34, 48, 34, 93}}
 				} else {
 					return 1, errors.New("an error")
 				}
 				return 1, nil
 			})
 			defer UnpatchAll()
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 			output, err := preIns.GetTxVerify(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("an error"))
 		})
 
 		Convey("current user is nil", func() {
-			preIns := &Preset{CBs: &cec.Callbacks{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{}}}
 			output, err := preIns.GetTxVerify(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Current user is nil. "))
@@ -1858,7 +1907,7 @@ func TestPreset_GetTxVerify(t *testing.T) {
 				return 1, errors.New("an error")
 			})
 			defer UnpatchAll()
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 			output, err := preIns.GetTxVerify(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("an error"))
@@ -1872,7 +1921,7 @@ func TestPreset_GetTxVerify(t *testing.T) {
 				return 1, nil
 			})
 			defer UnpatchAll()
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 			output, err := preIns.GetTxVerify(nil)
 			So(output, ShouldEqual, "")
 			So(err, ShouldBeNil)
@@ -1881,20 +1930,20 @@ func TestPreset_GetTxVerify(t *testing.T) {
 }
 
 func TestPreset_GetTxArbitrate(t *testing.T) {
-	Convey("test Preset.GetTxArbitrate", t, func() {
+	Convey("test MessageInPayload.GetTxArbitrate", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
 			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
 			Patch((*storage.SQLite).Read, func(_ *storage.SQLite, out interface{}, _, _ string, _ ...interface{}) (int64, error) {
 				if outAssert, ok := out.(*DBDef.Account); ok {
-					*outAssert = DBDef.Account{Arbitrate: []byte{91,34,48,34,93}}
+					*outAssert = DBDef.Account{Arbitrate: []byte{91, 34, 48, 34, 93}}
 				}
 				return 1, nil
 			})
 			defer UnpatchAll()
 
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 
 			output, err := preIns.GetTxArbitrate(nil)
 			So(output, ShouldBeNil)
@@ -1912,7 +1961,7 @@ func TestPreset_GetTxArbitrate(t *testing.T) {
 				return 1, nil
 			})
 			defer UnpatchAll()
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 			output, err := preIns.GetTxArbitrate(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("invalid character ':' after top-level value"))
@@ -1924,21 +1973,21 @@ func TestPreset_GetTxArbitrate(t *testing.T) {
 			mockClientObj.EXPECT().Account().Return(&auth.UserAccount{Addr: "0x9693"})
 			Patch((*storage.SQLite).Read, func(_ *storage.SQLite, out interface{}, _, _ string, _ ...interface{}) (int64, error) {
 				if outAssert, ok := out.(*DBDef.Account); ok {
-					*outAssert = DBDef.Account{Arbitrate: []byte{91,34,48,34,93}}
+					*outAssert = DBDef.Account{Arbitrate: []byte{91, 34, 48, 34, 93}}
 				} else {
 					return 1, errors.New("an error")
 				}
 				return 1, nil
 			})
 			defer UnpatchAll()
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 			output, err := preIns.GetTxArbitrate(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("an error"))
 		})
 
 		Convey("current user is nil", func() {
-			preIns := &Preset{CBs: &cec.Callbacks{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{}}}
 			output, err := preIns.GetTxArbitrate(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Current user is nil. "))
@@ -1952,7 +2001,7 @@ func TestPreset_GetTxArbitrate(t *testing.T) {
 				return 1, errors.New("an error")
 			})
 			defer UnpatchAll()
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 			output, err := preIns.GetTxArbitrate(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("an error"))
@@ -1966,7 +2015,7 @@ func TestPreset_GetTxArbitrate(t *testing.T) {
 				return 1, nil
 			})
 			defer UnpatchAll()
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 			output, err := preIns.GetTxArbitrate(nil)
 			So(output, ShouldEqual, "")
 			So(err, ShouldBeNil)
@@ -1975,7 +2024,7 @@ func TestPreset_GetTxArbitrate(t *testing.T) {
 }
 
 func TestPreset_ModifyNickname(t *testing.T) {
-	Convey("test Preset.ModifyNickname", t, func() {
+	Convey("test MessageInPayload.ModifyNickname", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockClientObj := mock_scry.NewMockClient(controller)
@@ -1984,27 +2033,18 @@ func TestPreset_ModifyNickname(t *testing.T) {
 				return 1, nil
 			})
 
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
 
-			output, err := preIns.ModifyNickname(&server.MessageIn{Payload: []byte{123, 34, 78, 105, 99, 107, 110, 97, 109, 101, 34, 58, 32, 34, 110, 105, 99, 107, 32, 110, 97, 109, 101, 34, 125}})
+			output, err := preIns.ModifyNickname(&definition.MessageInPayload{Nickname: definition.ModifyNickname{Nickname: "nick name"}})
 			So(output, ShouldBeTrue)
 			So(err, ShouldBeNil)
 		})
 
 		Convey("current user is nil", func() {
-			preIns := &Preset{CBs: &cec.Callbacks{}}
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{}}}
 			output, err := preIns.ModifyNickname(nil)
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.New("Current user is nil. "))
-		})
-
-		Convey("json unmarshal failed", func() {
-			controller := gomock.NewController(t)
-			mockClientObj := mock_scry.NewMockClient(controller)
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj}}
-			output, err := preIns.ModifyNickname(&server.MessageIn{Payload: []byte{34, 78, 105, 99, 107, 110, 97, 109, 101, 34, 58, 32, 34, 110, 105, 99, 107, 32, 110, 97, 109, 101, 34}})
-			So(output, ShouldBeNil)
-			So(err, ShouldBeError, errors.New("invalid character ':' after top-level value"))
 		})
 
 		Convey("db update failed", func() {
@@ -2014,8 +2054,8 @@ func TestPreset_ModifyNickname(t *testing.T) {
 			Patch((*storage.SQLite).Update, func(*storage.SQLite, interface{}, map[string]interface{}, string, ...interface{}) (int64, error) {
 				return 1, errors.New("an error")
 			})
-			preIns := &Preset{CBs: &cec.Callbacks{CurUser: mockClientObj, DB: &storage.SQLite{}}}
-			output, err := preIns.ModifyNickname(&server.MessageIn{Payload: []byte{123, 34, 78, 105, 99, 107, 110, 97, 109, 101, 34, 58, 32, 34, 110, 105, 99, 107, 32, 110, 97, 109, 101, 34, 125}})
+			preIns := &Preset{CBs: &cec.Callbacks{WS: &server.WSServer{CurUser: mockClientObj, DB: &storage.SQLite{}}}}
+			output, err := preIns.ModifyNickname(&definition.MessageInPayload{Nickname: definition.ModifyNickname{Nickname: "nick name"}})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.Wrap(errors.New("an error"), "Modify nickname failed. "))
 		})
@@ -2023,7 +2063,7 @@ func TestPreset_ModifyNickname(t *testing.T) {
 }
 
 func TestPreset_ModifyContractParam(t *testing.T) {
-	Convey("test Preset.ModifyContractParam", t, func() {
+	Convey("test MessageInPayload.ModifyContractParam", t, func() {
 		Convey("standard input, expect success", func() {
 			controller := gomock.NewController(t)
 			mockChainWrapperObj := mock_scry.NewMockChainWrapper(controller)
@@ -2035,19 +2075,17 @@ func TestPreset_ModifyContractParam(t *testing.T) {
 
 			preIns := &Preset{
 				Bin:      &binary.Binary{},
-				Deployer: &PreDef.Preset{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
+				Deployer: &definition.MessageInPayload{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
 			}
 
-			output, err := preIns.ModifyContractParam(&server.MessageIn{Payload: []byte{123, 34, 109, 111, 100, 105, 102, 121, 67, 111, 110, 116, 114, 97, 99, 116, 80, 97, 114, 97, 109, 34, 58, 123, 34, 112, 97, 114, 97, 109, 78, 97, 109, 101, 34, 58, 34, 49, 34, 44, 34, 112, 97, 114, 97, 109, 86, 97, 108, 117, 101, 34, 58, 34, 49, 48, 48, 34, 125, 125}})
+			output, err := preIns.ModifyContractParam(&definition.MessageInPayload{
+				Contract: definition.ModifyContractParam{
+					ParamName:  "1",
+					ParamValue: "100",
+				},
+			})
 			So(output, ShouldBeTrue)
 			So(err, ShouldBeNil)
-		})
-
-		Convey("json unmarshal failed", func() {
-			preIns := &Preset{}
-			output, err := preIns.ModifyContractParam(&server.MessageIn{Payload: []byte{34, 109, 111, 100, 105, 102, 121, 67, 111, 110, 116, 114, 97, 99, 116, 80, 97, 114, 97, 109, 34, 58, 123, 34, 112, 97, 114, 97, 109, 78, 97, 109, 101, 34, 58, 34, 49, 34, 44, 34, 112, 97, 114, 97, 109, 86, 97, 108, 117, 101, 34, 58, 34, 49, 48, 48, 34, 125}})
-			So(output, ShouldBeNil)
-			So(err, ShouldBeError, errors.New("invalid character ':' after top-level value"))
 		})
 
 		Convey("modify contract params failed", func() {
@@ -2060,9 +2098,14 @@ func TestPreset_ModifyContractParam(t *testing.T) {
 			mockChainWrapperObj.EXPECT().ModifyContractParam(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("an error"))
 			preIns := &Preset{
 				Bin:      &binary.Binary{},
-				Deployer: &PreDef.Preset{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
+				Deployer: &definition.MessageInPayload{Address: "0xd280b60c38bc8db9d309fa5a540ffec499f0a3e8", Password: "111111"},
 			}
-			output, err := preIns.ModifyContractParam(&server.MessageIn{Payload: []byte{123, 34, 109, 111, 100, 105, 102, 121, 67, 111, 110, 116, 114, 97, 99, 116, 80, 97, 114, 97, 109, 34, 58, 123, 34, 112, 97, 114, 97, 109, 78, 97, 109, 101, 34, 58, 34, 49, 34, 44, 34, 112, 97, 114, 97, 109, 86, 97, 108, 117, 101, 34, 58, 34, 49, 48, 48, 34, 125, 125}})
+			output, err := preIns.ModifyContractParam(&definition.MessageInPayload{
+				Contract: definition.ModifyContractParam{
+					ParamName:  "1",
+					ParamValue: "100",
+				},
+			})
 			So(output, ShouldBeNil)
 			So(err, ShouldBeError, errors.Wrap(errors.New("an error"), "modify contract param failed"))
 		})

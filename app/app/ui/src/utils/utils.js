@@ -372,7 +372,7 @@ let initFunc = {
                     Price: payload[i].Price,
                     Keys: payload[i].Keys,
                     Description: payload[i].Description,
-                    ArbitrateResult: false,
+                    ArbitrateResult: payload[i].ArbitrateResult,
                     SVDisplay: utils.setSupportVerify(payload[i].SupportVerify),
                     NVDisplay: utils.setNeedVerify(payload[i].StartVerify)
                 })
@@ -402,7 +402,7 @@ let initFunc = {
                     Verifier1Response: payload[i].Verifier1Response,
                     Verifier2Response: payload[i].Verifier2Response,
                     SupportVerify: payload[i].SupportVerify,
-                    ArbitrateResult: payload[i].Description,
+                    ArbitrateResult: payload[i].ArbitrateResult,
                     SVDisplay: utils.setSupportVerify(payload[i].SupportVerify),
                     NVDisplay: utils.setNeedVerify(payload[i].StartVerify),
                 })
