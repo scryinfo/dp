@@ -74,6 +74,7 @@ type Arbitrate struct {
 	ArbitrateResult bool `json:"arbitrateResult,omitempty"`
 }
 
+// ModifyNickname specific structure for MN func
 type ModifyNickname struct {
 	Nickname string `json:"nickname"`
 }

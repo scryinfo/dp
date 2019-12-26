@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-// MessageInPayload handle system functions pre-defined
+// Preset handle system functions pre-defined
 type Preset struct {
 	PresetMsgNames    []string
 	PresetMsgHandlers []definition.PresetFunc
