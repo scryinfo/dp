@@ -82,7 +82,7 @@ func TrackerLiveAndDep() []*dot.TypeLives {
 	}
 
 	return []*dot.TypeLives{
-		&dot.TypeLives{
+		{
 			Meta: dot.Metadata{TypeId: TrackerTypeId, NewDoter: newTracker},
 		},
 		client.ClientTypeLive(),
