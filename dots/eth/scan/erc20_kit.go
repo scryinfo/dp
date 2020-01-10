@@ -3,6 +3,7 @@ package scan
 import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/scryinfo/dot/dot"
 	"go.uber.org/zap"
 	"math/big"
@@ -86,6 +87,15 @@ func UnPackInputs(m *abi.Method, inputData []byte, inputs interface{}) (exData [
 	}
 }
 
+//GenerateTransfer
+func (c *Erc20Kit) GenerateTransfer(to *common.Address, value *big.Int, exData []byte, nonce uint64, price *big.Int, limit uint64) (*types.Transaction, error) {
+	data, err := c.PackInputsForTransfer(to, value, exData)
+	if err != nil {
+		return nil, err
+	}
+	return types.NewTransaction(nonce, *to, nil, limit, price, data), nil
+}
+
 //PackInputsForTransfer
 func (c *Erc20Kit) PackInputsForTransfer(to *common.Address, value *big.Int, exData []byte) ([]byte, error) {
 	return PackInputs(c.Transfer, exData, to, value)
@@ -104,6 +114,15 @@ func (c *Erc20Kit) UnPackInputsForTransfer(inputData []byte) (to *common.Address
 	} else {
 		return &inputs.To, inputs.Value, exData, nil
 	}
+}
+
+//GenerateTransfer
+func (c *Erc20Kit) GenerateTransferFrom(from *common.Address, to *common.Address, value *big.Int, exData []byte, nonce uint64, price *big.Int, limit uint64) (*types.Transaction, error) {
+	data, err := c.PackInputsForTransferFrom(from, to, value, exData)
+	if err != nil {
+		return nil, err
+	}
+	return types.NewTransaction(nonce, *to, nil, limit, price, data), nil
 }
 
 //PackInputsForTransferFrom
