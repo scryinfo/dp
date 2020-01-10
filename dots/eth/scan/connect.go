@@ -67,7 +67,7 @@ func (c *Connect) Create(l dot.Line) error {
 		if len(c.conf.SignerType) < 1 || c.conf.SignerType != EIP155Signer {
 			c.Signer = types.HomesteadSigner{}
 		} else {
-			c.Signer = types.NewEIP155Signer(&c.chainId) //todo
+			c.Signer = types.NewEIP155Signer(&c.chainId)
 		}
 	}
 	return err
