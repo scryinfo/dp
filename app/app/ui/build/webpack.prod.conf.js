@@ -15,11 +15,25 @@ const env = require('../config/prod.env')
 
 const webpackConfig = merge(baseWebpackConfig, {
   module: {
-    rules: utils.styleLoaders({
-      sourceMap: config.build.productionSourceMap,
-      extract: true,
-      usePostCSS: true
-    })
+    // rules: utils.styleLoaders({
+    //   sourceMap: config.build.productionSourceMap,
+    //   extract: true,
+    //   usePostCSS: true,
+    // }),
+      rules: [
+        {
+          test: /\.css$/,
+          use: [
+            {
+              loader:MiniCssExtractPlugin.loader,
+              options:{
+                publicPath: '../../'
+              }
+            },
+            "css-loader"
+          ]
+        }
+      ]
   },
   devtool: config.build.productionSourceMap ? config.build.devtool : false,
   output: {
@@ -112,22 +126,22 @@ const webpackConfig = merge(baseWebpackConfig, {
       }
     ])
   ],
-  module: {
-    rules: [
-      {
-        test: /\.css$/,
-        use: [
-          {
-            loader:MiniCssExtractPlugin.loader,
-            options:{
-              publicPath: '../../'
-            }
-          },
-          "css-loader"
-        ]
-      }
-    ]
-  },
+  // module: {
+  //   rules: [
+  //     {
+  //       test: /\.css$/,
+  //       use: [
+  //         {
+  //           loader:MiniCssExtractPlugin.loader,
+  //           options:{
+  //             publicPath: '../../'
+  //           }
+  //         },
+  //         "css-loader"
+  //       ]
+  //     }
+  //   ]
+  // },
   optimization: {
     splitChunks: {
       cacheGroups: {

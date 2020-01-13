@@ -1,4 +1,4 @@
-import {connect} from "./connect";
+import connects from "./connect";
 
 let utils = {
     stateEnum: ["Begin", "Created", "Voted", "Buying", "ReadyForDownload", "Closed"],
@@ -12,20 +12,21 @@ let utils = {
     ],
 
     init: function () {
-        connect.addCallbackFunc("onPublish", presetFunc.onPublish);
-        connect.addCallbackFunc("onVerifiersChosen", presetFunc.onVerifiersChosen);
-        connect.addCallbackFunc("onAdvancePurchase", presetFunc.onAdvancePurchase);
-        connect.addCallbackFunc("onConfirmPurchase", presetFunc.onConfirmPurchase);
-        connect.addCallbackFunc("onReEncrypt", presetFunc.onReEncrypt);
-        connect.addCallbackFunc("onTransactionClose", presetFunc.onTransactionClose);
-        connect.addCallbackFunc("onRegisterVerifier", presetFunc.onRegisterVerifier);
-        connect.addCallbackFunc("onVoteResult", presetFunc.onVoteResult);
-        connect.addCallbackFunc("onVerifierDisable", presetFunc.onVerifierDisable);
-        connect.addCallbackFunc("onArbitrationBegin", presetFunc.onArbitrationBegin);
-        connect.addCallbackFunc("onArbitrationResult", presetFunc.onArbitrationResult);
+
+        connects.addCallbackFunc("onPublish", presetFunc.onPublish);
+        connects.addCallbackFunc("onVerifiersChosen", presetFunc.onVerifiersChosen);
+        connects.addCallbackFunc("onAdvancePurchase", presetFunc.onAdvancePurchase);
+        connects.addCallbackFunc("onConfirmPurchase", presetFunc.onConfirmPurchase);
+        connects.addCallbackFunc("onReEncrypt", presetFunc.onReEncrypt);
+        connects.addCallbackFunc("onTransactionClose", presetFunc.onTransactionClose);
+        connects.addCallbackFunc("onRegisterVerifier", presetFunc.onRegisterVerifier);
+        connects.addCallbackFunc("onVoteResult", presetFunc.onVoteResult);
+        connects.addCallbackFunc("onVerifierDisable", presetFunc.onVerifierDisable);
+        connects.addCallbackFunc("onArbitrationBegin", presetFunc.onArbitrationBegin);
+        connects.addCallbackFunc("onArbitrationResult", presetFunc.onArbitrationResult);
     },
 
-    reacquireData: function (mode,str) {
+    reacquireData: function (mode: any, str?: any) {
         switch (mode) {
             case "dl":
                 initFunc.initDL();
@@ -54,8 +55,8 @@ let utils = {
         }
     },
 
-    setStateString: function (str) {
-        let index;
+    setStateString: function (str: string) :number {
+        let index = 0;
         for (let i = 0; i < utils.stateEnum.length; i++) {
             if (str === utils.stateEnum[i]) {
                 index = i;
@@ -65,11 +66,11 @@ let utils = {
         return index;
     },
 
-    functionDisabled: function (funcNum, stateStr) {
-        return !utils.state[funcNum][utils.setStateString(stateStr)];
+    functionDisabled: function (funcNum:number, stateStr: string) {
+      return !utils.state[funcNum][utils.setStateString(stateStr)];
     },
 
-    setSupportVerify: function (sv) {
+    setSupportVerify: function (sv: any) {
         let result = "";
         if (sv) {
             result = "支持验证";
@@ -80,7 +81,7 @@ let utils = {
         return result;
     },
 
-    setNeedVerify: function (nv) {
+    setNeedVerify: function (nv: any) {
         let result = "";
         if (nv) {
             result = "已启用验证";
@@ -93,7 +94,8 @@ let utils = {
 };
 
 let presetFunc = {
-    onPublish: function (payload, _this) {
+
+    onPublish: function (payload:any, _this:any) {
         console.log("发布事件回调：", payload);
         _this.$notify({
             title: "发布事件回调：",
@@ -112,7 +114,8 @@ let presetFunc = {
         });
     },
 
-    onVerifiersChosen: function (payload, _this) {
+
+    onVerifiersChosen: function (payload:any, _this:any) {
         console.log("选择验证者事件回调：", payload);
         _this.$notify({
             title: "选择验证者事件回调：",
@@ -129,14 +132,15 @@ let presetFunc = {
         });
     },
 
-    onAdvancePurchase: function (payload, _this) {
+
+    onAdvancePurchase: function (payload:any, _this:any) {
         console.log("创建交易事件回调：", payload);
         _this.$notify({
             title: "创建交易事件回调：",
             message: "创建交易(ID：" + payload.TransactionId + ")成功",
             position: "top-left"
         });
-        let param = {
+      let param = {
             PublishId: payload.PublishId,
             TransactionId: payload.TransactionId,
             Title: payload.Title,
@@ -146,15 +150,21 @@ let presetFunc = {
             State: utils.stateEnum[parseInt(payload.State)],
             SVDisplay: utils.setSupportVerify(payload.SupportVerify),
             NVDisplay: utils.setNeedVerify(payload.StartVerify),
-            ArbitrateResult: payload.ArbitrateResult
+            ArbitrateResult: payload.ArbitrateResult,
+            SupportVerify:false,
+            Verifier1Response:"",
+            Verifier2Response:"",
         };
         switch (parseInt(payload.Identify)) {
             case 1:
                 _this.$store.state.transactionsell.push(param);
                 break;
             case 2:
+
                 param.SupportVerify = payload.SupportVerify;
+
                 param.Verifier1Response = payload.Verifier1Response;
+
                 param.Verifier2Response = payload.Verifier2Response;
                 _this.$store.state.transactionbuy.push(param);
                 break;
@@ -164,7 +174,8 @@ let presetFunc = {
         }
     },
 
-    onConfirmPurchase: function (payload, _this) {
+
+    onConfirmPurchase: function (payload:any, _this:any) {
         console.log("购买数据事件回调：", payload);
         _this.$notify({
             title: "购买数据事件回调：",
@@ -173,24 +184,25 @@ let presetFunc = {
         });
         switch (parseInt(payload.Identify)) {
             case 1:
-                _this.$store.state.transactionsell.forEach(function (item) {
+                _this.$store.state.transactionsell.forEach(function (item: { TransactionId: any; State: string; }) {
                     if (item.TransactionId === payload.TransactionId) {
                         item.State = utils.stateEnum[parseInt(payload.State)]
                     }
                 });
                 break;
             case 2:
-                _this.$store.state.transactionbuy.forEach(function (item) {
+                _this.$store.state.transactionbuy.forEach(function (item: { TransactionId: any; State: string; }) {
                     if (item.TransactionId === payload.TransactionId) {
                         item.State = utils.stateEnum[parseInt(payload.State)]
                     }
                 });
                 break;
             case 3:
-                _this.$store.state.transactionverifier.forEach(function (item, index, arr) {
+                _this.$store.state.transactionverifier.forEach(function (item: { TransactionId: any; }, index: number, arr: any[]) {
                     if (item.TransactionId === payload.TransactionId) {
                         // delete item
-                        arr[index] = arr[0];
+
+                      arr[index] = arr[0];
                         arr.shift();
                     }
                 });
@@ -198,7 +210,7 @@ let presetFunc = {
         }
     },
 
-    onReEncrypt: function (payload, _this) {
+    onReEncrypt: function (payload:any, _this:any) {
         console.log("再加密数据事件回调：", payload);
         _this.$notify({
             title: "再加密数据事件回调：",
@@ -207,14 +219,14 @@ let presetFunc = {
         });
         switch (parseInt(payload.Identify)) {
             case 1:
-                _this.$store.state.transactionsell.forEach(function (item) {
+                _this.$store.state.transactionsell.forEach(function (item: { TransactionId: any; State: string; }) {
                     if (item.TransactionId === payload.TransactionId) {
                         item.State = utils.stateEnum[parseInt(payload.State)]
                     }
                 });
                 break;
             case 2:
-                _this.$store.state.transactionbuy.forEach(function (item) {
+                _this.$store.state.transactionbuy.forEach(function (item: { TransactionId: any; State: string; }) {
                     if (item.TransactionId === payload.TransactionId) {
                         item.State = utils.stateEnum[parseInt(payload.State)]
                     }
@@ -223,7 +235,7 @@ let presetFunc = {
         }
     },
 
-    onTransactionClose: function (payload, _this) {
+    onTransactionClose: function (payload:any, _this:any) {
         console.log("交易关闭事件回调：", payload);
         _this.$notify({
             title: "交易关闭事件回调：",
@@ -232,21 +244,21 @@ let presetFunc = {
         });
         switch (parseInt(payload.Identify)) {
             case 1:
-                _this.$store.state.transactionsell.forEach(function (item, index, arr) {
+                _this.$store.state.transactionsell.forEach(function (item: { TransactionId: any; State: string; }, index: any, arr: any) {
                     if (item.TransactionId === payload.TransactionId) {
                         item.State = utils.stateEnum[parseInt(payload.State)]
                     }
                 });
                 break;
             case 2:
-                _this.$store.state.transactionbuy.forEach(function (item, index, arr) {
+                _this.$store.state.transactionbuy.forEach(function (item: { TransactionId: any; State: string; }, index: any, arr: any) {
                     if (item.TransactionId === payload.TransactionId) {
                         item.State = utils.stateEnum[parseInt(payload.State)]
                     }
                 });
                 break;
             case 3:
-                _this.$store.state.transactionverifier.forEach(function (item, index, arr) {
+                _this.$store.state.transactionverifier.forEach(function (item: { TransactionId: any; State: string; }, index: any, arr: any) {
                     if (item.TransactionId === payload.TransactionId) {
                         item.State = utils.stateEnum[parseInt(payload.State)]
                     }
@@ -255,7 +267,7 @@ let presetFunc = {
         }
     },
 
-    onRegisterVerifier: function (payload, _this) {
+    onRegisterVerifier: function (payload:any, _this:any) {
         console.log("注册成为验证者事件回调。");
         _this.$notify({
             title: "注册成为验证者事件回调：",
@@ -264,7 +276,7 @@ let presetFunc = {
         });
     },
 
-    onVoteResult: function (payload, _this) {
+    onVoteResult: function (payload:any, _this:any) {
         console.log("验证者验证事件回调：", payload);
         _this.$notify({
             title: "验证者验证事件回调：",
@@ -272,7 +284,7 @@ let presetFunc = {
             position: "top-left"
         });
         if (parseInt(payload.Identify) === 2) {
-            _this.$store.state.transactionbuy.forEach(function (item) {
+            _this.$store.state.transactionbuy.forEach(function (item: { TransactionId: any; State: string; Verifier1Response: any; Verifier2Response: any; }) {
                 if (item.TransactionId === payload.TransactionId) {
                     item.State = utils.stateEnum[parseInt(payload.State)]
                     if (payload.Verifier1Response !== "") {
@@ -286,7 +298,7 @@ let presetFunc = {
         }
     },
 
-    onVerifierDisable: function (payload, _this) {
+    onVerifierDisable: function (payload:any, _this:any) {
         console.log("取消验证者验证资格事件回调：", payload);
         _this.$notify({
             title: "取消验证者验证资格事件回调：",
@@ -295,7 +307,7 @@ let presetFunc = {
         });
     },
 
-    onArbitrationBegin: function (payload, _this) {
+    onArbitrationBegin: function (payload:any, _this:any) {
         console.log("仲裁开始事件回调：", payload);
         _this.$notify({
             title: "仲裁开始事件回调：",
@@ -312,7 +324,7 @@ let presetFunc = {
         });
     },
 
-    onArbitrationResult: function (payload, _this) {
+    onArbitrationResult: function (payload:any, _this:any) {
         console.log("仲裁结果事件回调：", payload);
         _this.$notify({
             title: "仲裁结果事件回调：",
@@ -321,14 +333,14 @@ let presetFunc = {
         });
         switch (parseInt(payload.Identify)) {
             case 1:
-                _this.$store.state.transactionsell.forEach(function (item) {
+                _this.$store.state.transactionsell.forEach(function (item: { TransactionId: any; ArbitrateResult: any; }) {
                     if (item.TransactionId === payload.TransactionId) {
                         item.ArbitrateResult = payload.ArbitrateResult
                     }
                 });
                 break;
             case 2:
-                _this.$store.state.transactionbuy.forEach(function (item) {
+                _this.$store.state.transactionbuy.forEach(function (item: { TransactionId: any; ArbitrateResult: any; }) {
                     if (item.TransactionId === payload.TransactionId) {
                         item.ArbitrateResult = payload.ArbitrateResult
                     }
@@ -340,7 +352,7 @@ let presetFunc = {
 
 let initFunc = {
     initDL: function () {
-        connect.send({Name: "getDataList", Payload: ""}, function (payload, _this) {
+        connects.send({Name: "getDataList", Payload: ""}, function (payload:any, _this:any) {
             _this.$store.state.datalist = [];
             for (let i = 0; i < payload.length; i++) {
                 _this.$store.state.datalist.push({
@@ -354,7 +366,8 @@ let initFunc = {
                     SVDisplay: utils.setSupportVerify(payload[i].SupportVerify)
                 })
             }
-        }, function (payload, _this) {
+
+        }, function (payload:any, _this:any) {
             console.log("获取数据列表失败：", payload);
             _this.$alert(payload, "获取数据列表失败！", {
                 confirmButtonText: "关闭",
@@ -365,7 +378,8 @@ let initFunc = {
     },
 
     initTxS: function () {
-        connect.send({Name: "getTxSell", Payload: ""}, function (payload, _this) {
+
+        connects.send({Name: "getTxSell", Payload: ""}, function (payload:any, _this:any) {
             _this.$store.state.transactionsell = [];
             for (let i = 0; i < payload.length; i++) {
                 _this.$store.state.transactionsell.push({
@@ -381,7 +395,8 @@ let initFunc = {
                     NVDisplay: utils.setNeedVerify(payload[i].StartVerify)
                 })
             }
-        }, function (payload, _this) {
+
+        }, function (payload:any, _this:any) {
             console.log("获取当前用户为卖方的交易列表失败：", payload);
             _this.$alert(payload, "获取当前用户为卖方的交易列表失败！", {
                 confirmButtonText: "关闭",
@@ -392,7 +407,8 @@ let initFunc = {
     },
 
     initTxB: function () {
-        connect.send({Name: "getTxBuy", Payload: ""}, function (payload, _this) {
+
+        connects.send({Name: "getTxBuy", Payload: ""}, function (payload:any, _this:any) {
             _this.$store.state.transactionbuy = [];
             for (let i = 0; i < payload.length; i++) {
                 _this.$store.state.transactionbuy.push({
@@ -411,7 +427,8 @@ let initFunc = {
                     NVDisplay: utils.setNeedVerify(payload[i].StartVerify),
                 })
             }
-        }, function (payload, _this) {
+
+        }, function (payload:any, _this:any) {
             console.log("获取当前用户为买方的交易列表失败：", payload);
             _this.$alert(payload, "获取当前用户为买方的交易列表失败！", {
                 confirmButtonText: "关闭",
@@ -422,7 +439,8 @@ let initFunc = {
     },
 
     initTxV: function () {
-        connect.send({Name: "getTxVerify", Payload: ""}, function (payload, _this) {
+
+        connects.send({Name: "getTxVerify", Payload: ""}, function (payload:any, _this:any) {
             _this.$store.state.transactionverifier = [];
             if (payload.length > 0) {
                 for (let i = 0; i < payload.length; i++) {
@@ -436,7 +454,8 @@ let initFunc = {
                     })
                 }
             }
-        }, function (payload, _this) {
+
+        }, function (payload:any, _this:any) {
             console.log("获取当前用户为验证者的交易列表失败：", payload);
             _this.$alert(payload, "获取当前用户为验证者的交易列表失败！", {
                 confirmButtonText: "关闭",
@@ -447,7 +466,8 @@ let initFunc = {
     },
 
     initTxA: function () {
-        connect.send({Name: "getTxArbitrate", Payload: ""}, function (payload, _this) {
+
+        connects.send({Name: "getTxArbitrate", Payload: ""}, function (payload:any, _this:any) {
             _this.$store.state.transactionarbitrator = [];
             if (payload.length > 0) {
                 for (let i = 0; i < payload.length; i++) {
@@ -461,7 +481,8 @@ let initFunc = {
                     })
                 }
             }
-        }, function (payload, _this) {
+
+        }, function (payload:any, _this:any) {
             console.log("获取当前用户为仲裁者的交易列表失败：", payload);
             _this.$alert(payload, "获取当前用户为仲裁者的交易列表失败！", {
                 confirmButtonText: "关闭",
@@ -471,8 +492,9 @@ let initFunc = {
         });
     },
 
-    initEvtDL: function (str) {
-    connect.send({Name: "getEvtList", Payload: {eventBodys: str}}, function (payload, _this) {
+    initEvtDL: function (str: any) {
+
+      connects.send({Name: "getEvtList", Payload: {eventBodys: str}}, function (payload:any, _this:any) {
       _this.$store.state.datalist = [];
       console.log("getEvtList:",payload);
       for (let i = 0; i < payload.length; i++) {
@@ -486,7 +508,9 @@ let initFunc = {
           CreatedTime: payload[i].CreatedTime,
         })
       }
-    }, function (payload, _this) {
+
+
+      }, function (payload:any, _this:any) {
       console.log("获取数据列表失败：", payload);
       _this.$alert(payload, "获取数据列表失败！", {
         confirmButtonText: "关闭",

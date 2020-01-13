@@ -2,7 +2,7 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import Vuex from "vuex";
-import App from './App'
+import App from './App.vue'
 import router from './router'
 import store from "./vuex/store";
 import ElementUI from 'element-ui'
@@ -14,7 +14,7 @@ Vue.use(ElementUI);
 
 /* eslint-disable no-new */
 new Vue({
-  router,
-  store,
-  render: h => h(App)
+    router,
+    store,
+    render: h => h(App)
 }).$mount("#app");

@@ -24,72 +24,54 @@
     </div>
 </template>
 
-<script>
-export default {
-    name: "CFT",
-    data () {
-        return {
-            dialog: false,
-            dialogInner: false,
-            password: ""
-        }
-    },
-    props: {
-        buttonSize: {
-            type: String,
-            default: "mini"
-        },
-        buttonType: {
-            type: String,
-            default: "primary"
-        },
-        buttonName: {
-            type: String,
-            default: "default button name"
-        },
-        dialogTitle: {
-            type: String,
-            default: "default dialog title"
-        },
-        buttonDisabled: {
-            type: Boolean,
-            default: false
-        },
-        preParams: Array,
-    },
-    methods: {
-        pre: function (params) {
-            this.dialog = true;
-            if (!!params) {
-                let result = [];
-                for (let i = 0; i < params.length; i++) {
-                    result.push(params[i])
-                }
-                this.$emit("pre", result)
-            }
-        },
+<script lang="ts">
+  import { Vue, Component, Prop } from 'vue-property-decorator'
 
-        cancelFunc: function (name) {
-            if (name === "输入密码") {
-                this.dialogInner = false;
-            } else {
-                this.dialog = false;
-            }
-            this.$message({
-                type: "info",
-                message: "取消" + name
-            });
-        },
+  @Component
+  export default class CFT extends Vue{
+    @Prop(String) buttonSize: String | undefined  ;
+    @Prop() buttonType: String | undefined ;
+    @Prop() buttonName: String | undefined;
+    @Prop()dialogTitle: String | undefined;
+    @Prop()buttonDisabled: Boolean | undefined;
+    @Prop(Array) preParams: Array<any> | undefined;
 
-        submitFunc: function () {
-            this.dialogInner = false;
-            this.dialog = false;
-            let pwd = this.password;
-            this.password = "";
-            this.$emit("password", pwd);
+
+    dialog= false;
+    dialogInner= false;
+    password= "";
+
+    pre (params:any) {
+      this.dialog = true;
+      if (!!params) {
+        let result = [];
+        for (let i = 0; i < params.length; i++) {
+          result.push(params[i])
         }
+        this.$emit("pre", result)
+      }
     }
-}
+
+    cancelFunc (name:string) {
+      if (name === "输入密码") {
+        this.dialogInner = false;
+      } else {
+        this.dialog = false;
+      }
+      this.$message({
+        type: "info",
+        message: "取消" + name
+      });
+    }
+
+    submitFunc () {
+      this.dialogInner = false;
+      this.dialog = false;
+      let pwd = this.password;
+      this.password = "";
+      this.$emit("password", pwd);
+    }
+  }
 </script>
 
 <style scoped>

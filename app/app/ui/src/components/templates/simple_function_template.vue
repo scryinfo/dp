@@ -16,62 +16,52 @@
     </div>
 </template>
 
-<script>
-export default {
-    name: "SFT",
-    data () {
-        return {
-            dialog: false,
-            password: ""
-        }
-    },
-    props: {
-        buttonSize: {
-            type: String,
-            default: "mini"
-        },
-        buttonType: {
-            type: String,
-            default: "primary"
-        },
-        buttonName: {
-            type: String,
-            default: "default button name"
-        },
-        buttonDisabled: {
-            type: Boolean,
-            default: false
-        },
-        preParams: Array,
-    },
-    methods: {
-        pre: function (params) {
-            this.dialog = true;
-            if (!!params) {
-                let result = [];
-                for (let i = 0; i < params.length; i++) {
-                    result.push(params[i])
-                }
-                this.$emit("pre", result)
-            }
-        },
+<script lang="ts">
+  import { Vue, Component, Prop } from 'vue-property-decorator'
 
-        cancelFunc: function (name) {
-            this.dialog = false;
-            this.$message({
-                type: "info",
-                message: "取消" + name
-            });
-        },
+  @Component
+  export default class SFT extends Vue {
+    @Prop()
+    buttonSize: String | undefined;
+    @Prop()
+    buttonType: String | undefined;
+    @Prop()
+    buttonName: String | undefined;
+    @Prop()
+    buttonDisabled: Boolean | undefined;
+    @Prop(Array) preParams: Array<any> | undefined;
 
-        submitFunc: function () {
-            this.dialog = false;
-            let pwd = this.password;
-            this.password = "";
-            this.$emit("password", pwd);
+
+    dialog= false;
+    password= "";
+
+    pre (params:any) {
+      this.dialog = true;
+      if (!!params) {
+        let result = [];
+        for (let i = 0; i < params.length; i++) {
+          result.push(params[i])
         }
+        this.$emit("pre", result)
+      }
     }
-}
+
+    cancelFunc (name:string) {
+      this.dialog = false;
+      this.$message({
+        type: "info",
+        message: "取消" + name
+      });
+    }
+
+    submitFunc () {
+      this.dialog = false;
+      let pwd = this.password;
+      this.password = "";
+      this.$emit("password", pwd);
+    }
+
+  }
 </script>
 
 <style scoped>

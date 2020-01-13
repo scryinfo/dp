@@ -7,23 +7,28 @@
 	</div>
 </template>
 
-<script>
-import {connect} from "./utils/connect.js";
-export default {
-	name: "app",
+<script lang="ts">
+  import Vue from 'vue'
+  import Component from 'vue-class-component';
+  import connects from './utils/connect'
+  @Component({})
+  export default class App extends Vue {
     created () {
-        connect.WSConnect(this);
+        connects.WSConnect(this);
+      if (sessionStorage.getItem("store")) {
+        let store = sessionStorage.getItem("store");
+        let s = store!==null?store:"";
+        this.$store.replaceState(Object.assign({}, this.$store.state,JSON.parse(s)));
+        sessionStorage.removeItem('store');
+      }
 
-        if (sessionStorage.getItem("store")) {
-            this.$store.replaceState(Object.assign({}, this.$store.state,JSON.parse(sessionStorage.getItem("store"))));
-            sessionStorage.removeItem('store');
-        }
+      window.addEventListener("beforeunload", function (s:any){
+        s as App;
+        sessionStorage.setItem("store",JSON.stringify(s.$store.state))
+      })
+    }
+  }
 
-        window.addEventListener("beforeunload", function (){
-            sessionStorage.setItem("store",JSON.stringify(this.$store.state))
-        })
-	}
-}
 </script>
 
 <style>

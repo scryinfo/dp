@@ -237,7 +237,7 @@ type Connector struct {
 func newConnector(ethNodeAddr string) (*Connector, error) {
 	cn, err := ethclient.Dial(ethNodeAddr)
 	if err != nil {
-		return nil, errors.Wrap(err, "Connect to node: "+ethNodeAddr+" failed. ")
+		return nil, errors.Wrap(err, "ConnectsD to node: "+ethNodeAddr+" failed. ")
 	}
 
 	return &Connector{

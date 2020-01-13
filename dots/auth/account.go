@@ -62,7 +62,7 @@ func (c *Account) Destroy(ignore bool) error {
 func (c *Account) Initialize(authServiceAddr string) (err error) {
 	c.cn, err = grpc.Dial(authServiceAddr, grpc.WithInsecure())
 	if err != nil {
-		dot.Logger().Errorln("failed to Connect to node:" + authServiceAddr)
+		dot.Logger().Errorln("failed to ConnectsD to node:" + authServiceAddr)
 		return err
 	}
 

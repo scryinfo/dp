@@ -47,7 +47,7 @@
           "liveId": "40ef6679-5cfc-4436-a1f6-7f39870bc5ef",
           "json": {
             "wsPort": "9822",
-            "uiResourcesDir": "D:/GOCODE/src/github.com/scryinfo/dp-ts/app/app/ui/resources/app"
+            "uiResourcesDir": "D:/GOCODE/src/github.com/scryinfo/dp-ts-new/app/app/ui/resources/app"
           }
         }
       ]
