@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package _proto;
+
+service VariFlightDataService {
+    rpc GetFlightDataByFlightNumber(GetFlightDataByFlightNumberRequest) returns (stream VariFlightData) {};
+    rpc GetFlightDataBetweenTwoAirports(GetFlightDataBetweenTwoAirportsRequest) returns (stream VariFlightData) {};
+    rpc GetFlightDataBetweenTwoCities(GetFlightDataBetweenTwoCitiesRequest) returns (stream VariFlightData) {};
+    rpc GetFlightDataByDepartureAndArrivalStatus(GetFlightDataAtOneAirportByStatusRequest) returns (stream VariFlightData) {};
+}
+
+message VariFlightData {
+  string fcategory  = 1;
+  string FlightNo = 2;
+  string FlightCompany = 3;
+  string FlightDepcode = 4;
+  string FlightArrcode = 5;
+  string FlightDeptimePlanDate = 6;
+  string FlightArrtimePlanDate = 7;
+  string FlightDeptimeDate = 8;
+  string FlightArrtimeDate = 9;
+  string FlightState = 10;
+  string FlightHTerminal = 11;
+  string FlightTerminal = 12;
+  string org_timezone = 13;
+  string dst_timezone = 14;
+  string ShareFlightNo = 15;
+  string StopFlag = 16;
+  string ShareFlag = 17;
+  string VirtualFlag = 18;
+  string LegFlag = 19;
+  string FlightDep = 20;
+  string FlightArr = 21;
+  string FlightDepAirport = 22;
+  string FlightArrAirport = 23;
+}
+
+message GetFlightDataByFlightNumberRequest  {
+  string flightNumber = 1;
+  string date = 2;
+}
+
+message GetFlightDataBetweenTwoAirportsRequest  {
+  string departureAirport = 1;
+  string arrivalAirport = 2;
+  string date = 3;
+}
+
+message GetFlightDataBetweenTwoCitiesRequest  {
+  string departureCity = 1;
+  string arrivalCity = 2;
+  string date = 3;
+}
+
+message GetFlightDataAtOneAirportByStatusRequest  {
+  string airport = 1;
+  string status = 2;
+  string date = 3;
+}
