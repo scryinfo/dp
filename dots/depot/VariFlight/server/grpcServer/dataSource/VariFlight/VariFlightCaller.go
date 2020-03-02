@@ -1,3 +1,6 @@
+// Scry Info.  All rights reserved.
+// license that can be found in the license file.
+
 package VariFlight
 
 import (
@@ -13,8 +16,8 @@ import (
 // VariFlightCaller coordinate the overall logic of calling API from https://www.variflight.com/, caching and storing the responded flight data.
 type VariFlightCaller struct {
 	// required parameters for API validation
-	Appid            string
-	RegistrationCode string
+	Appid       string
+	Appsecurity string
 
 	// other shared parts for API calling
 	commonPartOfURL  string
@@ -33,10 +36,10 @@ type VariFlightCaller struct {
 	cacher *cacher
 }
 
-func New(appid, registrationCode string, minDurAgainstExtraRequest, maxDurAgainstExtraRequest time.Duration, driverName, dataSourceName string) *VariFlightCaller {
+func New(appid, appsecurity string, minDurAgainstExtraRequest, maxDurAgainstExtraRequest time.Duration, driverName, dataSourceName string) *VariFlightCaller {
 	return &VariFlightCaller{
-		Appid:            appid,
-		RegistrationCode: registrationCode,
+		Appid:       appid,
+		Appsecurity: appsecurity,
 
 		commonPartOfURL:  defaultCommonPartURL,
 		flightDateLayout: defaultFlightDateLayout,
@@ -58,8 +61,8 @@ func (a *VariFlightCaller) Call(paramsFunc APIParamsConfFunc) ([]VariFlightData,
 	apiParams := paramsFunc()
 	apiParams.Opts["appid"] = a.Appid
 
-	token := token(apiParams.Opts, a.RegistrationCode)
-	reqURL := url(a.commonPartOfURL, apiParams.Opts, a.RegistrationCode)
+	token := token(apiParams.Opts, a.Appsecurity)
+	reqURL := url(a.commonPartOfURL, apiParams.Opts, a.Appsecurity)
 
 	// read data from cache
 	data := a.cacher.read(token)
@@ -85,8 +88,8 @@ func (a *VariFlightCaller) Call(paramsFunc APIParamsConfFunc) ([]VariFlightData,
 	}
 
 	// data exists
-	// Note dynamic flight data may vary over time. If data has been just updated within during of MinDurAgainstExtraRequest,
-	// or if it's departure plan date is far beyond the during of MaxDurAgainstExtraRequest, then avoid extra calling VariFlightCaller,
+	// Note dynamic flight data may vary over time. If data has been just updated within during of minDurAgainstExtraRequest,
+	// or if it's departure plan date is far beyond the during of maxDurAgainstExtraRequest, then avoid extra calling VariFlightCaller,
 	// but return the cached data directly, because in this case we can roughly think that the flight data should
 	// has low chance to change, so it's unnecessary to call the VariFlightCaller again for the same _token.
 	if data.isUpdatedWithin(a.MinDurAgainstExtraRequest) || data.isDepPlanDateBeyond(a.MaxDurAgainstExtraRequest) {
@@ -149,10 +152,10 @@ func (a *VariFlightCaller) call(method APIMethod, url string) ([]VariFlightData,
 //	var queryParams = map[string]string{}
 //	queryParams["fnum"] = flightNumber
 //	queryParams["date"] = date
-//	queryParams["appid"] = a.Appid
+//	queryParams["appid"] = a.appid
 //
-//	_token := utils.token(queryParams, a.RegistrationCode)
-//	reqURL := utils.url(a.commonPartOfURL, queryParams, a.RegistrationCode)
+//	_token := utils.token(queryParams, a.appsecurity)
+//	reqURL := utils.url(a.commonPartOfURL, queryParams, a.appsecurity)
 //
 //	// read data from cache
 //	data := a.cacher.read(_token)
@@ -180,11 +183,11 @@ func (a *VariFlightCaller) call(method APIMethod, url string) ([]VariFlightData,
 //	}
 //
 //	// data exists
-//	// Note dynamic flight data may vary over time. If data has been just updated within during of MinDurAgainstExtraRequest,
-//	// or if it's departure plan date is far beyond the during of MaxDurAgainstExtraRequest, then avoid extra calling VariFlightCaller,
+//	// Note dynamic flight data may vary over time. If data has been just updated within during of minDurAgainstExtraRequest,
+//	// or if it's departure plan date is far beyond the during of maxDurAgainstExtraRequest, then avoid extra calling VariFlightCaller,
 //	// but return the cached data directly, because in this case we can roughly think that the flight data should
 //	// has low chance to change, so it's unnecessary to call the VariFlightCaller again for the same _token.
-//	if data.isUpdatedWithin(a.MinDurAgainstExtraRequest) || data.isDepPlanDateBeyond(a.MaxDurAgainstExtraRequest) {
+//	if data.isUpdatedWithin(a.minDurAgainstExtraRequest) || data.isDepPlanDateBeyond(a.maxDurAgainstExtraRequest) {
 //		return data.value, nil
 //	}
 //
@@ -215,9 +218,9 @@ func (a *VariFlightCaller) call(method APIMethod, url string) ([]VariFlightData,
 //	queryParams["dep"] = departureAirport
 //	queryParams["arr"] = arrivalAirport
 //	queryParams["date"] = date
-//	queryParams["Appid"] = a.Appid
+//	queryParams["appid"] = a.appid
 //
-//	urlWithToken := defaultCommonPartURL + utils.queryWithToken(queryParams, a.RegistrationCode)
+//	urlWithToken := defaultCommonPartURL + utils.queryWithToken(queryParams, a.appsecurity)
 //
 //	var flightDataResp []VariFlightData
 //
@@ -232,9 +235,9 @@ func (a *VariFlightCaller) call(method APIMethod, url string) ([]VariFlightData,
 //	queryParams["depcity"] = departureCity
 //	queryParams["arrcity"] = arrivalCity
 //	queryParams["date"] = date
-//	queryParams["Appid"] = a.Appid
+//	queryParams["appid"] = a.appid
 //
-//	urlWithToken := defaultCommonPartURL + utils.queryWithToken(queryParams, a.RegistrationCode)
+//	urlWithToken := defaultCommonPartURL + utils.queryWithToken(queryParams, a.appsecurity)
 //
 //	var flightDataResp []VariFlightData
 //
@@ -251,9 +254,9 @@ func (a *VariFlightCaller) call(method APIMethod, url string) ([]VariFlightData,
 //	queryParams["page"] = page
 //	queryParams["perpage"] = dataItemsNumberPerPage
 //	queryParams["date"] = date
-//	queryParams["Appid"] = a.Appid
+//	queryParams["appid"] = a.appid
 //
-//	urlWithToken := defaultCommonPartURL + utils.queryWithToken(queryParams, a.RegistrationCode)
+//	urlWithToken := defaultCommonPartURL + utils.queryWithToken(queryParams, a.appsecurity)
 //
 //	var flightDataResp []VariFlightData
 //
