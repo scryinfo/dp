@@ -1,53 +1,92 @@
+// Scry Info.  All rights reserved.
+// license that can be found in the license file.
+
 package server
 
 import (
-	"github.com/gin-gonic/gin"
-	"./httpHandler"
-	"log"
+	"github.com/scryinfo/dot/dot"
+	"github.com/scryinfo/dp/dots/depot/VariFlight/server/_proto"
+	"google.golang.org/grpc"
 	"time"
+
+	"github.com/scryinfo/dot/dots/grpc/gserver"
+
+	"./grpcServer"
 )
 
-type GinRouter struct {
-	// required parameters for data source VariFlight API validation
-	Appid            string
-	RegistrationCode string
+const (
+	VariFlightWebSocketGrpcServerTypeId = ""
+)
 
+type VariFlightWebSocketGrpcServerConfig struct {
+	// required parameters for data source VariFlight API validation
+	Appid       string `json:"appid"`
+	Appsecurity string `json:"appsecurity"`
+
+	// todo: rename
 	// time control parameters for avoiding unnecessary extra API calling
-	MinDurAgainstExtraRequest time.Duration
-	MaxDurAgainstExtraRequest time.Duration
+	MinDurAgainstExtraRequest time.Duration `json:"minDurAgainstExtraRequest"`
+	MaxDurAgainstExtraRequest time.Duration `json:"maxDurAgainstExtraRequest"`
 
 	// arguments for connecting a database
-	DriverName string
+	DriverName     string
 	DataSourceName string
-
-	variFlightHttpHandler *httpHandler.VariFlightHttpHandler
 }
 
-func New(appid, registrationCode string, minDurAgainstExtraRequest, maxDurAgainstExtraRequest time.Duration, driverName, dataSourceName string) *GinRouter {
-	r := GinRouter{
-		Appid: appid,
-		RegistrationCode: registrationCode,
+type VariFlightWebSocketGrpcServer struct {
+	config *VariFlightWebSocketGrpcServerConfig
 
-		MinDurAgainstExtraRequest: minDurAgainstExtraRequest,
-		MaxDurAgainstExtraRequest: maxDurAgainstExtraRequest,
+	//variFlightHttpHandler *httpHandler.VariFlightHttpHandler
 
-		DriverName: driverName,
-		DataSourceName: dataSourceName,
-	}
+	WebSocket *gserver.WebSocket `dot:""`
 
-	variFlightHttpHandler := httpHandler.New(appid, registrationCode, minDurAgainstExtraRequest, maxDurAgainstExtraRequest, driverName, dataSourceName)
-	r.variFlightHttpHandler = variFlightHttpHandler
-	
-	return &r
+	grpcServer   *grpc.Server
+	domainServer *grpcServer.VariFlightGrpcServer
 }
 
-func (r *GinRouter) Run() {
-	router := gin.Default()
-	gin.WrapH(r.variFlightHttpHandler)
-
-	router.GET("/variflight", r.variFlightHttpHandler)
-	if err := router.Run("localhost:8000"); err != nil {
-		log.Fatal(err)
+func VariFlightWebSocketGrpcServerConfigTypeLive() *dot.ConfigTypeLives {
+	return &dot.ConfigTypeLives{
+		TypeIdConfig: VariFlightWebSocketGrpcServerTypeId,
+		ConfigInfo:   &VariFlightWebSocketGrpcServerConfig{},
 	}
 }
 
+func VariFlightWebSocketGrpcServerTypeLive() *dot.TypeLives {
+	return &dot.TypeLives{
+		Meta: dot.Metadata{
+			TypeId: VariFlightWebSocketGrpcServerTypeId,
+			NewDoter: func(conf []byte) (dot dot.Dot, err error) {
+				var toConf = VariFlightWebSocketGrpcServerConfig{}
+				if err := dot.UnMarshalConfig(conf, &toConf); err != nil {
+					return nil, err
+				}
+				return &VariFlightWebSocketGrpcServer{config: &toConf}, nil
+			},
+		},
+		Lives: []dot.Live{
+			{
+				TypeId: VariFlightWebSocketGrpcServerTypeId,
+				RelyLives: map[string]dot.LiveId{
+					"WebSocket": gserver.WebSocketTypeId,
+				},
+			},
+		},
+	}
+}
+
+func VariFlightWebSocketGrpcServerAndRelyTypeLives() []*dot.TypeLives {
+	allTypeLives := []*dot.TypeLives{VariFlightWebSocketGrpcServerTypeLive()}
+	allTypeLives = append(allTypeLives, gserver.WebSocketAndRelyTypeLives()...)
+	return allTypeLives
+}
+
+func (s *VariFlightWebSocketGrpcServer) AfterAllInject(l dot.Line) {
+	s.grpcServer = s.WebSocket.ServerNobl.Server()
+	s.domainServer = grpcServer.New(s.config.Appid, s.config.Appsecurity, s.config.MinDurAgainstExtraRequest, s.config.MaxDurAgainstExtraRequest, s.config.DriverName, s.config.DataSourceName)
+	_proto.RegisterVariFlightDataServiceServer(s.grpcServer, s.domainServer)
+}
+
+// todo: to close the db, otherwise use gorms component.
+func (s *VariFlightWebSocketGrpcServer) Stop(ignore bool) error {
+
+}
