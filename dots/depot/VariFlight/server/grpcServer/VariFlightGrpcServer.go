@@ -1,3 +1,6 @@
+// Scry Info.  All rights reserved.
+// license that can be found in the license file.
+
 package grpcServer
 
 import (
@@ -25,8 +28,8 @@ var variFligtAPICodeToGrpcCode = map[VariFlight.VariFlightStatusCode]codes.Code{
 //  VariFlightGrpcServer serve flight data provided by https://www.variflight.com/.
 type VariFlightGrpcServer struct {
 	// required parameters for data source VariFlight API validation
-	Appid            string
-	RegistrationCode string
+	Appid       string
+	appsecurity string
 
 	// time control parameters for avoiding unnecessary extra API calling
 	MinDurAgainstExtraRequest time.Duration
@@ -39,10 +42,10 @@ type VariFlightGrpcServer struct {
 	variFlightCaller *VariFlight.VariFlightCaller
 }
 
-func New(appid, registrationCode string, minDurAgainstExtraRequest, maxDurAgainstExtraRequest time.Duration, driverName, dataSourceName string) *VariFlightGrpcServer {
+func New(appid, appsecurity string, minDurAgainstExtraRequest, maxDurAgainstExtraRequest time.Duration, driverName, dataSourceName string) *VariFlightGrpcServer {
 	return &VariFlightGrpcServer{
-		Appid:            appid,
-		RegistrationCode: registrationCode,
+		Appid:       appid,
+		appsecurity: appsecurity,
 
 		MinDurAgainstExtraRequest: minDurAgainstExtraRequest,
 		MaxDurAgainstExtraRequest: maxDurAgainstExtraRequest,
@@ -50,7 +53,7 @@ func New(appid, registrationCode string, minDurAgainstExtraRequest, maxDurAgains
 		DriverName:     driverName,
 		DataSourceName: dataSourceName,
 
-		variFlightCaller: VariFlight.New(appid, registrationCode, minDurAgainstExtraRequest, maxDurAgainstExtraRequest, driverName, dataSourceName),
+		variFlightCaller: VariFlight.New(appid, appsecurity, minDurAgainstExtraRequest, maxDurAgainstExtraRequest, driverName, dataSourceName),
 	}
 }
 
