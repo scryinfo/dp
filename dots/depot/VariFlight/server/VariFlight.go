@@ -4,6 +4,8 @@
 package server
 
 import (
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"google.golang.org/grpc"
@@ -108,4 +110,56 @@ func (s *VariFlightWebSocketGrpcServer) Stop(ignore bool) error {
 		s.variFlightServiceServer = nil
 	}
 	return nil
+}
+
+// For test purpose only.
+func NewVariFlightWebSocketGrpcServerTest() *VariFlightWebSocketGrpcServer {
+	config := VariFlightWebSocketGrpcServerConfig {
+		Appid: "VariFlight_test_appid",
+		Appsecurity: "VariFlight_test_appsecurity",
+
+		MinDurAgainstExtraRequest: time.Minute * 30,
+		MaxDurAgainstExtraRequest: time.Hour * 24,
+
+		DriverName: "postgres",
+		DataSourceName: "",
+
+		ServicePath: "",
+	}
+
+	bytes, err := json.Marshal(&config);
+	if err != nil {
+		dot.Logger().Fatal(func() string {
+			return fmt.Sprintf("failed to marshal config, error: %v", err)
+		})
+	}
+
+	newer := func(conf []byte) (dot dot.Dot, err error) {
+		var toConf = VariFlightWebSocketGrpcServerConfig{}
+		if err := dot.UnMarshalConfig(conf, &toConf); err != nil {
+			return nil, err
+		}
+		if toConf.ServicePath == "" {
+			toConf.ServicePath = defaultServicePath
+		}
+		return &VariFlightWebSocketGrpcServer{config: &toConf}, nil
+	}
+
+	d, err := newer(bytes)
+	if err != nil {
+		dot.Logger().Fatal(func() string {
+			return fmt.Sprintf("failed to get new dot, error: %v", err)
+		})
+	}
+
+	cp, ok := d.(*VariFlightWebSocketGrpcServer)
+	if !ok {
+		dot.Logger().Fatal(func() string {
+			return fmt.Sprint("obtained component is not *VariFlightWebSocketGrpcServer")
+		})
+	}
+
+	cp.AfterAllInject(nil)
+
+	return cp
 }
