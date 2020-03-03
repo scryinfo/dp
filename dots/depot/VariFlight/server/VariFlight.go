@@ -4,44 +4,53 @@
 package server
 
 import (
-	"github.com/scryinfo/dot/dot"
-	"github.com/scryinfo/dp/dots/depot/VariFlight/server/_proto"
-	"google.golang.org/grpc"
 	"time"
 
+	"google.golang.org/grpc"
+
+	"github.com/scryinfo/dot/dot"
 	"github.com/scryinfo/dot/dots/grpc/gserver"
 
-	"./grpcServer"
+	"github.com/scryinfo/dp/dots/depot/VariFlight/server/_proto"
+	"github.com/scryinfo/dp/dots/depot/VariFlight/server/grpcServer"
 )
 
 const (
-	VariFlightWebSocketGrpcServerTypeId = ""
+	VariFlightWebSocketGrpcServerTypeId = "70c1a120-03af-4e55-a6fe-feb44b5d2761"
+
+	defaultServicePath = "/variflight"
 )
+
+// VariFlightWebSocketGrpcServer component serves VariFlight flight data against gRPC-WebSocket request,
+// initially routed by the HTTP GET method and the given path.
+//
+// If ServicePath is not configured, then use defaultServicePath instead.
+//
+// todo: rename concisely
+type VariFlightWebSocketGrpcServer struct {
+	WebSocket *gserver.WebSocket `dot:""`
+
+	grpcServer              *grpc.Server
+	variFlightServiceServer *grpcServer.VariFlightGrpcServer
+
+	config *VariFlightWebSocketGrpcServerConfig
+}
 
 type VariFlightWebSocketGrpcServerConfig struct {
 	// required parameters for data source VariFlight API validation
 	Appid       string `json:"appid"`
 	Appsecurity string `json:"appsecurity"`
 
-	// todo: rename
 	// time control parameters for avoiding unnecessary extra API calling
 	MinDurAgainstExtraRequest time.Duration `json:"minDurAgainstExtraRequest"`
 	MaxDurAgainstExtraRequest time.Duration `json:"maxDurAgainstExtraRequest"`
 
 	// arguments for connecting a database
-	DriverName     string
-	DataSourceName string
-}
+	DriverName     string `json:"driver_name"`
+	DataSourceName string `json:"data_source_name"`
 
-type VariFlightWebSocketGrpcServer struct {
-	config *VariFlightWebSocketGrpcServerConfig
-
-	//variFlightHttpHandler *httpHandler.VariFlightHttpHandler
-
-	WebSocket *gserver.WebSocket `dot:""`
-
-	grpcServer   *grpc.Server
-	domainServer *grpcServer.VariFlightGrpcServer
+	// path to route grpc service
+	ServicePath string `json:"service_path"`
 }
 
 func VariFlightWebSocketGrpcServerConfigTypeLive() *dot.ConfigTypeLives {
@@ -51,42 +60,52 @@ func VariFlightWebSocketGrpcServerConfigTypeLive() *dot.ConfigTypeLives {
 	}
 }
 
-func VariFlightWebSocketGrpcServerTypeLive() *dot.TypeLives {
-	return &dot.TypeLives{
-		Meta: dot.Metadata{
-			TypeId: VariFlightWebSocketGrpcServerTypeId,
-			NewDoter: func(conf []byte) (dot dot.Dot, err error) {
-				var toConf = VariFlightWebSocketGrpcServerConfig{}
-				if err := dot.UnMarshalConfig(conf, &toConf); err != nil {
-					return nil, err
-				}
-				return &VariFlightWebSocketGrpcServer{config: &toConf}, nil
-			},
-		},
-		Lives: []dot.Live{
-			{
+func VariFlightWebSocketGrpcServerTypeLives() []*dot.TypeLives {
+	variFlightWebSocketGrpcServerTypeLive := func() *dot.TypeLives {
+		return &dot.TypeLives{
+			Meta: dot.Metadata{
 				TypeId: VariFlightWebSocketGrpcServerTypeId,
-				RelyLives: map[string]dot.LiveId{
-					"WebSocket": gserver.WebSocketTypeId,
+				NewDoter: func(conf []byte) (dot dot.Dot, err error) {
+					var toConf = VariFlightWebSocketGrpcServerConfig{}
+					if err := dot.UnMarshalConfig(conf, &toConf); err != nil {
+						return nil, err
+					}
+					if toConf.ServicePath == "" {
+						toConf.ServicePath = defaultServicePath
+					}
+					return &VariFlightWebSocketGrpcServer{config: &toConf}, nil
 				},
 			},
-		},
+			Lives: []dot.Live{
+				{
+					TypeId: VariFlightWebSocketGrpcServerTypeId,
+					RelyLives: map[string]dot.LiveId{
+						"WebSocket": gserver.WebSocketTypeId,
+					},
+				},
+			},
+		}
 	}
-}
-
-func VariFlightWebSocketGrpcServerAndRelyTypeLives() []*dot.TypeLives {
-	allTypeLives := []*dot.TypeLives{VariFlightWebSocketGrpcServerTypeLive()}
-	allTypeLives = append(allTypeLives, gserver.WebSocketAndRelyTypeLives()...)
+	allTypeLives := []*dot.TypeLives{variFlightWebSocketGrpcServerTypeLive()}
+	allTypeLives = append(allTypeLives, gserver.WebSocketTypeLives()...)
 	return allTypeLives
 }
 
 func (s *VariFlightWebSocketGrpcServer) AfterAllInject(l dot.Line) {
-	s.grpcServer = s.WebSocket.ServerNobl.Server()
-	s.domainServer = grpcServer.New(s.config.Appid, s.config.Appsecurity, s.config.MinDurAgainstExtraRequest, s.config.MaxDurAgainstExtraRequest, s.config.DriverName, s.config.DataSourceName)
-	_proto.RegisterVariFlightDataServiceServer(s.grpcServer, s.domainServer)
+	s.grpcServer = grpc.NewServer()
+	s.variFlightServiceServer = grpcServer.New(s.config.Appid, s.config.Appsecurity, s.config.MinDurAgainstExtraRequest, s.config.MaxDurAgainstExtraRequest, s.config.DriverName, s.config.DataSourceName)
+	_proto.RegisterVariFlightDataServiceServer(s.grpcServer, s.variFlightServiceServer)
+
+	s.WebSocket.GET(s.config.ServicePath, s.grpcServer)
 }
 
-// todo: to close the db, otherwise use gorms component.
+// todo: code to close the db, otherwise use a common db component (e.g. gorms).
 func (s *VariFlightWebSocketGrpcServer) Stop(ignore bool) error {
-
+	if s.grpcServer != nil {
+		s.grpcServer = nil
+	}
+	if s.variFlightServiceServer != nil {
+		s.variFlightServiceServer = nil
+	}
+	return nil
 }
