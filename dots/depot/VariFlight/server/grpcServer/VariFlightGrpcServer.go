@@ -9,8 +9,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"../_proto"
-	"./dataSource/VariFlight"
+	"github.com/scryinfo/dp/dots/depot/VariFlight/server/_proto"
+	"github.com/scryinfo/dp/dots/depot/VariFlight/server/grpcServer/dataSource/VariFlight"
 )
 
 var _ _proto.VariFlightDataServiceServer = (*VariFlightGrpcServer)(nil)
