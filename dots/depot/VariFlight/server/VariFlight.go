@@ -67,7 +67,7 @@ func VariFlightWebSocketGrpcServerTypeLives() []*dot.TypeLives {
 		return &dot.TypeLives{
 			Meta: dot.Metadata{
 				TypeId: VariFlightWebSocketGrpcServerTypeId,
-				NewDoter: func(conf []byte) (dot dot.Dot, err error) {
+				NewDoter: func(conf []byte) (dot.Dot, error) {
 					var toConf = VariFlightWebSocketGrpcServerConfig{}
 					if err := dot.UnMarshalConfig(conf, &toConf); err != nil {
 						return nil, err
@@ -134,7 +134,7 @@ func NewVariFlightWebSocketGrpcServerTest() *VariFlightWebSocketGrpcServer {
 		})
 	}
 
-	newer := func(conf []byte) (dot dot.Dot, err error) {
+	newer := func(conf []byte) (dot.Dot, error) {
 		var toConf = VariFlightWebSocketGrpcServerConfig{}
 		if err := dot.UnMarshalConfig(conf, &toConf); err != nil {
 			return nil, err
