@@ -4,10 +4,6 @@
 package VariFlight
 
 const (
-	defaultCommonPartURL    = "http://open-al.variflight.com/api/flight?"
-	defaultFlightTimeLayout = "2006-01-02 15:04:05"
-	defaultFlightDateLayout = "2006-01-02"
-
 	defaultPaage   = "1"
 	defaultPerpage = "20"
 
