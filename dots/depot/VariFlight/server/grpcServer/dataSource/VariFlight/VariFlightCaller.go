@@ -8,6 +8,7 @@ import (
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
+	"github.com/scryinfo/dot/dots/db/gorms"
 	"io"
 	"net/http"
 	"os"
@@ -17,7 +18,6 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/scryinfo/dot/dot"
-	"github.com/scryinfo/dot/dots/db/gorms"
 )
 
 const (
@@ -66,7 +66,7 @@ func VariFlightCallerTypeLives() []*dot.TypeLives {
 				NewDoter: func(conf []byte) (dot.Dot, error) {
 					_conf := defaultVariFlightCallerConfig
 					if err := dot.UnMarshalConfig(conf, &_conf); err != nil {
-						dot.Logger().Debugln("UnMarshalConfig failed", zap.Error(err))
+						dot.Logger().Debugln("UnMarshalConfig(VariFlightCallerConfig) failed", zap.Error(err))
 						os.Exit(1)
 					}
 					dot.Logger().Debug(func() string {
@@ -75,14 +75,14 @@ func VariFlightCallerTypeLives() []*dot.TypeLives {
 					return &VariFlightCaller{config: &_conf}, nil
 				},
 			},
-			Lives: []dot.Live{
-				{
-					TypeId: VariFlightCallerTypeId,
-					RelyLives: map[string]dot.LiveId{
-						"Gorms": gorms.TypeId,
-					},
-				},
-			},
+			//Lives: []dot.Live{
+			//	{
+			//		TypeId: VariFlightCallerTypeId,
+			//		RelyLives: map[string]dot.LiveId{
+			//			"Gorms": gorms.TypeId,
+			//		},
+			//	},
+			//},
 		},
 		gorms.TypeLives()[0],
 	}
