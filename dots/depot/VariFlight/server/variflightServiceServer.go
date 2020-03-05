@@ -1,19 +1,17 @@
 // Scry Info.  All rights reserved.
 // license that can be found in the license file.
 
-package grpcServer
+package server
 
 import (
-	"time"
-
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	"github.com/scryinfo/dp/dots/depot/VariFlight/server/_proto"
-	"github.com/scryinfo/dp/dots/depot/VariFlight/server/grpcServer/dataSource/VariFlight"
+	VariFlight "github.com/scryinfo/dp/dots/depot/VariFlight/server/VariFlightApiCaller"
 )
 
-var _ _proto.VariFlightDataServiceServer = (*VariFlightGrpcServer)(nil)
+var _ _proto.VariFlightDataServiceServer = (*variflightServiceServer)(nil)
 
 var variFligtAPICodeToGrpcCode = map[VariFlight.VariFlightStatusCode]codes.Code{
 	VariFlight.UserNotExists:          codes.Unauthenticated,
@@ -25,39 +23,16 @@ var variFligtAPICodeToGrpcCode = map[VariFlight.VariFlightStatusCode]codes.Code{
 	VariFlight.UnknownError:           codes.Unknown,
 }
 
-//  VariFlightGrpcServer serve flight data provided by https://www.variflight.com/.
-type VariFlightGrpcServer struct {
-	// required parameters for data source VariFlight API validation
-	Appid       string
-	appsecurity string
-
-	// time control parameters for avoiding unnecessary extra API calling
-	MinDurAgainstExtraRequest time.Duration
-	MaxDurAgainstExtraRequest time.Duration
-
-	// arguments for connecting a database
-	DriverName     string
-	DataSourceName string
-
-	variFlightCaller *VariFlight.VariFlightCaller
+//  variflightServiceServer serve flight data provided by https://www.variflight.com/.
+type variflightServiceServer struct {
+	variFlightCaller *VariFlight.VariFlightApiCaller
 }
 
-func New(appid, appsecurity string, minDurAgainstExtraRequest, maxDurAgainstExtraRequest time.Duration, driverName, dataSourceName string) *VariFlightGrpcServer {
-	return &VariFlightGrpcServer{
-		Appid:       appid,
-		appsecurity: appsecurity,
-
-		MinDurAgainstExtraRequest: minDurAgainstExtraRequest,
-		MaxDurAgainstExtraRequest: maxDurAgainstExtraRequest,
-
-		DriverName:     driverName,
-		DataSourceName: dataSourceName,
-
-		variFlightCaller: VariFlight.New(appid, appsecurity, minDurAgainstExtraRequest, maxDurAgainstExtraRequest, driverName, dataSourceName),
-	}
+func new(vfCaller *VariFlight.VariFlightApiCaller) *variflightServiceServer {
+	return &variflightServiceServer{vfCaller}
 }
 
-func (s *VariFlightGrpcServer) GetFlightDataByFlightNumber(req *_proto.GetFlightDataByFlightNumberRequest, srv _proto.VariFlightDataService_GetFlightDataByFlightNumberServer) error {
+func (s *variflightServiceServer) GetFlightDataByFlightNumber(req *_proto.GetFlightDataByFlightNumberRequest, srv _proto.VariFlightDataService_GetFlightDataByFlightNumberServer) error {
 	params := VariFlight.GetFlightDataByFlightNumber(req.FlightNumber, req.Date)
 	variFlightDatas, err := s.variFlightCaller.Call(params)
 	if err != nil {
@@ -71,7 +46,7 @@ func (s *VariFlightGrpcServer) GetFlightDataByFlightNumber(req *_proto.GetFlight
 	return nil
 }
 
-func (s *VariFlightGrpcServer) GetFlightDataBetweenTwoAirports(req *_proto.GetFlightDataBetweenTwoAirportsRequest, srv _proto.VariFlightDataService_GetFlightDataBetweenTwoAirportsServer) error {
+func (s *variflightServiceServer) GetFlightDataBetweenTwoAirports(req *_proto.GetFlightDataBetweenTwoAirportsRequest, srv _proto.VariFlightDataService_GetFlightDataBetweenTwoAirportsServer) error {
 	params := VariFlight.GetFlightDataBetweenTwoAirports(req.DepartureAirport, req.ArrivalAirport, req.Date)
 	variFlightDatas, err := s.variFlightCaller.Call(params)
 	if err != nil {
@@ -85,7 +60,7 @@ func (s *VariFlightGrpcServer) GetFlightDataBetweenTwoAirports(req *_proto.GetFl
 	return nil
 }
 
-func (s *VariFlightGrpcServer) GetFlightDataBetweenTwoCities(req *_proto.GetFlightDataBetweenTwoCitiesRequest, srv _proto.VariFlightDataService_GetFlightDataBetweenTwoCitiesServer) error {
+func (s *variflightServiceServer) GetFlightDataBetweenTwoCities(req *_proto.GetFlightDataBetweenTwoCitiesRequest, srv _proto.VariFlightDataService_GetFlightDataBetweenTwoCitiesServer) error {
 	params := VariFlight.GetFlightDataBetweenTwoCities(req.DepartureCity, req.ArrivalCity, req.Date)
 	variFlightDatas, err := s.variFlightCaller.Call(params)
 	if err != nil {
@@ -99,7 +74,7 @@ func (s *VariFlightGrpcServer) GetFlightDataBetweenTwoCities(req *_proto.GetFlig
 	return nil
 }
 
-func (s *VariFlightGrpcServer) GetFlightDataByDepartureAndArrivalStatus(req *_proto.GetFlightDataAtOneAirportByStatusRequest, srv _proto.VariFlightDataService_GetFlightDataByDepatureAndArrivalStatusServer) error {
+func (s *variflightServiceServer) GetFlightDataByDepartureAndArrivalStatus(req *_proto.GetFlightDataAtOneAirportByStatusRequest, srv _proto.VariFlightDataService_GetFlightDataByDepatureAndArrivalStatusServer) error {
 	params := VariFlight.GetFlightDataByDepartureAndArrivalStatus(req.Airport, req.Status, "", "", req.Date)
 	variFlightDatas, err := s.variFlightCaller.Call(params)
 	if err != nil {
