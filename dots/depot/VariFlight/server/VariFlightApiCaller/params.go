@@ -13,7 +13,7 @@ const (
 	APIMethodByStatus       APIMethod = "GetFlightDataByDepartureAndArrivalStatus"
 )
 
-// APIMethod is method of calling VariFlightCaller from https://www.variflight.com/
+// APIMethod is method of calling VariFlightApiCaller from https://www.variflight.com/
 type APIMethod string
 
 // APIParams contains APIMethod and its required parameters, with appid, appsecurity and _token excluded.
