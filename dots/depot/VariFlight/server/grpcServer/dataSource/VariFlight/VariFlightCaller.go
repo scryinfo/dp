@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
@@ -66,7 +67,7 @@ func VariFlightCallerTypeLives() []*dot.TypeLives {
 					_conf := defaultVariFlightCallerConfig
 					if err := dot.UnMarshalConfig(conf, &_conf); err != nil {
 						dot.Logger().Debugln("UnMarshalConfig failed", zap.Error(err))
-						return nil, err
+						os.Exit(1)
 					}
 					dot.Logger().Debug(func() string {
 						return spew.Sprintf("VariFlightCallerConfig: %#+v", _conf)
@@ -96,6 +97,9 @@ func (a *VariFlightCaller) AfterAllInject(l dot.Line) {
 
 // Call coordinates the overall logic of API calling, caching and storing the responded flight data.
 func (a *VariFlightCaller) Call(paramsFunc APIParamsConfFunc) ([]VariFlightData, error) {
+	dot.Logger().Info(func() string {
+		return spew.Sprintf("VariFlightCaller Call. parameters: %#+v", paramsFunc())
+	})
 	apiParams := paramsFunc()
 	apiParams.Opts["appid"] = a.config.Appid
 
@@ -158,6 +162,9 @@ func (a *VariFlightCaller) Call(paramsFunc APIParamsConfFunc) ([]VariFlightData,
 
 // call calls API and returns the decoded data and the raw body bytes.
 func (a *VariFlightCaller) call(method APIMethod, url string) ([]VariFlightData, []byte, error) {
+	dot.Logger().Info(func() string {
+		return spew.Sprintf("VariFlightCaller call. method: %v, url: %v\n", method, url)
+	})
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, nil, newGetUrlError(method, url, err)
