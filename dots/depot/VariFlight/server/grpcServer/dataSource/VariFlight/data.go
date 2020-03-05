@@ -11,10 +11,10 @@ import (
 type data struct {
 	token            string
 	digest           string
-	updatedAtTime    time.Time        `db:"updated_at_time"`
-	flightDateLayout string           `db:"flight_data_layout"`
-	value            []VariFlightData `db:"-"`                 // for cache only
-	valueJSONString  string           `db:"value_json_string"` // for store only
+	updatedAtTime    time.Time        `dbx:"updated_at_time"`
+	flightDateLayout string           `dbx:"flight_data_layout"`
+	value            []VariFlightData `dbx:"-"`                 // for cache only
+	valueJSONString  string           `dbx:"value_json_string"` // for store only
 }
 
 func newData(token, digest string, updatedAtTime time.Time, flightDateLayout string, value []VariFlightData, valueJSONString string) *data {
