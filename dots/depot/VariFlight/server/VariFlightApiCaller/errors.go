@@ -23,7 +23,7 @@ const (
 	UnknownError           VariFlightStatusCode = 11
 )
 
-// GetUrlError wraps error returned by http.Get() during calling VariFlightCaller
+// GetUrlError wraps error returned by http.Get() during calling VariFlightApiCaller
 type GetUrlError struct {
 	Method       APIMethod
 	Url          string
@@ -42,7 +42,7 @@ func (r *GetUrlError) Unwrap() error {
 	return r.WrappedError
 }
 
-//  VariFlightDataQueryError represents error message responded by VariFlightCaller
+//  VariFlightDataQueryError represents error message responded by VariFlightApiCaller
 type VariFlightDataQueryError struct {
 	Method     APIMethod
 	Url        string
@@ -66,7 +66,7 @@ func (e *VariFlightDataQueryError) Error() string {
 		e.Method, e.Url, e.StatusCode, e.Status, e.ErrCode, e.ErrMsg)
 }
 
-// DecodeJsonError wraps error of decoding message from VariFlightCaller
+// DecodeJsonError wraps error of decoding message from VariFlightApiCaller
 type DecodeJsonError struct {
 	Method     APIMethod
 	Url        string
