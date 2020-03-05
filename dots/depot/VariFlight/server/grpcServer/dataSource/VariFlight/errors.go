@@ -35,7 +35,7 @@ func newGetUrlError(method APIMethod, url string, wrappedErr error) *GetUrlError
 }
 
 func (r *GetUrlError) Error() string {
-	return fmt.Sprintf("%v failed, defaultCommonPartURL: %v, error: %v", r.Method, r.Url, r.WrappedError)
+	return fmt.Sprintf("%v failed, url: %v, error: %v", r.Method, r.Url, r.WrappedError)
 }
 
 func (r *GetUrlError) Unwrap() error {
@@ -62,7 +62,7 @@ func newDataQueryError(method APIMethod, url string, statusCode VariFlightStatus
 }
 
 func (e *VariFlightDataQueryError) Error() string {
-	return fmt.Sprintf("%v failed, defaultCommonPartURL: %v, status code: %v, status: %v, error code: %v, error: %v.",
+	return fmt.Sprintf("%v failed, url: %v, status code: %v, status: %v, error code: %v, error: %v.",
 		e.Method, e.Url, e.StatusCode, e.Status, e.ErrCode, e.ErrMsg)
 }
 
@@ -81,7 +81,7 @@ func newDecodeJsonError(method APIMethod, url string, statusCode int, status str
 }
 
 func (e *DecodeJsonError) Error() string {
-	return fmt.Sprintf("%v failed, defaultCommonPartURL: %v, status code: %v, status: %v, error: %v.",
+	return fmt.Sprintf("%v failed, url: %v, status code: %v, status: %v, error: %v.",
 		e.Method, e.Url, e.StatusCode, e.Status, e.WrappedError)
 }
 
