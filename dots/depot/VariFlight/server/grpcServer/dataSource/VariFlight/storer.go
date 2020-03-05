@@ -8,10 +8,10 @@ import (
 	"os"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
-	_ "github.com/mattn/go-sqlite3"
+	//_ "github.com/lib/pq"
+	//_ "github.com/mattn/go-sqlite3"
+	//_ "github.com/go-sql-driver/mysql"
 
 	"go.uber.org/zap"
 
