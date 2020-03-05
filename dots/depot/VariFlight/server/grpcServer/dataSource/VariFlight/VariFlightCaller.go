@@ -11,58 +11,96 @@ import (
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/davecgh/go-spew/spew"
+	"go.uber.org/zap"
+
+	"github.com/scryinfo/dot/dot"
+	"github.com/scryinfo/dot/dots/db/gorms"
 )
+
+const (
+	VariFlightCallerTypeId = "e19f09c0-ac20-4d1e-a810-130900f94657"
+)
+
+var defaultVariFlightCallerConfig = VariFlightCallerConfig{
+	commonPartOfURL:  "http://open-al.variflight.com/api/flight?",
+	flightDateLayout: "2006-01-02 15:04:05",
+	flightTimeLayout: "2006-01-02",
+
+	MinDurAgainstExtraRequest: 1800e9,          // 30 minutes
+	MaxDurAgainstExtraRequest: 5 * 24 * 3600e9, // 5 days
+}
+
+type VariFlightCallerConfig struct {
+	// required parameters for data source VariFlight API validation
+	Appid       string `json:"appid"`
+	Appsecurity string `json:"appsecurity"`
+
+	// other shared parts for API calling
+	commonPartOfURL  string `json:"-"`
+	flightDateLayout string `json:"-"`
+	flightTimeLayout string `json:"-"`
+
+	// time control parameters for avoiding unnecessary extra API calling
+	MinDurAgainstExtraRequest uint64 `json:"minDurAgainstExtraRequest, omitempty"`
+	MaxDurAgainstExtraRequest uint64 `json:"maxDurAgainstExtraRequest, omitempty"`
+}
 
 // VariFlightCaller coordinate the overall logic of calling API from https://www.variflight.com/, caching and storing the responded flight data.
 type VariFlightCaller struct {
-	// required parameters for API validation
-	Appid       string
-	Appsecurity string
+	config *VariFlightCallerConfig
 
-	// other shared parts for API calling
-	commonPartOfURL  string
-	flightDateLayout string
-	flightTimeLayout string
-
-	// time control parameters for avoiding unnecessary extra API calling
-	MinDurAgainstExtraRequest time.Duration
-	MaxDurAgainstExtraRequest time.Duration
-
-	// arguments for connecting a database
-	DriverName     string
-	DataSourceName string
+	Gorms *gorms.Gorms `dot:""`
 
 	storer *storer
 	cacher *cacher
 }
 
-func New(appid, appsecurity string, minDurAgainstExtraRequest, maxDurAgainstExtraRequest time.Duration, driverName, dataSourceName string) *VariFlightCaller {
-	return &VariFlightCaller{
-		Appid:       appid,
-		Appsecurity: appsecurity,
-
-		commonPartOfURL:  defaultCommonPartURL,
-		flightDateLayout: defaultFlightDateLayout,
-		flightTimeLayout: defaultFlightTimeLayout,
-
-		MinDurAgainstExtraRequest: minDurAgainstExtraRequest,
-		MaxDurAgainstExtraRequest: maxDurAgainstExtraRequest,
-
-		DriverName:     driverName,
-		DataSourceName: dataSourceName,
-
-		cacher: newCacher(),
-		storer: newStorer(driverName, dataSourceName),
+func VariFlightCallerTypeLives() []*dot.TypeLives {
+	return []*dot.TypeLives{
+		{
+			Meta: dot.Metadata{
+				TypeId: VariFlightCallerTypeId,
+				NewDoter: func(conf []byte) (dot.Dot, error) {
+					_conf := defaultVariFlightCallerConfig
+					if err := dot.UnMarshalConfig(conf, &_conf); err != nil {
+						dot.Logger().Debugln("UnMarshalConfig failed", zap.Error(err))
+						return nil, err
+					}
+					dot.Logger().Debug(func() string {
+						return spew.Sprintf("VariFlightCallerConfig: %#+v", _conf)
+					})
+					return &VariFlightCaller{config: &_conf}, nil
+				},
+			},
+			Lives: []dot.Live{
+				{
+					TypeId: VariFlightCallerTypeId,
+					RelyLives: map[string]dot.LiveId{
+						"Gorms": gorms.TypeId,
+					},
+				},
+			},
+		},
+		gorms.TypeLives()[0],
 	}
+}
+
+func (a *VariFlightCaller) AfterAllInject(l dot.Line) {
+	db := a.Gorms.Db.DB()
+	driverName := a.Gorms.Db.Dialect().GetName()
+	a.storer = newStorer(db, driverName)
+	a.cacher = newCacher()
 }
 
 // Call coordinates the overall logic of API calling, caching and storing the responded flight data.
 func (a *VariFlightCaller) Call(paramsFunc APIParamsConfFunc) ([]VariFlightData, error) {
 	apiParams := paramsFunc()
-	apiParams.Opts["appid"] = a.Appid
+	apiParams.Opts["appid"] = a.config.Appid
 
-	token := token(apiParams.Opts, a.Appsecurity)
-	reqURL := url(a.commonPartOfURL, apiParams.Opts, a.Appsecurity)
+	token := token(apiParams.Opts, a.config.Appsecurity)
+	reqURL := url(a.config.commonPartOfURL, apiParams.Opts, a.config.Appsecurity)
 
 	// read data from cache
 	data := a.cacher.read(token)
@@ -73,7 +111,7 @@ func (a *VariFlightCaller) Call(paramsFunc APIParamsConfFunc) ([]VariFlightData,
 		if err != nil {
 			return nil, err
 		}
-		data := newData(token, fmt.Sprint(md5.Sum(apiDataBytes)), time.Now(), a.flightDateLayout, apiData, string(apiDataBytes))
+		data := newData(token, fmt.Sprint(md5.Sum(apiDataBytes)), time.Now(), a.config.flightDateLayout, apiData, string(apiDataBytes))
 
 		// storer data
 		if err = a.storer.create(data); err != nil {
@@ -92,7 +130,7 @@ func (a *VariFlightCaller) Call(paramsFunc APIParamsConfFunc) ([]VariFlightData,
 	// or if it's departure plan date is far beyond the during of maxDurAgainstExtraRequest, then avoid extra calling VariFlightCaller,
 	// but return the cached data directly, because in this case we can roughly think that the flight data should
 	// has low chance to change, so it's unnecessary to call the VariFlightCaller again for the same _token.
-	if data.isUpdatedWithin(a.MinDurAgainstExtraRequest) || data.isDepPlanDateBeyond(a.MaxDurAgainstExtraRequest) {
+	if data.isUpdatedWithin(time.Duration(a.config.MinDurAgainstExtraRequest)) || data.isDepPlanDateBeyond(time.Duration(a.config.MaxDurAgainstExtraRequest)) {
 		return data.value, nil
 	}
 
@@ -146,122 +184,3 @@ func (a *VariFlightCaller) call(method APIMethod, url string) ([]VariFlightData,
 
 	return apiData, buffer.Bytes(), nil
 }
-
-//// ......
-//func (a *VariFlightCaller) GetFlightDataByFlightNumber(flightNumber, date string) ([]VariFlightData, error) {
-//	var queryParams = map[string]string{}
-//	queryParams["fnum"] = flightNumber
-//	queryParams["date"] = date
-//	queryParams["appid"] = a.appid
-//
-//	_token := utils.token(queryParams, a.appsecurity)
-//	reqURL := utils.url(a.commonPartOfURL, queryParams, a.appsecurity)
-//
-//	// read data from cache
-//	data := a.cacher.read(_token)
-//	// data not exists
-//	if data == nil {
-//		// call VariFlightCaller for data
-//		var apiData []VariFlightData
-//		var apiDataBytes []byte
-//		var err error
-//		if apiData ,apiDataBytes, err = a.call(APIMethodByFlightNumber, reqURL); err != nil {
-//			return nil, err
-//		}
-//		data := newData(_token, fmt.Sprint(md5.Sum(apiDataBytes)), time.Now(), a.flightDateLayout, apiData, string(apiDataBytes))
-//
-//		// storer data
-//		if err = a.storer.Create(data); err != nil {
-//			return nil, err
-//		}
-//
-//		// cache data
-//		data.valueJSONString = ""
-//		a.cacher.create(data)
-//
-//		return apiData, nil
-//	}
-//
-//	// data exists
-//	// Note dynamic flight data may vary over time. If data has been just updated within during of minDurAgainstExtraRequest,
-//	// or if it's departure plan date is far beyond the during of maxDurAgainstExtraRequest, then avoid extra calling VariFlightCaller,
-//	// but return the cached data directly, because in this case we can roughly think that the flight data should
-//	// has low chance to change, so it's unnecessary to call the VariFlightCaller again for the same _token.
-//	if data.isUpdatedWithin(a.minDurAgainstExtraRequest) || data.isDepPlanDateBeyond(a.maxDurAgainstExtraRequest) {
-//		return data.value, nil
-//	}
-//
-//    // Otherwise, we should repeat calling VariFlightCaller for latest flight data.
-//	apiData ,apiDataBytes, err := a.call(APIMethodByFlightNumber, reqURL)
-//	if err != nil {
-//		return nil, err
-//	}
-//	// if data hasn't varied in fact, only the updatedAtTime property needs to be updated.
-//	newDigest := fmt.Sprint(md5.Sum(apiDataBytes))
-//	if data.isSameDigest(newDigest) {
-//		if err := a.storer.updateUpdateAtTime(_token, time.Now()); err != nil {
-//			return nil, err
-//		}
-//		a.cacher.updateUpdateAtTime(_token, time.Now())
-//		return data.value, nil
-//	}
-//	// but if data has varied over time, more data property need to be updated as follow.
-//	if err := a.storer.update(_token, newDigest, time.Now(), string(apiDataBytes)); err != nil {
-//		return nil, err
-//	}
-//	a.cacher.update(_token, newDigest, time.Now(), apiData)
-//	return apiData, nil
-//}
-
-//func (a *VariFlightCaller) GetFlightDataBetweenTwoAirports(departureAirport, arrivalAirport, date string) ([]VariFlightData, error) {
-//	var queryParams = map[string]string{}
-//	queryParams["dep"] = departureAirport
-//	queryParams["arr"] = arrivalAirport
-//	queryParams["date"] = date
-//	queryParams["appid"] = a.appid
-//
-//	urlWithToken := defaultCommonPartURL + utils.queryWithToken(queryParams, a.appsecurity)
-//
-//	var flightDataResp []VariFlightData
-//
-//	if err := a.call(APIMethodByAirports, urlWithToken, &flightDataResp); err != nil {
-//		return nil, err
-//	}
-//	return flightDataResp, nil
-//}
-//
-//func (a *VariFlightCaller) GetFlightDataBetweenTwoCities(departureCity, arrivalCity, date string) ([]VariFlightData, error) {
-//	var queryParams = map[string]string{}
-//	queryParams["depcity"] = departureCity
-//	queryParams["arrcity"] = arrivalCity
-//	queryParams["date"] = date
-//	queryParams["appid"] = a.appid
-//
-//	urlWithToken := defaultCommonPartURL + utils.queryWithToken(queryParams, a.appsecurity)
-//
-//	var flightDataResp []VariFlightData
-//
-//	if err := a.call(APIMethodByCities, urlWithToken, &flightDataResp); err != nil {
-//		return nil, err
-//	}
-//	return flightDataResp, nil
-//}
-//
-//func (a *VariFlightCaller) GetFlightDataByDepartureAndArrivalStatus(airport, status, page, dataItemsNumberPerPage, date string) ([]VariFlightData, error) {
-//	var queryParams = map[string]string{}
-//	queryParams["airport"] = airport
-//	queryParams["status"] = status
-//	queryParams["page"] = page
-//	queryParams["perpage"] = dataItemsNumberPerPage
-//	queryParams["date"] = date
-//	queryParams["appid"] = a.appid
-//
-//	urlWithToken := defaultCommonPartURL + utils.queryWithToken(queryParams, a.appsecurity)
-//
-//	var flightDataResp []VariFlightData
-//
-//	if err := a.call(APIMethodByStatus, urlWithToken, &flightDataResp); err != nil {
-//		return nil, err
-//	}
-//	return flightDataResp, nil
-//}
