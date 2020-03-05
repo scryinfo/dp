@@ -4,10 +4,9 @@
 package VariFlight
 
 import (
+	"database/sql"
 	"os"
 	"time"
-	"database/sql"
-
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -25,8 +24,7 @@ var schema = `
 		digest text,
 		updated_at_time text,
 		flight_data_layout text,
-		value_json_string text,
-);`
+		value_json_string text);`
 
 type storer struct {
 	dbx *sqlx.DB
