@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/jmoiron/sqlx"
 	"github.com/scryinfo/dot/dot"
 	"github.com/scryinfo/dot/dots/db/gorms"
@@ -29,7 +28,7 @@ func main()  {
 		os.Exit(1)
 	}
 	dot.Logger().Debug(func() string {
-		return spew.Sprintf("gorms: %v", gmdot.(*gorms.Gorms))
+		return fmt.Sprintf("gorms: %v", gmdot.(*gorms.Gorms))
 	})
 
 	vfdot, err := l.ToInjecter().GetByLiveId(VariFlight.VariFlightApiCallerTypeId)
@@ -38,7 +37,7 @@ func main()  {
 		os.Exit(1)
 	}
 	dot.Logger().Debug(func() string {
-		return spew.Sprintf("VariFlightApiCaller: %v", vfdot.(*VariFlight.VariFlightApiCaller))
+		return fmt.Sprintf("VariFlightApiCaller: %v", vfdot.(*VariFlight.VariFlightApiCaller))
 	})
 
 	fmt.Println("VariFlightApiCaller now can work normally!")
