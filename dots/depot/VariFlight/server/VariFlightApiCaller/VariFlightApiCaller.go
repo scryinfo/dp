@@ -8,16 +8,15 @@ import (
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
-	"github.com/scryinfo/dot/dots/db/gorms"
 	"io"
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"go.uber.org/zap"
 
 	"github.com/scryinfo/dot/dot"
+	"github.com/scryinfo/dot/dots/db/gorms"
 )
 
 const (
@@ -70,7 +69,7 @@ func VariFlightCallerTypeLives() []*dot.TypeLives {
 						os.Exit(1)
 					}
 					dot.Logger().Debug(func() string {
-						return spew.Sprintf("VariFlightApiCallerConfig: %v", _conf)
+						return fmt.Sprintf("VariFlightApiCallerConfig: %v", _conf)
 					})
 					return &VariFlightApiCaller{config: &_conf}, nil
 				},
@@ -98,7 +97,7 @@ func (a *VariFlightApiCaller) AfterAllInject(l dot.Line) {
 // Call coordinates the overall logic of API calling, caching and storing the responded flight data.
 func (a *VariFlightApiCaller) Call(paramsFunc APIParamsConfFunc) ([]VariFlightData, error) {
 	dot.Logger().Info(func() string {
-		return spew.Sprintf("VariFlightApiCaller Call. parameters: %v", paramsFunc())
+		return fmt.Sprintf("VariFlightApiCaller Call. parameters: %v", paramsFunc())
 	})
 	apiParams := paramsFunc()
 	apiParams.Opts["appid"] = a.config.Appid
@@ -163,7 +162,7 @@ func (a *VariFlightApiCaller) Call(paramsFunc APIParamsConfFunc) ([]VariFlightDa
 // call calls API and returns the decoded data and the raw body bytes.
 func (a *VariFlightApiCaller) call(method APIMethod, url string) ([]VariFlightData, []byte, error) {
 	dot.Logger().Info(func() string {
-		return spew.Sprintf("VariFlightApiCaller call. method: %v, url: %v\n", method, url)
+		return fmt.Sprintf("VariFlightApiCaller call. method: %v, url: %v\n", method, url)
 	})
 	resp, err := http.Get(url)
 	if err != nil {
