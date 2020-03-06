@@ -25,16 +25,16 @@ var variFligtAPICodeToGrpcCode = map[VariFlight.VariFlightStatusCode]codes.Code{
 
 //  variflightServiceServer serve flight data provided by https://www.variflight.com/.
 type variflightServiceServer struct {
-	variFlightCaller *VariFlight.VariFlightApiCaller
+	variFlightApiCaller *VariFlight.VariFlightApiCaller
 }
 
-func new(vfCaller *VariFlight.VariFlightApiCaller) *variflightServiceServer {
+func newVariFlightServiceServer(vfCaller *VariFlight.VariFlightApiCaller) *variflightServiceServer {
 	return &variflightServiceServer{vfCaller}
 }
 
 func (s *variflightServiceServer) GetFlightDataByFlightNumber(req *_proto.GetFlightDataByFlightNumberRequest, srv _proto.VariFlightDataService_GetFlightDataByFlightNumberServer) error {
 	params := VariFlight.GetFlightDataByFlightNumber(req.FlightNumber, req.Date)
-	variFlightDatas, err := s.variFlightCaller.Call(params)
+	variFlightDatas, err := s.variFlightApiCaller.Call(params)
 	if err != nil {
 		return protoError(err)
 	}
@@ -48,7 +48,7 @@ func (s *variflightServiceServer) GetFlightDataByFlightNumber(req *_proto.GetFli
 
 func (s *variflightServiceServer) GetFlightDataBetweenTwoAirports(req *_proto.GetFlightDataBetweenTwoAirportsRequest, srv _proto.VariFlightDataService_GetFlightDataBetweenTwoAirportsServer) error {
 	params := VariFlight.GetFlightDataBetweenTwoAirports(req.DepartureAirport, req.ArrivalAirport, req.Date)
-	variFlightDatas, err := s.variFlightCaller.Call(params)
+	variFlightDatas, err := s.variFlightApiCaller.Call(params)
 	if err != nil {
 		return protoError(err)
 	}
@@ -62,7 +62,7 @@ func (s *variflightServiceServer) GetFlightDataBetweenTwoAirports(req *_proto.Ge
 
 func (s *variflightServiceServer) GetFlightDataBetweenTwoCities(req *_proto.GetFlightDataBetweenTwoCitiesRequest, srv _proto.VariFlightDataService_GetFlightDataBetweenTwoCitiesServer) error {
 	params := VariFlight.GetFlightDataBetweenTwoCities(req.DepartureCity, req.ArrivalCity, req.Date)
-	variFlightDatas, err := s.variFlightCaller.Call(params)
+	variFlightDatas, err := s.variFlightApiCaller.Call(params)
 	if err != nil {
 		return protoError(err)
 	}
@@ -76,7 +76,7 @@ func (s *variflightServiceServer) GetFlightDataBetweenTwoCities(req *_proto.GetF
 
 func (s *variflightServiceServer) GetFlightDataByDepartureAndArrivalStatus(req *_proto.GetFlightDataAtOneAirportByStatusRequest, srv _proto.VariFlightDataService_GetFlightDataByDepatureAndArrivalStatusServer) error {
 	params := VariFlight.GetFlightDataByDepartureAndArrivalStatus(req.Airport, req.Status, "", "", req.Date)
-	variFlightDatas, err := s.variFlightCaller.Call(params)
+	variFlightDatas, err := s.variFlightApiCaller.Call(params)
 	if err != nil {
 		return protoError(err)
 	}
