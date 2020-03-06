@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/jmoiron/sqlx"
 	"github.com/scryinfo/dot/dot"
 	"github.com/scryinfo/dot/dots/db/gorms"
@@ -28,7 +27,7 @@ func main()  {
 		os.Exit(1)
 	}
 	dot.Logger().Debug(func() string {
-		return spew.Sprintf("gorms.TypeId: %#+v", gmdot.(*gorms.Gorms))
+		return fmt.Sprintf("gorms.TypeId: %#+v", gmdot.(*gorms.Gorms))
 	})
 
 	gorms := gmdot.(*gorms.Gorms)
