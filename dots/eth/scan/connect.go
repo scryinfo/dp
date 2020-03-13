@@ -71,11 +71,11 @@ func (c *Connect) Create(l dot.Line) error {
 	c.EthClient, err = ethclient.DialContext(c.Ctx, c.conf.UrlEth)
 	if err == nil {
 		c.chainId = *big.NewInt(c.conf.ChainId)
+		c.eip155Signer = types.NewEIP155Signer(&c.chainId)
 		if len(c.conf.SignerType) < 1 || c.conf.SignerType != EIP155Signer {
 			c.Signer = types.HomesteadSigner{}
 		} else {
-			c.Signer = types.NewEIP155Signer(&c.chainId)
-			c.eip155Signer = types.NewEIP155Signer(&c.chainId)
+			c.Signer = c.eip155Signer
 		}
 	}
 	return err
