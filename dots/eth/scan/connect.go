@@ -29,18 +29,25 @@ type Connect struct {
 	chainId         big.Int
 	homesteadSigner types.HomesteadSigner
 	frontierSigner  types.FrontierSigner
+	eip155Signer    types.EIP155Signer
 
 	EthClient EthClientI   //eth client
 	Signer    types.Signer //signer
 }
 
 func (c *Connect) Sender(tx *types.Transaction) (common.Address, error) {
-	a, err := c.homesteadSigner.Sender(tx)
-	if err != nil {
-		a, err = c.frontierSigner.Sender(tx)
+	var a common.Address
+	var err error
+	if tx.ChainId().Cmp(&c.chainId) == 0 {
+		a, err = c.eip155Signer.Sender(tx)
+	} else {
+		a, err = types.NewEIP155Signer(tx.ChainId()).Sender(tx)
 	}
-	if err != nil && c.Signer != nil {
-		a, err = c.Signer.Sender(tx)
+	if err != nil {
+		a, err = c.homesteadSigner.Sender(tx)
+		if err != nil {
+			a, err = c.frontierSigner.Sender(tx)
+		}
 	}
 	return a, err
 }
@@ -68,6 +75,7 @@ func (c *Connect) Create(l dot.Line) error {
 			c.Signer = types.HomesteadSigner{}
 		} else {
 			c.Signer = types.NewEIP155Signer(&c.chainId)
+			c.eip155Signer = types.NewEIP155Signer(&c.chainId)
 		}
 	}
 	return err
