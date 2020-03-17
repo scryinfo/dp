@@ -4,14 +4,14 @@
 package _go
 
 import (
+	"github.com/scryinfo/dp/dots/depot/VariFlight/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/scryinfo/dp/dots/depot/VariFlight/go/_proto"
 	VariFlight "github.com/scryinfo/dp/dots/depot/VariFlight/go/VariFlightApiCaller"
 )
 
-var _ _proto.VariFlightDataServiceServer = (*variflightServiceServer)(nil)
+var _ proto.VariFlightDataServiceServer = (*variflightServiceServer)(nil)
 
 var variFligtAPICodeToGrpcCode = map[VariFlight.VariFlightStatusCode]codes.Code{
 	VariFlight.UserNotExists:          codes.Unauthenticated,
@@ -32,7 +32,7 @@ func newVariFlightServiceServer(vfCaller *VariFlight.VariFlightApiCaller) *varif
 	return &variflightServiceServer{vfCaller}
 }
 
-func (s *variflightServiceServer) GetFlightDataByFlightNumber(req *_proto.GetFlightDataByFlightNumberRequest, srv _proto.VariFlightDataService_GetFlightDataByFlightNumberServer) error {
+func (s *variflightServiceServer) GetFlightDataByFlightNumber(req *proto.GetFlightDataByFlightNumberRequest, srv proto.VariFlightDataService_GetFlightDataByFlightNumberServer) error {
 	params := VariFlight.GetFlightDataByFlightNumber(req.FlightNumber, req.Date)
 	variFlightDatas, err := s.variFlightApiCaller.Call(params)
 	if err != nil {
@@ -46,7 +46,7 @@ func (s *variflightServiceServer) GetFlightDataByFlightNumber(req *_proto.GetFli
 	return nil
 }
 
-func (s *variflightServiceServer) GetFlightDataBetweenTwoAirports(req *_proto.GetFlightDataBetweenTwoAirportsRequest, srv _proto.VariFlightDataService_GetFlightDataBetweenTwoAirportsServer) error {
+func (s *variflightServiceServer) GetFlightDataBetweenTwoAirports(req *proto.GetFlightDataBetweenTwoAirportsRequest, srv proto.VariFlightDataService_GetFlightDataBetweenTwoAirportsServer) error {
 	params := VariFlight.GetFlightDataBetweenTwoAirports(req.DepartureAirport, req.ArrivalAirport, req.Date)
 	variFlightDatas, err := s.variFlightApiCaller.Call(params)
 	if err != nil {
@@ -60,7 +60,7 @@ func (s *variflightServiceServer) GetFlightDataBetweenTwoAirports(req *_proto.Ge
 	return nil
 }
 
-func (s *variflightServiceServer) GetFlightDataBetweenTwoCities(req *_proto.GetFlightDataBetweenTwoCitiesRequest, srv _proto.VariFlightDataService_GetFlightDataBetweenTwoCitiesServer) error {
+func (s *variflightServiceServer) GetFlightDataBetweenTwoCities(req *proto.GetFlightDataBetweenTwoCitiesRequest, srv proto.VariFlightDataService_GetFlightDataBetweenTwoCitiesServer) error {
 	params := VariFlight.GetFlightDataBetweenTwoCities(req.DepartureCity, req.ArrivalCity, req.Date)
 	variFlightDatas, err := s.variFlightApiCaller.Call(params)
 	if err != nil {
@@ -74,7 +74,7 @@ func (s *variflightServiceServer) GetFlightDataBetweenTwoCities(req *_proto.GetF
 	return nil
 }
 
-func (s *variflightServiceServer) GetFlightDataByDepartureAndArrivalStatus(req *_proto.GetFlightDataAtOneAirportByStatusRequest, srv _proto.VariFlightDataService_GetFlightDataByDepatureAndArrivalStatusServer) error {
+func (s *variflightServiceServer) GetFlightDataByDepartureAndArrivalStatus(req *proto.GetFlightDataAtOneAirportByStatusRequest, srv proto.VariFlightDataService_GetFlightDataByDepatureAndArrivalStatusServer) error {
 	params := VariFlight.GetFlightDataByDepartureAndArrivalStatus(req.Airport, req.Status, "", "", req.Date)
 	variFlightDatas, err := s.variFlightApiCaller.Call(params)
 	if err != nil {
@@ -88,8 +88,8 @@ func (s *variflightServiceServer) GetFlightDataByDepartureAndArrivalStatus(req *
 	return nil
 }
 
-func protoVariFlightData(data *VariFlight.VariFlightData) *_proto.VariFlightData {
-	return &_proto.VariFlightData{
+func protoVariFlightData(data *VariFlight.VariFlightData) *proto.VariFlightData {
+	return &proto.VariFlightData{
 		Fcategory:             data.Fcategory,
 		FlightNo:              data.FlightNo,
 		FlightCompany:         data.FlightCompany,

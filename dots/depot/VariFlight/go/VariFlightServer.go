@@ -1,14 +1,11 @@
 package _go
 
 import (
-	"go.uber.org/zap"
-	"google.golang.org/grpc"
-	"github.com/davecgh/go-spew/fmt"
-
 	"github.com/scryinfo/dot/dot"
 	"github.com/scryinfo/dot/dots/grpc/gserver"
-	"github.com/scryinfo/dp/dots/depot/VariFlight/go/_proto"
 	VariFlight "github.com/scryinfo/dp/dots/depot/VariFlight/go/VariFlightApiCaller"
+	"github.com/scryinfo/dp/dots/depot/VariFlight/proto"
+	"google.golang.org/grpc"
 )
 
 const (
@@ -47,7 +44,7 @@ func VariFlightServerTypeLives() []*dot.TypeLives {
 }
 
 func (s *VariFlightServer) AfterAllInject(l dot.Line) {s.grpcServer = grpc.NewServer()
-	_proto.RegisterVariFlightDataServiceServer(grpc.NewServer(), newVariFlightServiceServer(s.VariFlightApiCaller))
+	proto.RegisterVariFlightDataServiceServer(grpc.NewServer(), newVariFlightServiceServer(s.VariFlightApiCaller))
 
 	s.WebSocket.Wrap(s.grpcServer)
 }
