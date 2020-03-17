@@ -1,8 +1,6 @@
 package server
 
 import (
-	"os"
-
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"github.com/davecgh/go-spew/fmt"
@@ -17,22 +15,9 @@ const (
 	VariFlightServerTypeId = "ca39e667-ddaa-47cb-989b-d888ef4b2585"
 )
 
-var defaultVariFlightServerConfig = VariFlightServerConfig{
-	ServicePath: "/scry/variflight",
-}
-
-type VariFlightServerConfig struct {
-	ServicePath string `json:"service_path, omitempty"`
-}
-
 type VariFlightServer struct {
-	config *VariFlightServerConfig
-
 	VariFlightApiCaller *VariFlight.VariFlightApiCaller `dot:""`
 	WebSocket           *gserver.WebSocket              `dot:""`
-
-	serviceServer *variflightServiceServer
-	grpcServer    *grpc.Server
 }
 
 func VariFlightServerTypeLives() []*dot.TypeLives {
@@ -41,15 +26,7 @@ func VariFlightServerTypeLives() []*dot.TypeLives {
 			Meta: dot.Metadata{
 				TypeId: VariFlightServerTypeId,
 				NewDoter: func(conf []byte) (dot.Dot, error) {
-					_conf := defaultVariFlightServerConfig
-					if err := dot.UnMarshalConfig(conf, &_conf); err != nil {
-						dot.Logger().Debugln("UnMarshalConfig(VariFlightServerConfig) failed.", zap.Error(err))
-						os.Exit(1)
-					}
-					dot.Logger().Debug(func() string {
-						return fmt.Sprintf("VariFlightServerConfig: %v", _conf)
-					})
-					return &VariFlightServer{config: &_conf}, nil
+					return &VariFlightServer{}, nil
 				},
 			},
 			//Lives: []dot.Live{
@@ -69,10 +46,8 @@ func VariFlightServerTypeLives() []*dot.TypeLives {
 	return typeLives
 }
 
-func (s *VariFlightServer) AfterAllInject(l dot.Line) {
-	s.grpcServer = grpc.NewServer()
-	s.serviceServer = newVariFlightServiceServer(s.VariFlightApiCaller)
-	_proto.RegisterVariFlightDataServiceServer(s.grpcServer, s.serviceServer)
+func (s *VariFlightServer) AfterAllInject(l dot.Line) {s.grpcServer = grpc.NewServer()
+	_proto.RegisterVariFlightDataServiceServer(grpc.NewServer(), newVariFlightServiceServer(s.VariFlightApiCaller))
 
-	s.WebSocket.GET(s.config.ServicePath, s.grpcServer)
+	s.WebSocket.Wrap(s.grpcServer)
 }
