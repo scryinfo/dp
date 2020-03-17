@@ -1,4 +1,4 @@
-package server
+package _go
 
 import (
 	"go.uber.org/zap"
@@ -7,8 +7,8 @@ import (
 
 	"github.com/scryinfo/dot/dot"
 	"github.com/scryinfo/dot/dots/grpc/gserver"
-	"github.com/scryinfo/dp/dots/depot/VariFlight/server/_proto"
-	VariFlight "github.com/scryinfo/dp/dots/depot/VariFlight/server/VariFlightApiCaller"
+	"github.com/scryinfo/dp/dots/depot/VariFlight/go/_proto"
+	VariFlight "github.com/scryinfo/dp/dots/depot/VariFlight/go/VariFlightApiCaller"
 )
 
 const (

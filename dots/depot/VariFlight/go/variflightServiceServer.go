@@ -1,14 +1,14 @@
 // Scry Info.  All rights reserved.
 // license that can be found in the license file.
 
-package server
+package _go
 
 import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/scryinfo/dp/dots/depot/VariFlight/server/_proto"
-	VariFlight "github.com/scryinfo/dp/dots/depot/VariFlight/server/VariFlightApiCaller"
+	"github.com/scryinfo/dp/dots/depot/VariFlight/go/_proto"
+	VariFlight "github.com/scryinfo/dp/dots/depot/VariFlight/go/VariFlightApiCaller"
 )
 
 var _ _proto.VariFlightDataServiceServer = (*variflightServiceServer)(nil)

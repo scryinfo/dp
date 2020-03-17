@@ -9,8 +9,8 @@ import (
 	"github.com/scryinfo/dot/dots/gindot"
 	"github.com/scryinfo/dot/dots/grpc/gserver"
 	"github.com/scryinfo/dot/dots/line"
-	"github.com/scryinfo/dp/dots/depot/VariFlight/server"
-	vfApiCaller "github.com/scryinfo/dp/dots/depot/VariFlight/server/VariFlightApiCaller"
+	"github.com/scryinfo/dp/dots/depot/VariFlight/go"
+	vfApiCaller "github.com/scryinfo/dp/dots/depot/VariFlight/go/VariFlightApiCaller"
 	"github.com/scryinfo/scryg/sutils/ssignal"
 	"go.uber.org/zap"
 	"log"
@@ -73,14 +73,14 @@ func main()  {
 	fmt.Println("WebSocket component now can work normally.")
 
 	//get VariFlightServer component
-	vfServer, err := l.ToInjecter().GetByType(reflect.TypeOf((*server.VariFlightServer)(nil)))
-	//vfServer, err := l.ToInjecter().GetByLiveId(server.VariFlightServerTypeId)
+	vfServer, err := l.ToInjecter().GetByType(reflect.TypeOf((*_go.VariFlightServer)(nil)))
+	//vfServer, err := l.ToInjecter().GetByLiveId(go.VariFlightServerTypeId)
 	if err != nil {
-		dot.Logger().Debugln("GetByliveId(server.VariFlightServerTypeId) failed.", zap.Error(err))
+		dot.Logger().Debugln("GetByliveId(go.VariFlightServerTypeId) failed.", zap.Error(err))
 		os.Exit(1)
 	}
 	dot.Logger().Debug(func() string {
-		return fmt.Sprintf("VariFlightServer: %#+v", vfServer.(*server.VariFlightServer))
+		return fmt.Sprintf("VariFlightServer: %#+v", vfServer.(*_go.VariFlightServer))
 	})
 	fmt.Println("VariFlightServer component now can work normally.")
 
@@ -90,7 +90,7 @@ func main()  {
 }
 
 func buildNewer(l dot.Line) error {
-	if err := l.PreAdd(server.VariFlightServerTypeLives()...); err != nil {
+	if err := l.PreAdd(_go.VariFlightServerTypeLives()...); err != nil {
 		dot.Logger().Debugln("PreAdd failed.", zap.Error(err))
 		os.Exit(1)
 	}

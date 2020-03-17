@@ -7,7 +7,7 @@ import (
 	"github.com/scryinfo/dot/dot"
 	"github.com/scryinfo/dot/dots/db/gorms"
 	"github.com/scryinfo/dot/dots/line"
-	VariFlight "github.com/scryinfo/dp/dots/depot/VariFlight/server/VariFlightApiCaller"
+	VariFlight "github.com/scryinfo/dp/dots/depot/VariFlight/go/VariFlightApiCaller"
 	"github.com/scryinfo/scryg/sutils/ssignal"
 	"go.uber.org/zap"
 	"log"
