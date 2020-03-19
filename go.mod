@@ -42,14 +42,13 @@ require (
 	github.com/cespare/cp v1.1.1 // indirect
 	github.com/chilts/sid v0.0.0-20190607042430-660e94789ec9
 	github.com/deckarep/golang-set v1.7.1 // indirect
-	github.com/denisenkom/go-mssqldb v0.0.0-20190707035753-2be1aa521ff4 // indirect
 	github.com/edsrzf/mmap-go v1.0.0 // indirect
 	github.com/ethereum/go-ethereum v1.8.27
 	github.com/fjl/memsize v0.0.0-20180929194037-2a09253e352a // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/go-yaml/yaml v2.1.0+incompatible
 	github.com/golang/mock v1.2.0
-	github.com/golang/protobuf v1.3.2
+	github.com/golang/protobuf v1.3.4
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/go-cmp v0.3.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
@@ -57,7 +56,8 @@ require (
 	github.com/ipfs/go-ipfs-api v0.0.1
 	github.com/ipfs/go-ipfs-files v0.0.3 // indirect
 	github.com/jackpal/go-nat-pmp v1.0.1 // indirect
-	github.com/jinzhu/gorm v1.9.11
+	github.com/jinzhu/gorm v1.9.12
+	github.com/jmoiron/sqlx v1.2.0
 	github.com/karalabe/hid v1.0.0 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/libp2p/go-libp2p-core v0.0.3 // indirect
@@ -66,19 +66,20 @@ require (
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/multiformats/go-multiaddr-dns v0.0.2 // indirect
 	github.com/pborman/uuid v1.2.0 // indirect
-	github.com/pkg/errors v0.8.1
+	github.com/pkg/errors v0.9.1
 	github.com/rjeczalik/notify v0.9.2 // indirect
-	github.com/scryinfo/dot v0.1.4-0.20191217094521-d2a6217924e7
+	github.com/scryinfo/dot v0.1.4
+	github.com/scryinfo/dot/dots/db/gorms v0.0.0-20200319023948-717fab49e5c3
+	github.com/scryinfo/dot/dots/db/pgs v0.0.0-20191206082647-113b71839359 // indirect
+	github.com/scryinfo/dot/dots/gindot v0.0.0-20191121022614-959828ad21d4
 	github.com/scryinfo/dot/dots/grpc v0.0.0-20191217094521-d2a6217924e7
-	github.com/scryinfo/scryg v0.1.3-0.20190608053141-a292b801bfd6
+	github.com/scryinfo/scryg v0.1.3
 	github.com/sirupsen/logrus v1.4.2
 	github.com/smartystreets/goconvey v1.6.4
 	github.com/stretchr/testify v1.4.0 // indirect
 	github.com/syndtr/goleveldb v1.0.0 // indirect
-	go.uber.org/multierr v1.4.0 // indirect
-	go.uber.org/zap v1.13.0
-	golang.org/x/net v0.0.0-20190923162816-aa69164e4478
-	google.golang.org/appengine v1.6.0 // indirect
+	go.uber.org/zap v1.14.0
+	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
 	google.golang.org/genproto v0.0.0-20190605220351-eb0b1bdb6ae6
 	google.golang.org/grpc v1.21.1
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect

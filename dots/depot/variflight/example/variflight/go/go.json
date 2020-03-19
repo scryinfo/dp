@@ -1,0 +1,81 @@
+{
+  "log": {
+    "file": "log.log",
+    "level": "debug"
+  },
+  "dots": [
+    {
+      "metaData": {
+        "typeId": "ca39e667-ddaa-47cb-989b-d888ef4b2585",
+        "showName": "GrpcWebSocketServerComponent"
+      }
+    },
+    {
+      "metaData": {
+        "typeId": "a0b3f061-8e33-42b8-943a-f0542ad2533f",
+        "showName": "GrpcServiceServerComponent"
+      }
+    },
+    {
+      "metaData": {
+        "typeId": "27709862-0a7b-48e9-8427-5bbc86760c41",
+        "showName": "WebSocketWrapperComponent"
+      }
+    },
+
+    {
+      "metaData": {
+        "typeId": "e19f09c0-ac20-4d1e-a810-130900f94657",
+        "showName": "VariFlightApiComponent"
+      },
+      "lives": [
+        {
+          "liveId": "e19f09c0-ac20-4d1e-a810-130900f94657",
+          "json": {
+            "appid": "test_appid",
+            "appsecurity": "test_appsecurity",
+            "minDurAgainstExtraRequest":3600,
+            "maxDurAgainstExtraRequest": 432000,
+            "test_mode": true
+          }
+        }
+      ]
+    },
+    {
+      "metaData": {
+        "typeId": "d2b575cd-e38f-4002-b4bd-9dc85fe13fe6",
+        "showName": "GormsComponent"
+      },
+      "lives": [
+        {
+          "liveId": "d2b575cd-e38f-4002-b4bd-9dc85fe13fe6",
+          "json": {
+            "dbParameters": "./testDB.db",
+            "showSql": true,
+            "dialect": "sqlite3"
+          }
+        }
+      ]
+    },
+
+    {
+      "metaData": {
+        "typeId": "4943e959-7ad7-42c6-84dd-8b24e9ed30bb",
+        "showName": "GinEngineComponent"
+      },
+      "lives": [
+        {
+          "liveId": "4943e959-7ad7-42c6-84dd-8b24e9ed30bb",
+          "json": {
+            "addr": ":9090",
+            "keyFile": "",
+            "pemFile": "",
+            "logSkipPaths": [
+              "/sample/*"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
