@@ -1,3 +1,0 @@
-For windows, protoc command as follow:
-
-protoc --proto_path=proto proto/VariFlightDataService.proto --js_out=import_style=commonjs,binary:client/_proto --ts_out=service=grpc-web:client/_proto --plugin=protoc-gen-ts=%cd%/node_modules/.bin/protoc-gen-ts.cmd
