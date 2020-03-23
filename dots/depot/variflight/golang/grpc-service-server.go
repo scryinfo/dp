@@ -7,6 +7,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	"io"
+	"log"
 
 	"github.com/scryinfo/dot/dot"
 	"github.com/scryinfo/dp/dots/depot/variflight/golang/dao"
@@ -29,13 +31,9 @@ var variFligtAPICodeToGrpcCode = map[dao.VariFlightStatusCode]codes.Code{
 	dao.UnknownError:           codes.Unknown,
 }
 
-type DataSource interface {
-	Call(paramsFunc dao.APIParamsConfFunc) ([]dao.VariFlightData, error)
-}
-
 //  GrpcServiceServer serve flight data provided by https://www.variflight.com/.
 type GrpcServiceServer struct {
-	DataSource DataSource `dot:""`
+	DataSource *dao.Api `dot:""`
 }
 
 func GrpcServiceServerTypeLives() []*dot.TypeLives {
@@ -53,71 +51,143 @@ func GrpcServiceServerTypeLives() []*dot.TypeLives {
 	return typeLives
 }
 
-func (s *GrpcServiceServer) GetFlightDataByFlightNumber(req *protobuf.GetFlightDataByFlightNumberRequest, srv protobuf.VariFlightDataService_GetFlightDataByFlightNumberServer) error {
+func (s *GrpcServiceServer) GetFlightDataByFlightNumber(srv protobuf.VariFlightDataService_GetFlightDataByFlightNumberServer) error {
 	srv.SendHeader(metadata.Pairs("Pre-Response-Metadata", "Is-sent-as-headers-stream"))
 	srv.SetTrailer(metadata.Pairs("Post-Response-Metadata", "Is-sent-as-trailers-stream"))
 
-	params := dao.GetFlightDataByFlightNumber(req.FlightNumber, req.Date)
-	variFlightDatas, err := s.DataSource.Call(params)
-	if err != nil {
-		return protoError(err)
-	}
+	log.Println("started stream\n\n")
+	defer log.Println("returened stream\n\n")
+	for {
+		req, err := srv.Recv()
+		if err ==io.EOF {
+			log.Println("returened stream. Encountered EOF.\n\n")
+			return nil
+		}
+		if err != nil {
+			log.Printf("failed to Recv(): %#+v\n\n", err)
+			return err
+		}
+		log.Printf("received req: %v\n\n", req)
 
-	for _, variFlightData := range variFlightDatas {
-		srv.Send(protoVariFlightData(&variFlightData))
-	}
+		params := dao.GetFlightDataByFlightNumber(req.FlightNumber, req.Date)
+		log.Printf("params: %v\n\n", params)
+		log.Printf("GrpcServiceServer DataSource: %#+v\n\n", s.DataSource)
+		variFlightDatas, err := s.DataSource.Call(params)
+		if err != nil {
+			return protoError(err)
+		}
+		log.Printf("params called.")
 
+		for _, variFlightData := range variFlightDatas {
+			if err := srv.Send(protoVariFlightData(&variFlightData)); err != nil {
+				log.Printf("failed to sent variFlightData: %#+v\n\n", variFlightData)
+				return err
+			}
+			log.Printf("sent variFlightData: %+#v\n\n", variFlightData)
+		}
+	}
 	return nil
 }
 
-func (s *GrpcServiceServer) GetFlightDataBetweenTwoAirports(req *protobuf.GetFlightDataBetweenTwoAirportsRequest, srv protobuf.VariFlightDataService_GetFlightDataBetweenTwoAirportsServer) error {
+func (s *GrpcServiceServer) GetFlightDataBetweenTwoAirports(srv protobuf.VariFlightDataService_GetFlightDataBetweenTwoAirportsServer) error  {
 	srv.SendHeader(metadata.Pairs("Pre-Response-Metadata", "Is-sent-as-headers-stream"))
 	srv.SetTrailer(metadata.Pairs("Post-Response-Metadata", "Is-sent-as-trailers-stream"))
 
-	params := dao.GetFlightDataBetweenTwoAirports(req.DepartureAirport, req.ArrivalAirport, req.Date)
-	variFlightDatas, err := s.DataSource.Call(params)
-	if err != nil {
-		return protoError(err)
-	}
+	log.Println("started stream\n\n")
+	defer log.Println("returened stream\n\n")
+	for {
+		req, err := srv.Recv()
+		if err ==io.EOF {
+			log.Println("returened stream. Encountered EOF.\n\n")
+			return nil
+		}
+		if err != nil {
+			log.Printf("failed to Recv(): %#+v\n\n", err)
+			return err
+		}
 
-	for _, variFlightData := range variFlightDatas {
-		srv.Send(protoVariFlightData(&variFlightData))
-	}
+		params := dao.GetFlightDataBetweenTwoAirports(req.DepartureAirport, req.ArrivalAirport, req.Date)
+		variFlightDatas, err := s.DataSource.Call(params)
+		if err != nil {
+			return protoError(err)
+		}
 
+		for _, variFlightData := range variFlightDatas {
+			if err := srv.Send(protoVariFlightData(&variFlightData)); err != nil {
+				log.Printf("failed to sent variFlightData: %#+v\n\n", variFlightData)
+				return err
+			}
+			log.Printf("sent variFlightData: %+#v\n\n", variFlightData)
+		}
+	}
 	return nil
 }
 
-func (s *GrpcServiceServer) GetFlightDataBetweenTwoCities(req *protobuf.GetFlightDataBetweenTwoCitiesRequest, srv protobuf.VariFlightDataService_GetFlightDataBetweenTwoCitiesServer) error {
+func (s *GrpcServiceServer) GetFlightDataBetweenTwoCities(srv protobuf.VariFlightDataService_GetFlightDataBetweenTwoCitiesServer) error {
 	srv.SendHeader(metadata.Pairs("Pre-Response-Metadata", "Is-sent-as-headers-stream"))
 	srv.SetTrailer(metadata.Pairs("Post-Response-Metadata", "Is-sent-as-trailers-stream"))
 
-	params := dao.GetFlightDataBetweenTwoCities(req.DepartureCity, req.ArrivalCity, req.Date)
-	variFlightDatas, err := s.DataSource.Call(params)
-	if err != nil {
-		return protoError(err)
-	}
+	log.Println("started stream\n\n")
+	defer log.Println("returened stream\n\n")
+	for {
+		req, err := srv.Recv()
+		if err ==io.EOF {
+			log.Println("returened stream. Encountered EOF.\n\n")
+			return nil
+		}
+		if err != nil {
+			log.Printf("failed to Recv(): %#+v\n\n", err)
+			return err
+		}
 
-	for _, variFlightData := range variFlightDatas {
-		srv.Send(protoVariFlightData(&variFlightData))
-	}
+		params := dao.GetFlightDataBetweenTwoCities(req.DepartureCity, req.ArrivalCity, req.Date)
+		variFlightDatas, err := s.DataSource.Call(params)
+		if err != nil {
+			return protoError(err)
+		}
 
+		for _, variFlightData := range variFlightDatas {
+			if err := srv.Send(protoVariFlightData(&variFlightData)); err != nil {
+				log.Printf("failed to sent variFlightData: %#+v\n\n", variFlightData)
+				return err
+			}
+			log.Printf("sent variFlightData: %+#v\n\n", variFlightData)
+		}
+	}
 	return nil
 }
 
-func (s *GrpcServiceServer) GetFlightDataByDepartureAndArrivalStatus(req *protobuf.GetFlightDataAtOneAirportByStatusRequest, srv protobuf.VariFlightDataService_GetFlightDataByDepartureAndArrivalStatusServer) error {
+func (s *GrpcServiceServer) GetFlightDataByDepartureAndArrivalStatus(srv protobuf.VariFlightDataService_GetFlightDataByDepartureAndArrivalStatusServer) error  {
 	srv.SendHeader(metadata.Pairs("Pre-Response-Metadata", "Is-sent-as-headers-stream"))
 	srv.SetTrailer(metadata.Pairs("Post-Response-Metadata", "Is-sent-as-trailers-stream"))
 
-	params := dao.GetFlightDataByDepartureAndArrivalStatus(req.Airport, req.Status, "", "", req.Date)
-	variFlightDatas, err := s.DataSource.Call(params)
-	if err != nil {
-		return protoError(err)
-	}
+	log.Println("started stream\n\n")
+	defer log.Println("returened stream\n\n")
+	for {
+		req, err := srv.Recv()
+		if err ==io.EOF {
+			log.Println("returened stream. Encountered EOF.\n\n")
+			return nil
+		}
+		if err != nil {
+			log.Printf("failed to Recv(): %#+v\n\n", err)
+			return err
+		}
 
-	for _, variFlightData := range variFlightDatas {
-		srv.Send(protoVariFlightData(&variFlightData))
-	}
+		params := dao.GetFlightDataByDepartureAndArrivalStatus(req.Airport, req.Status, "", "", req.Date)
+		variFlightDatas, err := s.DataSource.Call(params)
+		if err != nil {
+			return protoError(err)
+		}
 
+		for _, variFlightData := range variFlightDatas {
+			if err := srv.Send(protoVariFlightData(&variFlightData)); err != nil {
+				log.Printf("failed to sent variFlightData: %#+v\n\n", variFlightData)
+				return err
+			}
+			log.Printf("sent variFlightData: %+#v\n\n", variFlightData)
+		}
+	}
 	return nil
 }
 

@@ -7,7 +7,7 @@ import {grpc} from "@improbable-eng/grpc-web";
 type VariFlightDataServiceGetFlightDataByFlightNumber = {
   readonly methodName: string;
   readonly service: typeof VariFlightDataService;
-  readonly requestStream: false;
+  readonly requestStream: true;
   readonly responseStream: true;
   readonly requestType: typeof variflight_pb.GetFlightDataByFlightNumberRequest;
   readonly responseType: typeof variflight_pb.VariFlightData;
@@ -16,7 +16,7 @@ type VariFlightDataServiceGetFlightDataByFlightNumber = {
 type VariFlightDataServiceGetFlightDataBetweenTwoAirports = {
   readonly methodName: string;
   readonly service: typeof VariFlightDataService;
-  readonly requestStream: false;
+  readonly requestStream: true;
   readonly responseStream: true;
   readonly requestType: typeof variflight_pb.GetFlightDataBetweenTwoAirportsRequest;
   readonly responseType: typeof variflight_pb.VariFlightData;
@@ -25,7 +25,7 @@ type VariFlightDataServiceGetFlightDataBetweenTwoAirports = {
 type VariFlightDataServiceGetFlightDataBetweenTwoCities = {
   readonly methodName: string;
   readonly service: typeof VariFlightDataService;
-  readonly requestStream: false;
+  readonly requestStream: true;
   readonly responseStream: true;
   readonly requestType: typeof variflight_pb.GetFlightDataBetweenTwoCitiesRequest;
   readonly responseType: typeof variflight_pb.VariFlightData;
@@ -34,7 +34,7 @@ type VariFlightDataServiceGetFlightDataBetweenTwoCities = {
 type VariFlightDataServiceGetFlightDataByDepartureAndArrivalStatus = {
   readonly methodName: string;
   readonly service: typeof VariFlightDataService;
-  readonly requestStream: false;
+  readonly requestStream: true;
   readonly responseStream: true;
   readonly requestType: typeof variflight_pb.GetFlightDataAtOneAirportByStatusRequest;
   readonly responseType: typeof variflight_pb.VariFlightData;
@@ -80,9 +80,9 @@ export class VariFlightDataServiceClient {
   readonly serviceHost: string;
 
   constructor(serviceHost: string, options?: grpc.RpcOptions);
-  getFlightDataByFlightNumber(requestMessage: variflight_pb.GetFlightDataByFlightNumberRequest, metadata?: grpc.Metadata): ResponseStream<variflight_pb.VariFlightData>;
-  getFlightDataBetweenTwoAirports(requestMessage: variflight_pb.GetFlightDataBetweenTwoAirportsRequest, metadata?: grpc.Metadata): ResponseStream<variflight_pb.VariFlightData>;
-  getFlightDataBetweenTwoCities(requestMessage: variflight_pb.GetFlightDataBetweenTwoCitiesRequest, metadata?: grpc.Metadata): ResponseStream<variflight_pb.VariFlightData>;
-  getFlightDataByDepartureAndArrivalStatus(requestMessage: variflight_pb.GetFlightDataAtOneAirportByStatusRequest, metadata?: grpc.Metadata): ResponseStream<variflight_pb.VariFlightData>;
+  getFlightDataByFlightNumber(metadata?: grpc.Metadata): BidirectionalStream<variflight_pb.GetFlightDataByFlightNumberRequest, variflight_pb.VariFlightData>;
+  getFlightDataBetweenTwoAirports(metadata?: grpc.Metadata): BidirectionalStream<variflight_pb.GetFlightDataBetweenTwoAirportsRequest, variflight_pb.VariFlightData>;
+  getFlightDataBetweenTwoCities(metadata?: grpc.Metadata): BidirectionalStream<variflight_pb.GetFlightDataBetweenTwoCitiesRequest, variflight_pb.VariFlightData>;
+  getFlightDataByDepartureAndArrivalStatus(metadata?: grpc.Metadata): BidirectionalStream<variflight_pb.GetFlightDataAtOneAirportByStatusRequest, variflight_pb.VariFlightData>;
 }
 

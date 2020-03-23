@@ -3,10 +3,10 @@ syntax = "proto3";
 package protobuf;
 
 service VariFlightDataService {
-    rpc GetFlightDataByFlightNumber(GetFlightDataByFlightNumberRequest) returns (stream VariFlightData) {};
-    rpc GetFlightDataBetweenTwoAirports(GetFlightDataBetweenTwoAirportsRequest) returns (stream VariFlightData) {};
-    rpc GetFlightDataBetweenTwoCities(GetFlightDataBetweenTwoCitiesRequest) returns (stream VariFlightData) {};
-    rpc GetFlightDataByDepartureAndArrivalStatus(GetFlightDataAtOneAirportByStatusRequest) returns (stream VariFlightData) {};
+    rpc GetFlightDataByFlightNumber(stream GetFlightDataByFlightNumberRequest) returns (stream VariFlightData) {};
+    rpc GetFlightDataBetweenTwoAirports(stream GetFlightDataBetweenTwoAirportsRequest) returns (stream VariFlightData) {};
+    rpc GetFlightDataBetweenTwoCities(stream GetFlightDataBetweenTwoCitiesRequest) returns (stream VariFlightData) {};
+    rpc GetFlightDataByDepartureAndArrivalStatus(stream GetFlightDataAtOneAirportByStatusRequest) returns (stream VariFlightData) {};
 }
 
 message VariFlightData {
