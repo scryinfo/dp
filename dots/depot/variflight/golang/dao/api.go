@@ -26,11 +26,10 @@ const (
 
 var defaultApiConfig = ApiConfig{
 	commonPartOfURL:  "http://open-al.variflight.com/api/flight?",
-	flightDateLayout: "2006-01-02 15:04:05",
-	flightTimeLayout: "2006-01-02",
+	flightDateLayout: "2006-01-02",
+	flightTimeLayout: "2006-01-02 15:04:05",
 
-	MinDurAgainstExtraRequest: 30 * 60,       // 30 minutes
-	MaxDurAgainstExtraRequest: 5 * 24 * 3600, // 5 days
+	dataAge: 30 * 60, // 30 minutes
 
 	TestMode: false,
 }
@@ -46,8 +45,7 @@ type ApiConfig struct {
 	flightTimeLayout string `json:"-"`
 
 	// time control parameters (measured in second) for avoiding unnecessary extra API calling
-	MinDurAgainstExtraRequest time.Duration `json:"minDurAgainstExtraRequest, omitempty"`
-	MaxDurAgainstExtraRequest time.Duration `json:"maxDurAgainstExtraRequest, omitempty"`
+	dataAge time.Duration `json:"data_age, omitempty"`
 
 	// TestMode only for test purpose with fake datum, when in production it must be false
 	TestMode bool `json:"test_mode, omitempty"`
@@ -116,58 +114,97 @@ func (a *Api) Call(paramsFunc APIParamsConfFunc) ([]VariFlightData, error) {
 	token := token(apiParams.Opts, a.config.Appsecurity)
 	reqURL := url(a.config.commonPartOfURL, apiParams.Opts, a.config.Appsecurity)
 
-	// read data from cache
-	data := a.cacher.read(token)
-	// data not exists
-	if data == nil {
-		// call Api for data
-		apiData, apiDataBytes, err := a.call(apiParams.Method, reqURL)
-		if err != nil {
-			return nil, err
-		}
-		data := newData(token, fmt.Sprint(md5.Sum(apiDataBytes)), time.Now(), a.config.flightDateLayout, apiData, string(apiDataBytes))
-
-		// storer data
-		if err = a.storer.create(data); err != nil {
-			return nil, err
-		}
-
-		// cache data
-		data.valueJSONString = ""
-		a.cacher.create(data)
-
-		return apiData, nil
-	}
-
-	// data exists
-	// Note dynamic flight data may vary over time. If data has been just updated within during of minDurAgainstExtraRequest,
-	// or if it's departure plan date is far beyond the during of maxDurAgainstExtraRequest, then avoid extra calling Api,
-	// but return the cached data directly, because in this case we can roughly think that the flight data should
-	// has low chance to change, so it's unnecessary to call the Api again for the same _token.
-	if data.isUpdatedWithin((a.config.MinDurAgainstExtraRequest)*time.Second) || data.isDepPlanDateBeyond((a.config.MaxDurAgainstExtraRequest)*time.Second) {
-		return data.value, nil
-	}
-
-	// Otherwise, we should repeat calling Api for latest flight data.
-	apiData, apiDataBytes, err := a.call(apiParams.Method, reqURL)
+	// read local data and return if valid
+	localData, err := a.localData(token)
 	if err != nil {
 		return nil, err
 	}
-	// if data hasn't varied in fact, only the updatedAtTime property needs to be updated.
-	newDigest := fmt.Sprint(md5.Sum(apiDataBytes))
-	if data.isSameDigest(newDigest) {
-		if err := a.storer.updateUpdateAtTime(token, time.Now()); err != nil {
-			return nil, err
-		}
-		a.cacher.updateUpdateAtTime(token, time.Now())
-		return data.value, nil
+	if localData != nil && a.isAcceptable(localData) {
+		return localData.value, nil
 	}
-	// but if data has varied over time, more data property need to be updated as follow.
-	if err := a.storer.update(token, newDigest, time.Now(), string(apiDataBytes)); err != nil {
+
+	// call Api for remote data
+	remoteData, remoteDataBytes, err := a.call(apiParams.Method, reqURL)
+	if err != nil {
 		return nil, err
 	}
-	a.cacher.update(token, newDigest, time.Now(), apiData)
-	return apiData, nil
+
+	// create new record of local data if not exists
+	if localData == nil {
+		if err := a.create(&data{
+			token:            token,
+			digest:           fmt.Sprint(md5.Sum(remoteDataBytes)),
+			updatedAtTime:    time.Now(),
+			flightDateLayout: a.config.flightDateLayout,
+			value:            remoteData,
+			valueJSONString:  string(remoteDataBytes),
+		}); err != nil {
+			return nil, err
+		}
+		return remoteData, nil
+	}
+
+	// otherwise update local data
+	if err := a.update(localData, remoteDataBytes, remoteData); err != nil {
+		return nil, err
+	}
+	return remoteData, nil
+}
+
+func (a *Api) localData(token string) (*data, error) {
+	d := a.cacher.read(token)
+	if d != nil {
+		return d, nil
+	}
+
+	d, err := a.storer.read(token)
+	if err != nil {
+		return nil, err
+	}
+
+	if d == nil {
+		return nil, nil
+	}
+
+	d.valueJSONString = ""
+	a.cacher.create(d)
+	return d, nil
+}
+
+// Note dynamic flight data may vary over time. If data has been just updated within during of minDurAgainstExtraRequest,
+// then avoid extra calling Api,
+// but return the cached data directly, because in this case we can roughly think that the flight data should
+// has low chance to change, so it's unnecessary to call the Api again for the same _token.
+// Otherwise, we should repeat calling Api for latest flight data.
+func (a *Api) isAcceptable(d *data) bool {
+	return d.isUpdatedWithin((a.config.dataAge) * time.Second)
+}
+
+func (a *Api) update(d *data, newBytes []byte, newValue []VariFlightData) error {
+	// if data hasn't varied in fact, only the updatedAtTime property needs to be updated.
+	newDigest := fmt.Sprint(md5.Sum(newBytes))
+	if d.isSameDigest(newDigest) {
+		if err := a.storer.updateUpdateAtTime(d.token, time.Now()); err != nil {
+			return nil
+		}
+		a.cacher.updateUpdateAtTime(d.token, time.Now())
+		return nil
+	}
+	// but if data has varied over time, more data property need to be updated as follow.
+	if err := a.storer.update(d.token, newDigest, time.Now(), string(newBytes)); err != nil {
+		return nil
+	}
+	a.cacher.update(d.token, newDigest, time.Now(), newValue)
+	return nil
+}
+
+func (a *Api) create(d *data) error {
+	if err := a.storer.create(d); err != nil {
+		return err
+	}
+	d.valueJSONString = ""
+	a.cacher.create(d)
+	return nil
 }
 
 // call calls API and returns the decoded data and the raw body bytes.

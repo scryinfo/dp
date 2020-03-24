@@ -32,26 +32,26 @@ func (d *data) isUpdatedWithin(dur time.Duration) bool {
 	return d.updatedAtTime.Add(dur).After(time.Now())
 }
 
-func (d *data) isDepPlanDateBeyond(dur time.Duration) bool {
-	tData, _ := parseLocalToUTC(d.flightDateLayout, d.value[0].FlightDeptimePlanDate, d.value[0].OrgTimezone)
-	tNow := nowToUTC()
-	return tNow.Add(dur).Before(tData) || tData.Add(dur).Before(tNow)
-}
+//func (d *data) isDepPlanDateBeyond(dur time.Duration) bool {
+//	tData, _ := parseLocalToUTC(d.flightDateLayout, d.value[0].FlightDeptimePlanDate, d.value[0].OrgTimezone)
+//	tNow := nowToUTC()
+//	return tNow.Add(dur).Before(tData) || tData.Add(dur).Before(tNow)
+//}
 
 func (d *data) isSameDigest(digestToCompare string) bool {
 	return d.digest == digestToCompare
 }
 
-func (d *data) encodeValue() error {
-	if d.value != nil {
-		bytes, err := json.Marshal(d.value)
-		if err != nil {
-			return err
-		}
-		d.valueJSONString = string(bytes)
-	}
-	return nil
-}
+//func (d *data) encodeValue() error {
+//	if d.value != nil {
+//		bytes, err := json.Marshal(d.value)
+//		if err != nil {
+//			return err
+//		}
+//		d.valueJSONString = string(bytes)
+//	}
+//	return nil
+//}
 
 func (d *data) decodeJSONString() error {
 	if d.valueJSONString != "" {

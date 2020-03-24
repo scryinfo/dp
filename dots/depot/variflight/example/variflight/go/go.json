@@ -34,8 +34,7 @@
           "json": {
             "appid": "test_appid",
             "appsecurity": "test_appsecurity",
-            "minDurAgainstExtraRequest":3600,
-            "maxDurAgainstExtraRequest": 432000,
+            "data_age":3600,
             "test_mode": true
           }
         }

@@ -5,6 +5,7 @@ package dao
 
 import (
 	"database/sql"
+	"fmt"
 	"os"
 	"time"
 
@@ -39,6 +40,24 @@ func newStorer(db *sql.DB, driverName string) *storer {
 		return nil
 	}
 	return &storer{dbx: dbx}
+}
+
+func (s *storer) read(token string) (*data, error) {
+	query := fmt.Sprintf("SELECT * FROM flight_data WHERE token=%v", token)
+	d := data{}
+	if err := s.dbx.Get(&d, query); err != nil {
+		return nil, newDBAccessError(query, err)
+	}
+
+	if d.valueJSONString == "" {
+		return nil, nil
+	}
+
+	if err := d.decodeJSONString(); err != nil {
+		return nil, newDBAccessError(query, err)
+	}
+
+	return &d, nil
 }
 
 func (s *storer) create(data *data) error {
