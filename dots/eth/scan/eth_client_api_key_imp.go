@@ -54,15 +54,18 @@ func (e *EthClientApiKeyImp) BlockByNumber(ctx context.Context, number *big.Int)
 		tag = "0x" + number.Text(16)
 	}
 	url := fmt.Sprintf("%s?%s&action=eth_getBlockByNumber&tag=%s&boolean=true&apikey=%s", e.url, e.module, tag, e.apiKey)
-	client, err := ethclient.DialContext(ctx, url)
-	if err != nil {
-		return nil, err
+	{
+		req, err := http.Get(url)
+		if err != nil {
+			return nil, err
+		}
+		defer req.Body.Close()
+		body, err := ioutil.ReadAll(req.Body)
+		if err != nil {
+			return nil, err
+		}
+		return e.getBlock(body)
 	}
-	block, err := client.BlockByNumber(ctx, number)
-	if err != nil {
-		return nil, err
-	}
-	return block, err
 }
 
 func (e *EthClientApiKeyImp) HeaderByHash(ctx context.Context, hash common.Hash) (*types.Header, error) {
@@ -244,4 +247,157 @@ func (e *EthClientApiKeyImp) SendTransaction(ctx context.Context, tx *types.Tran
 		return err
 	}
 	return client.SendTransaction(ctx, tx)
+}
+
+func (e *EthClientApiKeyImp) getBlock(bodyStr []byte) (*types.Block, error) {
+	var raw json.RawMessage
+	{
+		var rpc struct {
+			Result json.RawMessage `json:"result"`
+		}
+		if err := json.Unmarshal(bodyStr, &rpc); err != nil {
+			return nil, err
+		}
+		raw = rpc.Result
+	}
+	// Decode header and transactions.
+	var head *types.Header
+	var body rpcBlock
+
+	if err := json.Unmarshal(raw, &head); err != nil {
+		return nil, err
+	}
+
+	if err := json.Unmarshal(raw, &body); err != nil {
+		return nil, err
+	}
+	// Quick-verify transaction and uncle lists. This mostly helps with debugging the server.
+	if head.UncleHash == types.EmptyUncleHash && len(body.UncleHashes) > 0 {
+		return nil, fmt.Errorf("server returned non-empty uncle list but block header indicates no uncles")
+	}
+	if head.UncleHash != types.EmptyUncleHash && len(body.UncleHashes) == 0 {
+		return nil, fmt.Errorf("server returned empty uncle list but block header indicates uncles")
+	}
+	if head.TxHash == types.EmptyRootHash && len(body.Transactions) > 0 {
+		return nil, fmt.Errorf("server returned non-empty transaction list but block header indicates no transactions")
+	}
+	if head.TxHash != types.EmptyRootHash && len(body.Transactions) == 0 {
+		return nil, fmt.Errorf("server returned empty transaction list but block header indicates transactions")
+	}
+	// Load uncles because they are not included in the block response.
+	var uncles []*types.Header //todo
+	if len(body.UncleHashes) > 0 {
+		uncles = make([]*types.Header, len(body.UncleHashes))
+		for i := range body.UncleHashes {
+			h, err := e.getUncleByBlockNumberAndIndex(head.Number, uint64(i))
+			if err != nil {
+				return nil, err
+			}
+			uncles[i] = h
+		}
+	}
+	// Fill the sender cache of transactions in the block.
+	txs := make([]*types.Transaction, len(body.Transactions))
+	for i, tx := range body.Transactions {
+		if tx.From != nil {
+			setSenderFromServer(tx.tx, *tx.From, body.Hash)
+		}
+		txs[i] = tx.tx
+	}
+	return types.NewBlockWithHeader(head).WithBody(txs, uncles), nil
+}
+
+func (e *EthClientApiKeyImp) getHeader(bodyStr []byte) (*types.Header, error) {
+	var raw json.RawMessage
+	{
+		var rpc struct {
+			Result json.RawMessage `json:"result"`
+		}
+		if err := json.Unmarshal(bodyStr, &rpc); err != nil {
+			return nil, err
+		}
+		raw = rpc.Result
+	}
+	// Decode header and transactions.
+	var head *types.Header
+	if err := json.Unmarshal(raw, &head); err != nil {
+		return nil, err
+	}
+
+	return head, nil
+}
+
+func (e *EthClientApiKeyImp) getUncleByBlockNumberAndIndex(number *big.Int, index uint64) (*types.Header, error) {
+	//http://api-cn.etherscan.com/api?module=proxy&action=eth_getUncleByBlockNumberAndIndex&tag=0x210A9B&index=0x0&apikey=YourApiKeyToken
+	tag := "latest"
+	if number != nil {
+		tag = "0x" + number.Text(16)
+	}
+	url := fmt.Sprintf("%s?%s&action=eth_getUncleByBlockNumberAndIndex&tag=%s&index=%s&apikey=%s", e.url, e.module, tag, hexutil.EncodeUint64(index), e.apiKey)
+
+	req, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer req.Body.Close()
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		return nil, err
+	}
+	return e.getHeader(body)
+}
+
+type rpcBlock struct {
+	Hash         common.Hash      `json:"hash"`
+	Transactions []rpcTransaction `json:"transactions"`
+	UncleHashes  []common.Hash    `json:"uncles"`
+}
+
+type rpcTransaction struct {
+	tx *types.Transaction
+	txExtraInfo
+}
+
+type txExtraInfo struct {
+	BlockNumber *string         `json:"blockNumber,omitempty"`
+	BlockHash   *common.Hash    `json:"blockHash,omitempty"`
+	From        *common.Address `json:"from,omitempty"`
+}
+
+func (tx *rpcTransaction) UnmarshalJSON(msg []byte) error {
+	if err := json.Unmarshal(msg, &tx.tx); err != nil {
+		return err
+	}
+	return json.Unmarshal(msg, &tx.txExtraInfo)
+}
+
+type senderFromServer struct {
+	addr      common.Address
+	blockhash common.Hash
+}
+
+var errNotCached = errors.New("sender not cached")
+
+func setSenderFromServer(tx *types.Transaction, addr common.Address, block common.Hash) {
+	// Use types.Sender for side-effect to store our signer into the cache.
+	types.Sender(&senderFromServer{addr, block}, tx)
+}
+
+func (s *senderFromServer) Equal(other types.Signer) bool {
+	os, ok := other.(*senderFromServer)
+	return ok && os.blockhash == s.blockhash
+}
+
+func (s *senderFromServer) Sender(tx *types.Transaction) (common.Address, error) {
+	if s.blockhash == (common.Hash{}) {
+		return common.Address{}, errNotCached
+	}
+	return s.addr, nil
+}
+
+func (s *senderFromServer) Hash(tx *types.Transaction) common.Hash {
+	panic("can't sign with senderFromServer")
+}
+func (s *senderFromServer) SignatureValues(tx *types.Transaction, sig []byte) (R, S, V *big.Int, err error) {
+	panic("can't sign with senderFromServer")
 }

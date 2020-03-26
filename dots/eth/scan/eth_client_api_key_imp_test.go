@@ -18,7 +18,7 @@ func TestEthClientApiKeyImp_BlockByNumber(t *testing.T) {
 	block, err := conn.BlockByNumber(context.Background(), nil)
 	assert.Equal(t, nil, err)
 	assert.NotEqual(t, nil, block)
-	block, err = conn.BlockByNumber(context.Background(), big.NewInt(10))
+	block, err = conn.BlockByNumber(context.Background(), big.NewInt(3))
 	assert.Equal(t, nil, err)
 	assert.NotEqual(t, nil, block)
 }
