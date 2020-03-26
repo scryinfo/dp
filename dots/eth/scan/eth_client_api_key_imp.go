@@ -79,15 +79,33 @@ func (e *EthClientApiKeyImp) HeaderByNumber(ctx context.Context, number *big.Int
 func (e *EthClientApiKeyImp) TransactionByHash(ctx context.Context, hash common.Hash) (tx *types.Transaction, isPending bool, err error) {
 	//http://api-cn.etherscan.com/api?module=proxy&action=eth_getTransactionByHash&txhash=0x1e2910a262b1008d0616a0beb24c1a491d78771baa54a33e66065e03b1f46bc1&apikey=YourApiKeyToken
 	url := fmt.Sprintf("%s?%s&action=eth_getTransactionByHash&txhash=%s&apikey=%s", e.url, e.module, hash.Hex(), e.apiKey)
-	client, err := ethclient.DialContext(ctx, url)
+	req, err := http.Get(url)
 	if err != nil {
 		return nil, false, err
 	}
-	tx, p, err := client.TransactionByHash(ctx, hash)
+	defer req.Body.Close()
+	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return nil, false, err
 	}
-	return tx, p, err
+
+	result, err := getResultFromHttpBody(body)
+	if err != nil {
+		return nil, false, err
+	}
+	var rpcTx *rpcTransaction
+	err = json.Unmarshal(result, &rpcTx)
+	if err != nil {
+		return nil, false, err
+	} else if rpcTx == nil {
+		return nil, false, ethereum.NotFound
+	} else if _, r, _ := rpcTx.tx.RawSignatureValues(); r == nil {
+		return nil, false, fmt.Errorf("server returned transaction without signature")
+	}
+	if rpcTx.From != nil && rpcTx.BlockHash != nil {
+		setSenderFromServer(rpcTx.tx, *rpcTx.From, *rpcTx.BlockHash)
+	}
+	return rpcTx.tx, rpcTx.BlockNumber == nil, nil
 }
 
 func (e *EthClientApiKeyImp) TransactionSender(ctx context.Context, tx *types.Transaction, block common.Hash, index uint) (common.Address, error) {
@@ -105,15 +123,29 @@ func (e *EthClientApiKeyImp) TransactionInBlock(ctx context.Context, blockHash c
 func (e *EthClientApiKeyImp) TransactionReceipt(ctx context.Context, txHash common.Hash) (*types.Receipt, error) {
 	//http://api-cn.etherscan.com/api?module=proxy&action=eth_getTransactionReceipt&txhash=0x1e2910a262b1008d0616a0beb24c1a491d78771baa54a33e66065e03b1f46bc1&apikey=YourApiKeyToken
 	url := fmt.Sprintf("%s?%s&action=eth_getTransactionReceipt&txhash=%s&apikey=%s", e.url, e.module, txHash.Hex(), e.apiKey)
-	client, err := ethclient.DialContext(ctx, url)
+	req, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
-	receipt, err := client.TransactionReceipt(ctx, txHash)
+	defer req.Body.Close()
+	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		return nil, err
 	}
-	return receipt, err
+
+	result, err := getResultFromHttpBody(body)
+	if err != nil {
+		return nil, err
+	}
+	var receipt *types.Receipt
+	err = json.Unmarshal(result, &receipt)
+	if err != nil {
+		return nil, err
+	} else if receipt == nil {
+		return nil, ethereum.NotFound
+	}
+
+	return receipt, nil
 }
 
 func (e *EthClientApiKeyImp) SyncProgress(ctx context.Context) (*ethereum.SyncProgress, error) {
@@ -250,15 +282,9 @@ func (e *EthClientApiKeyImp) SendTransaction(ctx context.Context, tx *types.Tran
 }
 
 func (e *EthClientApiKeyImp) getBlock(bodyStr []byte) (*types.Block, error) {
-	var raw json.RawMessage
-	{
-		var rpc struct {
-			Result json.RawMessage `json:"result"`
-		}
-		if err := json.Unmarshal(bodyStr, &rpc); err != nil {
-			return nil, err
-		}
-		raw = rpc.Result
+	raw, err := getResultFromHttpBody(bodyStr)
+	if err != nil {
+		return nil, err
 	}
 	// Decode header and transactions.
 	var head *types.Header
@@ -307,16 +333,24 @@ func (e *EthClientApiKeyImp) getBlock(bodyStr []byte) (*types.Block, error) {
 	return types.NewBlockWithHeader(head).WithBody(txs, uncles), nil
 }
 
-func (e *EthClientApiKeyImp) getHeader(bodyStr []byte) (*types.Header, error) {
+func getResultFromHttpBody(body []byte) ([]byte, error) {
 	var raw json.RawMessage
 	{
 		var rpc struct {
 			Result json.RawMessage `json:"result"`
 		}
-		if err := json.Unmarshal(bodyStr, &rpc); err != nil {
+		if err := json.Unmarshal(body, &rpc); err != nil {
 			return nil, err
 		}
 		raw = rpc.Result
+	}
+	return raw, nil
+}
+
+func (e *EthClientApiKeyImp) getHeader(bodyStr []byte) (*types.Header, error) {
+	raw, err := getResultFromHttpBody(bodyStr)
+	if err != nil {
+		return nil, err
 	}
 	// Decode header and transactions.
 	var head *types.Header

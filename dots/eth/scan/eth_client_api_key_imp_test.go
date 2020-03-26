@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	apiKey = "5AR9FBAGPEV7F3UA9FQCDXSU5K725KWTJZ" //not commit
+	apiKey = "" //not commit
 	url    = "http://api-cn.etherscan.com/api"
 )
 
@@ -41,20 +41,20 @@ func TestEthClientApiKeyImp_TransactionByHash(t *testing.T) {
 func TestEthClientApiKeyImp_TransactionReceipt(t *testing.T) {
 	conn := NewEthClientApiKeyImp(url, apiKey, "")
 	hash := common.HexToHash("0x43caf8ba9b1f9c79f41ddf8be41da8ca84fad919b50ed48a4071ff3d7c35814e")
-	tx, err := conn.TransactionReceipt(context.Background(), hash)
+	receipt, err := conn.TransactionReceipt(context.Background(), hash)
 	assert.Equal(t, nil, err)
-	assert.NotEqual(t, nil, tx)
-	assert.Equal(t, uint64(1), tx.Status)
-	assert.Equal(t, uint64(21000), tx.GasUsed)
-	assert.Equal(t, big.NewInt(9739302), tx.BlockNumber)
+	assert.NotEqual(t, nil, receipt)
+	assert.Equal(t, uint64(1), receipt.Status)
+	assert.Equal(t, uint64(21000), receipt.GasUsed)
+	assert.Equal(t, big.NewInt(9739302), receipt.BlockNumber)
 
 	hash = common.HexToHash("0x96d72b5c39f54a725f0367e1d67f25b56938f0e35508571f93476e2022ec5a8c")
-	tx, err = conn.TransactionReceipt(context.Background(), hash)
+	receipt, err = conn.TransactionReceipt(context.Background(), hash)
 	assert.Equal(t, nil, err)
-	assert.NotEqual(t, nil, tx)
-	assert.Equal(t, uint64(0), tx.Status)
-	assert.Equal(t, uint64(74615), tx.GasUsed)
-	assert.Equal(t, big.NewInt(9739320), tx.BlockNumber)
+	assert.NotEqual(t, nil, receipt)
+	assert.Equal(t, uint64(0), receipt.Status)
+	assert.Equal(t, uint64(74615), receipt.GasUsed)
+	assert.Equal(t, big.NewInt(9739320), receipt.BlockNumber)
 }
 
 func TestEthClientApiKeyImp_BalanceAt(t *testing.T) {
