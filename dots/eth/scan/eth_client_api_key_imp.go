@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/pkg/errors"
-	"github.com/status-im/keycard-go/hexutils"
 	"io/ioutil"
 	"math/big"
 	"net/http"
@@ -54,11 +54,11 @@ func (e *EthClientApiKeyImp) BlockByNumber(ctx context.Context, number *big.Int)
 		tag = "0x" + number.Text(16)
 	}
 	url := fmt.Sprintf("%s?%s&action=eth_getBlockByNumber&tag=%s&boolean=true&apikey=%s", e.url, e.module, tag, e.apiKey)
-	client, err := ethclient.DialContext(context.Background(), url)
+	client, err := ethclient.DialContext(ctx, url)
 	if err != nil {
 		return nil, err
 	}
-	block, err := client.BlockByNumber(context.Background(), nil)
+	block, err := client.BlockByNumber(ctx, number)
 	if err != nil {
 		return nil, err
 	}
@@ -76,11 +76,11 @@ func (e *EthClientApiKeyImp) HeaderByNumber(ctx context.Context, number *big.Int
 func (e *EthClientApiKeyImp) TransactionByHash(ctx context.Context, hash common.Hash) (tx *types.Transaction, isPending bool, err error) {
 	//http://api-cn.etherscan.com/api?module=proxy&action=eth_getTransactionByHash&txhash=0x1e2910a262b1008d0616a0beb24c1a491d78771baa54a33e66065e03b1f46bc1&apikey=YourApiKeyToken
 	url := fmt.Sprintf("%s?%s&action=eth_getTransactionByHash&txhash=%s&apikey=%s", e.url, e.module, hash.Hex(), e.apiKey)
-	client, err := ethclient.DialContext(context.Background(), url)
+	client, err := ethclient.DialContext(ctx, url)
 	if err != nil {
 		return nil, false, err
 	}
-	tx, p, err := client.TransactionByHash(context.Background(), hash)
+	tx, p, err := client.TransactionByHash(ctx, hash)
 	if err != nil {
 		return nil, false, err
 	}
@@ -102,11 +102,11 @@ func (e *EthClientApiKeyImp) TransactionInBlock(ctx context.Context, blockHash c
 func (e *EthClientApiKeyImp) TransactionReceipt(ctx context.Context, txHash common.Hash) (*types.Receipt, error) {
 	//http://api-cn.etherscan.com/api?module=proxy&action=eth_getTransactionReceipt&txhash=0x1e2910a262b1008d0616a0beb24c1a491d78771baa54a33e66065e03b1f46bc1&apikey=YourApiKeyToken
 	url := fmt.Sprintf("%s?%s&action=eth_getTransactionReceipt&txhash=%s&apikey=%s", e.url, e.module, txHash.Hex(), e.apiKey)
-	client, err := ethclient.DialContext(context.Background(), url)
+	client, err := ethclient.DialContext(ctx, url)
 	if err != nil {
 		return nil, err
 	}
-	receipt, err := client.TransactionReceipt(context.Background(), txHash)
+	receipt, err := client.TransactionReceipt(ctx, txHash)
 	if err != nil {
 		return nil, err
 	}
@@ -175,7 +175,7 @@ func (e *EthClientApiKeyImp) NonceAt(ctx context.Context, account common.Address
 		tag = "0x" + blockNumber.Text(16)
 	}
 	url := fmt.Sprintf("%s?%s&action=eth_getTransactionCount&address=%s&tag=%s&apikey=%s", e.url, e.module, account.Hex(), tag, e.apiKey)
-	client, err := ethclient.DialContext(context.Background(), url)
+	client, err := ethclient.DialContext(ctx, url)
 	if err != nil {
 		return 0, err
 	}
@@ -205,7 +205,7 @@ func (e *EthClientApiKeyImp) PendingCodeAt(ctx context.Context, account common.A
 func (e *EthClientApiKeyImp) PendingNonceAt(ctx context.Context, account common.Address) (uint64, error) {
 	tag := "pending"
 	url := fmt.Sprintf("%s?%s&action=eth_getTransactionCount&address=%s&tag=%s&apikey=%s", e.url, e.module, account.Hex(), tag, e.apiKey)
-	client, err := ethclient.DialContext(context.Background(), url)
+	client, err := ethclient.DialContext(ctx, url)
 	if err != nil {
 		return 0, err
 	}
@@ -238,8 +238,8 @@ func (e *EthClientApiKeyImp) SendTransaction(ctx context.Context, tx *types.Tran
 	if err != nil {
 		return err
 	}
-	url := fmt.Sprintf("%s?%s&action=eth_sendRawTransaction&hex=%s&apikey=%s", e.url, e.module, hexutils.BytesToHex(data), e.apiKey)
-	client, err := ethclient.DialContext(context.Background(), url)
+	url := fmt.Sprintf("%s?%s&action=eth_sendRawTransaction&hex=%s&apikey=%s", e.url, e.module, hexutil.Encode(data), e.apiKey)
+	client, err := ethclient.DialContext(ctx, url)
 	if err != nil {
 		return err
 	}
