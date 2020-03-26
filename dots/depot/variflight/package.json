@@ -1,0 +1,21 @@
+{
+  "name": "variflight",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "ts-protoc-gen": "^0.12.0"
+  },
+  "dependencies": {
+    "@improbable-eng/grpc-web": "^0.12.0",
+    "@types/google-protobuf": "^3.7.2",
+    "google-protobuf": "^3.11.4"
+  },
+  "scripts": {
+    "pb_go_out": "protoc --proto_path=protobuf protobuf/variflight.proto --go_out=plugins=grpc:golang/protobuf",
+    "pb_ts_out": "protoc --proto_path=protobuf protobuf/variflight.proto --js_out=import_style=commonjs,binary:typescript/protobuf --ts_out=service=grpc-web:typescript/protobuf --plugin=protoc-gen-ts=%cd%/node_modules/.bin/protoc-gen-ts.cmd"
+  }
+}

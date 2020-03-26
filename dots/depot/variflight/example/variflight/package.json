@@ -1,0 +1,27 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "buildgo": "cd go && del before.log go.exe log.log && go build && cd ../",
+    "rungo": "cd go && del before.log go.exe log.log && go build && go.exe",
+    "backend": "cd go && go.exe",
+    "frontend": "(set USE_TLS=) && npx webpack-dev-server",
+    "frontend_tls": "set USE_TLS=true && npx webpack-dev-server --https"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^13.9.2",
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.8.3",
+    "webpack": "^4.42.0",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
+  },
+  "dependencies": {
+    "@improbable-eng/grpc-web": "^0.12.0"
+  }
+}
