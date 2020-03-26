@@ -34,7 +34,7 @@ type ScanCall interface {
 	DoneBlock(bl *types.Block) bool                                         //完成一个区块
 }
 
-type Scan struct {
+type ScanWeb3 struct {
 	ScanCall   ScanCall `dot:""`
 	EthConnect *Connect `dot:""`
 
@@ -44,19 +44,19 @@ type Scan struct {
 	initBlockNumber *big.Int
 }
 
-func (c *Scan) SetConfig(conf *ScanConfig) {
+func (c *ScanWeb3) SetConfig(conf *ScanConfig) {
 	if conf != nil {
 		c.conf = *conf
 	}
 }
 
-func (c *Scan) Stop(ignore bool) error {
+func (c *ScanWeb3) Stop(ignore bool) error {
 	c.stopped.Store(true)
 	close(c.stopChanel)
 	return nil
 }
 
-func (c *Scan) Start(ignore bool) error {
+func (c *ScanWeb3) Start(ignore bool) error {
 	c.stopped.Store(false)
 	if c.ScanCall == nil {
 		return errors.New("the ScanCall is nil")
@@ -65,7 +65,7 @@ func (c *Scan) Start(ignore bool) error {
 	return nil
 }
 
-func (c *Scan) startScan() {
+func (c *ScanWeb3) startScan() {
 	logger := dot.Logger()
 	c.initBlockNumber = big.NewInt(-1)
 
@@ -101,7 +101,7 @@ ForMaxBlocks:
 				max.Sub(b.Header().Number, big.NewInt(int64(c.conf.SafeBlockDiffer)))
 				break
 			} else {
-				logger.Debugln("Scan", zap.Error(err))
+				logger.Debugln("ScanWeb3", zap.Error(err))
 			}
 			select { //等待后再重试
 			case <-c.stopChanel:
@@ -131,7 +131,7 @@ ForMaxBlocks:
 				if err == nil && b != nil {
 					break
 				} else {
-					logger.Debugln("Scan", zap.Error(err))
+					logger.Debugln("ScanWeb3", zap.Error(err))
 				}
 				select { //等待后再重试
 				case <-c.stopChanel:
@@ -165,8 +165,8 @@ ForMaxBlocks:
 						}
 						break
 					} else {
-						logger.Debugln("Scan", zap.Error(err))
-						logger.Debugln("Scan", zap.Error(err2))
+						logger.Debugln("ScanWeb3", zap.Error(err))
+						logger.Debugln("ScanWeb3", zap.Error(err2))
 					}
 
 					select { //等待后再重试
@@ -193,14 +193,14 @@ ForMaxBlocks:
 	}
 }
 
-func newScan(conf []byte) (d dot.Dot, err error) {
-	scan := &Scan{stopChanel: make(chan bool)}
+func newScanWeb3(conf []byte) (d dot.Dot, err error) {
+	scan := &ScanWeb3{stopChanel: make(chan bool)}
 	defafultValue := true
 	if len(conf) > 0 {
 		scanConfig := &ScanConfig{}
 		err = json.Unmarshal(conf, scanConfig)
 		if err != nil { //配置出错，使用默认配置
-			dot.Logger().Errorln("Scan", zap.Error(err))
+			dot.Logger().Errorln("ScanWeb3", zap.Error(err))
 		} else {
 			scan.conf = *scanConfig
 			defafultValue = false
@@ -216,12 +216,12 @@ func newScan(conf []byte) (d dot.Dot, err error) {
 	return d, nil
 }
 
-//ScanTypeLives
-func ScanTypeLives() []*dot.TypeLives {
+//ScanWeb3TypeLives
+func ScanWeb3TypeLives() []*dot.TypeLives {
 	lives := []*dot.TypeLives{
 		{
 			Meta: dot.Metadata{TypeId: ScanTypeId, NewDoter: func(conf []byte) (dot dot.Dot, err error) {
-				return newScan(conf)
+				return newScanWeb3(conf)
 			}},
 			Lives: []dot.Live{
 				{

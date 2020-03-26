@@ -60,7 +60,6 @@ func (c *Connect) Stop(ignore bool) error {
 	if c.EthClient != nil {
 		c.EthClient.Close()
 	}
-
 	return nil
 }
 
