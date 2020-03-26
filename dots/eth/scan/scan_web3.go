@@ -25,6 +25,7 @@ type ScanConfig struct {
 	IntervalBlock    uint32 `json:"intervalBlock"`    //重试取得区块出错的间隔
 	IntervalTx       uint32 `json:"intervalTx"`       //重试取交易出错的间隔
 	SafeBlockDiffer  uint32 `json:"safeBlockDiffer"`  //在遍历区块时，只遍历 最大区块- SafeHeightDiffer的区块， 这样是为了安全考虑，这个值如果是公链的话是 6
+	Start            bool   `json:"start"`            //是否启动
 }
 
 type ScanCall interface {
@@ -57,11 +58,13 @@ func (c *ScanWeb3) Stop(ignore bool) error {
 }
 
 func (c *ScanWeb3) Start(ignore bool) error {
-	c.stopped.Store(false)
-	if c.ScanCall == nil {
-		return errors.New("the ScanCall is nil")
+	if c.conf.Start {
+		c.stopped.Store(false)
+		if c.ScanCall == nil {
+			return errors.New("the ScanCall is nil")
+		}
+		go c.startScan()
 	}
-	go c.startScan()
 	return nil
 }
 
@@ -195,7 +198,6 @@ ForMaxBlocks:
 
 func newScanWeb3(conf []byte) (d dot.Dot, err error) {
 	scan := &ScanWeb3{stopChanel: make(chan bool)}
-	defafultValue := true
 	if len(conf) > 0 {
 		scanConfig := &ScanConfig{}
 		err = json.Unmarshal(conf, scanConfig)
@@ -203,15 +205,21 @@ func newScanWeb3(conf []byte) (d dot.Dot, err error) {
 			dot.Logger().Errorln("ScanWeb3", zap.Error(err))
 		} else {
 			scan.conf = *scanConfig
-			defafultValue = false
 		}
 	}
-	if defafultValue {
+	if scan.conf.IntervalScanCall < 1 {
 		scan.conf.IntervalScanCall = IntervalScanCall_
+	}
+	if scan.conf.IntervalBlock < 1 {
 		scan.conf.IntervalBlock = IntervalBlock_
+	}
+	if scan.conf.IntervalTx < 1 {
 		scan.conf.IntervalTx = IntervalTx_
+	}
+	if scan.conf.SafeBlockDiffer < 1 {
 		scan.conf.SafeBlockDiffer = SafeBlockDiffer_
 	}
+
 	d = scan
 	return d, nil
 }

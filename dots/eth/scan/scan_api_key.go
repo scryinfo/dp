@@ -20,6 +20,7 @@ type configScanApiKey struct {
 	SafeBlockDiffer  uint32 `json:"safeBlockDiffer"`  //在遍历区块时，只遍历 最大区块- SafeHeightDiffer的区块， 这样是为了安全考虑，这个值如果是公链的话是 6
 	ApiKey           string `json:"apiKey"`           //cn.etherscan.com 的key
 	Url              string `json:"url"`              //
+	Start            bool   `json:"start"`            //是否启动
 }
 type ScanApiKey struct {
 	ScanCall ScanCall `dot:""`
@@ -172,11 +173,13 @@ ForMaxBlocks:
 //}
 
 func (c *ScanApiKey) Start(ignore bool) error {
-	c.stopped.Store(false)
-	if c.ScanCall == nil {
-		return errors.New("the ScanCall is nil")
+	if c.conf.Start {
+		c.stopped.Store(false)
+		if c.ScanCall == nil {
+			return errors.New("the ScanCall is nil")
+		}
+		go c.startScan()
 	}
-	go c.startScan()
 	return nil
 }
 
@@ -195,7 +198,20 @@ func newScanApiKey(conf []byte) (dot.Dot, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	d := &ScanApiKey{conf: *dconf}
+	if d.conf.IntervalScanCall < 1 {
+		d.conf.IntervalScanCall = IntervalScanCall_
+	}
+	if d.conf.IntervalBlock < 1 {
+		d.conf.IntervalBlock = IntervalBlock_
+	}
+	if d.conf.IntervalTx < 1 {
+		d.conf.IntervalTx = IntervalTx_
+	}
+	if d.conf.SafeBlockDiffer < 1 {
+		d.conf.SafeBlockDiffer = SafeBlockDiffer_
+	}
 	d.ethConnect = NewEthClientApiKeyImp(d.conf.Url, d.conf.ApiKey, "")
 	return d, nil
 }
