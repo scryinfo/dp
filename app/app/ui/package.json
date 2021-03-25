@@ -6,7 +6,8 @@
   "author": "mats9693 <982254249@qq.com>",
   "scripts": {
     "dev": "node build/dev-server.js",
-    "build": "node build/build.js"
+    "build": "node build/build.js",
+    "build-report": "npm run build --report"
   },
   "dependencies": {
     "vue": "^2.6.6",

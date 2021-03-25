@@ -27,8 +27,11 @@ Write-Output "|-> * truffle migrate prepared. "
 Write-Output ""
 Start-Sleep -Milliseconds 1000
 
-Start-Transcript "migrate.log" -Force
+$Transcript = $PSScriptRoot+"/migrate.txt"
+Start-Transcript -Path $Transcript -Force
 truffle migrate --network geth
-Stop-Transcript 
+Stop-Transcript
+
+Set-Location $PSScriptRoot
 Write-Output "|-> * truffle migrate finished. "
 Write-Output "|-> * End. "
