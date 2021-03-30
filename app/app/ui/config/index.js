@@ -15,7 +15,7 @@ module.exports = {
     // npm install --save-dev compression-webpack-plugin
     productionGzip: false,
     productionGzipExtensions: ['js', 'css'],
-    bundleAnalyzerReport: true // control show analyzer report or not.
+    bundleAnalyzerReport: false // control show analyzer report or not.
   },
   dev: {
     env: require('./dev.env.js'),

@@ -20,8 +20,7 @@
 ### 打包UI资源文件：
 > 我们假设你已经完成了node.js的下载与安装。
 
-执行dp/app/app/ui/tool目录下的**webpackUI.ps1**脚本文件完成这一步骤。  
-你可以通过ui/config/index.js中的*bundleAnalyzerReport*控制是否显示webpack结果分析报告。  
+执行dp/app/app/ui/tool目录下的**webpackUI.ps1**脚本文件完成这一步骤。
 ### 构建app可执行文件：
 在dp/app/app/main目录下执行go build，成功执行后，会生成入口文件：**main.exe**。
 ##  运行
@@ -29,8 +28,6 @@
 - ipfs客户端 (0.4.14 / 0.4.20)
 - geth客户端 (1.9.19)
 - 浏览器 (chrome 79)
-### 启动用户服务：
-运行dp/services/auth_s目录下的，用户服务的可执行文件：**account_server-windows-64.exe**，默认使用48080端口。
 ### 连接ipfs：
 > 我们假设你已经完成了ipfs的下载与安装。
 - 修改配置文件，在你的ipfs下载路径中，找到config文件。如下所示，为其一级配置项"API"添加下面三条"Access..."配置：  

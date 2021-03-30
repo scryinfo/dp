@@ -29,7 +29,7 @@ Write-Output "|-> * Webpack UI files prepared. "
 Write-Output ""
 Start-Sleep -Milliseconds 1000
 
-npm run build-report
+npm run build
 
 Write-Output "|-> * Webpack UI files finished. "
 Write-Output "|-> * End. "
