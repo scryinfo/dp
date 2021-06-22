@@ -11,8 +11,6 @@ replace (
 	golang.org/x/image => github.com/golang/image v0.0.0-20190507092727-e4e5bf290fec
 	golang.org/x/lint => github.com/golang/lint v0.0.0-20190409202823-959b441ac422
 	golang.org/x/mobile => github.com/golang/mobile v0.0.0-20190509164839-32b2708ab171
-	golang.org/x/mock => github.com/golang/mock v1.3.1
-	golang.org/x/mod => github.com/golang/mod v0.1.0
 	golang.org/x/net => github.com/golang/net v0.0.0-20190509222800-a4d6f7feada5
 	golang.org/x/oauth2 => github.com/golang/oauth2 v0.0.0-20190402181905-9f3314589c9a
 	golang.org/x/sync => github.com/golang/sync v0.0.0-20190423024810-112230192c58
@@ -25,7 +23,6 @@ replace (
 	google.golang.org/genproto => github.com/google/go-genproto v0.0.0-20190513181449-d00d292a067c
 	google.golang.org/grpc => github.com/grpc/grpc-go v1.21.0
 	gopkg.in/check.v1 => github.com/go-check/check v0.0.0-20180628173108-788fd7840127
-	gopkg.in/errgo.v2 => github.com/go-errgo/errgo v0.0.0-20180823071505-f768c5ab0476
 	gopkg.in/natefinch/npipe.v2 => github.com/natefinch/npipe v0.0.0-20160621034901-c1b8fa8bdcce
 	gopkg.in/urfave/cli.v1 => github.com/urfave/cli v1.20.0
 	honnef.co/go/tools => github.com/dominikh/go-tools v0.0.0-20190418001031-e561f6794a2a
@@ -48,40 +45,40 @@ require (
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/go-yaml/yaml v2.1.0+incompatible
 	github.com/golang/mock v1.2.0
-	github.com/golang/protobuf v1.3.4
+	github.com/golang/protobuf v1.3.5
 	github.com/golang/snappy v0.0.1 // indirect
-	github.com/google/go-cmp v0.3.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
 	github.com/huin/goupnp v1.0.0 // indirect
 	github.com/ipfs/go-ipfs-api v0.0.1
 	github.com/ipfs/go-ipfs-files v0.0.3 // indirect
 	github.com/jackpal/go-nat-pmp v1.0.1 // indirect
 	github.com/jinzhu/gorm v1.9.12
-	github.com/jmoiron/sqlx v1.2.0
+	github.com/jmoiron/sqlx v1.2.0 // indirect
 	github.com/karalabe/hid v1.0.0 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/libp2p/go-libp2p-core v0.0.3 // indirect
 	github.com/libp2p/go-libp2p-metrics v0.1.0 // indirect
 	github.com/libp2p/go-libp2p-peer v0.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.2 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
+	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/multiformats/go-multiaddr-dns v0.0.2 // indirect
 	github.com/pborman/uuid v1.2.0 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/rjeczalik/notify v0.9.2 // indirect
 	github.com/scryinfo/dot v0.1.4
-	github.com/scryinfo/dot/dots/db/gorms v0.0.0-20200319023948-717fab49e5c3
 	github.com/scryinfo/dot/dots/db/pgs v0.0.0-20191206082647-113b71839359 // indirect
-	github.com/scryinfo/dot/dots/gindot v0.0.0-20191121022614-959828ad21d4
-	github.com/scryinfo/dot/dots/grpc v0.0.0-20191217094521-d2a6217924e7
+	github.com/scryinfo/dot/dots/grpc v0.0.0-20200319031141-1bb115eee416
 	github.com/scryinfo/scryg v0.1.3
 	github.com/sirupsen/logrus v1.4.2
 	github.com/smartystreets/goconvey v1.6.4
 	github.com/stretchr/testify v1.4.0 // indirect
 	github.com/syndtr/goleveldb v1.0.0 // indirect
-	go.uber.org/zap v1.14.0
+	go.uber.org/zap v1.14.1
 	golang.org/x/net v0.0.0-20200301022130-244492dfa37a
-	google.golang.org/genproto v0.0.0-20190605220351-eb0b1bdb6ae6
-	google.golang.org/grpc v1.21.1
+	google.golang.org/genproto v0.0.0-20190605220351-eb0b1bdb6ae6 // indirect
+	google.golang.org/grpc v1.28.0
+	gopkg.in/go-playground/validator.v8 v8.18.2 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	gopkg.in/urfave/cli.v1 v1.20.0 // indirect
 )
