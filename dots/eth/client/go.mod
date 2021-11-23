@@ -32,7 +32,7 @@ replace (
 )
 
 require (
-	github.com/ethereum/go-ethereum v1.8.27
+	github.com/ethereum/go-ethereum v1.10.10
 	github.com/scryinfo/dot v0.1.3
 	go.uber.org/zap v1.10.0
 )
