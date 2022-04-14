@@ -4,7 +4,7 @@
   "description": "dot gRPC-Web",
   "devDependencies": {
     "@grpc/proto-loader": "^0.3.0",
-    "async": "^1.5.2",
+    "async": "^3.2.2",
     "google-protobuf": "^3.6.1",
     "grpc": "^1.15.0",
     "grpc-web": "^1.0.0",
